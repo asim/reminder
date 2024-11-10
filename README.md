@@ -8,7 +8,7 @@ This is the english translation of the Quran made more accessible through a prog
 
 ## Load
 
-```
+```go
 import "github.com/asim/reminder/quran"
 
 q := quran.Load()
@@ -21,10 +21,10 @@ for _, chapter := range q {
 
 ## Markdown
 
-To compile it to markdown
+To simply get the markdown
 
-```
-go run main.go
-```
+```go
+md := quran.Markdown()
 
-An `index.md` file will be generated
+os.WriteFile("reminder.md", []byte(text), 0644)
+```
