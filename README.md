@@ -19,7 +19,7 @@ q := quran.Load()
 
 for _, chapter := range q {
   fmt.Println(chapter.Name)
-  fmt.Println(strings.Join(chapter.Verses, "\n"))
+  fmt.Println(chapter.Verses)
 }
 ```
 
