@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-//go:embed *.json
+//go:embed data/*.json
 var files embed.FS
 
 type Chapter struct {
@@ -25,7 +25,7 @@ func Load() map[string]*Chapter {
 
 	// Set local
 	for i := 0; i < 114; i++ {
-		f, err := files.ReadFile(fmt.Sprintf("%d.json", i+1))
+		f, err := files.ReadFile(fmt.Sprintf("data/%d.json", i+1))
 		if err != nil {
 			panic(err.Error())
 		}
