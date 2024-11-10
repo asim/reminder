@@ -6,11 +6,15 @@ A reminder to the whole world
 
 This is the english translation of the Quran made more accessible through a programmable interface. 
 
-## Load
+## Import
 
 ```go
 import "github.com/asim/reminder/quran"
+```
 
+## Load
+
+```go
 q := quran.Load()
 
 for _, chapter := range q {
