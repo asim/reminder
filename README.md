@@ -51,8 +51,6 @@ Render in markdown
 
 ```go
 md := quran.Markdown()
-
-os.WriteFile("reminder.md", []byte(text), 0644)
 ```
 
 For the names
