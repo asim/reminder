@@ -32,3 +32,11 @@ md := quran.Markdown()
 
 os.WriteFile("reminder.md", []byte(text), 0644)
 ```
+
+## Serve
+
+Run the http server on :8080 
+
+```
+go run main.go
+```
