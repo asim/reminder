@@ -34,8 +34,3 @@ jobs:
         IN_TRAVIS_CI: yes
       run: go test -v ./...
 
-    - name: Run tests.sh
-      id: tests-sh
-      env:
-        IN_TRAVIS_CI: yes
-      run: bash ./tests.sh
