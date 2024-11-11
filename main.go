@@ -14,9 +14,12 @@ import (
 var template = `
 <html>
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
-    #container { padding: 25px; height: 100%%; max-width: 1024px; margin: 0 auto;}
+    html, body { height: 100%%; width: 100%%; margin: 0; padding: 0;}
+    #container { height: 100%%; max-width: 1024px; margin: 0 auto; padding: 25px;}
     #head a { margin-right: 10px; color: black; font-weight: bold; }
+    #content { padding-bottom: 100px; }
     </style>
   </head>
   <body>
