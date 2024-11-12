@@ -7,8 +7,6 @@ A reminder to the whole world
 This is the reminder (dhikr) of Allah through a programmable interface. Access the Quran in English, the names of Allah and more. 
 Help spread the word of God and remind all why we're here. 
 
-Integrate it into any piece of software you have.
-
 ## Import
 
 For the Quran in English
