@@ -21,6 +21,12 @@ For the names of Allah
 import "github.com/asim/reminder/names"
 ```
 
+For the hadith of the prophet Muhammad (PBUH)
+
+```go
+import "github.com/asim/reminder/hadith"
+```
+
 ## Load
 
 ```go
@@ -43,6 +49,12 @@ for _, name := range n {
 }
 ```
 
+Load the hadith
+
+```go
+hadith.Load()
+```
+
 ## Render
 
 Render in markdown
@@ -55,6 +67,12 @@ For the names
 
 ```go
 md := names.Markdown()
+```
+
+For the hadith
+
+```go
+md := hadith.Markdown()
 ```
 
 ## Serve
