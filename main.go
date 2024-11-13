@@ -6,6 +6,7 @@ import (
 
 	"github.com/asim/reminder/names"
 	"github.com/asim/reminder/quran"
+	"github.com/asim/reminder/hadith"
 	"github.com/gomarkdown/markdown"
 	"github.com/gomarkdown/markdown/html"
 	"github.com/gomarkdown/markdown/parser"
@@ -27,6 +28,7 @@ var template = `
       <div id="head">
         <a href="/">Quran</a>
         <a href="/names">Names</a>
+        <a href="/hadith">Hadith</a>
       </div>
       <div id="content">
       %s
@@ -53,9 +55,11 @@ func render(md []byte) []byte {
 func main() {
 	text := quran.Markdown()
 	name := names.Markdown()
+	books := hadith.Markdown()
 
 	thtml := fmt.Sprintf(template, string(render([]byte(text))))
 	nhtml := fmt.Sprintf(template, string(render([]byte(name))))
+	vhtml := fmt.Sprintf(template, string(render([]byte(books))))
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(thtml))
@@ -63,6 +67,10 @@ func main() {
 
 	http.HandleFunc("/names", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(nhtml))
+	})
+
+	http.HandleFunc("/hadith", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(vhtml))
 	})
 
 	http.ListenAndServe(":8080", nil)
