@@ -21,7 +21,7 @@ For the names of Allah
 import "github.com/asim/reminder/names"
 ```
 
-For the hadith of the prophet Muhammad (PBUH)
+For the hadith (bukhari) of the prophet Muhammad (PBUH)
 
 ```go
 import "github.com/asim/reminder/hadith"
@@ -74,6 +74,14 @@ For the hadith
 ```go
 md := hadith.Markdown()
 ```
+
+## Index
+
+To index the content in a vector DB and create embeddings you'll need the `OPENAI_API_KEY` variable set
+
+## Search
+
+Again the `OPENAI_API_KEY` will be required for embeddings for your query 
 
 ## Serve
 
