@@ -10,23 +10,54 @@ import (
 var files embed.FS
 
 type Volume struct {
-	Name string
+	Name  string
 	Books []*Book
 }
 
 type Book struct {
-	Name string
+	Name    string
 	Hadiths []*Hadith
 }
 
 type Hadith struct {
 	Info string
-	By string
+	By   string
 	Text string
 }
 
-func Load() []*Volume {
-	var volumes []*Volume
+type Volumes []*Volume
+
+func (v *Volumes) Markdown() string {
+	var data string
+
+	for _, volume := range *v {
+		data += fmt.Sprintln()
+		data += fmt.Sprintf(`# %s`, volume.Name)
+		data += fmt.Sprintln()
+		data += fmt.Sprintln()
+
+		for _, book := range volume.Books {
+			data += fmt.Sprintf(`## %s`, book.Name)
+			data += fmt.Sprintln()
+			data += fmt.Sprintln()
+
+			for _, hadith := range book.Hadiths {
+				data += fmt.Sprintf(`### %s`, hadith.Info)
+				data += fmt.Sprintln()
+				data += fmt.Sprintf(`#### By %s`, hadith.By)
+				data += fmt.Sprintln()
+				data += fmt.Sprintf(`%s`, hadith.Text)
+				data += fmt.Sprintln()
+				data += fmt.Sprintln()
+			}
+		}
+	}
+
+	return data
+}
+
+func Load() *Volumes {
+	volumes := &Volumes{}
 
 	f, err := files.ReadFile("data/bukhari.json")
 	if err != nil {
@@ -54,7 +85,7 @@ func Load() []*Volume {
 
 				hadith := &Hadith{
 					Info: hd["info"].(string),
-					By: hd["by"].(string),
+					By:   hd["by"].(string),
 					Text: hd["text"].(string),
 				}
 
@@ -64,39 +95,12 @@ func Load() []*Volume {
 			volume.Books = append(volume.Books, book)
 		}
 
-		volumes = append(volumes, volume)
+		*volumes = append(*volumes, volume)
 	}
 
 	return volumes
 }
 
 func Markdown() string {
-        volumes := Load()
-
-        var data string
-
-	for _, volume := range volumes {
-                data += fmt.Sprintln()
-                data += fmt.Sprintf(`# %s`, volume.Name)
-                data += fmt.Sprintln()
-                data += fmt.Sprintln()
-
-		for _, book := range volume.Books {
-                	data += fmt.Sprintf(`## %s`, book.Name)
-			data += fmt.Sprintln()
-			data += fmt.Sprintln()
-			
-			for _, hadith := range book.Hadiths {
-                		data += fmt.Sprintf(`### %s`, hadith.Info)
-				data += fmt.Sprintln()
-                		data += fmt.Sprintf(`#### By %s`, hadith.By)
-				data += fmt.Sprintln()
-                		data += fmt.Sprintf(`%s`, hadith.Text)
-				data += fmt.Sprintln()
-				data += fmt.Sprintln()
-			}
-		}
-        }
-
-        return data
+	return Load().Markdown()
 }

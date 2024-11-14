@@ -17,8 +17,29 @@ type Name struct {
 	Description string
 }
 
-func Load() []*Name {
-	var names []*Name
+type Names []*Name
+
+func (n *Names) Markdown() string {
+	var data string
+
+	for _, name := range *n {
+		data += fmt.Sprintln()
+		data += fmt.Sprintf(`# %d`, name.Number)
+		data += fmt.Sprintln()
+		data += fmt.Sprintln()
+		data += fmt.Sprintf(`### %s`, name.Meaning)
+		data += fmt.Sprintln()
+		data += fmt.Sprintf(`#### %s`, name.English)
+		data += fmt.Sprintln()
+		data += fmt.Sprintf(`%s`, name.Description)
+		data += fmt.Sprintln()
+	}
+
+	return data
+}
+
+func Load() *Names {
+	names := &Names{}
 
 	f, err := files.ReadFile("data/names.json")
 	if err != nil {
@@ -39,29 +60,13 @@ func Load() []*Name {
 			Meaning:     en["meaning"].(string),
 			Description: en["desc"].(string),
 		}
-		names = append(names, name)
+
+		*names = append(*names, name)
 	}
 
 	return names
 }
 
 func Markdown() string {
-	names := Load()
-
-	var data string
-
-	for _, name := range names {
-		data += fmt.Sprintln()
-		data += fmt.Sprintf(`# %d`, name.Number)
-		data += fmt.Sprintln()
-		data += fmt.Sprintln()
-		data += fmt.Sprintf(`### %s`, name.Meaning)
-		data += fmt.Sprintln()
-		data += fmt.Sprintf(`#### %s`, name.English)
-		data += fmt.Sprintln()
-		data += fmt.Sprintf(`%s`, name.Description)
-		data += fmt.Sprintln()
-	}
-
-	return data
+	return Load().Markdown()
 }
