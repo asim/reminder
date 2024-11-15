@@ -16,7 +16,9 @@ import (
 )
 
 var (
-	IndexFlag = flag.Bool("index", false, "Index data for search")
+	IndexFlag  = flag.Bool("index", false, "Index data for search. Stored at $HOME/reminder.idx")
+	ExportFlag = flag.Bool("export", false, "Export the index data to $HOME/reminder.idx.gob.gz")
+	ImportFlag = flag.Bool("import", false, "Import the index data from $HOME/reminder.idx.gob.gz")
 )
 
 var template = `
@@ -29,13 +31,13 @@ var template = `
     #container { height: 100%%; max-width: 1024px; margin: 0 auto; padding: 25px;}
     #head a { margin-right: 10px; color: black; font-weight: bold; }
     #content { padding-bottom: 100px; }
-    #content p { padding: 50px 10px 50px 10px; border-bottom: 1px solid grey; }
+    #content p { padding: 50px 10px 50px 10px; border-bottom: 1px solid grey; margin: 0; }
     </style>
   </head>
   <body>
     <div id="container">
       <div id="head">
-        <a href="/">Quran</a>
+        <a href="/">Reminder</a>
         <a href="/names">Names</a>
         <a href="/hadith">Hadith</a>
         <a href="/search">Search</a>
@@ -68,15 +70,23 @@ func result(res []*index.Result) []byte {
 	data += fmt.Sprintln()
 
 	for _, r := range res {
-		data += fmt.Sprintf("source: %s", r.Metadata["source"])
-		data += r.Text
+		switch r.Metadata["source"] {
+		case "quran":
+			data += fmt.Sprintf("#### Quran - %s %s:%s", r.Metadata["name"], r.Metadata["chapter"], r.Metadata["verse"])
+		case "names":
+			data += fmt.Sprintf("#### Name - %s", r.Metadata["meaning"])
+		case "bukhari":
+			data += fmt.Sprintf("#### Hadith - %s %s", r.Metadata["info"], r.Metadata["by"])
+		}
+
 		data += fmt.Sprintln()
+		data += r.Text
 		data += fmt.Sprintln()
 	}
 
-	data = fmt.Sprintf(template, data)
+	data = fmt.Sprintf(template, "Results", string(render([]byte(data))))
 
-	return render([]byte(data))
+	return []byte(data)
 }
 
 func indexContent(idx *index.Index, md map[string]string, text string) {
@@ -168,6 +178,18 @@ func main() {
 		}()
 	} else {
 		close(indexed)
+	}
+
+	if *ExportFlag {
+		if err := idx.Export(); err != nil {
+			fmt.Println(err)
+		}
+	}
+
+	if *ImportFlag {
+		if err := idx.Import(); err != nil {
+			fmt.Println(err)
+		}
 	}
 
 	thtml := fmt.Sprintf(template, "Home", string(render([]byte(text))))

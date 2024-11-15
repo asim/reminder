@@ -12,6 +12,7 @@ import (
 )
 
 type Index struct {
+	Home string
 	Name string
 	DB   *chromem.DB
 	Col  *chromem.Collection
@@ -21,6 +22,18 @@ type Result struct {
 	Text     string
 	Score    float32
 	Metadata map[string]string
+}
+
+func (i *Index) Export() error {
+	path := filepath.Join(i.Home, i.Name+".idx.gob.gz")
+
+	return i.DB.ExportToFile(path, true, "")
+}
+
+func (i *Index) Import() error {
+	path := filepath.Join(i.Home, i.Name+".idx.gob.gz")
+
+	return i.DB.ImportFromFile(path, "")
 }
 
 func (i *Index) Store(md map[string]string, content ...string) error {
@@ -69,7 +82,7 @@ func New(name string) *Index {
 
 	path := filepath.Join(u.HomeDir, name+".idx")
 
-	db, err := chromem.NewPersistentDB(path, true)
+	db, err := chromem.NewPersistentDB(path, false)
 	if err != nil {
 		panic(err)
 	}
@@ -80,6 +93,7 @@ func New(name string) *Index {
 	}
 
 	return &Index{
+		Home: u.HomeDir,
 		Name: name,
 		DB:   db,
 		Col:  c,
