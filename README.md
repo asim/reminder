@@ -83,23 +83,22 @@ To build the binary `reminder`
 go install
 ```
 
-## Index
+## Index & Search
 
 To index the content in a vector DB and create embeddings you'll need the `OPENAI_API_KEY` variable set
 
-Specify `--index=true` at time of starting the server
-
 ```
-export OPENAI_API_KEY=xxx
-
 reminder --index
 ```
 
-## Search
+You can then export this via the `--export` flag to `$HOME/reminder.idx.gob.gz and import via `--import`.
 
-Again the `OPENAI_API_KEY` will be required for embeddings for your query 
+The `OPENAI_API_KEY` will be required for any search queries to craete embeddings for your query 
 
-## Serve
+Note: By default an embedded index is included. You will need to replace ./index/data/reminder.idx.gob.gz and 
+rebuild the binary if you want to replace the built-in version or use `--import` at runtime.
+
+## Serve HTTP
 
 Run the http server on :8080 
 
