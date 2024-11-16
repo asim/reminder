@@ -4,8 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 
+	"github.com/asim/reminder/files"
 	"github.com/asim/reminder/hadith"
 	"github.com/asim/reminder/index"
 	"github.com/asim/reminder/names"
@@ -16,9 +19,11 @@ import (
 )
 
 var (
-	IndexFlag  = flag.Bool("index", false, "Index data for search. Stored at $HOME/reminder.idx")
-	ExportFlag = flag.Bool("export", false, "Export the index data to $HOME/reminder.idx.gob.gz")
-	ImportFlag = flag.Bool("import", false, "Import the index data from $HOME/reminder.idx.gob.gz")
+	IndexFlag    = flag.Bool("index", false, "Index data for search. Stored at $HOME/reminder.idx")
+	ExportFlag   = flag.Bool("export", false, "Export the index data to $HOME/reminder.idx.gob.gz")
+	ImportFlag   = flag.Bool("import", false, "Import the index data from $HOME/reminder.idx.gob.gz")
+	GenerateFlag = flag.Bool("generate", false, "Generate the html files")
+	ServerFlag   = flag.Bool("serve", false, "Run the server")
 )
 
 var template = `
@@ -152,23 +157,43 @@ func main() {
 	flag.Parse()
 
 	// load data
+	fmt.Println("Loading data")
 	q := quran.Load()
 	n := names.Load()
 	b := hadith.Load()
 
 	// render the markdown
-	text := q.Markdown()
-	name := n.Markdown()
-	books := b.Markdown()
+	if *GenerateFlag {
+		fmt.Println("Generating html")
+		text := q.Markdown()
+		name := n.Markdown()
+		books := b.Markdown()
+
+		thtml := fmt.Sprintf(template, "Reminder", string(render([]byte(text))))
+		nhtml := fmt.Sprintf(template, "Names", string(render([]byte(name))))
+		vhtml := fmt.Sprintf(template, "Hadith", string(render([]byte(books))))
+
+		os.WriteFile(filepath.Join(".", "files", "reminder.html"), []byte(thtml), 0644)
+		os.WriteFile(filepath.Join(".", "files", "names.html"), []byte(nhtml), 0644)
+		os.WriteFile(filepath.Join(".", "files", "hadith.html"), []byte(vhtml), 0644)
+		return
+	}
 
 	// create a new index
 	fmt.Println("Creating index")
 	idx := index.New("reminder")
 
+	// Load the pre-existing data
+	fmt.Println("Loading index")
+	if err := idx.Load(); err != nil {
+		fmt.Println(err)
+	}
+
 	// index the quran in english
 	indexed := make(chan bool, 1)
 
 	if *IndexFlag {
+		fmt.Println("Indexing data")
 		go func() {
 			indexQuran(idx, q)
 			indexNames(idx, n)
@@ -181,20 +206,25 @@ func main() {
 	}
 
 	if *ExportFlag {
+		fmt.Println("Exporting index")
 		if err := idx.Export(); err != nil {
 			fmt.Println(err)
 		}
+		return
 	}
 
 	if *ImportFlag {
+		fmt.Println("Importing index")
 		if err := idx.Import(); err != nil {
 			fmt.Println(err)
 		}
 	}
 
-	thtml := fmt.Sprintf(template, "Home", string(render([]byte(text))))
-	nhtml := fmt.Sprintf(template, "Names", string(render([]byte(name))))
-	vhtml := fmt.Sprintf(template, "Hadith", string(render([]byte(books))))
+	// load the data from html
+
+	thtml := files.Get("reminder")
+	nhtml := files.Get("names")
+	vhtml := files.Get("hadith")
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(thtml))
@@ -244,7 +274,9 @@ func main() {
 		w.Write([]byte(html))
 	})
 
-	fmt.Println("Starting server :8080")
+	if *ServerFlag {
+		fmt.Println("Starting server :8080")
 
-	http.ListenAndServe(":8080", nil)
+		http.ListenAndServe(":8080", nil)
+	}
 }

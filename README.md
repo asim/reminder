@@ -75,6 +75,14 @@ For the hadith
 md := hadith.Markdown()
 ```
 
+## Build
+
+To build the binary `reminder`
+
+```
+go install
+```
+
 ## Index
 
 To index the content in a vector DB and create embeddings you'll need the `OPENAI_API_KEY` variable set
@@ -84,7 +92,7 @@ Specify `--index=true` at time of starting the server
 ```
 export OPENAI_API_KEY=xxx
 
-go run main.go --index=true
+reminder --index
 ```
 
 ## Search
@@ -96,5 +104,13 @@ Again the `OPENAI_API_KEY` will be required for embeddings for your query
 Run the http server on :8080 
 
 ```
-go run main.go
+reminder --serve
+```
+
+## Generate HTML
+
+To regenerate the HTML files
+
+```
+reminder --generate
 ```

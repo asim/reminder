@@ -2,6 +2,7 @@ package index
 
 import (
 	"context"
+	"embed"
 	"fmt"
 	"os/user"
 	"path/filepath"
@@ -10,6 +11,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/philippgille/chromem-go"
 )
+
+//go:embed data/*.gob.gz
+var files embed.FS
 
 type Index struct {
 	Home string
@@ -22,6 +26,28 @@ type Result struct {
 	Text     string
 	Score    float32
 	Metadata map[string]string
+}
+
+// Load the embedded index
+func (i *Index) Load() error {
+	f, err := files.Open("data/" + i.Name + ".idx.gob.gz")
+	if err != nil {
+		return err
+	}
+	sk, err := NewReadSeekerWrapper(f)
+	if err != nil {
+		return err
+	}
+	if err := i.DB.ImportFromReader(sk, ""); err != nil {
+		return err
+	}
+	c, err := i.DB.GetOrCreateCollection(i.Name, nil, nil)
+	if err != nil {
+		return err
+	}
+	// set the Collection
+	i.Col = c
+	return nil
 }
 
 func (i *Index) Export() error {
