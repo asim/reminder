@@ -91,7 +91,7 @@ To index the content in a vector DB and create embeddings you'll need the `OPENA
 reminder --index
 ```
 
-You can then export this via the `--export` flag to `$HOME/reminder.idx.gob.gz and import via `--import`.
+You can then export this via the `--export` flag to `$HOME/reminder.idx.gob.gz` and import via `--import`.
 
 The `OPENAI_API_KEY` will be required for any search queries to craete embeddings for your query 
 
