@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"net/http"
@@ -26,7 +28,7 @@ var (
 	ServerFlag   = flag.Bool("serve", false, "Run the server")
 )
 
-var template = `
+var htmlTemplate = `
 <html>
   <head>
     <title>%s | Reminder</title>
@@ -69,9 +71,17 @@ func render(md []byte) []byte {
 	return markdown.Render(doc, renderer)
 }
 
-func result(res []*index.Result) []byte {
-	data := `# Results`
+func result(question, answer string, res []*index.Result) []byte {
+	data := `## Question: ` + question
 	data += fmt.Sprintln()
+	data += `# Answer`
+	data += fmt.Sprintln()
+	data += fmt.Sprintln()
+	data += "### " + answer
+	data += fmt.Sprintln()
+	data += "#### References"
+	data += fmt.Sprintln()
+	data += "***"
 	data += fmt.Sprintln()
 
 	for _, r := range res {
@@ -89,7 +99,7 @@ func result(res []*index.Result) []byte {
 		data += fmt.Sprintln()
 	}
 
-	data = fmt.Sprintf(template, "Results", string(render([]byte(data))))
+	data = fmt.Sprintf(htmlTemplate, "Results", string(render([]byte(data))))
 
 	return []byte(data)
 }
@@ -169,9 +179,9 @@ func main() {
 		name := n.Markdown()
 		books := b.Markdown()
 
-		thtml := fmt.Sprintf(template, "Reminder", string(render([]byte(text))))
-		nhtml := fmt.Sprintf(template, "Names", string(render([]byte(name))))
-		vhtml := fmt.Sprintf(template, "Hadith", string(render([]byte(books))))
+		thtml := fmt.Sprintf(htmlTemplate, "Reminder", string(render([]byte(text))))
+		nhtml := fmt.Sprintf(htmlTemplate, "Names", string(render([]byte(name))))
+		vhtml := fmt.Sprintf(htmlTemplate, "Hadith", string(render([]byte(books))))
 
 		os.WriteFile(filepath.Join(".", "files", "reminder.html"), []byte(thtml), 0644)
 		os.WriteFile(filepath.Join(".", "files", "names.html"), []byte(nhtml), 0644)
@@ -261,8 +271,18 @@ func main() {
 				return
 			}
 
+			var contexts []string
+
+			for _, r := range res {
+				b, _ := json.Marshal(r)
+				// TODO: maybe just provide text
+				contexts = append(contexts, string(b))
+			}
+
+			answer := askLLM(context.TODO(), contexts, q)
+
 			// create a markdown
-			md := result(res)
+			md := result(q, answer, res)
 			w.Write(md)
 			return
 		}
@@ -270,7 +290,7 @@ func main() {
 		// render search form
 		form := `<style>#search { margin-top: 25px; } #q { padding: 10px; width: 100%; }</style>
 		<form id="search" action="/search" method="post"><input id="q" name=q placeholder=Search></form>`
-		html := fmt.Sprintf(template, "Search", form)
+		html := fmt.Sprintf(htmlTemplate, "Search", form)
 		w.Write([]byte(html))
 	})
 

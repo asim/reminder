@@ -82,7 +82,7 @@ func (i *Index) Store(md map[string]string, content ...string) error {
 }
 
 func (i *Index) Query(v string) ([]*Result, error) {
-	res, err := i.Col.Query(context.TODO(), v, 25, nil, nil)
+	res, err := i.Col.Query(context.TODO(), v, 100, nil, nil)
 	if err != nil {
 		return nil, err
 	}
