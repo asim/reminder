@@ -7,7 +7,9 @@ A reminder to the whole world
 This is the reminder (dhikr) of Allah (God) through a programmable interface. Access the Quran in English, the names of Allah and more. 
 Help spread the word of God and remind all why we're here. Use it via Go or as a HTTP server.
 
-## Import
+## Import in Go
+
+[![Go Reference](https://pkg.go.dev/badge/github.com/asim/reminder.svg)](https://pkg.go.dev/github.com/asim/reminder)
 
 For the Quran in English
 
