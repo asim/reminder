@@ -7,6 +7,14 @@ A reminder to the whole world
 This is the reminder (dhikr) of Allah (God) through a programmable interface. Access the Quran in English, the names of Allah and more. 
 Help spread the word of God and remind all why we're here. Use it via Go or as a HTTP server.
 
+## Features
+
+- Go Library
+- Quran in English
+- Names of Allah & Meaning
+- Hadith (Bukhari) in English
+- Index & Search using GPT 4o mini
+
 ## Import in Go
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/asim/reminder.svg)](https://pkg.go.dev/github.com/asim/reminder)
@@ -51,33 +59,7 @@ for _, name := range n {
 }
 ```
 
-Load the hadith
-
-```go
-hadith.Load()
-```
-
-## Render
-
-Render in markdown
-
-```go
-md := quran.Markdown()
-```
-
-For the names
-
-```go
-md := names.Markdown()
-```
-
-For the hadith
-
-```go
-md := hadith.Markdown()
-```
-
-## Build
+## Build the Binary
 
 To build the binary `reminder`
 
@@ -100,6 +82,13 @@ The `OPENAI_API_KEY` will be required for any search queries to craete embedding
 Note: By default an embedded index is included. You will need to replace ./index/data/reminder.idx.gob.gz and 
 rebuild the binary if you want to replace the built-in version or use `--import` at runtime.
 
+## LLM Answers
+
+Using GPT 4o mini we're able to provide a summarised answer to each search query. The results will return 
+the answer first and then the references from Quran, Hadith and Names used for the context of the query.
+
+Provide `OPENAI_API_KEY` to make use of this in your own server.
+
 ## Serve HTTP
 
 Run the http server on :8080 
@@ -115,3 +104,5 @@ To regenerate the HTML files
 ```
 reminder --generate
 ```
+
+Make sure to rebuild the binary after as the files are embedded by default.
