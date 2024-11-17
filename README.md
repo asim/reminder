@@ -37,7 +37,7 @@ For the hadith (bukhari) of the prophet Muhammad (PBUH)
 import "github.com/asim/reminder/hadith"
 ```
 
-## Load
+### Load
 
 ```go
 q := quran.Load()
