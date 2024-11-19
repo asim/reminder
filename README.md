@@ -14,7 +14,7 @@ Help spread the word of God and remind all why we're here. Use it via Go or as a
 - Hadith (Bukhari) in English
 - Index & Search using GPT 4o mini
 
-## Download & Install
+## Install
 
 Find the latest [release](https://github.com/asim/reminder/releases/latest)
 
