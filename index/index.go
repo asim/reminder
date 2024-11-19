@@ -100,22 +100,31 @@ func (i *Index) Query(v string) ([]*Result, error) {
 	return results, nil
 }
 
-func New(name string) *Index {
+func New(name string, persist bool) *Index {
 	u, err := user.Current()
 	if err != nil {
 		panic(err)
 	}
 
-	path := filepath.Join(u.HomeDir, name+".idx")
+	var db *chromem.DB
+	var c *chromem.Collection
 
-	db, err := chromem.NewPersistentDB(path, false)
-	if err != nil {
-		panic(err)
-	}
+	if persist {
+		path := filepath.Join(u.HomeDir, name+".idx")
 
-	c, err := db.GetOrCreateCollection(name, nil, nil)
-	if err != nil {
-		panic(err)
+		var err error
+		db, err = chromem.NewPersistentDB(path, false)
+		if err != nil {
+			panic(err)
+		}
+
+		c, err = db.GetOrCreateCollection(name, nil, nil)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		db = chromem.NewDB()
+		c, _ = db.CreateCollection(name, nil, nil)
 	}
 
 	return &Index{

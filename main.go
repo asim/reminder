@@ -166,14 +166,14 @@ func indexHadith(idx *index.Index, b *hadith.Volumes) {
 func main() {
 	flag.Parse()
 
-	// load data
-	fmt.Println("Loading data")
-	q := quran.Load()
-	n := names.Load()
-	b := hadith.Load()
-
 	// render the markdown
 	if *GenerateFlag {
+		fmt.Println("Loading data")
+		// load data
+		q := quran.Load()
+		n := names.Load()
+		b := hadith.Load()
+
 		fmt.Println("Generating html")
 		text := q.Markdown()
 		name := n.Markdown()
@@ -190,11 +190,9 @@ func main() {
 	}
 
 	// create a new index
-	fmt.Println("Creating index")
-	idx := index.New("reminder")
+	idx := index.New("reminder", false)
 
 	// Load the pre-existing data
-	fmt.Println("Loading index")
 	if err := idx.Load(); err != nil {
 		fmt.Println(err)
 	}
@@ -203,6 +201,12 @@ func main() {
 	indexed := make(chan bool, 1)
 
 	if *IndexFlag {
+		fmt.Println("Loading data")
+		// load data
+		q := quran.Load()
+		n := names.Load()
+		b := hadith.Load()
+
 		fmt.Println("Indexing data")
 		go func() {
 			indexQuran(idx, q)
@@ -298,5 +302,38 @@ func main() {
 		fmt.Println("Starting server :8080")
 
 		http.ListenAndServe(":8080", nil)
+	}
+
+	args := os.Args[1:]
+
+	if len(args) <= 1 {
+		return
+	}
+
+	command := args[0]
+
+	if command == "search" {
+		q := strings.Join(args[1:], " ")
+
+		if len(q) == 0 {
+			return
+		}
+
+		res, err := idx.Query(q)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		var contexts []string
+
+		for _, r := range res {
+			b, _ := json.Marshal(r)
+			// TODO: maybe just provide text
+			contexts = append(contexts, string(b))
+		}
+
+		answer := askLLM(context.TODO(), contexts, q)
+		fmt.Println(answer)
 	}
 }
