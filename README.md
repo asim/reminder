@@ -24,13 +24,15 @@ Or Go install
 go get github.com.com/asim/reminder@latest
 ```
 
-## Search
+## OpenAI Usage
 
 Set the `OPENAI_API_KEY` value
 
 ```
 export OPENAI_API_KEY=xxx
 ```
+
+## Search
 
 Make a query
 
