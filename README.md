@@ -9,7 +9,7 @@ Help spread the word of God and remind all why we're here. Use it via Go or as a
 
 ## Features
 
-- Quran in English
+- Read Quran in English
 - Names of Allah & Meaning
 - Hadith (Bukhari) in English
 - Index & Search using GPT 4o mini
