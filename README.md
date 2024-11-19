@@ -24,7 +24,7 @@ Or Go install
 go get github.com.com/asim/reminder@latest
 ```
 
-## OpenAI Usage
+## LLM Usage
 
 Set the `OPENAI_API_KEY` value
 
