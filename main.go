@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"flag"
@@ -307,7 +308,46 @@ func main() {
 	args := os.Args[1:]
 
 	if len(args) <= 1 {
-		return
+		// repl
+		var history []string
+
+		for {
+			reader := bufio.NewReader(os.Stdin)
+			fmt.Print(">: ")
+			q, _ := reader.ReadString('\n')
+			if len(q) == 0 {
+				continue
+			}
+
+			res, err := idx.Query(q)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+
+			var contexts []string
+
+			for _, r := range res {
+				b, _ := json.Marshal(r)
+				// TODO: maybe just provide text
+				contexts = append(contexts, string(b))
+			}
+
+			// ask the question
+			answer := askLLM(context.TODO(), append(contexts, history...), q)
+
+			// append to history
+			history = append(history, q)
+			history = append(history, answer)
+
+			if len(history) > 100 {
+				history = history[10:]
+			}
+
+			// write the response
+			fmt.Println(answer)
+		}
+
 	}
 
 	command := args[0]
