@@ -37,7 +37,7 @@ export OPENAI_API_KEY=xxx
 Make a query
 
 ```
-reminder search what did the prophet
+reminder search what did the prophet do
 ```
 
 ## Server
