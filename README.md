@@ -20,8 +20,6 @@ Find the latest [release](https://github.com/asim/reminder/releases/latest)
 
 Or Go install
 
-To build the binary `reminder`
-
 ```
 go get github.com.com/asim/reminder@latest
 ```
