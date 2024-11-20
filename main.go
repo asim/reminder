@@ -334,7 +334,6 @@ func main() {
 				contexts = append(contexts, string(b))
 			}
 
-
 			// ask the question
 			answer := askLLM(context.TODO(), append(contexts, history...), q)
 
@@ -379,8 +378,25 @@ func main() {
 		answer := askLLM(context.TODO(), contexts, q)
 		fmt.Println(answer)
 
-		for i, r := range res {
-			fmt.Printf("[%d] %v\n", i, r)
+		fmt.Println("\nReferences")
+
+		for i := 0; i < len(res); i++ {
+			if i >= 10 {
+				break
+			}
+			r := res[i]
+
+			var source string
+			switch r.Metadata["source"] {
+			case "quran":
+				source = fmt.Sprintf("quran %v:%v", r.Metadata["chapter"], r.Metadata["verse"])
+			case "bukhari":
+				source = fmt.Sprintf("bukhari %v by %v", r.Metadata["info"], r.Metadata["by"])
+			case "names":
+				source = fmt.Sprintf("names %v", r.Metadata["meaning"])
+			}
+
+			fmt.Printf("[%d] [%v] %v\n", i, source, r.Text)
 		}
 	}
 }
