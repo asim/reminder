@@ -310,6 +310,7 @@ func main() {
 	if len(args) <= 1 {
 		// repl
 		var history []string
+		history = append(history, "What follows is conversation history")
 
 		for {
 			reader := bufio.NewReader(os.Stdin)
@@ -333,15 +334,17 @@ func main() {
 				contexts = append(contexts, string(b))
 			}
 
+
 			// ask the question
 			answer := askLLM(context.TODO(), append(contexts, history...), q)
 
 			// append to history
-			history = append(history, q)
-			history = append(history, answer)
+			history = append(history, fmt.Sprintf("<question>%s</question><answer>%s</answer>", q, answer))
 
 			if len(history) > 100 {
 				history = history[10:]
+				// reset the head
+				history = append(history, "What follows is conversation history")
 			}
 
 			// write the response
@@ -375,5 +378,9 @@ func main() {
 
 		answer := askLLM(context.TODO(), contexts, q)
 		fmt.Println(answer)
+
+		for i, r := range res {
+			fmt.Printf("[%d] %v\n", i, r)
+		}
 	}
 }
