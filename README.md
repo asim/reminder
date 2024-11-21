@@ -32,23 +32,6 @@ Set the `OPENAI_API_KEY` value
 export OPENAI_API_KEY=xxx
 ```
 
-## REPL
-
-By default a repl is included which will maintain the query history for the time you're chatting
-
-```
-reminder
->: Who is the prophet
-```
-
-## Search
-
-Make a single search query
-
-```
-reminder search what did the prophet do
-```
-
 ## Server
 
 Run the http server 

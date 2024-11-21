@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"encoding/json"
 	"flag"
@@ -36,8 +35,9 @@ var htmlTemplate = `
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
     html, body { height: 100%%; width: 100%%; margin: 0; padding: 0;}
+    #head { margin-bottom: 5em; }
+    #head a { margin-right: 10px; color: black; font-weight: bold; text-decoration: none; }
     #container { height: 100%%; max-width: 1024px; margin: 0 auto; padding: 25px;}
-    #head a { margin-right: 10px; color: black; font-weight: bold; }
     #content { padding-bottom: 100px; }
     #content p { padding: 50px 10px 50px 10px; border-bottom: 1px solid grey; margin: 0; }
     </style>
@@ -45,7 +45,8 @@ var htmlTemplate = `
   <body>
     <div id="container">
       <div id="head">
-        <a href="/">Reminder</a>
+        <a href="/">[Reminder]</a>
+        <a href="/quran">Quran</a>
         <a href="/names">Names</a>
         <a href="/hadith">Hadith</a>
         <a href="/search">Search</a>
@@ -180,11 +181,11 @@ func main() {
 		name := n.Markdown()
 		books := b.Markdown()
 
-		thtml := fmt.Sprintf(htmlTemplate, "Reminder", string(render([]byte(text))))
+		thtml := fmt.Sprintf(htmlTemplate, "Quran", string(render([]byte(text))))
 		nhtml := fmt.Sprintf(htmlTemplate, "Names", string(render([]byte(name))))
 		vhtml := fmt.Sprintf(htmlTemplate, "Hadith", string(render([]byte(books))))
 
-		os.WriteFile(filepath.Join(".", "files", "reminder.html"), []byte(thtml), 0644)
+		os.WriteFile(filepath.Join(".", "files", "quran.html"), []byte(thtml), 0644)
 		os.WriteFile(filepath.Join(".", "files", "names.html"), []byte(nhtml), 0644)
 		os.WriteFile(filepath.Join(".", "files", "hadith.html"), []byte(vhtml), 0644)
 		return
@@ -237,11 +238,42 @@ func main() {
 
 	// load the data from html
 
-	thtml := files.Get("reminder")
+	thtml := files.Get("quran")
 	nhtml := files.Get("names")
 	vhtml := files.Get("hadith")
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		q := "What is the reminder?"
+
+		res, err := idx.Query(q)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+
+		var contexts []string
+
+		for _, r := range res {
+			b, _ := json.Marshal(r)
+			// TODO: maybe just provide text
+			contexts = append(contexts, string(b))
+		}
+
+		answer := askLLM(context.TODO(), contexts, q)
+
+		// create a markdown
+		md := `# What is the Reminder?
+
+%s
+`
+		out := string(render([]byte(fmt.Sprintf(md, answer))))
+
+		html := fmt.Sprintf(htmlTemplate, "Home", out)
+
+		w.Write([]byte(html))
+	})
+
+	http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(thtml))
 	})
 
@@ -303,100 +335,5 @@ func main() {
 		fmt.Println("Starting server :8080")
 
 		http.ListenAndServe(":8080", nil)
-	}
-
-	args := os.Args[1:]
-
-	if len(args) <= 1 {
-		// repl
-		var history []string
-		history = append(history, "What follows is conversation history")
-
-		for {
-			reader := bufio.NewReader(os.Stdin)
-			fmt.Print(">: ")
-			q, _ := reader.ReadString('\n')
-			if len(q) == 0 {
-				continue
-			}
-
-			res, err := idx.Query(q)
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-
-			var contexts []string
-
-			for _, r := range res {
-				b, _ := json.Marshal(r)
-				// TODO: maybe just provide text
-				contexts = append(contexts, string(b))
-			}
-
-			// ask the question
-			answer := askLLM(context.TODO(), append(contexts, history...), q)
-
-			// append to history
-			history = append(history, fmt.Sprintf("<question>%s</question><answer>%s</answer>", q, answer))
-
-			if len(history) > 100 {
-				history = history[10:]
-				// reset the head
-				history = append(history, "What follows is conversation history")
-			}
-
-			// write the response
-			fmt.Println(answer)
-		}
-
-	}
-
-	command := args[0]
-
-	if command == "search" {
-		q := strings.Join(args[1:], " ")
-
-		if len(q) == 0 {
-			return
-		}
-
-		res, err := idx.Query(q)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		var contexts []string
-
-		for _, r := range res {
-			b, _ := json.Marshal(r)
-			// TODO: maybe just provide text
-			contexts = append(contexts, string(b))
-		}
-
-		answer := askLLM(context.TODO(), contexts, q)
-		fmt.Println(answer)
-
-		fmt.Println("\nReferences")
-
-		for i := 0; i < len(res); i++ {
-			if i >= 10 {
-				break
-			}
-			r := res[i]
-
-			var source string
-			switch r.Metadata["source"] {
-			case "quran":
-				source = fmt.Sprintf("quran %v:%v", r.Metadata["chapter"], r.Metadata["verse"])
-			case "bukhari":
-				source = fmt.Sprintf("bukhari %v by %v", r.Metadata["info"], r.Metadata["by"])
-			case "names":
-				source = fmt.Sprintf("names %v", r.Metadata["meaning"])
-			}
-
-			fmt.Printf("[%d] [%v] %v\n", i, source, r.Text)
-		}
 	}
 }
