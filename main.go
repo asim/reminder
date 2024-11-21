@@ -183,16 +183,16 @@ func gen(idx *index.Index, q string) (string, []string) {
 }
 
 var questions = []string{
-	"What is the reminder?",
-	"Why are we here?",
-	"What is our purpose?",
-	"How do we worship Allah?",
-	"Who is Allah?",
-	"Who is the prophet Muhammad?",
+	"What is the Reminder?",
+	"What is the Quran?",
+	"What is the Hadith?",
+	"Who is Allah to us?",
+	"Who is the prophet Muhammad",
+	"How do we 'worship' Allah?",
 	"Where did we come from?",
 	"Where do we go when we die?",
-	"How will the world end?",
 	"How do I remember Allah?",
+	"None of this makes sense to me",
 }
 
 func main() {
