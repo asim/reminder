@@ -39,7 +39,7 @@ var htmlTemplate = `
     #head a { margin-right: 10px; color: black; font-weight: bold; text-decoration: none; }
     #container { height: 100%%; max-width: 1024px; margin: 0 auto; padding: 25px;}
     #content { padding-bottom: 100px; }
-    #content p { padding: 50px 10px 50px 10px; border-bottom: 1px solid grey; margin: 0; }
+    #content p { padding: 0 0 25px 0; margin: 0; }
     </style>
   </head>
   <body>
