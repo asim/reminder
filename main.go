@@ -165,10 +165,48 @@ func indexHadith(idx *index.Index, b *hadith.Volumes) {
 	}
 }
 
+func gen(idx *index.Index, q string) (string, []string) {
+	res, err := idx.Query(q)
+	if err != nil {
+		return "", nil
+	}
+
+	var contexts []string
+
+	for _, r := range res {
+		b, _ := json.Marshal(r)
+		// TODO: maybe just provide text
+		contexts = append(contexts, string(b))
+	}
+
+	return askLLM(context.TODO(), contexts, q), contexts
+}
+
+var questions = []string{
+	"What is the reminder?",
+	"Why are we here?",
+	"What is our purpose?",
+	"How do we worship Allah?",
+	"Who is Allah?",
+	"Who is the prophet Muhammad?",
+	"Where did we come from?",
+	"Where do we go when we die?",
+	"How will the world end?",
+	"How do I remember Allah?",
+}
+
 func main() {
 	flag.Parse()
 
-	// render the markdown
+	// create a new index
+	idx := index.New("reminder", false)
+
+	// Load the pre-existing data
+	if err := idx.Load(); err != nil {
+		fmt.Println(err)
+	}
+
+	// render the markdown as html
 	if *GenerateFlag {
 		fmt.Println("Loading data")
 		// load data
@@ -185,18 +223,24 @@ func main() {
 		nhtml := fmt.Sprintf(htmlTemplate, "Names", string(render([]byte(name))))
 		vhtml := fmt.Sprintf(htmlTemplate, "Hadith", string(render([]byte(books))))
 
+		var index string
+
+		for _, q := range questions {
+			a, _ := gen(idx, q)
+			index += fmt.Sprintf("# %s", q)
+			index += fmt.Sprintln()
+			index += fmt.Sprintf("%s", a)
+			index += fmt.Sprintln()
+		}
+
+		ihtml := fmt.Sprintf(htmlTemplate, "Home", string(render([]byte(index))))
+
+		os.WriteFile(filepath.Join(".", "files", "index.html"), []byte(ihtml), 0644)
 		os.WriteFile(filepath.Join(".", "files", "quran.html"), []byte(thtml), 0644)
 		os.WriteFile(filepath.Join(".", "files", "names.html"), []byte(nhtml), 0644)
 		os.WriteFile(filepath.Join(".", "files", "hadith.html"), []byte(vhtml), 0644)
+
 		return
-	}
-
-	// create a new index
-	idx := index.New("reminder", false)
-
-	// Load the pre-existing data
-	if err := idx.Load(); err != nil {
-		fmt.Println(err)
 	}
 
 	// index the quran in english
@@ -238,39 +282,13 @@ func main() {
 
 	// load the data from html
 
+	ihtml := files.Get("index")
 	thtml := files.Get("quran")
 	nhtml := files.Get("names")
 	vhtml := files.Get("hadith")
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		q := "What is the reminder?"
-
-		res, err := idx.Query(q)
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-			return
-		}
-
-		var contexts []string
-
-		for _, r := range res {
-			b, _ := json.Marshal(r)
-			// TODO: maybe just provide text
-			contexts = append(contexts, string(b))
-		}
-
-		answer := askLLM(context.TODO(), contexts, q)
-
-		// create a markdown
-		md := `# What is the Reminder?
-
-%s
-`
-		out := string(render([]byte(fmt.Sprintf(md, answer))))
-
-		html := fmt.Sprintf(htmlTemplate, "Home", out)
-
-		w.Write([]byte(html))
+		w.Write([]byte(ihtml))
 	})
 
 	http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
