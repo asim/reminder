@@ -189,13 +189,13 @@ var questions = []string{
 	"What is the Reminder?",
 	"What is the Quran?",
 	"What is the Hadith?",
-	"Who is Allah to us?",
+	"Who is Allah?",
 	"Who is the prophet Muhammad",
+	"Why do we 'worship' Allah?",
 	"How do we 'worship' Allah?",
-	"Where did we come from?",
-	"Where do we go when we die?",
+	"What happens when we die?",
 	"How do I remember Allah?",
-	"None of this makes sense to me",
+	"How do I become Muslim?",
 }
 
 func main() {
