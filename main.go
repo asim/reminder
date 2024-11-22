@@ -35,11 +35,12 @@ var htmlTemplate = `
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
     html, body { height: 100%%; width: 100%%; margin: 0; padding: 0;}
-    #head { margin-bottom: 5em; }
+    #head { margin-bottom: 2.5em; }
     #head a { margin-right: 10px; color: black; font-weight: bold; text-decoration: none; }
     #container { height: 100%%; max-width: 1024px; margin: 0 auto; padding: 25px;}
     #content { padding-bottom: 100px; }
     #content p { padding: 0 0 25px 0; margin: 0; }
+    #search { margin-top: 10px; } #q { padding: 10px; width: 100%%; }
     </style>
   </head>
   <body>
@@ -49,7 +50,9 @@ var htmlTemplate = `
         <a href="/quran">Quran</a>
         <a href="/names">Names</a>
         <a href="/hadith">Hadith</a>
-        <a href="/search">Search</a>
+      </div>
+      <div id="search">
+	<form action="/search" method="post"><input id="q" name=q placeholder="Ask a question"></form>
       </div>
       <div id="content">
       %s
@@ -343,9 +346,7 @@ func main() {
 		}
 
 		// render search form
-		form := `<style>#search { margin-top: 25px; } #q { padding: 10px; width: 100%; }</style>
-		<form id="search" action="/search" method="post"><input id="q" name=q placeholder=Search></form>`
-		html := fmt.Sprintf(htmlTemplate, "Search", form)
+		html := fmt.Sprintf(htmlTemplate, "Search", "")
 		w.Write([]byte(html))
 	})
 
