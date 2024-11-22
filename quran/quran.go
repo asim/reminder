@@ -18,6 +18,7 @@ type Chapter struct {
 type Verse struct {
 	Number int
 	Text   string
+	Arabic string
 }
 
 type Quran struct {
@@ -50,9 +51,19 @@ func (q *Quran) Markdown() string {
 func Load() *Quran {
 	q := &Quran{}
 
+	// load the arabic
+	f, err := files.ReadFile("data/arabic.json")
+	if err != nil {
+		panic(err.Error())
+	}
+	var arabic map[string]interface{}
+	json.Unmarshal(f, &arabic)
+
 	// Set local
 	for i := 0; i < 114; i++ {
-		f, err := files.ReadFile(fmt.Sprintf("data/%d.json", i+1))
+		chapter := i + 1
+
+		f, err = files.ReadFile(fmt.Sprintf("data/%d.json", chapter))
 		if err != nil {
 			panic(err.Error())
 		}
@@ -65,17 +76,34 @@ func Load() *Quran {
 
 		var verses []*Verse
 
-		for _, ayah := range data {
+		arabicText := arabic[fmt.Sprintf("%d", chapter)].([]interface{})
+
+		for i, ayah := range data {
+			arabicAyah := arabicText[i].(map[string]interface{})
+			ch := int(arabicAyah["chapter"].(float64))
+			ve := int(arabicAyah["verse"].(float64))
+			ar := arabicAyah["text"].(string)
+
+			num := int(ayah.([]interface{})[0].(float64))
+			if ch != chapter {
+				panic("arabic chapter mismatch")
+			}
+
+			if ve != num {
+				panic("arabic verse mismatch")
+			}
+
 			verses = append(verses, &Verse{
-				Number: int(ayah.([]interface{})[0].(float64)),
+				Number: num,
 				Text:   ayah.([]interface{})[1].(string),
+				Arabic: ar,
 			})
 		}
 
 		// set the name
 		q.Chapters = append(q.Chapters, &Chapter{
 			Name:   name,
-			Number: i + 1,
+			Number: chapter,
 			Verses: verses,
 		})
 
