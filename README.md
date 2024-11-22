@@ -41,3 +41,13 @@ reminder --serve
 ```
 
 Go to [localhost:8080](https://localhost:8080)
+
+## Footnote
+
+The Quran says in [6:90](https://quran.com/6:90)
+
+```
+Say, “I ask no reward of you for this ˹Quran˺—it is a reminder to the whole world.”
+```
+
+Therefore, we ask nothing in compensation. 
