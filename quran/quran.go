@@ -39,6 +39,8 @@ func (q *Quran) Markdown() string {
 		// max 286 ayahs
 		for _, verse := range ch.Verses {
 			data += fmt.Sprintln()
+			data += fmt.Sprintf(`#### %d:%d`, ch.Number, verse.Number)
+			data += fmt.Sprintln()
 			data += fmt.Sprintf(verse.Text)
 			data += fmt.Sprintln()
 		}

@@ -92,7 +92,9 @@ func result(question, answer string, res []*index.Result) []byte {
 	for _, r := range res {
 		switch r.Metadata["source"] {
 		case "quran":
-			data += fmt.Sprintf("#### Quran - %s %s:%s", r.Metadata["name"], r.Metadata["chapter"], r.Metadata["verse"])
+			ch := r.Metadata["chapter"]
+			ve := r.Metadata["verse"]
+			data += fmt.Sprintf("#### Quran - %s [%s:%s](/quran#%s-%s)", r.Metadata["name"], ch, ve, ch, ve)
 		case "names":
 			data += fmt.Sprintf("#### Name - %s", r.Metadata["meaning"])
 		case "bukhari":
