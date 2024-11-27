@@ -10,14 +10,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/asim/reminder/files"
 	"github.com/asim/reminder/hadith"
+	"github.com/asim/reminder/html"
+	"github.com/asim/reminder/html/files"
 	"github.com/asim/reminder/index"
 	"github.com/asim/reminder/names"
 	"github.com/asim/reminder/quran"
-	"github.com/gomarkdown/markdown"
-	"github.com/gomarkdown/markdown/html"
-	"github.com/gomarkdown/markdown/parser"
 )
 
 var (
@@ -27,54 +25,6 @@ var (
 	GenerateFlag = flag.Bool("generate", false, "Generate the html files")
 	ServerFlag   = flag.Bool("serve", false, "Run the server")
 )
-
-var htmlTemplate = `
-<html>
-  <head>
-    <title>%s | Reminder</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-    html, body { height: 100%%; width: 100%%; margin: 0; padding: 0;}
-    #head { margin-bottom: 2.5em; }
-    #head a { margin-right: 10px; color: black; font-weight: bold; text-decoration: none; }
-    #container { height: 100%%; max-width: 1024px; margin: 0 auto; padding: 25px;}
-    #content { padding-bottom: 100px; }
-    #content p { padding: 0 0 25px 0; margin: 0; }
-    #search { margin-top: 10px; } #q { padding: 10px; width: 100%%; }
-    </style>
-  </head>
-  <body>
-    <div id="container">
-      <div id="head">
-        <a href="/">[Reminder]</a>
-        <a href="/quran">Quran</a>
-        <a href="/names">Names</a>
-        <a href="/hadith">Hadith</a>
-      </div>
-      <div id="search">
-	<form action="/search" method="post"><input id="q" name=q placeholder="Ask a question"></form>
-      </div>
-      <div id="content">
-      %s
-      </div>
-    </div>
-  </body>
-</html>
-`
-
-func render(md []byte) []byte {
-	// create markdown parser with extensions
-	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
-	p := parser.NewWithExtensions(extensions)
-	doc := p.Parse(md)
-
-	// create HTML renderer with extensions
-	htmlFlags := html.CommonFlags | html.HrefTargetBlank
-	opts := html.RendererOptions{Flags: htmlFlags}
-	renderer := html.NewRenderer(opts)
-
-	return markdown.Render(doc, renderer)
-}
 
 func result(question, answer string, res []*index.Result) []byte {
 	data := `## Question: ` + question
@@ -106,7 +56,7 @@ func result(question, answer string, res []*index.Result) []byte {
 		data += fmt.Sprintln()
 	}
 
-	data = fmt.Sprintf(htmlTemplate, "Results", string(render([]byte(data))))
+	data = html.RenderTemplate("Results", data)
 
 	return []byte(data)
 }
@@ -220,13 +170,13 @@ func main() {
 		b := hadith.Load()
 
 		fmt.Println("Generating html")
-		text := q.Markdown()
+		text := q.HTML()
 		name := n.Markdown()
 		books := b.Markdown()
 
-		thtml := fmt.Sprintf(htmlTemplate, "Quran", string(render([]byte(text))))
-		nhtml := fmt.Sprintf(htmlTemplate, "Names", string(render([]byte(name))))
-		vhtml := fmt.Sprintf(htmlTemplate, "Hadith", string(render([]byte(books))))
+		thtml := html.RenderTemplate("Quran", text)
+		nhtml := html.RenderTemplate("Names", name)
+		vhtml := html.RenderTemplate("Hadith", books)
 
 		var index string
 
@@ -238,12 +188,12 @@ func main() {
 			index += fmt.Sprintln()
 		}
 
-		ihtml := fmt.Sprintf(htmlTemplate, "Home", string(render([]byte(index))))
+		ihtml := html.RenderTemplate("Home", index)
 
-		os.WriteFile(filepath.Join(".", "files", "index.html"), []byte(ihtml), 0644)
-		os.WriteFile(filepath.Join(".", "files", "quran.html"), []byte(thtml), 0644)
-		os.WriteFile(filepath.Join(".", "files", "names.html"), []byte(nhtml), 0644)
-		os.WriteFile(filepath.Join(".", "files", "hadith.html"), []byte(vhtml), 0644)
+		os.WriteFile(filepath.Join(".", "html", "files", "index.html"), []byte(ihtml), 0644)
+		os.WriteFile(filepath.Join(".", "html", "files", "quran.html"), []byte(thtml), 0644)
+		os.WriteFile(filepath.Join(".", "html", "files", "names.html"), []byte(nhtml), 0644)
+		os.WriteFile(filepath.Join(".", "html", "files", "hadith.html"), []byte(vhtml), 0644)
 
 		return
 	}
@@ -287,10 +237,15 @@ func main() {
 
 	// load the data from html
 
-	ihtml := files.Get("index")
-	thtml := files.Get("quran")
-	nhtml := files.Get("names")
-	vhtml := files.Get("hadith")
+	ihtml := files.Get("index.html")
+	thtml := files.Get("quran.html")
+	nhtml := files.Get("names.html")
+	vhtml := files.Get("hadith.html")
+	otf := files.Get("arabic.otf")
+
+	http.HandleFunc("/files/arabic.otf", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(otf))
+	})
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(ihtml))
@@ -348,7 +303,7 @@ func main() {
 		}
 
 		// render search form
-		html := fmt.Sprintf(htmlTemplate, "Search", "")
+		html := fmt.Sprintf(html.Template, "Search", "")
 		w.Write([]byte(html))
 	})
 
