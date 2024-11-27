@@ -41,7 +41,9 @@ func (q *Quran) Markdown() string {
 			data += fmt.Sprintln()
 			data += fmt.Sprintf(`#### %d:%d`, ch.Number, verse.Number)
 			data += fmt.Sprintln()
-			data += fmt.Sprintf(verse.Text)
+			data += fmt.Sprintln(verse.Arabic)
+			data += fmt.Sprintln()
+			data += fmt.Sprintln(verse.Text)
 			data += fmt.Sprintln()
 		}
 
