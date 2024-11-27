@@ -28,13 +28,9 @@ type Quran struct {
 func (q *Quran) HTML() string {
 	var data string
 
-	var toc string
-
 	for _, ch := range q.Chapters {
-		toc += fmt.Sprintf(`<a href="#%d"><span class=chapter>%s</span></a>`, ch.Number, ch.Name)
-
 		data += fmt.Sprintln()
-		data += fmt.Sprintf(`<h1>%d</h1>`, ch.Number)
+		data += fmt.Sprintf(`<h1 id="%d">%d</h1>`, ch.Number, ch.Number)
 		data += fmt.Sprintln()
 		data += fmt.Sprintln()
 		data += fmt.Sprintf(`<h3>%s</h3>`, ch.Name)
@@ -43,7 +39,7 @@ func (q *Quran) HTML() string {
 		// max 286 ayahs
 		for _, verse := range ch.Verses {
 			data += fmt.Sprintln()
-			data += fmt.Sprintf(`<h4>%d:%d</h4>`, ch.Number, verse.Number)
+			data += fmt.Sprintf(`<h4 id="%d-%d">%d:%d</h4>`, ch.Number, verse.Number, ch.Number, verse.Number)
 			data += fmt.Sprintln()
 			data += fmt.Sprintln(`<div class="arabic">` + verse.Arabic + `</div>`)
 			data += fmt.Sprintln()
@@ -53,7 +49,7 @@ func (q *Quran) HTML() string {
 
 	}
 
-	return toc + data
+	return data
 }
 
 func (q *Quran) Markdown() string {

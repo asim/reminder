@@ -35,6 +35,7 @@ var Template = `
   margin: 10px;
   border: 1px solid grey;
   padding: 10px;
+  display: inline-block;
 }
     </style>
   </head>
