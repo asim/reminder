@@ -28,7 +28,11 @@ type Quran struct {
 func (q *Quran) HTML() string {
 	var data string
 
+	var toc string
+
 	for _, ch := range q.Chapters {
+		toc += fmt.Sprintf(`<a href="#%d"><span class=chapter>%s</span></a>`, ch.Number, ch.Name)
+
 		data += fmt.Sprintln()
 		data += fmt.Sprintf(`<h1>%d</h1>`, ch.Number)
 		data += fmt.Sprintln()
@@ -49,7 +53,7 @@ func (q *Quran) HTML() string {
 
 	}
 
-	return data
+	return toc + data
 }
 
 func (q *Quran) Markdown() string {

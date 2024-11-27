@@ -31,6 +31,11 @@ var Template = `
   font-family: 'arabic';
   font-size: 1.5em;
 }
+.chapter {
+  margin: 10px;
+  border: 1px solid grey;
+  padding: 10px;
+}
     </style>
   </head>
   <body>
