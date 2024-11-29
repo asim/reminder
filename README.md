@@ -4,12 +4,11 @@ A reminder to the whole world
 
 ## Overview
 
-This is the reminder (dhikr) of Allah (God) through a programmable interface. Access the Quran in English, the names of Allah and more. 
-Help spread the word of God and remind all why we're here. Use it via Go or as a HTTP server. Includes LLM summarisation for questions.
+Reminder is a search for knowledge with the Quran, Hadith and names of Allah used for contextual reference when querying the an LLM. We're trying to uphold Islamic values while in the pursuit of knowledge.
 
 ## Features
 
-- Read Quran in English
+- Quran in English
 - Names of Allah & Meaning
 - Hadith (Bukhari) in English
 - Index & Search using GPT 4o mini
