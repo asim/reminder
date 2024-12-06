@@ -4,7 +4,7 @@ A reminder to the whole world
 
 ## Overview
 
-Reminder is a search for knowledge with the Quran, Hadith and names of Allah used for contextual reference when querying the an LLM. We're trying to uphold Islamic values while in the pursuit of knowledge.
+Reminder is a search for knowledge with the Quran, Hadith and names of Allah used for contextual reference when querying an LLM. We're trying to uphold Islamic values while in the pursuit of knowledge.
 
 ## Features
 
