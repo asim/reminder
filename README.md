@@ -41,7 +41,7 @@ reminder --serve
 
 Go to [localhost:8080](https://localhost:8080)
 
-## Footnote
+## Notes
 
 The Quran says in [6:90](https://quran.com/6:90)
 
