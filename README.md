@@ -8,7 +8,7 @@ Reminder is a search for knowledge with the Quran, Hadith and names of Allah use
 
 ## Features
 
-- Quran in English
+- Quran in English & Arabic
 - Names of Allah & Meaning
 - Hadith (Bukhari) in English
 - Index & Search using GPT 4o mini
