@@ -92,9 +92,9 @@ document.addEventListener('DOMContentLoaded', function(){
 		var text = "<p><b>Q</b>: " + json.q + "</p><p><b>A</b>: " + json.answer + "</p>";
 		text += "<div id=expand onclick='expand(this); return false;'>References<br><br><div class=ref style='display: none;'>";
 		for (i = 0; i < json.references.length; i++) {
-                    text += "<div>" + JSON.stringify(json.references[i]) + "</div><br><br>";
+                    text += JSON.stringify(json.references[i]) + "<br><br>";
 		}
-		text += "</div></a>";
+		text += "</div></div>";
 		ans.innerHTML = text + ans.innerHTML; 
 		resp.innerText = "";
 	    }
