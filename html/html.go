@@ -43,12 +43,13 @@ var Template = `
     <div id="container">
       <div id="head">
         <a href="/">[Reminder]</a>
+        <a href="/about">About</a>
         <a href="/quran">Quran</a>
         <a href="/names">Names</a>
         <a href="/hadith">Hadith</a>
       </div>
       <div id="search">
-        <form action="/search" method="post"><input id="q" name=q placeholder="Ask a question"></form>
+        <form id="question" action="/search" method="post"><input id="q" name=q placeholder="Ask a question"></form>
       </div>
       <div id="content">
       %s
@@ -56,6 +57,35 @@ var Template = `
     </div>
   </body>
 </html>
+`
+
+var Index = `
+<div id="answer"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    var form = document.getElementById("question");
+    form.addEventListener("submit", function(ev) {
+        ev.preventDefault();
+	var q = document.getElementById("q");
+
+	var xhr = new XMLHttpRequest();
+	var url = "/search.json";
+	xhr.open("POST", url, true);
+	xhr.setRequestHeader("Content-Type", "application/json");
+	xhr.onreadystatechange = function () {
+	    if (xhr.readyState === 4 && xhr.status === 200) {
+		var json = JSON.parse(xhr.responseText);
+		var ans = document.getElementById("answer");
+		var text = "<p><b>Q</b>: " + q.value + "</p><p><b>A</b>: " + json.answer + "</p>";
+		ans.innerHTML = text + ans.innerHTML; 
+		q.value = '';
+	    }
+	};
+	var data = JSON.stringify({"q": q.value});
+	xhr.send(data);
+    });
+}, false);
+</script>
 `
 
 func Render(md []byte) []byte {
@@ -70,6 +100,10 @@ func Render(md []byte) []byte {
 	renderer := html.NewRenderer(opts)
 
 	return markdown.Render(doc, renderer)
+}
+
+func RenderHTML(title, html string) string {
+	return fmt.Sprintf(Template, title, html)
 }
 
 func RenderString(v string) string {

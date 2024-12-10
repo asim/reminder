@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -174,23 +175,25 @@ func main() {
 		name := n.Markdown()
 		books := b.Markdown()
 
+		ihtml := html.RenderHTML("Home", html.Index)
 		thtml := html.RenderTemplate("Quran", text)
 		nhtml := html.RenderTemplate("Names", name)
 		vhtml := html.RenderTemplate("Hadith", books)
 
-		var index string
+		var about string
 
 		for _, q := range questions {
 			a, _ := gen(idx, q)
-			index += fmt.Sprintf("# %s", q)
-			index += fmt.Sprintln()
-			index += fmt.Sprintf("%s", a)
-			index += fmt.Sprintln()
+			about += fmt.Sprintf("# %s", q)
+			about += fmt.Sprintln()
+			about += fmt.Sprintf("%s", a)
+			about += fmt.Sprintln()
 		}
 
-		ihtml := html.RenderTemplate("Home", index)
+		ahtml := html.RenderTemplate("About", about)
 
 		os.WriteFile(filepath.Join(".", "html", "files", "index.html"), []byte(ihtml), 0644)
+		os.WriteFile(filepath.Join(".", "html", "files", "about.html"), []byte(ahtml), 0644)
 		os.WriteFile(filepath.Join(".", "html", "files", "quran.html"), []byte(thtml), 0644)
 		os.WriteFile(filepath.Join(".", "html", "files", "names.html"), []byte(nhtml), 0644)
 		os.WriteFile(filepath.Join(".", "html", "files", "hadith.html"), []byte(vhtml), 0644)
@@ -238,6 +241,7 @@ func main() {
 	// load the data from html
 
 	ihtml := files.Get("index.html")
+	ahtml := files.Get("about.html")
 	thtml := files.Get("quran.html")
 	nhtml := files.Get("names.html")
 	vhtml := files.Get("hadith.html")
@@ -249,6 +253,10 @@ func main() {
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(ihtml))
+	})
+
+	http.HandleFunc("/about", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(ahtml))
 	})
 
 	http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
@@ -305,6 +313,50 @@ func main() {
 		// render search form
 		html := fmt.Sprintf(html.Template, "Search", "")
 		w.Write([]byte(html))
+	})
+
+	http.HandleFunc("/search.json", func(w http.ResponseWriter, r *http.Request) {
+		select {
+		case <-indexed:
+		default:
+			// not indexed yet because blocked
+			w.Write([]byte(`{"error": "Indexing content"}`))
+			return
+		}
+
+		// indexed or no index of any kind
+
+		if r.Method == "POST" {
+			b, _ := ioutil.ReadAll(r.Body)
+			var data map[string]interface{}
+			json.Unmarshal(b, &data)
+
+			q := data["q"].(string)
+
+			res, err := idx.Query(q)
+			if err != nil {
+				http.Error(w, err.Error(), 500)
+				return
+			}
+
+			var contexts []string
+
+			for _, r := range res {
+				b, _ := json.Marshal(r)
+				// TODO: maybe just provide text
+				contexts = append(contexts, string(b))
+			}
+
+			answer := askLLM(context.TODO(), contexts, q)
+
+			output, _ := json.Marshal(map[string]interface{}{
+				"q": q,
+				"answer": answer,
+			})
+			w.Write(output)
+
+			return
+		}
 	})
 
 	if *ServerFlag {
