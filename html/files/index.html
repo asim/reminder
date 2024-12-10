@@ -39,18 +39,32 @@
         <a href="/hadith">Hadith</a>
       </div>
       <div id="search">
-        <form id="question" action="/search" method="post"><input id="q" name=q placeholder="Ask a question"></form>
+        <form id="question" action="/search" method="post"><input id="q" name=q placeholder="Ask a question" autocomplete="off"></form>
       </div>
       <div id="content">
       
+<style>
+#content p { padding: 0 0 10px 0; }
+#resp { margin-bottom: 5px;}
+#expand { text-decoration: underline; }
+#expand:hover { cursor: pointer; }
+.ref { font-size: small; }
+</style>
+<div id="resp"></div>
 <div id="answer"></div>
 <script>
+function expand(el) {
+      var ref = el.childNodes[3];
+      ref.style.display = 'block';
+}
+
 document.addEventListener('DOMContentLoaded', function(){
     var form = document.getElementById("question");
     form.addEventListener("submit", function(ev) {
+	var ans = document.getElementById("answer");
+	var resp = document.getElementById("resp");
         ev.preventDefault();
 	var q = document.getElementById("q");
-
 	var xhr = new XMLHttpRequest();
 	var url = "/search.json";
 	xhr.open("POST", url, true);
@@ -58,14 +72,20 @@ document.addEventListener('DOMContentLoaded', function(){
 	xhr.onreadystatechange = function () {
 	    if (xhr.readyState === 4 && xhr.status === 200) {
 		var json = JSON.parse(xhr.responseText);
-		var ans = document.getElementById("answer");
-		var text = "<p><b>Q</b>: " + q.value + "</p><p><b>A</b>: " + json.answer + "</p>";
+		var text = "<p><b>Q</b>: " + json.q + "</p><p><b>A</b>: " + json.answer + "</p>";
+		text += "<div id=expand onclick='expand(this); return false;'>References<br><br><div class=ref style='display: none;'>";
+		for (i = 0; i < json.references.length; i++) {
+                    text += "<div>" + JSON.stringify(json.references[i]) + "</div><br><br>";
+		}
+		text += "</div></a>";
 		ans.innerHTML = text + ans.innerHTML; 
-		q.value = '';
+		resp.innerText = "";
 	    }
 	};
 	var data = JSON.stringify({"q": q.value});
+	resp.innerText = "asking";
 	xhr.send(data);
+	q.value = '';
     });
 }, false);
 </script>

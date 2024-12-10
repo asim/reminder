@@ -350,8 +350,9 @@ func main() {
 			answer := askLLM(context.TODO(), contexts, q)
 
 			output, _ := json.Marshal(map[string]interface{}{
-				"q": q,
-				"answer": answer,
+				"q":          q,
+				"answer":     answer,
+				"references": res,
 			})
 			w.Write(output)
 
