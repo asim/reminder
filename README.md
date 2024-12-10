@@ -11,7 +11,8 @@ Reminder is a search for knowledge with the Quran, Hadith and names of Allah use
 - Quran in English & Arabic
 - Names of Allah & Meaning
 - Hadith (Bukhari) in English
-- Index & Search using GPT 4o mini
+- Index & Search using GPT 4o
+- Contextual query referencing
 
 ## Install
 
