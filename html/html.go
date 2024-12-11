@@ -20,7 +20,6 @@ var Template = `
     #container { height: 100%%; max-width: 1024px; margin: 0 auto; padding: 25px;}
     #content { padding-bottom: 100px; }
     #content p { padding: 0 0 25px 0; margin: 0; }
-    #search { margin-top: 10px; } #q { padding: 10px; width: 100%%; }
 @font-face {
     font-family: 'arabic';
     src: url('/files/arabic.otf') format('opentype');
@@ -43,36 +42,45 @@ var Template = `
     <div id="container">
       <div id="head">
         <a href="/">[Reminder]</a>
-        <a href="/about">About</a>
         <a href="/quran">Quran</a>
         <a href="/names">Names</a>
         <a href="/hadith">Hadith</a>
+        <a href="/search">Search</a>
       </div>
-      <div id="search">
-        <form id="question" action="/search" method="post"><input id="q" name=q placeholder="Ask a question" autocomplete="off"></form>
-      </div>
-      <div id="content">
-      %s
-      </div>
+      <div id="content">%s</div>
     </div>
   </body>
 </html>
 `
 
-var Index = `
+var Search = `
 <style>
 #content p { padding: 0 0 10px 0; }
-#resp { margin-bottom: 5px;}
+#resp { padding-bottom: 10px;}
 #expand { text-decoration: underline; }
 #expand:hover { cursor: pointer; }
 .ref { font-size: small; }
+#search { margin-top: 10px; }
+#q { padding: 10px; width: 100%; }
 </style>
+<div id="search">
+  <form id="question" action="/search" method="post"><input id="q" name=q placeholder="Ask a question" autocomplete="off"></form>
+</div>
 <div id="resp"></div>
 <div id="answer"></div>
 <script>
 function expand(el) {
-      var ref = el.childNodes[3];
-      ref.style.display = 'block';
+      var ref = el.nextSibling;
+
+      if (ref.style.display == 'none') {
+          ref.style.display = 'block';
+      } else {
+          ref.style.display = 'none';
+      }
+}
+
+function reference(el) {
+	return "<div>Text: " + el.Text + "<br>Metadata: " + JSON.stringify(el.Metadata) + "<br>Score: " + el.Score + "</div>";
 }
 
 document.addEventListener('DOMContentLoaded', function(){
@@ -83,18 +91,19 @@ document.addEventListener('DOMContentLoaded', function(){
         ev.preventDefault();
 	var q = document.getElementById("q");
 	var xhr = new XMLHttpRequest();
-	var url = "/search.json";
+	var url = "/api/search";
 	xhr.open("POST", url, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
 	xhr.onreadystatechange = function () {
 	    if (xhr.readyState === 4 && xhr.status === 200) {
 		var json = JSON.parse(xhr.responseText);
 		var text = "<p><b>Q</b>: " + json.q + "</p><p><b>A</b>: " + json.answer + "</p>";
-		text += "<div id=expand onclick='expand(this); return false;'>References<br><br><div class=ref style='display: none;'>";
+		text += "<div id=expand onclick='expand(this); return false;'>References<br><br></div>";
+		text += "<div class=ref style='display: none;'>";
 		for (i = 0; i < json.references.length; i++) {
-                    text += JSON.stringify(json.references[i]) + "<br><br>";
+                    text += reference(json.references[i]) + "<br><br>";
 		}
-		text += "</div></div>";
+		text += "</div>";
 		ans.innerHTML = text + ans.innerHTML; 
 		resp.innerText = "";
 	    }

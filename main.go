@@ -14,9 +14,9 @@ import (
 	"github.com/asim/reminder/hadith"
 	"github.com/asim/reminder/html"
 	"github.com/asim/reminder/html/files"
-	"github.com/asim/reminder/index"
 	"github.com/asim/reminder/names"
 	"github.com/asim/reminder/quran"
+	"github.com/asim/reminder/search"
 )
 
 var (
@@ -27,42 +27,7 @@ var (
 	ServerFlag   = flag.Bool("serve", false, "Run the server")
 )
 
-func result(question, answer string, res []*index.Result) []byte {
-	data := `## Question: ` + question
-	data += fmt.Sprintln()
-	data += `# Answer`
-	data += fmt.Sprintln()
-	data += fmt.Sprintln()
-	data += "### " + answer
-	data += fmt.Sprintln()
-	data += "#### References"
-	data += fmt.Sprintln()
-	data += "***"
-	data += fmt.Sprintln()
-
-	for _, r := range res {
-		switch r.Metadata["source"] {
-		case "quran":
-			ch := r.Metadata["chapter"]
-			ve := r.Metadata["verse"]
-			data += fmt.Sprintf("#### Quran - %s [%s:%s](/quran#%s-%s)", r.Metadata["name"], ch, ve, ch, ve)
-		case "names":
-			data += fmt.Sprintf("#### Name - %s", r.Metadata["meaning"])
-		case "bukhari":
-			data += fmt.Sprintf("#### Hadith - %s %s", r.Metadata["info"], r.Metadata["by"])
-		}
-
-		data += fmt.Sprintln()
-		data += r.Text
-		data += fmt.Sprintln()
-	}
-
-	data = html.RenderTemplate("Results", data)
-
-	return []byte(data)
-}
-
-func indexContent(idx *index.Index, md map[string]string, text string) {
+func indexContent(idx *search.Index, md map[string]string, text string) {
 	// index the documents
 	// TODO: use original json
 	lines := strings.Split(text, "\n")
@@ -74,7 +39,7 @@ func indexContent(idx *index.Index, md map[string]string, text string) {
 	}
 }
 
-func indexQuran(idx *index.Index, q *quran.Quran) {
+func indexQuran(idx *search.Index, q *quran.Quran) {
 	fmt.Println("Indexing Quran")
 
 	for _, chapter := range q.Chapters {
@@ -89,7 +54,7 @@ func indexQuran(idx *index.Index, q *quran.Quran) {
 	}
 }
 
-func indexNames(idx *index.Index, n *names.Names) {
+func indexNames(idx *search.Index, n *names.Names) {
 	fmt.Println("Indexing Names")
 
 	for _, name := range *n {
@@ -102,7 +67,7 @@ func indexNames(idx *index.Index, n *names.Names) {
 	}
 }
 
-func indexHadith(idx *index.Index, b *hadith.Volumes) {
+func indexHadith(idx *search.Index, b *hadith.Volumes) {
 	fmt.Println("Indexing Hadith")
 
 	for _, volume := range *b {
@@ -121,7 +86,7 @@ func indexHadith(idx *index.Index, b *hadith.Volumes) {
 	}
 }
 
-func gen(idx *index.Index, q string) (string, []string) {
+func gen(idx *search.Index, q string) (string, []string) {
 	res, err := idx.Query(q)
 	if err != nil {
 		return "", nil
@@ -155,7 +120,7 @@ func main() {
 	flag.Parse()
 
 	// create a new index
-	idx := index.New("reminder", false)
+	idx := search.New("reminder", false)
 
 	// Load the pre-existing data
 	if err := idx.Load(); err != nil {
@@ -175,10 +140,10 @@ func main() {
 		name := n.Markdown()
 		books := b.Markdown()
 
-		ihtml := html.RenderHTML("Home", html.Index)
 		thtml := html.RenderTemplate("Quran", text)
 		nhtml := html.RenderTemplate("Names", name)
 		vhtml := html.RenderTemplate("Hadith", books)
+		shtml := html.RenderHTML("Search", html.Search)
 
 		var about string
 
@@ -190,10 +155,10 @@ func main() {
 			about += fmt.Sprintln()
 		}
 
-		ahtml := html.RenderTemplate("About", about)
+		ihtml := html.RenderTemplate("Index", about)
 
 		os.WriteFile(filepath.Join(".", "html", "files", "index.html"), []byte(ihtml), 0644)
-		os.WriteFile(filepath.Join(".", "html", "files", "about.html"), []byte(ahtml), 0644)
+		os.WriteFile(filepath.Join(".", "html", "files", "search.html"), []byte(shtml), 0644)
 		os.WriteFile(filepath.Join(".", "html", "files", "quran.html"), []byte(thtml), 0644)
 		os.WriteFile(filepath.Join(".", "html", "files", "names.html"), []byte(nhtml), 0644)
 		os.WriteFile(filepath.Join(".", "html", "files", "hadith.html"), []byte(vhtml), 0644)
@@ -241,7 +206,7 @@ func main() {
 	// load the data from html
 
 	ihtml := files.Get("index.html")
-	ahtml := files.Get("about.html")
+	shtml := files.Get("search.html")
 	thtml := files.Get("quran.html")
 	nhtml := files.Get("names.html")
 	vhtml := files.Get("hadith.html")
@@ -253,10 +218,6 @@ func main() {
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(ihtml))
-	})
-
-	http.HandleFunc("/about", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(ahtml))
 	})
 
 	http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
@@ -272,50 +233,10 @@ func main() {
 	})
 
 	http.HandleFunc("/search", func(w http.ResponseWriter, r *http.Request) {
-		select {
-		case <-indexed:
-		default:
-			// not indexed yet because blocked
-			w.Write([]byte("Indexing content"))
-			return
-		}
-
-		// indexed or no index of any kind
-
-		if r.Method == "POST" {
-			r.ParseForm()
-			q := r.Form.Get("q")
-			if len(q) == 0 {
-				return
-			}
-			res, err := idx.Query(q)
-			if err != nil {
-				http.Error(w, err.Error(), 500)
-				return
-			}
-
-			var contexts []string
-
-			for _, r := range res {
-				b, _ := json.Marshal(r)
-				// TODO: maybe just provide text
-				contexts = append(contexts, string(b))
-			}
-
-			answer := askLLM(context.TODO(), contexts, q)
-
-			// create a markdown
-			md := result(q, answer, res)
-			w.Write(md)
-			return
-		}
-
-		// render search form
-		html := fmt.Sprintf(html.Template, "Search", "")
-		w.Write([]byte(html))
+		w.Write([]byte(shtml))
 	})
 
-	http.HandleFunc("/search.json", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/api/search", func(w http.ResponseWriter, r *http.Request) {
 		select {
 		case <-indexed:
 		default:
