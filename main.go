@@ -137,12 +137,12 @@ func main() {
 
 		fmt.Println("Generating html")
 		text := q.HTML()
-		name := n.Markdown()
+		name := n.HTML()
 		books := b.Markdown()
 
-		thtml := html.RenderTemplate("Quran", text)
-		nhtml := html.RenderTemplate("Names", name)
 		vhtml := html.RenderTemplate("Hadith", books)
+		thtml := html.RenderTemplate("Quran", text)
+		nhtml := html.RenderHTML("Names", name)
 		shtml := html.RenderHTML("Search", html.Search)
 
 		var about string
@@ -236,6 +236,22 @@ func main() {
 		w.Write([]byte(shtml))
 	})
 
+	http.HandleFunc("/api/translate", func(w http.ResponseWriter, r *http.Request) {
+		b, _ := ioutil.ReadAll(r.Body)
+		var data map[string]interface{}
+		json.Unmarshal(b, &data)
+
+		q := data["q"].(string)
+
+		prompt := `Translate the following into a modern interpretation, transliterate and then word by word. 
+		For each word provide 3 alternatives and a transliteration in english:
+
+		%s`
+
+		answer := askLLM(r.Context(), nil, fmt.Sprintf(prompt, q))
+		w.Write([]byte(answer))
+	})
+
 	http.HandleFunc("/api/search", func(w http.ResponseWriter, r *http.Request) {
 		select {
 		case <-indexed:
@@ -268,7 +284,7 @@ func main() {
 				contexts = append(contexts, string(b))
 			}
 
-			answer := askLLM(context.TODO(), contexts, q)
+			answer := askLLM(r.Context(), contexts, q)
 
 			output, _ := json.Marshal(map[string]interface{}{
 				"q":          q,

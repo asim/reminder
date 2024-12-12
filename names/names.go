@@ -19,6 +19,28 @@ type Name struct {
 
 type Names []*Name
 
+func (n *Names) HTML() string {
+	var data string
+
+	for _, name := range *n {
+		data += fmt.Sprintln()
+		data += fmt.Sprintf(`<h1 id="%d">%d</h1>`, name.Number, name.Number)
+		data += fmt.Sprintln()
+		data += fmt.Sprintln()
+		data += fmt.Sprintf(`<h3>%s</h3>`, name.Meaning)
+		data += fmt.Sprintln()
+
+		data += fmt.Sprintln()
+		data += fmt.Sprintln(`<div class="arabic">` + name.Arabic + `</div>`)
+		data += fmt.Sprintln()
+		data += fmt.Sprintln(`<h4 class="english">` + name.English + `</h4>`)
+		data += fmt.Sprintln()
+		data += fmt.Sprintln(`<div class="english">` + name.Description + `</div>`)
+	}
+
+	return data
+}
+
 func (n *Names) Markdown() string {
 	var data string
 
@@ -30,6 +52,8 @@ func (n *Names) Markdown() string {
 		data += fmt.Sprintf(`### %s`, name.Meaning)
 		data += fmt.Sprintln()
 		data += fmt.Sprintf(`#### %s`, name.English)
+		data += fmt.Sprintln()
+		data += fmt.Sprintf(`#### %s`, name.Arabic)
 		data += fmt.Sprintln()
 		data += fmt.Sprintf(`%s`, name.Description)
 		data += fmt.Sprintln()
