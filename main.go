@@ -244,7 +244,11 @@ func main() {
 		q := data["q"].(string)
 
 		prompt := `Translate the following into a modern interpretation, transliterate and then word by word. 
-		For each word provide 3 alternatives and a transliteration in english:
+		For each word provide 3 alternatives and a transliteration in english. Generate the output as JSON. 
+		The response will be served via an API so ensure it's entirely json compliant with no markdown.
+		Ensure consistency in the output using fields translation, transliteration and word_by_word.
+		The word_by_word field itself should be an array with word in english, arabic, translations and 
+		transliteration.:
 
 		%s`
 
