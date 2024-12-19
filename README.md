@@ -47,7 +47,9 @@ Go to [localhost:8080](https://localhost:8080)
 
 - `/api/quran` - to get the entire quran as JSON
 - `/api/search` - to get a summarised answer to a question
-  * `q` param for the query 
+  * `q` param for the query
+  * `POST` using `content-type` as `application/json`
+  * `curl -d '{"q": "what is islam"}' http://localhost:8080/api/search`
 
 
 ## Notes
