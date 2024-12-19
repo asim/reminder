@@ -24,7 +24,7 @@ Or Go install
 go get github.com.com/asim/reminder@latest
 ```
 
-## LLM Usage
+## OpenAI Usage
 
 Set the `OPENAI_API_KEY` value
 
@@ -41,6 +41,13 @@ reminder --serve
 ```
 
 Go to [localhost:8080](https://localhost:8080)
+
+## API
+
+- `/api/quran` - to get the entire quran as JSON
+- `/api/search` - to get a summarised answer to a question
+  * `q` param for the query 
+
 
 ## Notes
 
