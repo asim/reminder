@@ -4,7 +4,8 @@ A reminder to the whole world
 
 ## Overview
 
-Reminder is a search for knowledge with the Quran, Hadith and names of Allah used for contextual reference when querying an LLM. We're trying to uphold Islamic values while in the pursuit of knowledge.
+The Reminder is an API and web app for accessing and searching the Quran, Hadith and Names of Allah. It provides contextual search and summarisation using 
+OpenAI and includes referenced context usage. The API provides straightforward access to the Quran and ability to query the LLM. More to follow soon.
 
 ## Features
 
