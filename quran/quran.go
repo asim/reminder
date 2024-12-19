@@ -25,6 +25,11 @@ type Quran struct {
 	Chapters []*Chapter
 }
 
+func (q *Quran) JSON() []byte {
+	b, _ := json.Marshal(q)
+	return b
+}
+
 func (q *Quran) HTML() string {
 	var data string
 

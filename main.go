@@ -157,11 +157,15 @@ func main() {
 
 		ihtml := html.RenderTemplate("Index", about)
 
+		// write html files
 		os.WriteFile(filepath.Join(".", "html", "files", "index.html"), []byte(ihtml), 0644)
 		os.WriteFile(filepath.Join(".", "html", "files", "search.html"), []byte(shtml), 0644)
 		os.WriteFile(filepath.Join(".", "html", "files", "quran.html"), []byte(thtml), 0644)
 		os.WriteFile(filepath.Join(".", "html", "files", "names.html"), []byte(nhtml), 0644)
 		os.WriteFile(filepath.Join(".", "html", "files", "hadith.html"), []byte(vhtml), 0644)
+
+		// write json files
+		os.WriteFile(filepath.Join(".", "html", "files", "quran.json"), q.JSON(), 0644)
 
 		return
 	}
@@ -211,6 +215,7 @@ func main() {
 	nhtml := files.Get("names.html")
 	vhtml := files.Get("hadith.html")
 	otf := files.Get("arabic.otf")
+	qjson := files.Get("quran.json")
 
 	http.HandleFunc("/files/arabic.otf", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(otf))
@@ -234,6 +239,10 @@ func main() {
 
 	http.HandleFunc("/search", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(shtml))
+	})
+
+	http.HandleFunc("/api/quran", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(qjson))
 	})
 
 	http.HandleFunc("/api/translate", func(w http.ResponseWriter, r *http.Request) {
