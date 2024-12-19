@@ -5,6 +5,7 @@ import (
 )
 
 //go:embed *.html
+//go:embed *.json
 //go:embed *.otf
 var files embed.FS
 
