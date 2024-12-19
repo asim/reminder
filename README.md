@@ -13,6 +13,7 @@ Reminder is a search for knowledge with the Quran, Hadith and names of Allah use
 - Hadith (Bukhari) in English
 - Index & Search using GPT 4o
 - Contextual query referencing
+- API to query LLM or get Quran
 
 ## Install
 
