@@ -62,7 +62,9 @@ All queries are returned as JSON
 The Quran says in [6:90](https://quran.com/6:90)
 
 ```
-Say, “I ask no reward of you for this ˹Quran˺—it is a reminder to the whole world.”
+Say,
+“I ask no reward of you for this (Quran) —
+it is a reminder to the whole world.”
 ```
 
-Therefore, we ask nothing in compensation. 
+Therefore, we ask for nothing in return. 
