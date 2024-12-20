@@ -46,10 +46,12 @@ Go to [localhost:8080](https://localhost:8080)
 
 ## API
 
-- `/api/quran` - to get the entire quran as JSON
-- `/api/names` - to get the list of names as JSON
-- `/api/hadith` - to get the entire hadith as JSON
-- `/api/search` - to get summarised answer as JSON
+All queries are returned as JSON
+
+- `/api/quran` - to get the entire quran
+- `/api/names` - to get the list of names
+- `/api/hadith` - to get the entire hadith
+- `/api/search` - to get summarised answer
   * `q` param for the query
   * `POST` using `content-type` as `application/json`
   * `curl -d '{"q": "what is islam"}' http://localhost:8080/api/search`
