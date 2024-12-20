@@ -47,6 +47,8 @@ Go to [localhost:8080](https://localhost:8080)
 ## API
 
 - `/api/quran` - to get the entire quran as JSON
+- `/api/names` - to get the list of names as JSON
+- `/api/hadith` - to get the entire hadith as JSON
 - `/api/search` - to get a summarised answer to a question
   * `q` param for the query
   * `POST` using `content-type` as `application/json`

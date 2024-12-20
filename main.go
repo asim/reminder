@@ -166,6 +166,8 @@ func main() {
 
 		// write json files
 		os.WriteFile(filepath.Join(".", "html", "files", "quran.json"), q.JSON(), 0644)
+		os.WriteFile(filepath.Join(".", "html", "files", "names.json"), n.JSON(), 0644)
+		os.WriteFile(filepath.Join(".", "html", "files", "hadith.json"), b.JSON(), 0644)
 
 		return
 	}
@@ -216,6 +218,8 @@ func main() {
 	vhtml := files.Get("hadith.html")
 	otf := files.Get("arabic.otf")
 	qjson := files.Get("quran.json")
+	njson := files.Get("names.json")
+	hjson := files.Get("hadith.json")
 
 	http.HandleFunc("/files/arabic.otf", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(otf))
@@ -243,6 +247,14 @@ func main() {
 
 	http.HandleFunc("/api/quran", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(qjson))
+	})
+
+	http.HandleFunc("/api/names", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(njson))
+	})
+
+	http.HandleFunc("/api/hadith", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(hjson))
 	})
 
 	http.HandleFunc("/api/translate", func(w http.ResponseWriter, r *http.Request) {

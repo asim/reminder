@@ -19,6 +19,11 @@ type Name struct {
 
 type Names []*Name
 
+func (n *Names) JSON() []byte {
+	b, _ := json.Marshal(n)
+	return b
+}
+
 func (n *Names) HTML() string {
 	var data string
 

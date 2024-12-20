@@ -27,6 +27,11 @@ type Hadith struct {
 
 type Volumes []*Volume
 
+func (v *Volumes) JSON() []byte {
+	b, _ := json.Marshal(v)
+	return b
+}
+
 func (v *Volumes) Markdown() string {
 	var data string
 
