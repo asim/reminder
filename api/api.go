@@ -82,7 +82,7 @@ func (a *Api) Markdown() string {
 		data += fmt.Sprintln("\\")
 		data += fmt.Sprintln()
 		data += fmt.Sprintln()
-		data += fmt.Sprintf("Path: `%s`", endpoint.Path)
+		data += fmt.Sprintf("URL: [`%s`](%s)", endpoint.Path, endpoint.Path)
 		data += fmt.Sprintln()
 
 		if endpoint.Params != nil {
@@ -91,7 +91,7 @@ func (a *Api) Markdown() string {
 			data += fmt.Sprintln("Format `JSON`")
 			data += fmt.Sprintln()
 			for _, param := range endpoint.Params {
-				data += fmt.Sprintf("- `%s`: `%s` - %s", param.Name, param.Value, param.Description)
+				data += fmt.Sprintf("- `%s` - **`%s`** - %s", param.Name, param.Value, param.Description)
 				data += fmt.Sprintln()
 			}
 			data += fmt.Sprintln()
@@ -106,7 +106,7 @@ func (a *Api) Markdown() string {
 				data += fmt.Sprintf("Format `%s`", resp.Type)
 				data += fmt.Sprintln()
 				for _, param := range resp.Params {
-					data += fmt.Sprintf("- `%s`: `%s` - %s", param.Name, param.Value, param.Description)
+					data += fmt.Sprintf("- `%s` - **`%s`** - %s", param.Name, param.Value, param.Description)
 					data += fmt.Sprintln()
 				}
 			}
