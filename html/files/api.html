@@ -1,0 +1,116 @@
+
+<html>
+  <head>
+    <title>API | Reminder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+    html, body { height: 100%; width: 100%; margin: 0; padding: 0;}
+    #head { margin-bottom: 2.5em; }
+    #head a { margin-right: 10px; color: black; font-weight: bold; text-decoration: none; }
+    #container { height: 100%; max-width: 1024px; margin: 0 auto; padding: 25px;}
+    #content { padding-bottom: 100px; }
+    #content p { padding: 0 0 25px 0; margin: 0; }
+@font-face {
+    font-family: 'arabic';
+    src: url('/files/arabic.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+.arabic {
+  font-family: 'arabic';
+  font-size: 1.5em;
+}
+.chapter {
+  margin: 10px;
+  border: 1px solid grey;
+  padding: 10px;
+  display: inline-block;
+}
+code {
+  background: whitesmoke;
+  padding: 5px;
+  border-radius: 5px;
+}
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div id="head">
+        <a href="/">[Reminder]</a>
+        <a href="/api">API</a>
+        <a href="/quran">Quran</a>
+        <a href="/names">Names</a>
+        <a href="/hadith">Hadith</a>
+        <a href="/search">Search</a>
+      </div>
+      <div id="content"><h1 id="endpoints">Endpoints</h1>
+
+<p>A list of API endpoints</p>
+
+<h2 id="quran">Quran</h2>
+
+<hr>
+
+<p></p>
+
+<p>Path: <code>/api/quran</code></p>
+
+<h4 id="response">Response</h4>
+
+<p>Format <code>JSON</code></p>
+
+<h2 id="hadith">Hadith</h2>
+
+<hr>
+
+<p></p>
+
+<p>Path: <code>/api/hadith</code></p>
+
+<h4 id="response-1">Response</h4>
+
+<p>Format <code>JSON</code></p>
+
+<h2 id="names">Names</h2>
+
+<hr>
+
+<p></p>
+
+<p>Path: <code>/api/names</code></p>
+
+<h4 id="response-2">Response</h4>
+
+<p>Format <code>JSON</code></p>
+
+<h2 id="search">Search</h2>
+
+<hr>
+
+<p></p>
+
+<p>Path: <code>/api/search</code></p>
+
+<h4 id="request">Request</h4>
+
+<p>Format <code>JSON</code></p>
+
+<ul>
+<li><code>q</code>: <code>string</code> - The question to ask</li>
+</ul>
+
+<p></p>
+
+<h4 id="response-3">Response</h4>
+
+<p>Format <code>JSON</code></p>
+
+<ul>
+<li><code>q</code>: <code>string</code> - The question asked</li>
+<li><code>answer</code>: <code>string</code> - Answer to the question</li>
+<li><code>references</code>: <code>array</code> - A list of references used</li>
+</ul>
+</div>
+    </div>
+  </body>
+</html>
