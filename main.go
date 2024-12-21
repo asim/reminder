@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/asim/reminder/api"
 	"github.com/asim/reminder/hadith"
 	"github.com/asim/reminder/html"
 	"github.com/asim/reminder/html/files"
@@ -157,7 +158,11 @@ func main() {
 
 		ihtml := html.RenderTemplate("Index", about)
 
+		ap := api.Load()
+		apiHtml := html.RenderTemplate("API", ap.Markdown())
+
 		// write html files
+		os.WriteFile(filepath.Join(".", "html", "files", "api.html"), []byte(apiHtml), 0644)
 		os.WriteFile(filepath.Join(".", "html", "files", "index.html"), []byte(ihtml), 0644)
 		os.WriteFile(filepath.Join(".", "html", "files", "search.html"), []byte(shtml), 0644)
 		os.WriteFile(filepath.Join(".", "html", "files", "quran.html"), []byte(thtml), 0644)
@@ -211,6 +216,7 @@ func main() {
 
 	// load the data from html
 
+	apiHtml := files.Get("api.html")
 	ihtml := files.Get("index.html")
 	shtml := files.Get("search.html")
 	thtml := files.Get("quran.html")
@@ -227,6 +233,10 @@ func main() {
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(ihtml))
+	})
+
+	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(apiHtml))
 	})
 
 	http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {

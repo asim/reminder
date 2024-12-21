@@ -36,12 +36,18 @@ var Template = `
   padding: 10px;
   display: inline-block;
 }
+code {
+  background: whitesmoke;
+  padding: 5px;
+  border-radius: 5px;
+}
     </style>
   </head>
   <body>
     <div id="container">
       <div id="head">
         <a href="/">[Reminder]</a>
+        <a href="/api">API</a>
         <a href="/quran">Quran</a>
         <a href="/names">Names</a>
         <a href="/hadith">Hadith</a>
