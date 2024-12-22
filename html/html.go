@@ -14,12 +14,13 @@ var Template = `
     <title>%s | Reminder</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
-    html, body { height: 100%%; width: 100%%; margin: 0; padding: 0;}
+    html, body { height: 100%%; width: 100%%; margin: 0; padding: 0; font-family: monospace; }
     #head { margin-bottom: 2.5em; }
     #head a { margin-right: 10px; color: black; font-weight: bold; text-decoration: none; }
     #container { height: 100%%; max-width: 1024px; margin: 0 auto; padding: 25px;}
     #content { padding-bottom: 100px; }
     #content p { padding: 0 0 25px 0; margin: 0; }
+    li { margin-bottom: 5px; }
 @font-face {
     font-family: 'arabic';
     src: url('/files/arabic.otf') format('opentype');

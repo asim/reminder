@@ -9,10 +9,11 @@ type Api struct {
 }
 
 type Endpoint struct {
-	Name     string
-	Path     string
-	Params   []*Param
-	Response []*Value
+	Name        string
+	Path        string
+	Params      []*Param
+	Response    []*Value
+	Description string
 }
 
 type Param struct {
@@ -28,26 +29,30 @@ type Value struct {
 
 var Endpoints = []*Endpoint{
 	{
-		Name:     "Quran",
-		Path:     "/api/quran",
-		Params:   nil,
-		Response: []*Value{{Type: "JSON"}},
+		Name:        "Quran",
+		Path:        "/api/quran",
+		Params:      nil,
+		Response:    []*Value{{Type: "JSON"}},
+		Description: "Returns the entire Quran",
 	},
 	{
-		Name:     "Hadith",
-		Path:     "/api/hadith",
-		Params:   nil,
-		Response: []*Value{{Type: "JSON"}},
+		Name:        "Hadith",
+		Path:        "/api/hadith",
+		Params:      nil,
+		Response:    []*Value{{Type: "JSON"}},
+		Description: "Returns the entire Hadith",
 	},
 	{
-		Name:     "Names",
-		Path:     "/api/names",
-		Params:   nil,
-		Response: []*Value{{Type: "JSON"}},
+		Name:        "Names",
+		Path:        "/api/names",
+		Params:      nil,
+		Response:    []*Value{{Type: "JSON"}},
+		Description: "Returns the names of Allah",
 	},
 	{
-		Name: "Search",
-		Path: "/api/search",
+		Name:        "Search",
+		Path:        "/api/search",
+		Description: "Get summarised answers via an LLM",
 		Params: []*Param{
 			{
 				Name:        "q",
@@ -81,6 +86,8 @@ func (a *Api) Markdown() string {
 		data += fmt.Sprintln("___")
 		data += fmt.Sprintln("\\")
 		data += fmt.Sprintln()
+		data += fmt.Sprintln()
+		data += fmt.Sprintln(endpoint.Description)
 		data += fmt.Sprintln()
 		data += fmt.Sprintf("URL: [`%s`](%s)", endpoint.Path, endpoint.Path)
 		data += fmt.Sprintln()
