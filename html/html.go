@@ -45,6 +45,9 @@ code {
   padding: 5px;
   border-radius: 5px;
 }
+@media only screen and (max-width: 600px) {
+  #head a { margin-right: 5px; }
+}
     </style>
   </head>
   <body>
