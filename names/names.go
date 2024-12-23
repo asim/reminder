@@ -10,11 +10,11 @@ import (
 var files embed.FS
 
 type Name struct {
-	Number      int
-	English     string
-	Arabic      string
-	Meaning     string
-	Description string
+	Number      int    `json:"number"`
+	English     string `json:"english"`
+	Arabic      string `json:"arabic"`
+	Meaning     string `json:"meaning"`
+	Description string `json:"description"`
 }
 
 type Names []*Name

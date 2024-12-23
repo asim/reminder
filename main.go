@@ -314,6 +314,11 @@ func main() {
 			var contexts []string
 
 			for _, r := range res {
+				for k, v := range r.Metadata {
+					delete(r.Metadata, k)
+					r.Metadata[strings.ToLower(k)] = v
+				}
+
 				b, _ := json.Marshal(r)
 				// TODO: maybe just provide text
 				contexts = append(contexts, string(b))

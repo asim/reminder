@@ -10,19 +10,19 @@ import (
 var files embed.FS
 
 type Volume struct {
-	Name  string
-	Books []*Book
+	Name  string  `json:"name"`
+	Books []*Book `json:"books"`
 }
 
 type Book struct {
-	Name    string
-	Hadiths []*Hadith
+	Name    string    `json:"name"`
+	Hadiths []*Hadith `json:"hadiths"`
 }
 
 type Hadith struct {
-	Info string
-	By   string
-	Text string
+	Info string `json:"info"`
+	By   string `json:"by"`
+	Text string `json:"text"`
 }
 
 type Volumes []*Volume

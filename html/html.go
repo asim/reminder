@@ -93,7 +93,7 @@ function expand(el) {
 }
 
 function reference(el) {
-	return "<div>Text: " + el.Text + "<br>Metadata: " + JSON.stringify(el.Metadata) + "<br>Score: " + el.Score + "</div>";
+	return "<div>Text: " + el.text + "<br>Metadata: " + JSON.stringify(el.metadata) + "<br>Score: " + el.score + "</div>";
 }
 
 document.addEventListener('DOMContentLoaded', function(){

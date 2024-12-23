@@ -10,19 +10,19 @@ import (
 var files embed.FS
 
 type Chapter struct {
-	Name   string
-	Number int
-	Verses []*Verse
+	Name   string   `json:"name"`
+	Number int      `json:"number"`
+	Verses []*Verse `json:"verses"`
 }
 
 type Verse struct {
-	Number int
-	Text   string
-	Arabic string
+	Number int    `json:"number"`
+	Text   string `json:"text"`
+	Arabic string `json:"arabic"`
 }
 
 type Quran struct {
-	Chapters []*Chapter
+	Chapters []*Chapter `json:"chapters"`
 }
 
 func (q *Quran) JSON() []byte {
