@@ -35,10 +35,14 @@ var Template = `
   font-size: 1.5em;
 }
 .chapter {
-  margin: 10px;
+  margin-bottom: 10px;
   border: 1px solid grey;
+  border-radius: 5px;
   padding: 10px;
-  display: inline-block;
+  display: block;
+}
+.chapter a {
+  text-decoration: none;
 }
 code {
   background: whitesmoke;
