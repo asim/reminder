@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/asim/reminder/api"
@@ -71,7 +72,7 @@ func indexNames(idx *search.Index, n *names.Names) {
 func indexHadith(idx *search.Index, b *hadith.Volumes) {
 	fmt.Println("Indexing Hadith")
 
-	for _, volume := range *b {
+	for _, volume := range b.Contents {
 		for _, book := range volume.Books {
 			for _, hadith := range book.Hadiths {
 
@@ -128,13 +129,14 @@ func main() {
 		fmt.Println(err)
 	}
 
+	// load data
+	q := quran.Load()
+	n := names.Load()
+	b := hadith.Load()
+
 	// render the markdown as html
 	if *GenerateFlag {
 		fmt.Println("Loading data")
-		// load data
-		q := quran.Load()
-		n := names.Load()
-		b := hadith.Load()
 
 		fmt.Println("Generating html")
 		text := q.HTML()
@@ -181,12 +183,6 @@ func main() {
 	indexed := make(chan bool, 1)
 
 	if *IndexFlag {
-		fmt.Println("Loading data")
-		// load data
-		q := quran.Load()
-		n := names.Load()
-		b := hadith.Load()
-
 		fmt.Println("Indexing data")
 		go func() {
 			indexQuran(idx, q)
@@ -219,9 +215,9 @@ func main() {
 	apiHtml := files.Get("api.html")
 	ihtml := files.Get("index.html")
 	shtml := files.Get("search.html")
-	thtml := files.Get("quran.html")
+	//thtml := files.Get("quran.html")
 	nhtml := files.Get("names.html")
-	vhtml := files.Get("hadith.html")
+	//vhtml := files.Get("hadith.html")
 	otf := files.Get("arabic.otf")
 	qjson := files.Get("quran.json")
 	njson := files.Get("names.json")
@@ -240,7 +236,27 @@ func main() {
 	})
 
 	http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(thtml))
+		qhtml := html.RenderHTML("Quran", q.TOC())
+
+		w.Write([]byte(qhtml))
+	})
+
+	http.HandleFunc("/quran/{id}", func(w http.ResponseWriter, r *http.Request) {
+		id := r.PathValue("id")
+		if len(id) == 0 {
+			return
+		}
+
+		ch, _ := strconv.Atoi(id)
+
+		if ch < 1 || ch > 114 {
+			return
+		}
+
+		head := fmt.Sprintf("%d | Quran", ch)
+		qhtml := html.RenderHTML(head, q.Get(ch).HTML())
+
+		w.Write([]byte(qhtml))
 	})
 
 	http.HandleFunc("/names", func(w http.ResponseWriter, r *http.Request) {
@@ -248,7 +264,27 @@ func main() {
 	})
 
 	http.HandleFunc("/hadith", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(vhtml))
+		qhtml := html.RenderHTML("Hadith", b.TOC())
+
+		w.Write([]byte(qhtml))
+	})
+
+	http.HandleFunc("/hadith/{book}", func(w http.ResponseWriter, r *http.Request) {
+		book := r.PathValue("book")
+		if len(book) == 0 {
+			return
+		}
+
+		ch, _ := strconv.Atoi(book)
+
+		if ch < 1 || ch > len(b.Books) {
+			return
+		}
+
+		head := fmt.Sprintf("%d | Hadith", ch)
+		qhtml := html.RenderHTML(head, b.Get(ch).HTML())
+
+		w.Write([]byte(qhtml))
 	})
 
 	http.HandleFunc("/search", func(w http.ResponseWriter, r *http.Request) {

@@ -25,7 +25,46 @@ type Hadith struct {
 	Text string `json:"text"`
 }
 
-type Volumes []*Volume
+type Volumes struct {
+	Contents []*Volume
+	Books    []*Book
+}
+
+func (b *Book) HTML() string {
+	var data string
+
+	data += fmt.Sprintf(`<h1>%s</h1>`, b.Name)
+	data += fmt.Sprintln()
+	data += fmt.Sprintln()
+
+	for _, hadith := range b.Hadiths {
+		data += fmt.Sprintf(`<h3>%s</h3>`, hadith.Info)
+		data += fmt.Sprintln()
+		data += fmt.Sprintf(`<h4>%s</h4>`, hadith.By)
+		data += fmt.Sprintln()
+		data += fmt.Sprintf(`<div>%s</div>`, hadith.Text)
+		data += fmt.Sprintln()
+		data += fmt.Sprintln()
+	}
+
+	return data
+}
+
+func (v *Volumes) TOC() string {
+	var data string
+
+	for _, volume := range v.Contents {
+		for id, book := range volume.Books {
+			data += fmt.Sprintf(`<div class="chapter"><a href="/hadith/%d">%s</a></div>`, id+1, book.Name)
+		}
+	}
+
+	return data
+}
+
+func (v *Volumes) Get(book int) *Book {
+	return v.Books[book-1]
+}
 
 func (v *Volumes) JSON() []byte {
 	b, _ := json.Marshal(v)
@@ -35,7 +74,7 @@ func (v *Volumes) JSON() []byte {
 func (v *Volumes) Markdown() string {
 	var data string
 
-	for _, volume := range *v {
+	for _, volume := range v.Contents {
 		data += fmt.Sprintln()
 		data += fmt.Sprintf(`# %s`, volume.Name)
 		data += fmt.Sprintln()
@@ -98,9 +137,10 @@ func Load() *Volumes {
 			}
 
 			volume.Books = append(volume.Books, book)
+			volumes.Books = append(volumes.Books, book)
 		}
 
-		*volumes = append(*volumes, volume)
+		volumes.Contents = append(volumes.Contents, volume)
 	}
 
 	return volumes

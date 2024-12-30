@@ -25,33 +25,56 @@ type Quran struct {
 	Chapters []*Chapter `json:"chapters"`
 }
 
+func (ch *Chapter) HTML() string {
+	var data string
+
+	data += fmt.Sprintln()
+	data += fmt.Sprintf(`<h1 id="%d">%d</h1>`, ch.Number, ch.Number)
+	data += fmt.Sprintln()
+	data += fmt.Sprintln()
+	data += fmt.Sprintf(`<h3>%s</h3>`, ch.Name)
+	data += fmt.Sprintln()
+
+	// max 286 ayahs
+	for _, verse := range ch.Verses {
+		data += fmt.Sprintln()
+		data += fmt.Sprintf(`<h4 id="%d">%d:%d</h4>`, verse.Number, ch.Number, verse.Number)
+		data += fmt.Sprintln()
+		data += fmt.Sprintln(`<div class="arabic">` + verse.Arabic + `</div>`)
+		data += fmt.Sprintln()
+		data += fmt.Sprintln(`<div class="english">` + verse.Text + `</div>`)
+		data += fmt.Sprintln()
+	}
+
+	return data
+}
+
 func (q *Quran) JSON() []byte {
 	b, _ := json.Marshal(q)
 	return b
+}
+
+func (q *Quran) TOC() string {
+	var data string
+
+	data += `<div id="contents">`
+	for _, ch := range q.Chapters {
+		data += fmt.Sprintf(`<div class="chapter"><a href="/quran/%d">%d: %s</a></div>`, ch.Number, ch.Number, ch.Name)
+	}
+	data += `</div>`
+
+	return data
+}
+
+func (q *Quran) Get(chapter int) *Chapter {
+	return q.Chapters[chapter-1]
 }
 
 func (q *Quran) HTML() string {
 	var data string
 
 	for _, ch := range q.Chapters {
-		data += fmt.Sprintln()
-		data += fmt.Sprintf(`<h1 id="%d">%d</h1>`, ch.Number, ch.Number)
-		data += fmt.Sprintln()
-		data += fmt.Sprintln()
-		data += fmt.Sprintf(`<h3>%s</h3>`, ch.Name)
-		data += fmt.Sprintln()
-
-		// max 286 ayahs
-		for _, verse := range ch.Verses {
-			data += fmt.Sprintln()
-			data += fmt.Sprintf(`<h4 id="%d-%d">%d:%d</h4>`, ch.Number, verse.Number, ch.Number, verse.Number)
-			data += fmt.Sprintln()
-			data += fmt.Sprintln(`<div class="arabic">` + verse.Arabic + `</div>`)
-			data += fmt.Sprintln()
-			data += fmt.Sprintln(`<div class="english">` + verse.Text + `</div>`)
-			data += fmt.Sprintln()
-		}
-
+		data += ch.HTML()
 	}
 
 	return data
