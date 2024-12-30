@@ -72,7 +72,7 @@ func indexNames(idx *search.Index, n *names.Names) {
 func indexHadith(idx *search.Index, b *hadith.Volumes) {
 	fmt.Println("Indexing Hadith")
 
-	for _, volume := range *b {
+	for _, volume := range b.Contents {
 		for _, book := range volume.Books {
 			for _, hadith := range book.Hadiths {
 
@@ -217,7 +217,7 @@ func main() {
 	shtml := files.Get("search.html")
 	//thtml := files.Get("quran.html")
 	nhtml := files.Get("names.html")
-	vhtml := files.Get("hadith.html")
+	//vhtml := files.Get("hadith.html")
 	otf := files.Get("arabic.otf")
 	qjson := files.Get("quran.json")
 	njson := files.Get("names.json")
@@ -253,7 +253,8 @@ func main() {
 			return
 		}
 
-		qhtml := html.RenderHTML(id, q.Get(ch).HTML())
+		head := fmt.Sprintf("%d | Quran", ch)
+		qhtml := html.RenderHTML(head, q.Get(ch).HTML())
 
 		w.Write([]byte(qhtml))
 	})
@@ -263,7 +264,27 @@ func main() {
 	})
 
 	http.HandleFunc("/hadith", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(vhtml))
+		qhtml := html.RenderHTML("Hadith", b.TOC())
+
+		w.Write([]byte(qhtml))
+	})
+
+	http.HandleFunc("/hadith/{book}", func(w http.ResponseWriter, r *http.Request) {
+		book := r.PathValue("book")
+		if len(book) == 0 {
+			return
+		}
+
+		ch, _ := strconv.Atoi(book)
+
+		if ch < 1 || ch > len(b.Books) {
+			return
+		}
+
+		head := fmt.Sprintf("%d | Hadith", ch)
+		qhtml := html.RenderHTML(head, b.Get(ch).HTML())
+
+		w.Write([]byte(qhtml))
 	})
 
 	http.HandleFunc("/search", func(w http.ResponseWriter, r *http.Request) {
