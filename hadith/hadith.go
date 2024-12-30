@@ -54,7 +54,6 @@ func (v *Volumes) TOC() string {
 	var data string
 
 	for _, volume := range v.Contents {
-		data += fmt.Sprintf(`<h1>%s</h1>`, volume.Name)
 		for id, book := range volume.Books {
 			data += fmt.Sprintf(`<div class="chapter"><a href="/hadith/%d">%s</a></div>`, id+1, book.Name)
 		}
