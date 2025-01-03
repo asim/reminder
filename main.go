@@ -216,7 +216,7 @@ func main() {
 	ihtml := files.Get("index.html")
 	shtml := files.Get("search.html")
 	//thtml := files.Get("quran.html")
-	nhtml := files.Get("names.html")
+	//nhtml := files.Get("names.html")
 	//vhtml := files.Get("hadith.html")
 	otf := files.Get("arabic.otf")
 	qjson := files.Get("quran.json")
@@ -260,7 +260,27 @@ func main() {
 	})
 
 	http.HandleFunc("/names", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(nhtml))
+		qhtml := html.RenderHTML("Names", n.TOC())
+
+		w.Write([]byte(qhtml))
+	})
+
+	http.HandleFunc("/names/{id}", func(w http.ResponseWriter, r *http.Request) {
+		id := r.PathValue("id")
+		if len(id) == 0 {
+			return
+		}
+
+		name, _ := strconv.Atoi(id)
+
+		if name < 1 || name > len(*n) {
+			return
+		}
+
+		head := fmt.Sprintf("%d | Names", name)
+		qhtml := html.RenderHTML(head, n.Get(name).HTML())
+
+		w.Write([]byte(qhtml))
 	})
 
 	http.HandleFunc("/hadith", func(w http.ResponseWriter, r *http.Request) {
@@ -301,6 +321,23 @@ func main() {
 
 	http.HandleFunc("/api/hadith", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(hjson))
+	})
+
+	http.HandleFunc("/api/generate", func(w http.ResponseWriter, r *http.Request) {
+		b, _ := ioutil.ReadAll(r.Body)
+		var data map[string]interface{}
+		json.Unmarshal(b, &data)
+
+		q := data["q"].(string)
+
+		prompt := `Generate a detailed summary for the following with it's meaning and origin, output the response as JSON with the fields: 
+		name, description, summary. Each field itself should be a string.
+
+		%s
+		`
+
+		answer := askLLM(r.Context(), nil, fmt.Sprintf(prompt, q))
+		w.Write([]byte(answer))
 	})
 
 	http.HandleFunc("/api/translate", func(w http.ResponseWriter, r *http.Request) {

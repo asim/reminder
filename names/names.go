@@ -15,9 +15,49 @@ type Name struct {
 	Arabic      string `json:"arabic"`
 	Meaning     string `json:"meaning"`
 	Description string `json:"description"`
+	Summary     string `json:"summary"`
 }
 
 type Names []*Name
+
+func (name *Name) HTML() string {
+	var data string
+	data += fmt.Sprintln()
+	data += fmt.Sprintf(`<h1 id="%d">%d</h1>`, name.Number, name.Number)
+	data += fmt.Sprintln()
+	data += fmt.Sprintln()
+	data += fmt.Sprintf(`<h3>%s</h3>`, name.Meaning)
+	data += fmt.Sprintln()
+
+	data += fmt.Sprintln()
+	data += fmt.Sprintln(`<div class="arabic">` + name.Arabic + `</div>`)
+	data += fmt.Sprintln()
+	data += fmt.Sprintln(`<h4 class="english">` + name.English + `</h4>`)
+	data += fmt.Sprintln()
+	data += fmt.Sprintln(`<div class="english">` + name.Description + `</div>`)
+	data += fmt.Sprintln()
+	data += fmt.Sprintln(`<h4 class="english">Summary</h4>`)
+	data += fmt.Sprintln()
+	data += fmt.Sprintln(`<div class="english">` + name.Summary + `</div>`)
+	data += fmt.Sprintln()
+	return data
+}
+
+func (n *Names) Get(id int) *Name {
+	return (*n)[id-1]
+}
+
+func (n *Names) TOC() string {
+	var data string
+
+	data += `<div id="contents">`
+	for _, name := range *n {
+		data += fmt.Sprintf(`<div class="chapter"><a href="/names/%d">%d: %s</a></div>`, name.Number, name.Number, name.Meaning)
+	}
+	data += `</div>`
+
+	return data
+}
 
 func (n *Names) JSON() []byte {
 	b, _ := json.Marshal(n)
@@ -28,19 +68,7 @@ func (n *Names) HTML() string {
 	var data string
 
 	for _, name := range *n {
-		data += fmt.Sprintln()
-		data += fmt.Sprintf(`<h1 id="%d">%d</h1>`, name.Number, name.Number)
-		data += fmt.Sprintln()
-		data += fmt.Sprintln()
-		data += fmt.Sprintf(`<h3>%s</h3>`, name.Meaning)
-		data += fmt.Sprintln()
-
-		data += fmt.Sprintln()
-		data += fmt.Sprintln(`<div class="arabic">` + name.Arabic + `</div>`)
-		data += fmt.Sprintln()
-		data += fmt.Sprintln(`<h4 class="english">` + name.English + `</h4>`)
-		data += fmt.Sprintln()
-		data += fmt.Sprintln(`<div class="english">` + name.Description + `</div>`)
+		data += name.HTML()
 	}
 
 	return data
@@ -61,6 +89,10 @@ func (n *Names) Markdown() string {
 		data += fmt.Sprintf(`#### %s`, name.Arabic)
 		data += fmt.Sprintln()
 		data += fmt.Sprintf(`%s`, name.Description)
+		data += fmt.Sprintln()
+		data += fmt.Sprintln(`#### Summary`)
+		data += fmt.Sprintln()
+		data += fmt.Sprintf(`%s`, name.Summary)
 		data += fmt.Sprintln()
 	}
 
@@ -88,6 +120,17 @@ func Load() *Names {
 			Arabic:      n["name"].(string),
 			Meaning:     en["meaning"].(string),
 			Description: en["desc"].(string),
+		}
+
+		// try get summary
+		fd, err := files.ReadFile(fmt.Sprintf("data/%d.json", name.Number))
+		if err == nil {
+			var data map[string]interface{}
+			json.Unmarshal(fd, &data)
+			summary, ok := data["summary"].(string)
+			if ok {
+				name.Summary = summary
+			}
 		}
 
 		*names = append(*names, name)
