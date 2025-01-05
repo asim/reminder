@@ -25,10 +25,14 @@
   font-size: 1.5em;
 }
 .chapter {
-  margin: 10px;
+  margin-bottom: 10px;
   border: 1px solid grey;
+  border-radius: 5px;
   padding: 10px;
-  display: inline-block;
+  display: block;
+}
+.chapter a {
+  text-decoration: none;
 }
 code {
   background: whitesmoke;
@@ -68,6 +72,30 @@ code {
 
 <p>Format <code>JSON</code></p>
 
+<p></p>
+
+<h2 id="quran-chapter">Quran | Chapter</h2>
+
+<hr>
+
+<p></p>
+
+<p>Returns a chapter of the quran</p>
+
+<p>URL: <a href="/api/quran/{chapter}"><code>/api/quran/{chapter}</code></a></p>
+
+<h4 id="response-1">Response</h4>
+
+<p>Format <code>JSON</code></p>
+
+<ul>
+<li><code>name</code> - <strong><code>string</code></strong> - Name of chapter</li>
+<li><code>number</code> - <strong><code>int</code></strong> - Number of the chapter</li>
+<li><code>verses</code> - <strong><code>array</code></strong> - Verses in the chapter</li>
+</ul>
+
+<p></p>
+
 <h2 id="hadith">Hadith</h2>
 
 <hr>
@@ -78,9 +106,32 @@ code {
 
 <p>URL: <a href="/api/hadith"><code>/api/hadith</code></a></p>
 
-<h4 id="response-1">Response</h4>
+<h4 id="response-2">Response</h4>
 
 <p>Format <code>JSON</code></p>
+
+<p></p>
+
+<h2 id="hadith-book">Hadith | Book</h2>
+
+<hr>
+
+<p></p>
+
+<p>Returns a book from the hadith</p>
+
+<p>URL: <a href="/api/hadith/{book}"><code>/api/hadith/{book}</code></a></p>
+
+<h4 id="response-3">Response</h4>
+
+<p>Format <code>JSON</code></p>
+
+<ul>
+<li><code>name</code> - <strong><code>string</code></strong> - Name of book</li>
+<li><code>hadiths</code> - <strong><code>array</code></strong> - Hadiths in the book</li>
+</ul>
+
+<p></p>
 
 <h2 id="names">Names</h2>
 
@@ -92,9 +143,11 @@ code {
 
 <p>URL: <a href="/api/names"><code>/api/names</code></a></p>
 
-<h4 id="response-2">Response</h4>
+<h4 id="response-4">Response</h4>
 
 <p>Format <code>JSON</code></p>
+
+<p></p>
 
 <h2 id="search">Search</h2>
 
@@ -116,7 +169,7 @@ code {
 
 <p></p>
 
-<h4 id="response-3">Response</h4>
+<h4 id="response-5">Response</h4>
 
 <p>Format <code>JSON</code></p>
 
@@ -125,6 +178,8 @@ code {
 <li><code>answer</code> - <strong><code>string</code></strong> - Answer to the question</li>
 <li><code>references</code> - <strong><code>array</code></strong> - A list of references used</li>
 </ul>
+
+<p></p>
 </div>
     </div>
   </body>

@@ -219,9 +219,9 @@ func main() {
 	//nhtml := files.Get("names.html")
 	//vhtml := files.Get("hadith.html")
 	otf := files.Get("arabic.otf")
-	qjson := files.Get("quran.json")
+	//qjson := files.Get("quran.json")
 	njson := files.Get("names.json")
-	hjson := files.Get("hadith.json")
+	//hjson := files.Get("hadith.json")
 
 	http.HandleFunc("/files/arabic.otf", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(otf))
@@ -312,7 +312,25 @@ func main() {
 	})
 
 	http.HandleFunc("/api/quran", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(qjson))
+		qidx := q.Index().JSON()
+
+		w.Write(qidx)
+	})
+
+	http.HandleFunc("/api/quran/{chapter}", func(w http.ResponseWriter, r *http.Request) {
+		ch := r.PathValue("chapter")
+		if len(ch) == 0 {
+			return
+		}
+
+		chapter, _ := strconv.Atoi(ch)
+		if chapter < 1 || chapter > 114 {
+			return
+		}
+
+		b := q.Get(chapter).JSON()
+
+		w.Write(b)
 	})
 
 	http.HandleFunc("/api/names", func(w http.ResponseWriter, r *http.Request) {
@@ -320,7 +338,25 @@ func main() {
 	})
 
 	http.HandleFunc("/api/hadith", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(hjson))
+		hidx := b.Index().JSON()
+
+		w.Write([]byte(hidx))
+	})
+
+	http.HandleFunc("/api/hadith/{book}", func(w http.ResponseWriter, r *http.Request) {
+		bk := r.PathValue("book")
+		if len(bk) == 0 {
+			return
+		}
+
+		book, _ := strconv.Atoi(bk)
+		if book < 1 || book > len(b.Books) {
+			return
+		}
+
+		b := b.Get(book).JSON()
+
+		w.Write(b)
 	})
 
 	http.HandleFunc("/api/generate", func(w http.ResponseWriter, r *http.Request) {
