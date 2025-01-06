@@ -12,7 +12,7 @@ var files embed.FS
 type Chapter struct {
 	Name   string   `json:"name"`
 	Number int      `json:"number"`
-	Verses []*Verse `json:"verses"`
+	Verses []*Verse `json:"verses,omitempty"`
 }
 
 type Verse struct {
@@ -23,6 +23,11 @@ type Verse struct {
 
 type Quran struct {
 	Chapters []*Chapter `json:"chapters"`
+}
+
+func (ch *Chapter) JSON() []byte {
+	b, _ := json.Marshal(ch)
+	return b
 }
 
 func (ch *Chapter) HTML() string {
@@ -44,9 +49,25 @@ func (ch *Chapter) HTML() string {
 		data += fmt.Sprintln()
 		data += fmt.Sprintln(`<div class="english">` + verse.Text + `</div>`)
 		data += fmt.Sprintln()
+		data += fmt.Sprintln(`<div class="dots">...</div>`)
+		data += fmt.Sprintln()
 	}
 
 	return data
+}
+
+func (q *Quran) Index() *Quran {
+	nq := new(Quran)
+
+	for _, ch := range q.Chapters {
+		chapter := &Chapter{
+			Name:   ch.Name,
+			Number: ch.Number,
+		}
+		nq.Chapters = append(nq.Chapters, chapter)
+	}
+
+	return nq
 }
 
 func (q *Quran) JSON() []byte {

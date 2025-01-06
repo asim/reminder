@@ -16,6 +16,7 @@ type Volume struct {
 
 type Book struct {
 	Name    string    `json:"name"`
+	Number  int       `json:"number"`
 	Hadiths []*Hadith `json:"hadiths"`
 }
 
@@ -26,8 +27,13 @@ type Hadith struct {
 }
 
 type Volumes struct {
-	Contents []*Volume
-	Books    []*Book
+	Contents []*Volume `json:"contents,omitempty"`
+	Books    []*Book   `json:"books,omitempty"`
+}
+
+func (b *Book) JSON() []byte {
+	by, _ := json.Marshal(b)
+	return by
 }
 
 func (b *Book) HTML() string {
@@ -44,6 +50,7 @@ func (b *Book) HTML() string {
 		data += fmt.Sprintln()
 		data += fmt.Sprintf(`<div>%s</div>`, hadith.Text)
 		data += fmt.Sprintln()
+		data += fmt.Sprintln(`<div class="dots">...</div>`)
 		data += fmt.Sprintln()
 	}
 
@@ -62,6 +69,19 @@ func (v *Volumes) TOC() string {
 
 func (v *Volumes) Get(book int) *Book {
 	return v.Books[book-1]
+}
+
+func (v *Volumes) Index() *Volumes {
+	vv := new(Volumes)
+
+	for _, book := range v.Books {
+		vv.Books = append(vv.Books, &Book{
+			Name:   book.Name,
+			Number: book.Number,
+		})
+	}
+
+	return vv
 }
 
 func (v *Volumes) JSON() []byte {
@@ -115,11 +135,12 @@ func Load() *Volumes {
 			Name: d["name"].(string),
 		}
 
-		for _, b := range d["books"].([]interface{}) {
+		for num, b := range d["books"].([]interface{}) {
 			bk := b.(map[string]interface{})
 
 			book := &Book{
-				Name: bk["name"].(string),
+				Name:   bk["name"].(string),
+				Number: num + 1,
 			}
 
 			for _, h := range bk["hadiths"].([]interface{}) {

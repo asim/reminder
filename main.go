@@ -315,12 +315,44 @@ func main() {
 		w.Write([]byte(qjson))
 	})
 
+	http.HandleFunc("/api/quran/{chapter}", func(w http.ResponseWriter, r *http.Request) {
+		ch := r.PathValue("chapter")
+		if len(ch) == 0 {
+			return
+		}
+
+		chapter, _ := strconv.Atoi(ch)
+		if chapter < 1 || chapter > 114 {
+			return
+		}
+
+		b := q.Get(chapter).JSON()
+
+		w.Write(b)
+	})
+
 	http.HandleFunc("/api/names", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(njson))
 	})
 
 	http.HandleFunc("/api/hadith", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(hjson))
+	})
+
+	http.HandleFunc("/api/hadith/{book}", func(w http.ResponseWriter, r *http.Request) {
+		bk := r.PathValue("book")
+		if len(bk) == 0 {
+			return
+		}
+
+		book, _ := strconv.Atoi(bk)
+		if book < 1 || book > len(b.Books) {
+			return
+		}
+
+		b := b.Get(book).JSON()
+
+		w.Write(b)
 	})
 
 	http.HandleFunc("/api/generate", func(w http.ResponseWriter, r *http.Request) {
