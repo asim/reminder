@@ -40,6 +40,8 @@ func (name *Name) HTML() string {
 	data += fmt.Sprintln()
 	data += fmt.Sprintln(`<div class="english">` + name.Summary + `</div>`)
 	data += fmt.Sprintln()
+	data += fmt.Sprintln(`<div class="dots">...</div>`)
+	data += fmt.Sprintln()
 	return data
 }
 

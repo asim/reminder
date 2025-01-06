@@ -49,6 +49,12 @@ code {
   padding: 5px;
   border-radius: 5px;
 }
+.dots {
+  font-size: 1.5em;
+  text-align: center;
+  margin-bottom: 25px;
+  padding: 25px;
+}
 @media only screen and (max-width: 600px) {
   #head a { margin-right: 5px; }
 }

@@ -36,11 +36,38 @@ var Endpoints = []*Endpoint{
 		Description: "Returns the entire Quran",
 	},
 	{
+		Name:        "Quran | Chapter",
+		Path:        "/api/quran/{chapter}",
+		Params:      nil,
+		Description: "Returns a chapter of the quran",
+		Response: []*Value{{
+			Type: "JSON",
+			Params: []*Param{
+				{Name: "name", Value: "string", Description: "Name of chapter"},
+				{Name: "number", Value: "int", Description: "Number of the chapter"},
+				{Name: "verses", Value: "array", Description: "Verses in the chapter"},
+			},
+		}},
+	},
+	{
 		Name:        "Hadith",
 		Path:        "/api/hadith",
 		Params:      nil,
 		Response:    []*Value{{Type: "JSON"}},
 		Description: "Returns the entire Hadith",
+	},
+	{
+		Name:        "Hadith | Book",
+		Path:        "/api/hadith/{book}",
+		Params:      nil,
+		Description: "Returns a book from the hadith",
+		Response: []*Value{{
+			Type: "JSON",
+			Params: []*Param{
+				{Name: "name", Value: "string", Description: "Name of book"},
+				{Name: "hadiths", Value: "array", Description: "Hadiths in the book"},
+			},
+		}},
 	},
 	{
 		Name:        "Names",
@@ -118,6 +145,8 @@ func (a *Api) Markdown() string {
 				}
 			}
 
+			data += fmt.Sprintln()
+			data += fmt.Sprintln("\\")
 			data += fmt.Sprintln()
 		}
 

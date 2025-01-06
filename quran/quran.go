@@ -49,6 +49,8 @@ func (ch *Chapter) HTML() string {
 		data += fmt.Sprintln()
 		data += fmt.Sprintln(`<div class="english">` + verse.Text + `</div>`)
 		data += fmt.Sprintln()
+		data += fmt.Sprintln(`<div class="dots">...</div>`)
+		data += fmt.Sprintln()
 	}
 
 	return data

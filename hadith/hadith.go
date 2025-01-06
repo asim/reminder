@@ -50,6 +50,7 @@ func (b *Book) HTML() string {
 		data += fmt.Sprintln()
 		data += fmt.Sprintf(`<div>%s</div>`, hadith.Text)
 		data += fmt.Sprintln()
+		data += fmt.Sprintln(`<div class="dots">...</div>`)
 		data += fmt.Sprintln()
 	}
 
