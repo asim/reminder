@@ -312,7 +312,7 @@ func main() {
 	})
 
 	http.HandleFunc("/api/quran", func(w http.ResponseWriter, r *http.Request) {
-		qidx := q.Index().JSON()
+		qidx := q.JSON()
 
 		w.Write(qidx)
 	})
