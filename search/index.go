@@ -23,9 +23,9 @@ type Index struct {
 }
 
 type Result struct {
-	Text     string
-	Score    float32
-	Metadata map[string]string
+	Text     string            `json:"text"`
+	Score    float32           `json:"score"`
+	Metadata map[string]string `json:"metadata"`
 }
 
 // Load the embedded index
