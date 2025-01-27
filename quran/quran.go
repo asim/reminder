@@ -16,9 +16,10 @@ type Chapter struct {
 }
 
 type Verse struct {
-	Number int    `json:"number"`
-	Text   string `json:"text"`
-	Arabic string `json:"arabic"`
+	Chapter int    `json:"chapter"`
+	Number  int    `json:"number"`
+	Text    string `json:"text"`
+	Arabic  string `json:"arabic"`
 }
 
 type Quran struct {
@@ -54,6 +55,29 @@ func (ch *Chapter) HTML() string {
 	}
 
 	return data
+}
+
+func (v *Verse) HTML() string {
+	var data string
+
+	data += fmt.Sprintln()
+	data += fmt.Sprintln()
+	data += fmt.Sprintln()
+	data += fmt.Sprintf(`<h4>%d:%d</h4>`, v.Chapter, v.Number)
+	data += fmt.Sprintln()
+	data += fmt.Sprintln(`<div class="arabic">` + v.Arabic + `</div>`)
+	data += fmt.Sprintln()
+	data += fmt.Sprintln(`<div class="english">` + v.Text + `</div>`)
+	data += fmt.Sprintln()
+	data += fmt.Sprintln(`<div class="dots">...</div>`)
+	data += fmt.Sprintln()
+
+	return data
+}
+
+func (v *Verse) JSON() []byte {
+	b, _ := json.Marshal(v)
+	return b
 }
 
 func (q *Quran) Index() *Quran {
@@ -174,9 +198,10 @@ func Load() *Quran {
 			}
 
 			verses = append(verses, &Verse{
-				Number: num,
-				Text:   ayah.([]interface{})[1].(string),
-				Arabic: ar,
+				Chapter: chapter,
+				Number:  num,
+				Text:    ayah.([]interface{})[1].(string),
+				Arabic:  ar,
 			})
 		}
 

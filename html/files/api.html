@@ -39,6 +39,12 @@ code {
   padding: 5px;
   border-radius: 5px;
 }
+.dots {
+  font-size: 1.5em;
+  text-align: center;
+  margin-bottom: 25px;
+  padding: 25px;
+}
 @media only screen and (max-width: 600px) {
   #head a { margin-right: 5px; }
 }
@@ -74,7 +80,7 @@ code {
 
 <p></p>
 
-<h2 id="quran-chapter">Quran | Chapter</h2>
+<h2 id="quran-by-chapter">Quran by Chapter</h2>
 
 <hr>
 
@@ -96,6 +102,28 @@ code {
 
 <p></p>
 
+<h2 id="quran-by-verse">Quran by Verse</h2>
+
+<hr>
+
+<p></p>
+
+<p>Returns a verse of the quran</p>
+
+<p>URL: <a href="/api/quran/{chapter}/{verse}"><code>/api/quran/{chapter}/{verse}</code></a></p>
+
+<h4 id="response-2">Response</h4>
+
+<p>Format <code>JSON</code></p>
+
+<ul>
+<li><code>number</code> - <strong><code>int</code></strong> - Number of the verse</li>
+<li><code>text</code> - <strong><code>string</code></strong> - Text of the verse</li>
+<li><code>arabic</code> - <strong><code>string</code></strong> - Arabic text of the verse</li>
+</ul>
+
+<p></p>
+
 <h2 id="hadith">Hadith</h2>
 
 <hr>
@@ -106,13 +134,13 @@ code {
 
 <p>URL: <a href="/api/hadith"><code>/api/hadith</code></a></p>
 
-<h4 id="response-2">Response</h4>
+<h4 id="response-3">Response</h4>
 
 <p>Format <code>JSON</code></p>
 
 <p></p>
 
-<h2 id="hadith-book">Hadith | Book</h2>
+<h2 id="hadith-by-book">Hadith by Book</h2>
 
 <hr>
 
@@ -122,7 +150,7 @@ code {
 
 <p>URL: <a href="/api/hadith/{book}"><code>/api/hadith/{book}</code></a></p>
 
-<h4 id="response-3">Response</h4>
+<h4 id="response-4">Response</h4>
 
 <p>Format <code>JSON</code></p>
 
@@ -143,7 +171,7 @@ code {
 
 <p>URL: <a href="/api/names"><code>/api/names</code></a></p>
 
-<h4 id="response-4">Response</h4>
+<h4 id="response-5">Response</h4>
 
 <p>Format <code>JSON</code></p>
 
@@ -169,7 +197,7 @@ code {
 
 <p></p>
 
-<h4 id="response-5">Response</h4>
+<h4 id="response-6">Response</h4>
 
 <p>Format <code>JSON</code></p>
 

@@ -36,7 +36,7 @@ var Endpoints = []*Endpoint{
 		Description: "Returns the entire Quran",
 	},
 	{
-		Name:        "Quran | Chapter",
+		Name:        "Quran by Chapter",
 		Path:        "/api/quran/{chapter}",
 		Params:      nil,
 		Description: "Returns a chapter of the quran",
@@ -50,6 +50,21 @@ var Endpoints = []*Endpoint{
 		}},
 	},
 	{
+		Name:        "Quran by Verse",
+		Path:        "/api/quran/{chapter}/{verse}",
+		Params:      nil,
+		Description: "Returns a verse of the quran",
+		Response: []*Value{{
+			Type: "JSON",
+			Params: []*Param{
+				{Name: "chapter", Value: "int", Description: "Chapter of the verse"},
+				{Name: "number", Value: "int", Description: "Number of the verse"},
+				{Name: "text", Value: "string", Description: "Text of the verse"},
+				{Name: "arabic", Value: "string", Description: "Arabic text of the verse"},
+			},
+		}},
+	},
+	{
 		Name:        "Hadith",
 		Path:        "/api/hadith",
 		Params:      nil,
@@ -57,7 +72,7 @@ var Endpoints = []*Endpoint{
 		Description: "Returns the entire Hadith",
 	},
 	{
-		Name:        "Hadith | Book",
+		Name:        "Hadith by Book",
 		Path:        "/api/hadith/{book}",
 		Params:      nil,
 		Description: "Returns a book from the hadith",

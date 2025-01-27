@@ -259,6 +259,38 @@ func main() {
 		w.Write([]byte(qhtml))
 	})
 
+	http.HandleFunc("/quran/{id}/{ver}", func(w http.ResponseWriter, r *http.Request) {
+		id := r.PathValue("id")
+		if len(id) == 0 {
+			return
+		}
+
+		ver := r.PathValue("ver")
+		if len(ver) == 0 {
+			return
+		}
+
+		ch, _ := strconv.Atoi(id)
+		ve, _ := strconv.Atoi(ver)
+
+		if ch < 1 || ch > 114 {
+			return
+		}
+
+		cc := q.Get(ch)
+
+		if ve < 1 || ve > len(cc.Verses) {
+			return
+		}
+
+		vv := cc.Verses[ve-1]
+
+		head := fmt.Sprintf("%d:%d | Quran", ch, ve)
+		vhtml := html.RenderHTML(head, vv.HTML())
+
+		w.Write([]byte(vhtml))
+	})
+
 	http.HandleFunc("/names", func(w http.ResponseWriter, r *http.Request) {
 		qhtml := html.RenderHTML("Names", n.TOC())
 
@@ -327,6 +359,35 @@ func main() {
 		}
 
 		b := q.Get(chapter).JSON()
+
+		w.Write(b)
+	})
+
+	http.HandleFunc("/api/quran/{chapter}/{verse}", func(w http.ResponseWriter, r *http.Request) {
+		ch := r.PathValue("chapter")
+		if len(ch) == 0 {
+			return
+		}
+
+		chapter, _ := strconv.Atoi(ch)
+		if chapter < 1 || chapter > 114 {
+			return
+		}
+
+		ve := r.PathValue("verse")
+		if len(ch) == 0 {
+			return
+		}
+
+		cc := q.Get(chapter)
+
+		verse, _ := strconv.Atoi(ve)
+		if verse < 1 || verse > len(cc.Verses) {
+			return
+		}
+
+		vee := cc.Verses[verse-1]
+		b := vee.JSON()
 
 		w.Write(b)
 	})
