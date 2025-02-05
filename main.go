@@ -494,7 +494,7 @@ func main() {
 
 			output, _ := json.Marshal(map[string]interface{}{
 				"q":          q,
-				"answer":     answer,
+				"answer":     string(html.Render([]byte(answer))),
 				"references": res,
 			})
 			w.Write(output)
