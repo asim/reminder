@@ -1,6 +1,6 @@
 # Reminder
 
-Quran, hadith and names of Allah in one app and API with LLM search and summarisation 
+Quran, hadith and names of Allah in one app and API with RAG LLM search and summarisation via OpenAI.
 
 ## Overview
 
