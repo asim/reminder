@@ -56,6 +56,7 @@ All queries are returned as JSON
   * `POST` using `content-type` as `application/json`
   * `curl -d '{"q": "what is islam"}' http://localhost:8080/api/search`
 
+See `/api` for more details 
 
 ## Notes
 
