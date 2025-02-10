@@ -18,6 +18,7 @@ var Template = `
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap" rel="stylesheet">
     <style>
     html, body { height: 100%%; width: 100%%; margin: 0; padding: 0; font-family: "Nunito Sans", serif; }
+    a:visited { color:blue; }
     #head { margin-bottom: 2.5em; }
     #head a { margin-right: 10px; color: black; font-weight: bold; text-decoration: none; }
     #container { height: 100%%; max-width: 1024px; margin: 0 auto; padding: 25px;}
