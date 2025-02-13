@@ -4,8 +4,11 @@ Quran, hadith and names of Allah all in one app and API.
 
 ## Overview
 
-The Reminder is an API and web app for reading, querying and searching the Quran, Hadith and Names of Allah. It provides contextual search and summarisation using 
-OpenAI generated embeddings and chat APIs. It uses RAG based context referencing when provides summaries and answers. The API provides straightforward access to the Quran and ability to query the LLM. More to follow soon.
+The Reminder is an API and app for the Quran, Hadith (Bukhari) and Names of Allah. It provides search summarisation using OpenAI and RAG context referencing. The goal is to consolidate these texts and 
+information into a single API and app and 
+leverage LLMs as a tool for searching. We
+do not offload reasoning to LLMs but they 
+are a new form of useful indexing for search.
 
 ## Features
 
@@ -13,8 +16,8 @@ OpenAI generated embeddings and chat APIs. It uses RAG based context referencing
 - Names of Allah & Meaning
 - Hadith (Bukhari) in English
 - Index & Search using GPT 4o
-- Contextual query referencing
-- API to query LLM or get Quran
+- RAG contextual referencing
+- API to query LLM or Quran
 
 ## Install
 
@@ -56,7 +59,7 @@ All queries are returned as JSON
   * `POST` using `content-type` as `application/json`
   * `curl -d '{"q": "what is islam"}' http://localhost:8080/api/search`
 
-See `/api` for more details 
+See [`/api`](https://reminder.dev/api) for more details 
 
 ## Notes
 
@@ -67,5 +70,3 @@ Say,
 “I ask no reward of you for this (Quran) —
 it is a reminder to the whole world.”
 ```
-
-Therefore, we ask for nothing in return. 
