@@ -63,7 +63,7 @@ See [`/api`](https://reminder.dev/api) for more details
 
 ## Notes
 
-The Quran says in [6:90](https://quran.com/6:90)
+The Quran says in [6:90](https://reminder.dev/quran/6/90)
 
 ```
 Say,
