@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function(){
 	    }
 	};
 	var data = JSON.stringify({"q": q.value});
-	resp.innerText = "asking...";
+	resp.innerText = "seeking...";
 	xhr.send(data);
 	q.value = '';
     });
