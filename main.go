@@ -29,6 +29,8 @@ var (
 	ServerFlag   = flag.Bool("serve", false, "Run the server")
 )
 
+var history = map[string][]string{}
+
 func indexContent(idx *search.Index, md map[string]string, text string) {
 	// index the documents
 	// TODO: use original json
@@ -464,6 +466,35 @@ func main() {
 
 		// indexed or no index of any kind
 
+		if r.Method == "GET" {
+			var ctx string
+
+			// look for the context cookie
+			c, err := r.Cookie("session")
+			if err == nil {
+				ctx = c.Value
+			}
+
+			if len(ctx) == 0 {
+				w.Write([]byte(`{}`))
+				return
+			}
+
+			// pull the context which we only store in memory for now
+			h, ok := history[ctx]
+			if !ok {
+				h = []string{}
+			}
+
+			out, _ := json.Marshal(map[string]interface{}{
+				"session": ctx,
+				"history": h,
+			})
+
+			w.Write(out)
+			return
+		}
+
 		if r.Method == "POST" {
 			b, _ := ioutil.ReadAll(r.Body)
 			var data map[string]interface{}
@@ -491,13 +522,28 @@ func main() {
 			}
 
 			answer := askLLM(r.Context(), contexts, q)
+			answerMD := string(html.Render([]byte(answer)))
 
 			output, _ := json.Marshal(map[string]interface{}{
 				"q":          q,
-				"answer":     string(html.Render([]byte(answer))),
+				"answer":     answerMD,
 				"references": res,
 			})
 			w.Write(output)
+
+			var ctx string
+
+			// look for the context cookie
+			c, err := r.Cookie("session")
+			if err == nil {
+				ctx = c.Value
+				h, ok := history[ctx]
+				if !ok {
+					h = []string{}
+				}
+				h = append([]string{q, answerMD}, h...)
+				history[ctx] = h
+			}
 
 			return
 		}

@@ -72,7 +72,7 @@ code {
 #q { padding: 10px; width: 100%; }
 </style>
 <div id="search">
-  <form id="question" action="/search" method="post"><input id="q" name=q placeholder="Ask a question" autocomplete="off"></form>
+  <form id="question" action="/search" method="post"><input id="q" name=q placeholder="Ask a question" autocomplete="off" autofocus></form>
 </div>
 <div id="resp"></div>
 <div id="answer"></div>
@@ -91,7 +91,46 @@ function reference(el) {
 	return "<div>Text: " + el.text + "<br>Metadata: " + JSON.stringify(el.metadata) + "<br>Score: " + el.score + "</div>";
 }
 
+function getCookie(name) {
+    var cookies = document.cookie.split(';');
+    for(var i=0 ; i < cookies.length ; ++i) {
+        var pair = cookies[i].trim().split('=');
+        if(pair[0] == name)
+            return pair[1];
+    }
+    return null;
+};
+
+function setCookie(name, value) {
+    document.cookie = name + "=" + value;
+}
+
 document.addEventListener('DOMContentLoaded', function(){
+    // check if session exists
+    var uuid = getCookie("session");
+
+    if (uuid == undefined) {
+        uuid = self.crypto.randomUUID();
+	setCookie("session", uuid);
+    }
+
+    var url = "/api/search";
+
+    // attempt to get the existing responses
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", url, true);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+	  var ans = document.getElementById("answer");
+	  var json = JSON.parse(xhr.responseText);
+	  json.history.forEach(function(el) {
+		ans.innerHTML += "<p>" + el + "</p>";
+	  });
+        }
+    };
+
+    xhr.send(null);
+
     var form = document.getElementById("question");
     form.addEventListener("submit", function(ev) {
 	var ans = document.getElementById("answer");
@@ -99,13 +138,12 @@ document.addEventListener('DOMContentLoaded', function(){
         ev.preventDefault();
 	var q = document.getElementById("q");
 	var xhr = new XMLHttpRequest();
-	var url = "/api/search";
 	xhr.open("POST", url, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
 	xhr.onreadystatechange = function () {
 	    if (xhr.readyState === 4 && xhr.status === 200) {
 		var json = JSON.parse(xhr.responseText);
-		var text = "<p><b>Q</b>: " + json.q + "</p><p><b>A</b>: " + json.answer + "</p>";
+		var text = "<p>" + json.q + "</p><p>" + json.answer + "</p>";
 		text += "<div id=expand onclick='expand(this); return false;'>References<br><br></div>";
 		text += "<div class=ref style='display: none;'>";
 		for (i = 0; i < json.references.length; i++) {
@@ -117,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function(){
 	    }
 	};
 	var data = JSON.stringify({"q": q.value});
-	resp.innerText = "asking...";
+	resp.innerText = "seeking...";
 	xhr.send(data);
 	q.value = '';
     });
