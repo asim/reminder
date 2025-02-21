@@ -13,6 +13,7 @@ var Template = `
   <head>
     <title>%s | Reminder</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="manifest" href="/manifest.webmanifest">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap" rel="stylesheet">
@@ -70,9 +71,52 @@ code {
         <a href="/names">Names</a>
         <a href="/hadith">Hadith</a>
         <a href="/search">Search</a>
+        <button id="install" hidden>Install</button>
       </div>
       <div id="content">%s</div>
     </div>
+    </div>
+
+  <script>
+      if (navigator.serviceWorker) {
+        navigator.serviceWorker.register (
+          '/reminder.js',
+          {scope: '/'}
+        )
+      }
+  </script>
+  <script>
+        let installPrompt = null;
+        const installButton = document.querySelector("#install");
+
+        window.addEventListener("beforeinstallprompt", (event) => {
+          event.preventDefault();
+          installPrompt = event;
+          installButton.removeAttribute("hidden");
+        });
+
+        installButton.addEventListener("click", async () => {
+          if (!installPrompt) {
+            return;
+          }
+          const result = await installPrompt.prompt();
+          disableInAppInstallPrompt();
+        });
+
+        function disableInAppInstallPrompt() {
+          installPrompt = null;
+          installButton.setAttribute("hidden", "");
+        }
+
+        window.addEventListener("appinstalled", () => {
+          disableInAppInstallPrompt();
+        });
+
+        function disableInAppInstallPrompt() {
+          installPrompt = null;
+          installButton.setAttribute("hidden", "");
+        }
+  </script>
   </body>
 </html>
 `
