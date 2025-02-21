@@ -7,6 +7,9 @@ import (
 //go:embed *.html
 //go:embed *.json
 //go:embed *.otf
+//go:embed *.js
+//go:embed *.png
+//go:embed manifest.webmanifest
 var files embed.FS
 
 func Get(name string) string {
