@@ -225,6 +225,7 @@ func main() {
 	njson := files.Get("names.json")
 	hjson := files.Get("hadith.json")
 
+	ico := files.Get("icon-192.png")
 	png := files.Get("reminder.png")
 	js := files.Get("reminder.js")
 	mfs := files.Get("manifest.webmanifest")
@@ -233,11 +234,16 @@ func main() {
 		w.Write([]byte(mfs))
 	})
 
+	http.HandleFunc("/icon-192.png", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(ico))
+	})
+
 	http.HandleFunc("/reminder.png", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(png))
 	})
 
 	http.HandleFunc("/reminder.js", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/javascript")
 		w.Write([]byte(js))
 	})
 

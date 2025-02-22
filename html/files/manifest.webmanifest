@@ -9,10 +9,15 @@
   "display": "standalone", 
   "icons": [
       {
+        "src": "/icon-192.png",
+        "type": "image/png",
+        "sizes": "192x192",
+	"purpose": "maskable"
+      },
+      {
         "src": "/reminder.png",
         "type": "image/png",
-        "sizes": "300x300",
-	"purpose": "maskable"
+        "sizes": "300x300"
       }
   ]
 }

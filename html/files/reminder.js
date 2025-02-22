@@ -1,11 +1,10 @@
-var GHPATH = '/';
 var APP_PREFIX = 'reminder_';
 var VERSION = 'version_001';
 var URLS = [    
-  `${GHPATH}/`,
-  `${GHPATH}/index.html`,
-  `${GHPATH}/reminder.png`,
-  `${GHPATH}/reminder.js`
+  `/`,
+  `/index.html`,
+  `/reminder.png`,
+  `/reminder.js`
 ]
 
 var CACHE_NAME = APP_PREFIX + VERSION
