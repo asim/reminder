@@ -11,7 +11,8 @@
       {
         "src": "/reminder.png",
         "type": "image/png",
-        "sizes": "300x300"
+        "sizes": "300x300",
+	"purpose": "maskable"
       }
   ]
 }
