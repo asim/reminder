@@ -9,12 +9,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap" rel="stylesheet">
     <style>
     html, body { height: 100%; width: 100%; margin: 0; padding: 0; font-family: "Nunito Sans", serif; }
-    a:visited { color:blue; }
-    #head { margin-bottom: 2.5em; }
+    a { color: #333333; }
+    a:visited { color: #333333;}
+    #head {
+      position: fixed;
+      background: white;
+      padding: 15px 0 15px 0;
+      top: 0;
+      width: 100%;
+    }
     #head a { margin-right: 10px; color: black; font-weight: bold; text-decoration: none; }
     #container { height: 100%; max-width: 1024px; margin: 0 auto; padding: 25px;}
     #content { padding-bottom: 100px; }
     #content p { padding: 0 0 25px 0; margin: 0; }
+    #title { margin-top: 50px; font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
     li { margin-bottom: 5px; }
 @font-face {
     font-family: 'arabic';
@@ -63,10 +71,10 @@ code {
         <a href="/search">Search</a>
         <button id="install" hidden>Install</button>
       </div>
+      <div id="title">Names</div>
       <div id="content">
-<h1 id="1">1</h1>
 
-<h3>The Beneficent</h3>
+<h2>The Beneficent</h2>
 
 <div class="arabic">الرَّحْمَنُ</div>
 
@@ -81,9 +89,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="2">2</h1>
 
-<h3>The Merciful</h3>
+<h2>The Merciful</h2>
 
 <div class="arabic">الرَّحِيمُ</div>
 
@@ -98,9 +105,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="3">3</h1>
 
-<h3>The King / Eternal Lord</h3>
+<h2>The King / Eternal Lord</h2>
 
 <div class="arabic">الْمَلِكُ</div>
 
@@ -115,9 +121,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="4">4</h1>
 
-<h3>The Purest</h3>
+<h2>The Purest</h2>
 
 <div class="arabic">الْقُدُّوسُ</div>
 
@@ -132,9 +137,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="5">5</h1>
 
-<h3>The Source of Peace</h3>
+<h2>The Source of Peace</h2>
 
 <div class="arabic">السَّلاَمُ</div>
 
@@ -149,9 +153,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="6">6</h1>
 
-<h3>The inspirer of faith</h3>
+<h2>The inspirer of faith</h2>
 
 <div class="arabic">الْمُؤْمِنُ</div>
 
@@ -166,9 +169,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="7">7</h1>
 
-<h3>The Guardian</h3>
+<h2>The Guardian</h2>
 
 <div class="arabic">الْمُهَيْمِنُ</div>
 
@@ -183,9 +185,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="8">8</h1>
 
-<h3>The Precious / The Most Mighty</h3>
+<h2>The Precious / The Most Mighty</h2>
 
 <div class="arabic">الْعَزِيزُ</div>
 
@@ -200,9 +201,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="9">9</h1>
 
-<h3>The Compeller</h3>
+<h2>The Compeller</h2>
 
 <div class="arabic">الْجَبَّارُ</div>
 
@@ -217,9 +217,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="10">10</h1>
 
-<h3>The Greatest</h3>
+<h2>The Greatest</h2>
 
 <div class="arabic">الْمُتَكَبِّرُ</div>
 
@@ -234,9 +233,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="11">11</h1>
 
-<h3>The Creator</h3>
+<h2>The Creator</h2>
 
 <div class="arabic">الْخَالِقُ</div>
 
@@ -251,9 +249,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="12">12</h1>
 
-<h3>The Maker of Order</h3>
+<h2>The Maker of Order</h2>
 
 <div class="arabic">الْبَارِئُ</div>
 
@@ -268,9 +265,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="13">13</h1>
 
-<h3>The Shaper of Beauty</h3>
+<h2>The Shaper of Beauty</h2>
 
 <div class="arabic">الْمُصَوِّرُ</div>
 
@@ -285,9 +281,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="14">14</h1>
 
-<h3>The Forgiving</h3>
+<h2>The Forgiving</h2>
 
 <div class="arabic">الْغَفَّارُ</div>
 
@@ -302,9 +297,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="15">15</h1>
 
-<h3>The Subduer</h3>
+<h2>The Subduer</h2>
 
 <div class="arabic">الْقَهَّارُ</div>
 
@@ -319,9 +313,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="16">16</h1>
 
-<h3>The Giver of All</h3>
+<h2>The Giver of All</h2>
 
 <div class="arabic">الْوَهَّابُ</div>
 
@@ -336,9 +329,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="17">17</h1>
 
-<h3>The Sustainer</h3>
+<h2>The Sustainer</h2>
 
 <div class="arabic">الرَّزَّاقُ</div>
 
@@ -353,9 +345,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="18">18</h1>
 
-<h3>The Opener</h3>
+<h2>The Opener</h2>
 
 <div class="arabic">الْفَتَّاحُ</div>
 
@@ -370,9 +361,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="19">19</h1>
 
-<h3>The Knower of all</h3>
+<h2>The Knower of all</h2>
 
 <div class="arabic">اَلْعَلِيْمُ</div>
 
@@ -387,9 +377,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="20">20</h1>
 
-<h3>The Constrictor</h3>
+<h2>The Constrictor</h2>
 
 <div class="arabic">الْقَابِضُ</div>
 
@@ -404,9 +393,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="21">21</h1>
 
-<h3>The Reliever</h3>
+<h2>The Reliever</h2>
 
 <div class="arabic">الْبَاسِطُ</div>
 
@@ -421,9 +409,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="22">22</h1>
 
-<h3>The Abaser</h3>
+<h2>The Abaser</h2>
 
 <div class="arabic">الْخَافِضُ</div>
 
@@ -438,9 +425,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="23">23</h1>
 
-<h3>The Exalter</h3>
+<h2>The Exalter</h2>
 
 <div class="arabic">الرَّافِعُ</div>
 
@@ -455,9 +441,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="24">24</h1>
 
-<h3>The Bestower of Honour</h3>
+<h2>The Bestower of Honour</h2>
 
 <div class="arabic">الْمُعِزُّ</div>
 
@@ -472,9 +457,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="25">25</h1>
 
-<h3>The Humiliator</h3>
+<h2>The Humiliator</h2>
 
 <div class="arabic">المُذِلُّ</div>
 
@@ -489,9 +473,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="26">26</h1>
 
-<h3>The Hearer of all</h3>
+<h2>The Hearer of all</h2>
 
 <div class="arabic">السَّمِيعُ</div>
 
@@ -506,9 +489,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="27">27</h1>
 
-<h3>The Seer of all</h3>
+<h2>The Seer of all</h2>
 
 <div class="arabic">الْبَصِيرُ</div>
 
@@ -523,9 +505,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="28">28</h1>
 
-<h3>The Judge</h3>
+<h2>The Judge</h2>
 
 <div class="arabic">الْحَكَمُ</div>
 
@@ -540,9 +521,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="29">29</h1>
 
-<h3>The Just</h3>
+<h2>The Just</h2>
 
 <div class="arabic">الْعَدْلُ</div>
 
@@ -557,9 +537,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="30">30</h1>
 
-<h3>The Subtle One</h3>
+<h2>The Subtle One</h2>
 
 <div class="arabic">اللَّطِيفُ</div>
 
@@ -574,9 +553,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="31">31</h1>
 
-<h3>The All Aware</h3>
+<h2>The All Aware</h2>
 
 <div class="arabic">الْخَبِيرُ</div>
 
@@ -591,9 +569,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="32">32</h1>
 
-<h3>The Forebearing</h3>
+<h2>The Forebearing</h2>
 
 <div class="arabic">الْحَلِيمُ</div>
 
@@ -608,9 +585,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="33">33</h1>
 
-<h3>The Maginificent</h3>
+<h2>The Maginificent</h2>
 
 <div class="arabic">الْعَظِيمُ</div>
 
@@ -625,9 +601,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="34">34</h1>
 
-<h3>The Great Forgiver</h3>
+<h2>The Great Forgiver</h2>
 
 <div class="arabic">الْغَفُورُ</div>
 
@@ -642,9 +617,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="35">35</h1>
 
-<h3>The Rewarder of Thankfulness</h3>
+<h2>The Rewarder of Thankfulness</h2>
 
 <div class="arabic">الشَّكُورُ</div>
 
@@ -659,9 +633,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="36">36</h1>
 
-<h3>The Highest</h3>
+<h2>The Highest</h2>
 
 <div class="arabic">الْعَلِيُّ</div>
 
@@ -676,9 +649,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="37">37</h1>
 
-<h3>The Greatest</h3>
+<h2>The Greatest</h2>
 
 <div class="arabic">الْكَبِيرُ</div>
 
@@ -693,9 +665,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="38">38</h1>
 
-<h3>The Preserver</h3>
+<h2>The Preserver</h2>
 
 <div class="arabic">الْحَفِيظُ</div>
 
@@ -710,9 +681,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="39">39</h1>
 
-<h3>The Sustainer</h3>
+<h2>The Sustainer</h2>
 
 <div class="arabic">المُقيِت</div>
 
@@ -727,9 +697,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="40">40</h1>
 
-<h3>The Reckoner, The Sufficient</h3>
+<h2>The Reckoner, The Sufficient</h2>
 
 <div class="arabic">الْحسِيبُ</div>
 
@@ -744,9 +713,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="41">41</h1>
 
-<h3>The Majestic</h3>
+<h2>The Majestic</h2>
 
 <div class="arabic">الْجَلِيلُ</div>
 
@@ -761,9 +729,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="42">42</h1>
 
-<h3>The Most Generous, The Most Esteemed</h3>
+<h2>The Most Generous, The Most Esteemed</h2>
 
 <div class="arabic">الْكَرِيمُ</div>
 
@@ -778,9 +745,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="43">43</h1>
 
-<h3>The Watchful One</h3>
+<h2>The Watchful One</h2>
 
 <div class="arabic">الرَّقِيبُ</div>
 
@@ -795,9 +761,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="44">44</h1>
 
-<h3>The Responder to Prayer</h3>
+<h2>The Responder to Prayer</h2>
 
 <div class="arabic">الْمُجِيبُ</div>
 
@@ -812,9 +777,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="45">45</h1>
 
-<h3>The All-Encompassing, the Boundless</h3>
+<h2>The All-Encompassing, the Boundless</h2>
 
 <div class="arabic">الْوَاسِعُ</div>
 
@@ -829,9 +793,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="46">46</h1>
 
-<h3>The Perfectly Wise</h3>
+<h2>The Perfectly Wise</h2>
 
 <div class="arabic">الْحَكِيمُ</div>
 
@@ -846,9 +809,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="47">47</h1>
 
-<h3>The Most Loving</h3>
+<h2>The Most Loving</h2>
 
 <div class="arabic">الْوَدُودُ</div>
 
@@ -863,9 +825,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="48">48</h1>
 
-<h3>The Glorious One, The Most Honorable</h3>
+<h2>The Glorious One, The Most Honorable</h2>
 
 <div class="arabic">الْمَجِيدُ</div>
 
@@ -880,9 +841,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="49">49</h1>
 
-<h3>The Resurrector</h3>
+<h2>The Resurrector</h2>
 
 <div class="arabic">الْبَاعِثُ</div>
 
@@ -897,9 +857,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="50">50</h1>
 
-<h3>The Witness</h3>
+<h2>The Witness</h2>
 
 <div class="arabic">الشَّهِيدُ</div>
 
@@ -914,9 +873,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="51">51</h1>
 
-<h3>The Truth</h3>
+<h2>The Truth</h2>
 
 <div class="arabic">الْحَقُّ</div>
 
@@ -931,9 +889,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="52">52</h1>
 
-<h3>The Trustee</h3>
+<h2>The Trustee</h2>
 
 <div class="arabic">الْوَكِيلُ</div>
 
@@ -948,9 +905,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="53">53</h1>
 
-<h3>The Possessor of all strength</h3>
+<h2>The Possessor of all strength</h2>
 
 <div class="arabic">الْقَوِيُّ</div>
 
@@ -965,9 +921,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="54">54</h1>
 
-<h3>The Forceful</h3>
+<h2>The Forceful</h2>
 
 <div class="arabic">الْمَتِينُ</div>
 
@@ -982,9 +937,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="55">55</h1>
 
-<h3>The Protector</h3>
+<h2>The Protector</h2>
 
 <div class="arabic">الْوَلِيُّ</div>
 
@@ -999,9 +953,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="56">56</h1>
 
-<h3>The Praised</h3>
+<h2>The Praised</h2>
 
 <div class="arabic">الْحَمِيدُ</div>
 
@@ -1016,9 +969,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="57">57</h1>
 
-<h3>The All-Enumerating, The Counter</h3>
+<h2>The All-Enumerating, The Counter</h2>
 
 <div class="arabic">الْمُحْصِي</div>
 
@@ -1033,9 +985,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="58">58</h1>
 
-<h3>The Originator</h3>
+<h2>The Originator</h2>
 
 <div class="arabic">الْمُبْدِئُ</div>
 
@@ -1050,9 +1001,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="59">59</h1>
 
-<h3>The Restorer</h3>
+<h2>The Restorer</h2>
 
 <div class="arabic">الْمُعِيدُ</div>
 
@@ -1067,9 +1017,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="60">60</h1>
 
-<h3>The Giver of life</h3>
+<h2>The Giver of life</h2>
 
 <div class="arabic">الْمُحْيِي</div>
 
@@ -1084,9 +1033,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="61">61</h1>
 
-<h3>The Taker of life</h3>
+<h2>The Taker of life</h2>
 
 <div class="arabic">اَلْمُمِيتُ</div>
 
@@ -1101,9 +1049,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="62">62</h1>
 
-<h3>The Ever Living</h3>
+<h2>The Ever Living</h2>
 
 <div class="arabic">الْحَيُّ</div>
 
@@ -1118,9 +1065,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="63">63</h1>
 
-<h3>The Self Existing</h3>
+<h2>The Self Existing</h2>
 
 <div class="arabic">الْقَيُّومُ</div>
 
@@ -1135,9 +1081,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="64">64</h1>
 
-<h3>The Perceiver</h3>
+<h2>The Perceiver</h2>
 
 <div class="arabic">الْوَاجِدُ</div>
 
@@ -1152,9 +1097,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="65">65</h1>
 
-<h3>The Glorious</h3>
+<h2>The Glorious</h2>
 
 <div class="arabic">الْمَاجِدُ</div>
 
@@ -1169,9 +1113,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="66">66</h1>
 
-<h3>The Only One</h3>
+<h2>The Only One</h2>
 
 <div class="arabic">الْواحِدُ</div>
 
@@ -1186,9 +1129,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="67">67</h1>
 
-<h3>The One</h3>
+<h2>The One</h2>
 
 <div class="arabic">اَلاَحَدُ</div>
 
@@ -1203,9 +1145,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="68">68</h1>
 
-<h3>The Supreme Provider</h3>
+<h2>The Supreme Provider</h2>
 
 <div class="arabic">الصَّمَدُ</div>
 
@@ -1220,9 +1161,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="69">69</h1>
 
-<h3>The Powerful</h3>
+<h2>The Powerful</h2>
 
 <div class="arabic">الْقَادِرُ</div>
 
@@ -1237,9 +1177,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="70">70</h1>
 
-<h3>The Creator of all power</h3>
+<h2>The Creator of all power</h2>
 
 <div class="arabic">الْمُقْتَدِرُ</div>
 
@@ -1254,9 +1193,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="71">71</h1>
 
-<h3>The Expediter</h3>
+<h2>The Expediter</h2>
 
 <div class="arabic">الْمُقَدِّمُ</div>
 
@@ -1271,9 +1209,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="72">72</h1>
 
-<h3>The Delayer</h3>
+<h2>The Delayer</h2>
 
 <div class="arabic">الْمُؤَخِّرُ</div>
 
@@ -1288,9 +1225,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="73">73</h1>
 
-<h3>The First</h3>
+<h2>The First</h2>
 
 <div class="arabic">الأوَّلُ</div>
 
@@ -1305,9 +1241,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="74">74</h1>
 
-<h3>The Last</h3>
+<h2>The Last</h2>
 
 <div class="arabic">الآخِرُ</div>
 
@@ -1322,9 +1257,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="75">75</h1>
 
-<h3>The Manifest</h3>
+<h2>The Manifest</h2>
 
 <div class="arabic">الظَّاهِرُ</div>
 
@@ -1339,9 +1273,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="76">76</h1>
 
-<h3>The Hidden</h3>
+<h2>The Hidden</h2>
 
 <div class="arabic">الْبَاطِنُ</div>
 
@@ -1356,9 +1289,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="77">77</h1>
 
-<h3>The Governor</h3>
+<h2>The Governor</h2>
 
 <div class="arabic">الْوَالِي</div>
 
@@ -1373,9 +1305,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="78">78</h1>
 
-<h3>The Supreme One</h3>
+<h2>The Supreme One</h2>
 
 <div class="arabic">الْمُتَعَالِي</div>
 
@@ -1390,9 +1321,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="79">79</h1>
 
-<h3>The Doer of Good</h3>
+<h2>The Doer of Good</h2>
 
 <div class="arabic">الْبَرُّ</div>
 
@@ -1407,9 +1337,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="80">80</h1>
 
-<h3>The Guide to Repentence</h3>
+<h2>The Guide to Repentence</h2>
 
 <div class="arabic">التَّوَابُ</div>
 
@@ -1424,9 +1353,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="81">81</h1>
 
-<h3>The Avenger</h3>
+<h2>The Avenger</h2>
 
 <div class="arabic">الْمُنْتَقِمُ</div>
 
@@ -1441,9 +1369,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="82">82</h1>
 
-<h3>The Forgiver</h3>
+<h2>The Forgiver</h2>
 
 <div class="arabic">العَفُوُّ</div>
 
@@ -1458,9 +1385,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="83">83</h1>
 
-<h3>The Most Kind</h3>
+<h2>The Most Kind</h2>
 
 <div class="arabic">الرَّؤُوفُ</div>
 
@@ -1475,9 +1401,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="84">84</h1>
 
-<h3>The Owner / Soverign of All</h3>
+<h2>The Owner / Soverign of All</h2>
 
 <div class="arabic">مَالِكُ الْمُلْكِ</div>
 
@@ -1492,9 +1417,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="85">85</h1>
 
-<h3>Possessor of Majesty and Bounty</h3>
+<h2>Possessor of Majesty and Bounty</h2>
 
 <div class="arabic">ذُوالْجَلاَلِ وَالإكْرَامِ</div>
 
@@ -1509,9 +1433,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="86">86</h1>
 
-<h3>The Equitable One</h3>
+<h2>The Equitable One</h2>
 
 <div class="arabic">الْمُقْسِطُ</div>
 
@@ -1526,9 +1449,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="87">87</h1>
 
-<h3>The Gatherer</h3>
+<h2>The Gatherer</h2>
 
 <div class="arabic">الْجَامِعُ</div>
 
@@ -1543,9 +1465,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="88">88</h1>
 
-<h3>The Rich One</h3>
+<h2>The Rich One</h2>
 
 <div class="arabic">الْغَنِيُّ</div>
 
@@ -1560,9 +1481,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="89">89</h1>
 
-<h3>The Enricher</h3>
+<h2>The Enricher</h2>
 
 <div class="arabic">الْمُغْنِي</div>
 
@@ -1577,9 +1497,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="90">90</h1>
 
-<h3>The Preventer of harm</h3>
+<h2>The Preventer of harm</h2>
 
 <div class="arabic">اَلْمَانِعُ</div>
 
@@ -1594,9 +1513,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="91">91</h1>
 
-<h3>The Creator of the harmful</h3>
+<h2>The Creator of the harmful</h2>
 
 <div class="arabic">الضَّارَّ</div>
 
@@ -1611,9 +1529,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="92">92</h1>
 
-<h3>The Bestower of Benefits</h3>
+<h2>The Bestower of Benefits</h2>
 
 <div class="arabic">النَّافِعُ</div>
 
@@ -1628,9 +1545,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="93">93</h1>
 
-<h3>The Light</h3>
+<h2>The Light</h2>
 
 <div class="arabic">النُّورُ</div>
 
@@ -1645,9 +1561,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="94">94</h1>
 
-<h3>The Guider</h3>
+<h2>The Guider</h2>
 
 <div class="arabic">الْهَادِي</div>
 
@@ -1662,9 +1577,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="95">95</h1>
 
-<h3>The Incomparable Originator</h3>
+<h2>The Incomparable Originator</h2>
 
 <div class="arabic">الْبَدِيعُ</div>
 
@@ -1679,9 +1593,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="96">96</h1>
 
-<h3>The Everlasting One</h3>
+<h2>The Everlasting One</h2>
 
 <div class="arabic">اَلْبَاقِي</div>
 
@@ -1696,9 +1609,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="97">97</h1>
 
-<h3>The Inhertior</h3>
+<h2>The Inhertior</h2>
 
 <div class="arabic">الْوَارِثُ</div>
 
@@ -1713,9 +1625,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="98">98</h1>
 
-<h3>The Most Righteous Guide</h3>
+<h2>The Most Righteous Guide</h2>
 
 <div class="arabic">الرَّشِيدُ</div>
 
@@ -1730,9 +1641,8 @@ code {
 <div class="dots">...</div>
 
 
-<h1 id="99">99</h1>
 
-<h3>The Patient One</h3>
+<h2>The Patient One</h2>
 
 <div class="arabic">الصَّبُورُ</div>
 

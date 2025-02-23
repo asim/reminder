@@ -4,6 +4,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 //go:embed data/*.json
@@ -39,7 +40,7 @@ func (b *Book) JSON() []byte {
 func (b *Book) HTML() string {
 	var data string
 
-	data += fmt.Sprintf(`<h1>%s</h1>`, b.Name)
+	data += fmt.Sprintf(`<h2>%s</h2>`, b.Name)
 	data += fmt.Sprintln()
 	data += fmt.Sprintln()
 
@@ -61,7 +62,7 @@ func (v *Volumes) TOC() string {
 	var data string
 
 	for id, book := range v.Books {
-		data += fmt.Sprintf(`<div class="chapter"><a href="/hadith/%d">%s</a></div>`, id+1, book.Name)
+		data += fmt.Sprintf(`<div class="chapter"><a href="/hadith/%d">%d: %s</a></div>`, id+1, id+1, book.Name)
 	}
 
 	return data
@@ -138,8 +139,10 @@ func Load() *Volumes {
 		for num, b := range d["books"].([]interface{}) {
 			bk := b.(map[string]interface{})
 
+			name := strings.Split(bk["name"].(string), ". ")[1]
+
 			book := &Book{
-				Name:   bk["name"].(string),
+				Name:   name,
 				Number: num + 1,
 			}
 

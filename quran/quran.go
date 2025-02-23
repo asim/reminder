@@ -35,10 +35,8 @@ func (ch *Chapter) HTML() string {
 	var data string
 
 	data += fmt.Sprintln()
-	data += fmt.Sprintf(`<h1 id="%d">%d</h1>`, ch.Number, ch.Number)
 	data += fmt.Sprintln()
-	data += fmt.Sprintln()
-	data += fmt.Sprintf(`<h3>%s</h3>`, ch.Name)
+	data += fmt.Sprintf(`<h2>%s</h2>`, ch.Name)
 	data += fmt.Sprintln()
 
 	// max 286 ayahs

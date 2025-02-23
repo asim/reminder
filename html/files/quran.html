@@ -9,12 +9,20 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap" rel="stylesheet">
     <style>
     html, body { height: 100%; width: 100%; margin: 0; padding: 0; font-family: "Nunito Sans", serif; }
-    a:visited { color:blue; }
-    #head { margin-bottom: 2.5em; }
+    a { color: #333333; }
+    a:visited { color: #333333;}
+    #head {
+      position: fixed;
+      background: white;
+      padding: 15px 0 15px 0;
+      top: 0;
+      width: 100%;
+    }
     #head a { margin-right: 10px; color: black; font-weight: bold; text-decoration: none; }
     #container { height: 100%; max-width: 1024px; margin: 0 auto; padding: 25px;}
     #content { padding-bottom: 100px; }
     #content p { padding: 0 0 25px 0; margin: 0; }
+    #title { margin-top: 50px; font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
     li { margin-bottom: 5px; }
 @font-face {
     font-family: 'arabic';
@@ -63,9 +71,8 @@ code {
         <a href="/search">Search</a>
         <button id="install" hidden>Install</button>
       </div>
-      <div id="content"><h1 id="1">1</h1>
-
-<h3>The Opener</h3>
+      <div id="title">Quran</div>
+      <div id="content"><h2>The Opener</h2>
 
 <p><h4 id="1">1:1</h4>
 <div class="arabic">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div></p>
@@ -116,9 +123,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="2">2</h1>
-
-<h3>The Cow</h3>
+<h2>The Cow</h2>
 
 <p><h4 id="1">2:1</h4>
 <div class="arabic">الٓمٓ</div></p>
@@ -2122,9 +2127,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="3">3</h1>
-
-<h3>Family of Imran</h3>
+<h2>Family of Imran</h2>
 
 <p><h4 id="1">3:1</h4>
 <div class="arabic">الٓمٓ</div></p>
@@ -3526,9 +3529,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="4">4</h1>
-
-<h3>The Women</h3>
+<h2>The Women</h2>
 
 <p><h4 id="1">4:1</h4>
 <div class="arabic">يَـٰٓأَيُّهَا ٱلنَّاسُ ٱتَّقُواْ رَبَّكُمُ ٱلَّذِي خَلَقَكُم مِّن نَّفۡسٖ وَٰحِدَةٖ وَخَلَقَ مِنۡهَا زَوۡجَهَا وَبَثَّ مِنۡهُمَا رِجَالٗا كَثِيرٗا وَنِسَآءٗۚ وَٱتَّقُواْ ٱللَّهَ ٱلَّذِي تَسَآءَلُونَ بِهِۦ وَٱلۡأَرۡحَامَۚ إِنَّ ٱللَّهَ كَانَ عَلَيۡكُمۡ رَقِيبٗا</div></p>
@@ -4762,9 +4763,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="5">5</h1>
-
-<h3>The Table Spread</h3>
+<h2>The Table Spread</h2>
 
 <p><h4 id="1">5:1</h4>
 <div class="arabic">يَـٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُوٓاْ أَوۡفُواْ بِٱلۡعُقُودِۚ أُحِلَّتۡ لَكُم بَهِيمَةُ ٱلۡأَنۡعَٰمِ إِلَّا مَا يُتۡلَىٰ عَلَيۡكُمۡ غَيۡرَ مُحِلِّي ٱلصَّيۡدِ وَأَنتُمۡ حُرُمٌۗ إِنَّ ٱللَّهَ يَحۡكُمُ مَا يُرِيدُ</div></p>
@@ -5606,9 +5605,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="6">6</h1>
-
-<h3>The Cattle</h3>
+<h2>The Cattle</h2>
 
 <p><h4 id="1">6:1</h4>
 <div class="arabic">ٱلۡحَمۡدُ لِلَّهِ ٱلَّذِي خَلَقَ ٱلسَّمَٰوَٰتِ وَٱلۡأَرۡضَ وَجَعَلَ ٱلظُّلُمَٰتِ وَٱلنُّورَۖ ثُمَّ ٱلَّذِينَ كَفَرُواْ بِرَبِّهِمۡ يَعۡدِلُونَ</div></p>
@@ -6765,9 +6762,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="7">7</h1>
-
-<h3>The Heights</h3>
+<h2>The Heights</h2>
 
 <p><h4 id="1">7:1</h4>
 <div class="arabic">الٓمٓصٓ</div></p>
@@ -8211,9 +8206,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="8">8</h1>
-
-<h3>The Spoils of War</h3>
+<h2>The Spoils of War</h2>
 
 <p><h4 id="1">8:1</h4>
 <div class="arabic">يَسۡـَٔلُونَكَ عَنِ ٱلۡأَنفَالِۖ قُلِ ٱلۡأَنفَالُ لِلَّهِ وَٱلرَّسُولِۖ فَٱتَّقُواْ ٱللَّهَ وَأَصۡلِحُواْ ذَاتَ بَيۡنِكُمۡۖ وَأَطِيعُواْ ٱللَّهَ وَرَسُولَهُۥٓ إِن كُنتُم مُّؤۡمِنِينَ</div></p>
@@ -8740,9 +8733,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="9">9</h1>
-
-<h3>The Repentance</h3>
+<h2>The Repentance</h2>
 
 <p><h4 id="1">9:1</h4>
 <div class="arabic">بَرَآءَةٞ مِّنَ ٱللَّهِ وَرَسُولِهِۦٓ إِلَى ٱلَّذِينَ عَٰهَدتُّم مِّنَ ٱلۡمُشۡرِكِينَ</div></p>
@@ -9647,9 +9638,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="10">10</h1>
-
-<h3>Jonah</h3>
+<h2>Jonah</h2>
 
 <p><h4 id="1">10:1</h4>
 <div class="arabic">الٓرۚ تِلۡكَ ءَايَٰتُ ٱلۡكِتَٰبِ ٱلۡحَكِيمِ</div></p>
@@ -10414,9 +10403,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="11">11</h1>
-
-<h3>Hud</h3>
+<h2>Hud</h2>
 
 <p><h4 id="1">11:1</h4>
 <div class="arabic">الٓرۚ كِتَٰبٌ أُحۡكِمَتۡ ءَايَٰتُهُۥ ثُمَّ فُصِّلَتۡ مِن لَّدُنۡ حَكِيمٍ خَبِيرٍ</div></p>
@@ -11279,9 +11266,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="12">12</h1>
-
-<h3>Joseph</h3>
+<h2>Joseph</h2>
 
 <p><h4 id="1">12:1</h4>
 <div class="arabic">الٓرۚ تِلۡكَ ءَايَٰتُ ٱلۡكِتَٰبِ ٱلۡمُبِينِ</div></p>
@@ -12060,9 +12045,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="13">13</h1>
-
-<h3>The Thunder</h3>
+<h2>The Thunder</h2>
 
 <p><h4 id="1">13:1</h4>
 <div class="arabic">الٓمٓرۚ تِلۡكَ ءَايَٰتُ ٱلۡكِتَٰبِۗ وَٱلَّذِيٓ أُنزِلَ إِلَيۡكَ مِن رَّبِّكَ ٱلۡحَقُّ وَلَٰكِنَّ أَكۡثَرَ ٱلنَّاسِ لَا يُؤۡمِنُونَ</div></p>
@@ -12365,9 +12348,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="14">14</h1>
-
-<h3>Abraham</h3>
+<h2>Abraham</h2>
 
 <p><h4 id="1">14:1</h4>
 <div class="arabic">الٓرۚ كِتَٰبٌ أَنزَلۡنَٰهُ إِلَيۡكَ لِتُخۡرِجَ ٱلنَّاسَ مِنَ ٱلظُّلُمَٰتِ إِلَى ٱلنُّورِ بِإِذۡنِ رَبِّهِمۡ إِلَىٰ صِرَٰطِ ٱلۡعَزِيزِ ٱلۡحَمِيدِ</div></p>
@@ -12733,9 +12714,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="15">15</h1>
-
-<h3>The Rocky Tract</h3>
+<h2>The Rocky Tract</h2>
 
 <p><h4 id="1">15:1</h4>
 <div class="arabic">الٓرۚ تِلۡكَ ءَايَٰتُ ٱلۡكِتَٰبِ وَقُرۡءَانٖ مُّبِينٖ</div></p>
@@ -13430,9 +13409,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="16">16</h1>
-
-<h3>The Bee</h3>
+<h2>The Bee</h2>
 
 <p><h4 id="1">16:1</h4>
 <div class="arabic">أَتَىٰٓ أَمۡرُ ٱللَّهِ فَلَا تَسۡتَعۡجِلُوهُۚ سُبۡحَٰنَهُۥ وَتَعَٰلَىٰ عَمَّا يُشۡرِكُونَ</div></p>
@@ -14330,9 +14307,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="17">17</h1>
-
-<h3>The Night Journey</h3>
+<h2>The Night Journey</h2>
 
 <p><h4 id="1">17:1</h4>
 <div class="arabic">سُبۡحَٰنَ ٱلَّذِيٓ أَسۡرَىٰ بِعَبۡدِهِۦ لَيۡلٗا مِّنَ ٱلۡمَسۡجِدِ ٱلۡحَرَامِ إِلَى ٱلۡمَسۡجِدِ ٱلۡأَقۡصَا ٱلَّذِي بَٰرَكۡنَا حَوۡلَهُۥ لِنُرِيَهُۥ مِنۡ ءَايَٰتِنَآۚ إِنَّهُۥ هُوَ ٱلسَّمِيعُ ٱلۡبَصِيرُ</div></p>
@@ -15111,9 +15086,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="18">18</h1>
-
-<h3>The Cave</h3>
+<h2>The Cave</h2>
 
 <p><h4 id="1">18:1</h4>
 <div class="arabic">ٱلۡحَمۡدُ لِلَّهِ ٱلَّذِيٓ أَنزَلَ عَلَىٰ عَبۡدِهِ ٱلۡكِتَٰبَ وَلَمۡ يَجۡعَل لَّهُۥ عِوَجَاۜ</div></p>
@@ -15885,9 +15858,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="19">19</h1>
-
-<h3>Mary</h3>
+<h2>Mary</h2>
 
 <p><h4 id="1">19:1</h4>
 <div class="arabic">كٓهيعٓصٓ</div></p>
@@ -16575,9 +16546,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="20">20</h1>
-
-<h3>Ta-Ha</h3>
+<h2>Ta-Ha</h2>
 
 <p><h4 id="1">20:1</h4>
 <div class="arabic">طه</div></p>
@@ -17524,9 +17493,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="21">21</h1>
-
-<h3>The Prophets</h3>
+<h2>The Prophets</h2>
 
 <p><h4 id="1">21:1</h4>
 <div class="arabic">ٱقۡتَرَبَ لِلنَّاسِ حِسَابُهُمۡ وَهُمۡ فِي غَفۡلَةٖ مُّعۡرِضُونَ</div></p>
@@ -18312,9 +18279,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="22">22</h1>
-
-<h3>The Pilgrimage</h3>
+<h2>The Pilgrimage</h2>
 
 <p><h4 id="1">22:1</h4>
 <div class="arabic">يَـٰٓأَيُّهَا ٱلنَّاسُ ٱتَّقُواْ رَبَّكُمۡۚ إِنَّ زَلۡزَلَةَ ٱلسَّاعَةِ شَيۡءٌ عَظِيمٞ</div></p>
@@ -18862,9 +18827,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="23">23</h1>
-
-<h3>The Believers</h3>
+<h2>The Believers</h2>
 
 <p><h4 id="1">23:1</h4>
 <div class="arabic">قَدۡ أَفۡلَحَ ٱلۡمُؤۡمِنُونَ</div></p>
@@ -19692,9 +19655,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="24">24</h1>
-
-<h3>The Light</h3>
+<h2>The Light</h2>
 
 <p><h4 id="1">24:1</h4>
 <div class="arabic">سُورَةٌ أَنزَلۡنَٰهَا وَفَرَضۡنَٰهَا وَأَنزَلۡنَا فِيهَآ ءَايَٰتِۭ بَيِّنَٰتٖ لَّعَلَّكُمۡ تَذَكَّرُونَ</div></p>
@@ -20144,9 +20105,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="25">25</h1>
-
-<h3>The Criterion</h3>
+<h2>The Criterion</h2>
 
 <p><h4 id="1">25:1</h4>
 <div class="arabic">تَبَارَكَ ٱلَّذِي نَزَّلَ ٱلۡفُرۡقَانَ عَلَىٰ عَبۡدِهِۦ لِيَكُونَ لِلۡعَٰلَمِينَ نَذِيرًا</div></p>
@@ -20687,9 +20646,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="26">26</h1>
-
-<h3>The Poets</h3>
+<h2>The Poets</h2>
 
 <p><h4 id="1">26:1</h4>
 <div class="arabic">طسٓمٓ</div></p>
@@ -22280,9 +22237,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="27">27</h1>
-
-<h3>The Ant</h3>
+<h2>The Ant</h2>
 
 <p><h4 id="1">27:1</h4>
 <div class="arabic">طسٓۚ تِلۡكَ ءَايَٰتُ ٱلۡقُرۡءَانِ وَكِتَابٖ مُّبِينٍ</div></p>
@@ -22935,9 +22890,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="28">28</h1>
-
-<h3>The Stories</h3>
+<h2>The Stories</h2>
 
 <p><h4 id="1">28:1</h4>
 <div class="arabic">طسٓمٓ</div></p>
@@ -23555,9 +23508,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="29">29</h1>
-
-<h3>The Spider</h3>
+<h2>The Spider</h2>
 
 <p><h4 id="1">29:1</h4>
 <div class="arabic">الٓمٓ</div></p>
@@ -24042,9 +23993,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="30">30</h1>
-
-<h3>The Romans</h3>
+<h2>The Romans</h2>
 
 <p><h4 id="1">30:1</h4>
 <div class="arabic">الٓمٓ</div></p>
@@ -24466,9 +24415,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="31">31</h1>
-
-<h3>Luqman</h3>
+<h2>Luqman</h2>
 
 <p><h4 id="1">31:1</h4>
 <div class="arabic">الٓمٓ</div></p>
@@ -24708,9 +24655,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="32">32</h1>
-
-<h3>The Prostration</h3>
+<h2>The Prostration</h2>
 
 <p><h4 id="1">32:1</h4>
 <div class="arabic">الٓمٓ</div></p>
@@ -24922,9 +24867,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="33">33</h1>
-
-<h3>The Combined Forces</h3>
+<h2>The Combined Forces</h2>
 
 <p><h4 id="1">33:1</h4>
 <div class="arabic">يَـٰٓأَيُّهَا ٱلنَّبِيُّ ٱتَّقِ ٱللَّهَ وَلَا تُطِعِ ٱلۡكَٰفِرِينَ وَٱلۡمُنَٰفِقِينَۚ إِنَّ ٱللَّهَ كَانَ عَلِيمًا حَكِيمٗا</div></p>
@@ -25437,9 +25380,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="34">34</h1>
-
-<h3>Sheba</h3>
+<h2>Sheba</h2>
 
 <p><h4 id="1">34:1</h4>
 <div class="arabic">ٱلۡحَمۡدُ لِلَّهِ ٱلَّذِي لَهُۥ مَا فِي ٱلسَّمَٰوَٰتِ وَمَا فِي ٱلۡأَرۡضِ وَلَهُ ٱلۡحَمۡدُ فِي ٱلۡأٓخِرَةِۚ وَهُوَ ٱلۡحَكِيمُ ٱلۡخَبِيرُ</div></p>
@@ -25819,9 +25760,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="35">35</h1>
-
-<h3>Cityator</h3>
+<h2>Cityator</h2>
 
 <p><h4 id="1">35:1</h4>
 <div class="arabic">ٱلۡحَمۡدُ لِلَّهِ فَاطِرِ ٱلسَّمَٰوَٰتِ وَٱلۡأَرۡضِ جَاعِلِ ٱلۡمَلَـٰٓئِكَةِ رُسُلًا أُوْلِيٓ أَجۡنِحَةٖ مَّثۡنَىٰ وَثُلَٰثَ وَرُبَٰعَۚ يَزِيدُ فِي ٱلۡخَلۡقِ مَا يَشَآءُۚ إِنَّ ٱللَّهَ عَلَىٰ كُلِّ شَيۡءٖ قَدِيرٞ</div></p>
@@ -26138,9 +26077,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="36">36</h1>
-
-<h3>Ya Sin</h3>
+<h2>Ya Sin</h2>
 
 <p><h4 id="1">36:1</h4>
 <div class="arabic">يسٓ</div></p>
@@ -26723,9 +26660,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="37">37</h1>
-
-<h3>Those who set the Ranks</h3>
+<h2>Those who set the Ranks</h2>
 
 <p><h4 id="1">37:1</h4>
 <div class="arabic">وَٱلصَّـٰٓفَّـٰتِ صَفّٗا</div></p>
@@ -28001,9 +27936,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="38">38</h1>
-
-<h3>The Letter "Saad"</h3>
+<h2>The Letter "Saad"</h2>
 
 <p><h4 id="1">38:1</h4>
 <div class="arabic">صٓۚ وَٱلۡقُرۡءَانِ ذِي ٱلذِّكۡرِ</div></p>
@@ -28621,9 +28554,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="39">39</h1>
-
-<h3>The Troops</h3>
+<h2>The Troops</h2>
 
 <p><h4 id="1">39:1</h4>
 <div class="arabic">تَنزِيلُ ٱلۡكِتَٰبِ مِنَ ٱللَّهِ ٱلۡعَزِيزِ ٱلۡحَكِيمِ</div></p>
@@ -29150,9 +29081,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="40">40</h1>
-
-<h3>The Forgiver</h3>
+<h2>The Forgiver</h2>
 
 <p><h4 id="1">40:1</h4>
 <div class="arabic">حمٓ</div></p>
@@ -29749,9 +29678,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="41">41</h1>
-
-<h3>Explained in Detail</h3>
+<h2>Explained in Detail</h2>
 
 <p><h4 id="1">41:1</h4>
 <div class="arabic">حمٓ</div></p>
@@ -30131,9 +30058,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="42">42</h1>
-
-<h3>The Consultation</h3>
+<h2>The Consultation</h2>
 
 <p><h4 id="1">42:1</h4>
 <div class="arabic">حمٓ</div></p>
@@ -30506,9 +30431,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="43">43</h1>
-
-<h3>The Ornaments of Gold</h3>
+<h2>The Ornaments of Gold</h2>
 
 <p><h4 id="1">43:1</h4>
 <div class="arabic">حمٓ</div></p>
@@ -31133,9 +31056,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="44">44</h1>
-
-<h3>The Smoke</h3>
+<h2>The Smoke</h2>
 
 <p><h4 id="1">44:1</h4>
 <div class="arabic">حمٓ</div></p>
@@ -31550,9 +31471,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="45">45</h1>
-
-<h3>The Crouching</h3>
+<h2>The Crouching</h2>
 
 <p><h4 id="1">45:1</h4>
 <div class="arabic">حمٓ</div></p>
@@ -31813,9 +31732,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="46">46</h1>
-
-<h3>The Wind-Curved Sandhills</h3>
+<h2>The Wind-Curved Sandhills</h2>
 
 <p><h4 id="1">46:1</h4>
 <div class="arabic">حمٓ</div></p>
@@ -32062,9 +31979,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="47">47</h1>
-
-<h3>Muhammad</h3>
+<h2>Muhammad</h2>
 
 <p><h4 id="1">47:1</h4>
 <div class="arabic">ٱلَّذِينَ كَفَرُواْ وَصَدُّواْ عَن سَبِيلِ ٱللَّهِ أَضَلَّ أَعۡمَٰلَهُمۡ</div></p>
@@ -32332,9 +32247,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="48">48</h1>
-
-<h3>The Victory</h3>
+<h2>The Victory</h2>
 
 <p><h4 id="1">48:1</h4>
 <div class="arabic">إِنَّا فَتَحۡنَا لَكَ فَتۡحٗا مُّبِينٗا</div></p>
@@ -32539,9 +32452,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="49">49</h1>
-
-<h3>The Rooms</h3>
+<h2>The Rooms</h2>
 
 <p><h4 id="1">49:1</h4>
 <div class="arabic">يَـٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُواْ لَا تُقَدِّمُواْ بَيۡنَ يَدَيِ ٱللَّهِ وَرَسُولِهِۦۖ وَٱتَّقُواْ ٱللَّهَۚ إِنَّ ٱللَّهَ سَمِيعٌ عَلِيمٞ</div></p>
@@ -32669,9 +32580,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="50">50</h1>
-
-<h3>The Letter "Qaf"</h3>
+<h2>The Letter "Qaf"</h2>
 
 <p><h4 id="1">50:1</h4>
 <div class="arabic">قٓۚ وَٱلۡقُرۡءَانِ ٱلۡمَجِيدِ</div></p>
@@ -32988,9 +32897,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="51">51</h1>
-
-<h3>The Winnowing Winds</h3>
+<h2>The Winnowing Winds</h2>
 
 <p><h4 id="1">51:1</h4>
 <div class="arabic">وَٱلذَّـٰرِيَٰتِ ذَرۡوٗا</div></p>
@@ -33412,9 +33319,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="52">52</h1>
-
-<h3>The Mount</h3>
+<h2>The Mount</h2>
 
 <p><h4 id="1">52:1</h4>
 <div class="arabic">وَٱلطُّورِ</div></p>
@@ -33759,9 +33664,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="53">53</h1>
-
-<h3>The Star</h3>
+<h2>The Star</h2>
 
 <p><h4 id="1">53:1</h4>
 <div class="arabic">وَٱلنَّجۡمِ إِذَا هَوَىٰ</div></p>
@@ -34197,9 +34100,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="54">54</h1>
-
-<h3>The Moon</h3>
+<h2>The Moon</h2>
 
 <p><h4 id="1">54:1</h4>
 <div class="arabic">ٱقۡتَرَبَتِ ٱلسَّاعَةُ وَٱنشَقَّ ٱلۡقَمَرُ</div></p>
@@ -34586,9 +34487,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="55">55</h1>
-
-<h3>The Beneficent</h3>
+<h2>The Beneficent</h2>
 
 <p><h4 id="1">55:1</h4>
 <div class="arabic">ٱلرَّحۡمَٰنُ</div></p>
@@ -35136,9 +35035,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="56">56</h1>
-
-<h3>The Inevitable</h3>
+<h2>The Inevitable</h2>
 
 <p><h4 id="1">56:1</h4>
 <div class="arabic">إِذَا وَقَعَتِ ٱلۡوَاقِعَةُ</div></p>
@@ -35812,9 +35709,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="57">57</h1>
-
-<h3>The Iron</h3>
+<h2>The Iron</h2>
 
 <p><h4 id="1">57:1</h4>
 <div class="arabic">سَبَّحَ لِلَّهِ مَا فِي ٱلسَّمَٰوَٰتِ وَٱلۡأَرۡضِۖ وَهُوَ ٱلۡعَزِيزُ ٱلۡحَكِيمُ</div></p>
@@ -36019,9 +35914,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="58">58</h1>
-
-<h3>The Pleading Woman</h3>
+<h2>The Pleading Woman</h2>
 
 <p><h4 id="1">58:1</h4>
 <div class="arabic">قَدۡ سَمِعَ ٱللَّهُ قَوۡلَ ٱلَّتِي تُجَٰدِلُكَ فِي زَوۡجِهَا وَتَشۡتَكِيٓ إِلَى ٱللَّهِ وَٱللَّهُ يَسۡمَعُ تَحَاوُرَكُمَآۚ إِنَّ ٱللَّهَ سَمِيعُۢ بَصِيرٌ</div></p>
@@ -36177,9 +36070,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="59">59</h1>
-
-<h3>The Exile</h3>
+<h2>The Exile</h2>
 
 <p><h4 id="1">59:1</h4>
 <div class="arabic">سَبَّحَ لِلَّهِ مَا فِي ٱلسَّمَٰوَٰتِ وَمَا فِي ٱلۡأَرۡضِۖ وَهُوَ ٱلۡعَزِيزُ ٱلۡحَكِيمُ</div></p>
@@ -36349,9 +36240,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="60">60</h1>
-
-<h3>She that is to be examined</h3>
+<h2>She that is to be examined</h2>
 
 <p><h4 id="1">60:1</h4>
 <div class="arabic">يَـٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُواْ لَا تَتَّخِذُواْ عَدُوِّي وَعَدُوَّكُمۡ أَوۡلِيَآءَ تُلۡقُونَ إِلَيۡهِم بِٱلۡمَوَدَّةِ وَقَدۡ كَفَرُواْ بِمَا جَآءَكُم مِّنَ ٱلۡحَقِّ يُخۡرِجُونَ ٱلرَّسُولَ وَإِيَّاكُمۡ أَن تُؤۡمِنُواْ بِٱللَّهِ رَبِّكُمۡ إِن كُنتُمۡ خَرَجۡتُمۡ جِهَٰدٗا فِي سَبِيلِي وَٱبۡتِغَآءَ مَرۡضَاتِيۚ تُسِرُّونَ إِلَيۡهِم بِٱلۡمَوَدَّةِ وَأَنَا۠ أَعۡلَمُ بِمَآ أَخۡفَيۡتُمۡ وَمَآ أَعۡلَنتُمۡۚ وَمَن يَفۡعَلۡهُ مِنكُمۡ فَقَدۡ ضَلَّ سَوَآءَ ٱلسَّبِيلِ</div></p>
@@ -36444,9 +36333,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="61">61</h1>
-
-<h3>The Ranks</h3>
+<h2>The Ranks</h2>
 
 <p><h4 id="1">61:1</h4>
 <div class="arabic">سَبَّحَ لِلَّهِ مَا فِي ٱلسَّمَٰوَٰتِ وَمَا فِي ٱلۡأَرۡضِۖ وَهُوَ ٱلۡعَزِيزُ ٱلۡحَكِيمُ</div></p>
@@ -36546,9 +36433,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="62">62</h1>
-
-<h3>The Congregation, Friday</h3>
+<h2>The Congregation, Friday</h2>
 
 <p><h4 id="1">62:1</h4>
 <div class="arabic">يُسَبِّحُ لِلَّهِ مَا فِي ٱلسَّمَٰوَٰتِ وَمَا فِي ٱلۡأَرۡضِ ٱلۡمَلِكِ ٱلۡقُدُّوسِ ٱلۡعَزِيزِ ٱلۡحَكِيمِ</div></p>
@@ -36627,9 +36512,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="63">63</h1>
-
-<h3>The Hypocrites</h3>
+<h2>The Hypocrites</h2>
 
 <p><h4 id="1">63:1</h4>
 <div class="arabic">إِذَا جَآءَكَ ٱلۡمُنَٰفِقُونَ قَالُواْ نَشۡهَدُ إِنَّكَ لَرَسُولُ ٱللَّهِۗ وَٱللَّهُ يَعۡلَمُ إِنَّكَ لَرَسُولُهُۥ وَٱللَّهُ يَشۡهَدُ إِنَّ ٱلۡمُنَٰفِقِينَ لَكَٰذِبُونَ</div></p>
@@ -36708,9 +36591,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="64">64</h1>
-
-<h3>The Mutual Disillusion</h3>
+<h2>The Mutual Disillusion</h2>
 
 <p><h4 id="1">64:1</h4>
 <div class="arabic">يُسَبِّحُ لِلَّهِ مَا فِي ٱلسَّمَٰوَٰتِ وَمَا فِي ٱلۡأَرۡضِۖ لَهُ ٱلۡمُلۡكُ وَلَهُ ٱلۡحَمۡدُۖ وَهُوَ عَلَىٰ كُلِّ شَيۡءٖ قَدِيرٌ</div></p>
@@ -36838,9 +36719,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="65">65</h1>
-
-<h3>The Divorce</h3>
+<h2>The Divorce</h2>
 
 <p><h4 id="1">65:1</h4>
 <div class="arabic">يَـٰٓأَيُّهَا ٱلنَّبِيُّ إِذَا طَلَّقۡتُمُ ٱلنِّسَآءَ فَطَلِّقُوهُنَّ لِعِدَّتِهِنَّ وَأَحۡصُواْ ٱلۡعِدَّةَۖ وَٱتَّقُواْ ٱللَّهَ رَبَّكُمۡۖ لَا تُخۡرِجُوهُنَّ مِنۢ بُيُوتِهِنَّ وَلَا يَخۡرُجۡنَ إِلَّآ أَن يَأۡتِينَ بِفَٰحِشَةٖ مُّبَيِّنَةٖۚ وَتِلۡكَ حُدُودُ ٱللَّهِۚ وَمَن يَتَعَدَّ حُدُودَ ٱللَّهِ فَقَدۡ ظَلَمَ نَفۡسَهُۥۚ لَا تَدۡرِي لَعَلَّ ٱللَّهَ يُحۡدِثُ بَعۡدَ ذَٰلِكَ أَمۡرٗا</div></p>
@@ -36926,9 +36805,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="66">66</h1>
-
-<h3>The Prohibition</h3>
+<h2>The Prohibition</h2>
 
 <p><h4 id="1">66:1</h4>
 <div class="arabic">يَـٰٓأَيُّهَا ٱلنَّبِيُّ لِمَ تُحَرِّمُ مَآ أَحَلَّ ٱللَّهُ لَكَۖ تَبۡتَغِي مَرۡضَاتَ أَزۡوَٰجِكَۚ وَٱللَّهُ غَفُورٞ رَّحِيمٞ</div></p>
@@ -37014,9 +36891,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="67">67</h1>
-
-<h3>The Sovereignty</h3>
+<h2>The Sovereignty</h2>
 
 <p><h4 id="1">67:1</h4>
 <div class="arabic">تَبَٰرَكَ ٱلَّذِي بِيَدِهِ ٱلۡمُلۡكُ وَهُوَ عَلَىٰ كُلِّ شَيۡءٖ قَدِيرٌ</div></p>
@@ -37228,9 +37103,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="68">68</h1>
-
-<h3>The Pen</h3>
+<h2>The Pen</h2>
 
 <p><h4 id="1">68:1</h4>
 <div class="arabic">نٓۚ وَٱلۡقَلَمِ وَمَا يَسۡطُرُونَ</div></p>
@@ -37596,9 +37469,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="69">69</h1>
-
-<h3>The Reality</h3>
+<h2>The Reality</h2>
 
 <p><h4 id="1">69:1</h4>
 <div class="arabic">ٱلۡحَآقَّةُ</div></p>
@@ -37964,9 +37835,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="70">70</h1>
-
-<h3>The Ascending Stairways</h3>
+<h2>The Ascending Stairways</h2>
 
 <p><h4 id="1">70:1</h4>
 <div class="arabic">سَأَلَ سَآئِلُۢ بِعَذَابٖ وَاقِعٖ</div></p>
@@ -38276,9 +38145,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="71">71</h1>
-
-<h3>Noah</h3>
+<h2>Noah</h2>
 
 <p><h4 id="1">71:1</h4>
 <div class="arabic">إِنَّآ أَرۡسَلۡنَا نُوحًا إِلَىٰ قَوۡمِهِۦٓ أَنۡ أَنذِرۡ قَوۡمَكَ مِن قَبۡلِ أَن يَأۡتِيَهُمۡ عَذَابٌ أَلِيمٞ</div></p>
@@ -38476,9 +38343,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="72">72</h1>
-
-<h3>The Jinn</h3>
+<h2>The Jinn</h2>
 
 <p><h4 id="1">72:1</h4>
 <div class="arabic">قُلۡ أُوحِيَ إِلَيَّ أَنَّهُ ٱسۡتَمَعَ نَفَرٞ مِّنَ ٱلۡجِنِّ فَقَالُوٓاْ إِنَّا سَمِعۡنَا قُرۡءَانًا عَجَبٗا</div></p>
@@ -38676,9 +38541,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="73">73</h1>
-
-<h3>The Enshrouded One</h3>
+<h2>The Enshrouded One</h2>
 
 <p><h4 id="1">73:1</h4>
 <div class="arabic">يَـٰٓأَيُّهَا ٱلۡمُزَّمِّلُ</div></p>
@@ -38820,9 +38683,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="74">74</h1>
-
-<h3>The Cloaked One</h3>
+<h2>The Cloaked One</h2>
 
 <p><h4 id="1">74:1</h4>
 <div class="arabic">يَـٰٓأَيُّهَا ٱلۡمُدَّثِّرُ</div></p>
@@ -39216,9 +39077,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="75">75</h1>
-
-<h3>The Resurrection</h3>
+<h2>The Resurrection</h2>
 
 <p><h4 id="1">75:1</h4>
 <div class="arabic">لَآ أُقۡسِمُ بِيَوۡمِ ٱلۡقِيَٰمَةِ</div></p>
@@ -39500,9 +39359,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="76">76</h1>
-
-<h3>The Man</h3>
+<h2>The Man</h2>
 
 <p><h4 id="1">76:1</h4>
 <div class="arabic">هَلۡ أَتَىٰ عَلَى ٱلۡإِنسَٰنِ حِينٞ مِّنَ ٱلدَّهۡرِ لَمۡ يَكُن شَيۡـٔٗا مَّذۡكُورًا</div></p>
@@ -39721,9 +39578,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="77">77</h1>
-
-<h3>The Emissaries</h3>
+<h2>The Emissaries</h2>
 
 <p><h4 id="1">77:1</h4>
 <div class="arabic">وَٱلۡمُرۡسَلَٰتِ عُرۡفٗا</div></p>
@@ -40075,9 +39930,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="78">78</h1>
-
-<h3>The Tidings</h3>
+<h2>The Tidings</h2>
 
 <p><h4 id="1">78:1</h4>
 <div class="arabic">عَمَّ يَتَسَآءَلُونَ</div></p>
@@ -40359,9 +40212,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="79">79</h1>
-
-<h3>Those who drag forth</h3>
+<h2>Those who drag forth</h2>
 
 <p><h4 id="1">79:1</h4>
 <div class="arabic">وَٱلنَّـٰزِعَٰتِ غَرۡقٗا</div></p>
@@ -40685,9 +40536,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="80">80</h1>
-
-<h3>He Frowned</h3>
+<h2>He Frowned</h2>
 
 <p><h4 id="1">80:1</h4>
 <div class="arabic">عَبَسَ وَتَوَلَّىٰٓ</div></p>
@@ -40983,9 +40832,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="81">81</h1>
-
-<h3>The Overthrowing</h3>
+<h2>The Overthrowing</h2>
 
 <p><h4 id="1">81:1</h4>
 <div class="arabic">إِذَا ٱلشَّمۡسُ كُوِّرَتۡ</div></p>
@@ -41190,9 +41037,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="82">82</h1>
-
-<h3>The Cleaving</h3>
+<h2>The Cleaving</h2>
 
 <p><h4 id="1">82:1</h4>
 <div class="arabic">إِذَا ٱلسَّمَآءُ ٱنفَطَرَتۡ</div></p>
@@ -41327,9 +41172,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="83">83</h1>
-
-<h3>The Defrauding</h3>
+<h2>The Defrauding</h2>
 
 <p><h4 id="1">83:1</h4>
 <div class="arabic">وَيۡلٞ لِّلۡمُطَفِّفِينَ</div></p>
@@ -41583,9 +41426,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="84">84</h1>
-
-<h3>The Sundering</h3>
+<h2>The Sundering</h2>
 
 <p><h4 id="1">84:1</h4>
 <div class="arabic">إِذَا ٱلسَّمَآءُ ٱنشَقَّتۡ</div></p>
@@ -41762,9 +41603,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="85">85</h1>
-
-<h3>The Mansions of the Stars</h3>
+<h2>The Mansions of the Stars</h2>
 
 <p><h4 id="1">85:1</h4>
 <div class="arabic">وَٱلسَّمَآءِ ذَاتِ ٱلۡبُرُوجِ</div></p>
@@ -41920,9 +41759,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="86">86</h1>
-
-<h3>The Nightcommer</h3>
+<h2>The Nightcommer</h2>
 
 <p><h4 id="1">86:1</h4>
 <div class="arabic">وَٱلسَّمَآءِ وَٱلطَّارِقِ</div></p>
@@ -42043,9 +41880,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="87">87</h1>
-
-<h3>The Most High</h3>
+<h2>The Most High</h2>
 
 <p><h4 id="1">87:1</h4>
 <div class="arabic">سَبِّحِ ٱسۡمَ رَبِّكَ ٱلۡأَعۡلَى</div></p>
@@ -42180,9 +42015,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="88">88</h1>
-
-<h3>The Overwhelming</h3>
+<h2>The Overwhelming</h2>
 
 <p><h4 id="1">88:1</h4>
 <div class="arabic">هَلۡ أَتَىٰكَ حَدِيثُ ٱلۡغَٰشِيَةِ</div></p>
@@ -42366,9 +42199,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="89">89</h1>
-
-<h3>The Dawn</h3>
+<h2>The Dawn</h2>
 
 <p><h4 id="1">89:1</h4>
 <div class="arabic">وَٱلۡفَجۡرِ</div></p>
@@ -42580,9 +42411,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="90">90</h1>
-
-<h3>The City</h3>
+<h2>The City</h2>
 
 <p><h4 id="1">90:1</h4>
 <div class="arabic">لَآ أُقۡسِمُ بِهَٰذَا ٱلۡبَلَدِ</div></p>
@@ -42724,9 +42553,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="91">91</h1>
-
-<h3>The Sun</h3>
+<h2>The Sun</h2>
 
 <p><h4 id="1">91:1</h4>
 <div class="arabic">وَٱلشَّمۡسِ وَضُحَىٰهَا</div></p>
@@ -42833,9 +42660,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="92">92</h1>
-
-<h3>The Night</h3>
+<h2>The Night</h2>
 
 <p><h4 id="1">92:1</h4>
 <div class="arabic">وَٱلَّيۡلِ إِذَا يَغۡشَىٰ</div></p>
@@ -42984,9 +42809,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="93">93</h1>
-
-<h3>The Morning Hours</h3>
+<h2>The Morning Hours</h2>
 
 <p><h4 id="1">93:1</h4>
 <div class="arabic">وَٱلضُّحَىٰ</div></p>
@@ -43065,9 +42888,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="94">94</h1>
-
-<h3>The Relief</h3>
+<h2>The Relief</h2>
 
 <p><h4 id="1">94:1</h4>
 <div class="arabic">أَلَمۡ نَشۡرَحۡ لَكَ صَدۡرَكَ</div></p>
@@ -43125,9 +42946,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="95">95</h1>
-
-<h3>The Fig</h3>
+<h2>The Fig</h2>
 
 <p><h4 id="1">95:1</h4>
 <div class="arabic">وَٱلتِّينِ وَٱلزَّيۡتُونِ</div></p>
@@ -43185,9 +43004,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="96">96</h1>
-
-<h3>The Clot</h3>
+<h2>The Clot</h2>
 
 <p><h4 id="1">96:1</h4>
 <div class="arabic">ٱقۡرَأۡ بِٱسۡمِ رَبِّكَ ٱلَّذِي خَلَقَ</div></p>
@@ -43322,9 +43139,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="97">97</h1>
-
-<h3>The Power</h3>
+<h2>The Power</h2>
 
 <p><h4 id="1">97:1</h4>
 <div class="arabic">إِنَّآ أَنزَلۡنَٰهُ فِي لَيۡلَةِ ٱلۡقَدۡرِ</div></p>
@@ -43361,9 +43176,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="98">98</h1>
-
-<h3>The Clear Proof</h3>
+<h2>The Clear Proof</h2>
 
 <p><h4 id="1">98:1</h4>
 <div class="arabic">لَمۡ يَكُنِ ٱلَّذِينَ كَفَرُواْ مِنۡ أَهۡلِ ٱلۡكِتَٰبِ وَٱلۡمُشۡرِكِينَ مُنفَكِّينَ حَتَّىٰ تَأۡتِيَهُمُ ٱلۡبَيِّنَةُ</div></p>
@@ -43421,9 +43234,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="99">99</h1>
-
-<h3>The Earthquake</h3>
+<h2>The Earthquake</h2>
 
 <p><h4 id="1">99:1</h4>
 <div class="arabic">إِذَا زُلۡزِلَتِ ٱلۡأَرۡضُ زِلۡزَالَهَا</div></p>
@@ -43481,9 +43292,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="100">100</h1>
-
-<h3>The Courser</h3>
+<h2>The Courser</h2>
 
 <p><h4 id="1">100:1</h4>
 <div class="arabic">وَٱلۡعَٰدِيَٰتِ ضَبۡحٗا</div></p>
@@ -43562,9 +43371,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="101">101</h1>
-
-<h3>The Calamity</h3>
+<h2>The Calamity</h2>
 
 <p><h4 id="1">101:1</h4>
 <div class="arabic">ٱلۡقَارِعَةُ</div></p>
@@ -43643,9 +43450,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="102">102</h1>
-
-<h3>The Rivalry in world increase</h3>
+<h2>The Rivalry in world increase</h2>
 
 <p><h4 id="1">102:1</h4>
 <div class="arabic">أَلۡهَىٰكُمُ ٱلتَّكَاثُرُ</div></p>
@@ -43703,9 +43508,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="103">103</h1>
-
-<h3>The Declining Day</h3>
+<h2>The Declining Day</h2>
 
 <p><h4 id="1">103:1</h4>
 <div class="arabic">وَٱلۡعَصۡرِ</div></p>
@@ -43728,9 +43531,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="104">104</h1>
-
-<h3>The Traducer</h3>
+<h2>The Traducer</h2>
 
 <p><h4 id="1">104:1</h4>
 <div class="arabic">وَيۡلٞ لِّكُلِّ هُمَزَةٖ لُّمَزَةٍ</div></p>
@@ -43795,9 +43596,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="105">105</h1>
-
-<h3>The Elephant</h3>
+<h2>The Elephant</h2>
 
 <p><h4 id="1">105:1</h4>
 <div class="arabic">أَلَمۡ تَرَ كَيۡفَ فَعَلَ رَبُّكَ بِأَصۡحَٰبِ ٱلۡفِيلِ</div></p>
@@ -43834,9 +43633,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="106">106</h1>
-
-<h3>Quraysh</h3>
+<h2>Quraysh</h2>
 
 <p><h4 id="1">106:1</h4>
 <div class="arabic">لِإِيلَٰفِ قُرَيۡشٍ</div></p>
@@ -43866,9 +43663,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="107">107</h1>
-
-<h3>The Small kindnesses</h3>
+<h2>The Small kindnesses</h2>
 
 <p><h4 id="1">107:1</h4>
 <div class="arabic">أَرَءَيۡتَ ٱلَّذِي يُكَذِّبُ بِٱلدِّينِ</div></p>
@@ -43919,9 +43714,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="108">108</h1>
-
-<h3>The Abundance</h3>
+<h2>The Abundance</h2>
 
 <p><h4 id="1">108:1</h4>
 <div class="arabic">إِنَّآ أَعۡطَيۡنَٰكَ ٱلۡكَوۡثَرَ</div></p>
@@ -43944,9 +43737,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="109">109</h1>
-
-<h3>The Disbelievers</h3>
+<h2>The Disbelievers</h2>
 
 <p><h4 id="1">109:1</h4>
 <div class="arabic">قُلۡ يَـٰٓأَيُّهَا ٱلۡكَٰفِرُونَ</div></p>
@@ -43990,9 +43781,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="110">110</h1>
-
-<h3>The Divine Support</h3>
+<h2>The Divine Support</h2>
 
 <p><h4 id="1">110:1</h4>
 <div class="arabic">إِذَا جَآءَ نَصۡرُ ٱللَّهِ وَٱلۡفَتۡحُ</div></p>
@@ -44015,9 +43804,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="111">111</h1>
-
-<h3>The Palm Fiber</h3>
+<h2>The Palm Fiber</h2>
 
 <p><h4 id="1">111:1</h4>
 <div class="arabic">تَبَّتۡ يَدَآ أَبِي لَهَبٖ وَتَبَّ</div></p>
@@ -44054,9 +43841,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="112">112</h1>
-
-<h3>The Sincerity</h3>
+<h2>The Sincerity</h2>
 
 <p><h4 id="1">112:1</h4>
 <div class="arabic">قُلۡ هُوَ ٱللَّهُ أَحَدٌ</div></p>
@@ -44086,9 +43871,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="113">113</h1>
-
-<h3>The Daybreak</h3>
+<h2>The Daybreak</h2>
 
 <p><h4 id="1">113:1</h4>
 <div class="arabic">قُلۡ أَعُوذُ بِرَبِّ ٱلۡفَلَقِ</div></p>
@@ -44125,9 +43908,7 @@ code {
 
 <div class="dots">...</div>
 
-<h1 id="114">114</h1>
-
-<h3>Mankind</h3>
+<h2>Mankind</h2>
 
 <p><h4 id="1">114:1</h4>
 <div class="arabic">قُلۡ أَعُوذُ بِرَبِّ ٱلنَّاسِ</div></p>

@@ -23,10 +23,8 @@ type Names []*Name
 func (name *Name) HTML() string {
 	var data string
 	data += fmt.Sprintln()
-	data += fmt.Sprintf(`<h1 id="%d">%d</h1>`, name.Number, name.Number)
 	data += fmt.Sprintln()
-	data += fmt.Sprintln()
-	data += fmt.Sprintf(`<h3>%s</h3>`, name.Meaning)
+	data += fmt.Sprintf(`<h2>%s</h2>`, name.Meaning)
 	data += fmt.Sprintln()
 
 	data += fmt.Sprintln()

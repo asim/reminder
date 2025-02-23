@@ -19,12 +19,20 @@ var Template = `
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap" rel="stylesheet">
     <style>
     html, body { height: 100%%; width: 100%%; margin: 0; padding: 0; font-family: "Nunito Sans", serif; }
-    a:visited { color:blue; }
-    #head { margin-bottom: 2.5em; }
+    a { color: #333333; }
+    a:visited { color: #333333;}
+    #head {
+      position: fixed;
+      background: white;
+      padding: 15px 0 15px 0;
+      top: 0;
+      width: 100%%;
+    }
     #head a { margin-right: 10px; color: black; font-weight: bold; text-decoration: none; }
     #container { height: 100%%; max-width: 1024px; margin: 0 auto; padding: 25px;}
     #content { padding-bottom: 100px; }
     #content p { padding: 0 0 25px 0; margin: 0; }
+    #title { margin-top: 50px; font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
     li { margin-bottom: 5px; }
 @font-face {
     font-family: 'arabic';
@@ -73,6 +81,7 @@ code {
         <a href="/search">Search</a>
         <button id="install" hidden>Install</button>
       </div>
+      <div id="title">%s</div>
       <div id="content">%s</div>
     </div>
     </div>
@@ -238,7 +247,7 @@ func Render(md []byte) []byte {
 }
 
 func RenderHTML(title, html string) string {
-	return fmt.Sprintf(Template, title, html)
+	return fmt.Sprintf(Template, title, title, html)
 }
 
 func RenderString(v string) string {
@@ -246,5 +255,5 @@ func RenderString(v string) string {
 }
 
 func RenderTemplate(title string, text string) string {
-	return fmt.Sprintf(Template, title, RenderString(text))
+	return fmt.Sprintf(Template, title, title, RenderString(text))
 }

@@ -160,7 +160,7 @@ func main() {
 			about += fmt.Sprintln()
 		}
 
-		ihtml := html.RenderTemplate("Index", about)
+		ihtml := html.RenderTemplate("Home", about)
 
 		ap := api.Load()
 		apiHtml := html.RenderTemplate("API", ap.Markdown())
