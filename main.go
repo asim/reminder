@@ -138,17 +138,7 @@ func main() {
 
 	// render the markdown as html
 	if *GenerateFlag {
-		fmt.Println("Loading data")
-
 		fmt.Println("Generating html")
-		text := q.HTML()
-		name := n.HTML()
-		books := b.Markdown()
-
-		vhtml := html.RenderTemplate("Hadith", books)
-		thtml := html.RenderTemplate("Quran", text)
-		nhtml := html.RenderHTML("Names", name)
-		shtml := html.RenderHTML("Search", html.Search)
 
 		var about string
 
@@ -160,18 +150,15 @@ func main() {
 			about += fmt.Sprintln()
 		}
 
-		ihtml := html.RenderTemplate("Home", about)
-
 		ap := api.Load()
 		apiHtml := html.RenderTemplate("API", ap.Markdown())
+		ihtml := html.RenderTemplate("Home", about)
+		shtml := html.RenderHTML("Search", html.Search)
 
 		// write html files
 		os.WriteFile(filepath.Join(".", "html", "files", "api.html"), []byte(apiHtml), 0644)
 		os.WriteFile(filepath.Join(".", "html", "files", "index.html"), []byte(ihtml), 0644)
 		os.WriteFile(filepath.Join(".", "html", "files", "search.html"), []byte(shtml), 0644)
-		os.WriteFile(filepath.Join(".", "html", "files", "quran.html"), []byte(thtml), 0644)
-		os.WriteFile(filepath.Join(".", "html", "files", "names.html"), []byte(nhtml), 0644)
-		os.WriteFile(filepath.Join(".", "html", "files", "hadith.html"), []byte(vhtml), 0644)
 
 		// write json files
 		os.WriteFile(filepath.Join(".", "html", "files", "quran.json"), q.JSON(), 0644)
@@ -217,9 +204,6 @@ func main() {
 	apiHtml := files.Get("api.html")
 	ihtml := files.Get("index.html")
 	shtml := files.Get("search.html")
-	//thtml := files.Get("quran.html")
-	//nhtml := files.Get("names.html")
-	//vhtml := files.Get("hadith.html")
 	otf := files.Get("arabic.otf")
 	qjson := files.Get("quran.json")
 	njson := files.Get("names.json")
