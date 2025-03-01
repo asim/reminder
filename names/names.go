@@ -4,6 +4,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 //go:embed data/*.json
@@ -16,6 +17,7 @@ type Name struct {
 	Meaning     string `json:"meaning"`
 	Description string `json:"description"`
 	Summary     string `json:"summary"`
+	Location    []string `json:"location"`
 }
 
 type Names []*Name
@@ -37,6 +39,19 @@ func (name *Name) HTML() string {
 	data += fmt.Sprintln(`<h4 class="english">Summary</h4>`)
 	data += fmt.Sprintln()
 	data += fmt.Sprintln(`<div class="english">` + name.Summary + `</div>`)
+	data += fmt.Sprintln()
+	data += fmt.Sprintln(`<h4 class="english">Location</h4>`)
+	data += fmt.Sprintln()
+
+	var locations string
+
+	for _, loc := range name.Location {
+		uri := fmt.Sprintf("/quran/%s", strings.Replace(loc, ":", "/", -1))
+		locations += fmt.Sprintf(`<a href="%s">%s</a>&nbsp;`, uri, loc)
+	}
+	data += fmt.Sprintf(`<div>%s</div>`, locations)
+
+	data += fmt.Sprintln()
 	data += fmt.Sprintln()
 	data += fmt.Sprintln(`<div class="dots">...</div>`)
 	data += fmt.Sprintln()
@@ -114,12 +129,19 @@ func Load() *Names {
 	for _, entry := range d {
 		n := entry.(map[string]interface{})
 		en := n["en"].(map[string]interface{})
+
+		fnd := strings.Replace(n["found"].(string), " ", "", -1)
+		fnd = strings.Replace(fnd, "(", " ", -1)
+		fnd = strings.Replace(fnd, ")", " ", -1)
+		loc := strings.Split(strings.TrimSpace(fnd), " ")
+
 		name := &Name{
 			Number:      int(n["number"].(float64)),
 			English:     n["transliteration"].(string),
 			Arabic:      n["name"].(string),
 			Meaning:     en["meaning"].(string),
 			Description: en["desc"].(string),
+			Location: loc,
 		}
 
 		// try get summary
