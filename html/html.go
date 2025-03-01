@@ -79,7 +79,7 @@ code {
         <a href="/names">Names</a>
         <a href="/hadith">Hadith</a>
         <a href="/search">Search</a>
-        <button id="install" hidden>Install</button>
+        <button id="install" hidden>Install PWA</button>
       </div>
       <div id="title">%s</div>
       <div id="content">%s</div>

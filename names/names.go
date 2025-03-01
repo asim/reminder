@@ -11,12 +11,12 @@ import (
 var files embed.FS
 
 type Name struct {
-	Number      int    `json:"number"`
-	English     string `json:"english"`
-	Arabic      string `json:"arabic"`
-	Meaning     string `json:"meaning"`
-	Description string `json:"description"`
-	Summary     string `json:"summary"`
+	Number      int      `json:"number"`
+	English     string   `json:"english"`
+	Arabic      string   `json:"arabic"`
+	Meaning     string   `json:"meaning"`
+	Description string   `json:"description"`
+	Summary     string   `json:"summary"`
 	Location    []string `json:"location"`
 }
 
@@ -141,7 +141,7 @@ func Load() *Names {
 			Arabic:      n["name"].(string),
 			Meaning:     en["meaning"].(string),
 			Description: en["desc"].(string),
-			Location: loc,
+			Location:    loc,
 		}
 
 		// try get summary
