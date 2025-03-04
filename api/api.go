@@ -46,6 +46,7 @@ var Endpoints = []*Endpoint{
 				{Name: "name", Value: "string", Description: "Name of chapter"},
 				{Name: "number", Value: "int", Description: "Number of the chapter"},
 				{Name: "verses", Value: "array", Description: "Verses in the chapter"},
+				{Name: "english", Value: "string", Description: "Name in english"},
 			},
 		}},
 	},
