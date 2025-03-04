@@ -151,9 +151,9 @@ func main() {
 		}
 
 		ap := api.Load()
-		apiHtml := html.RenderTemplate("API", ap.Markdown())
-		ihtml := html.RenderTemplate("Home", about)
-		shtml := html.RenderHTML("Search", html.Search)
+		apiHtml := html.RenderTemplate("API", "", ap.Markdown())
+		ihtml := html.RenderTemplate("Home", "", about)
+		shtml := html.RenderHTML("Search", "", html.Search)
 
 		// write html files
 		os.WriteFile(filepath.Join(".", "html", "files", "api.html"), []byte(apiHtml), 0644)
@@ -244,7 +244,7 @@ func main() {
 	})
 
 	http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
-		qhtml := html.RenderHTML("Quran", q.TOC())
+		qhtml := html.RenderHTML("Quran", quran.Description, q.TOC())
 
 		w.Write([]byte(qhtml))
 	})
@@ -262,7 +262,7 @@ func main() {
 		}
 
 		head := fmt.Sprintf("%d | Quran", ch)
-		qhtml := html.RenderHTML(head, q.Get(ch).HTML())
+		qhtml := html.RenderHTML(head, "", q.Get(ch).HTML())
 
 		w.Write([]byte(qhtml))
 	})
@@ -294,13 +294,13 @@ func main() {
 		vv := cc.Verses[ve-1]
 
 		head := fmt.Sprintf("%d:%d | Quran", ch, ve)
-		vhtml := html.RenderHTML(head, vv.HTML())
+		vhtml := html.RenderHTML(head, "", vv.HTML())
 
 		w.Write([]byte(vhtml))
 	})
 
 	http.HandleFunc("/names", func(w http.ResponseWriter, r *http.Request) {
-		qhtml := html.RenderHTML("Names", n.TOC())
+		qhtml := html.RenderHTML("Names", names.Description, n.TOC())
 
 		w.Write([]byte(qhtml))
 	})
@@ -318,13 +318,13 @@ func main() {
 		}
 
 		head := fmt.Sprintf("%d | Names", name)
-		qhtml := html.RenderHTML(head, n.Get(name).HTML())
+		qhtml := html.RenderHTML(head, "", n.Get(name).HTML())
 
 		w.Write([]byte(qhtml))
 	})
 
 	http.HandleFunc("/hadith", func(w http.ResponseWriter, r *http.Request) {
-		qhtml := html.RenderHTML("Hadith", b.TOC())
+		qhtml := html.RenderHTML("Hadith", hadith.Description, b.TOC())
 
 		w.Write([]byte(qhtml))
 	})
@@ -342,7 +342,7 @@ func main() {
 		}
 
 		head := fmt.Sprintf("%d | Hadith", ch)
-		qhtml := html.RenderHTML(head, b.Get(ch).HTML())
+		qhtml := html.RenderHTML(head, "", b.Get(ch).HTML())
 
 		w.Write([]byte(qhtml))
 	})

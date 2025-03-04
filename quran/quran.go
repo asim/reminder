@@ -12,6 +12,8 @@ var files embed.FS
 var Bismillah = `بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ`
 var English = `In the Name of Allah—the Most Compassionate, Most Merciful.`
 
+var Description = `The word of God, as revealed to Prophet Muhammad (peace be upon him). It is a guide for Muslims (believers) on faith, morality, and life through its 114 chapters.`
+
 type Chapter struct {
 	Name    string   `json:"name"`
 	Number  int      `json:"number"`

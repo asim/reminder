@@ -10,6 +10,8 @@ import (
 //go:embed data/*.json
 var files embed.FS
 
+var Description = `The "Names of Allah" (Asma al-Husna) refer to the 99 beautiful names of God. Descriptions of God's divine attributes, revealing His nature and qualities.`
+
 type Name struct {
 	Number      int      `json:"number"`
 	English     string   `json:"english"`

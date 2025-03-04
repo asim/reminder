@@ -10,6 +10,8 @@ import (
 //go:embed data/*.json
 var files embed.FS
 
+var Description = `A collection of the Prophet Muhammad's sayings and actions, providing essential context and practical guidance for Islamic practice and belief alongside the Quran.`
+
 type Volume struct {
 	Name  string  `json:"name"`
 	Books []*Book `json:"books"`

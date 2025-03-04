@@ -32,6 +32,7 @@ var Template = `
     #container { height: 100%%; max-width: 1024px; margin: 0 auto; padding: 25px;}
     #content { padding-bottom: 100px; }
     #content p { padding: 0 0 25px 0; margin: 0; }
+    #desc { margin-bottom: 10px; }
     #title { margin-top: 50px; font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
     li { margin-bottom: 5px; }
 @font-face {
@@ -82,6 +83,7 @@ code {
         <button id="install" hidden>Install PWA</button>
       </div>
       <div id="title">%s</div>
+      <div id="desc">%s</div>
       <div id="content">%s</div>
     </div>
     </div>
@@ -246,14 +248,14 @@ func Render(md []byte) []byte {
 	return markdown.Render(doc, renderer)
 }
 
-func RenderHTML(title, html string) string {
-	return fmt.Sprintf(Template, title, title, html)
+func RenderHTML(title, desc, html string) string {
+	return fmt.Sprintf(Template, title, title, desc, html)
 }
 
 func RenderString(v string) string {
 	return string(Render([]byte(v)))
 }
 
-func RenderTemplate(title string, text string) string {
-	return fmt.Sprintf(Template, title, title, RenderString(text))
+func RenderTemplate(title string, desc, text string) string {
+	return fmt.Sprintf(Template, title, title, desc, RenderString(text))
 }

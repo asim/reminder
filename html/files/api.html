@@ -22,6 +22,7 @@
     #container { height: 100%; max-width: 1024px; margin: 0 auto; padding: 25px;}
     #content { padding-bottom: 100px; }
     #content p { padding: 0 0 25px 0; margin: 0; }
+    #desc { margin-bottom: 10px; }
     #title { margin-top: 50px; font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
     li { margin-bottom: 5px; }
 @font-face {
@@ -69,9 +70,10 @@ code {
         <a href="/names">Names</a>
         <a href="/hadith">Hadith</a>
         <a href="/search">Search</a>
-        <button id="install" hidden>Install</button>
+        <button id="install" hidden>Install PWA</button>
       </div>
       <div id="title">API</div>
+      <div id="desc"></div>
       <div id="content"><h1 id="endpoints">Endpoints</h1>
 
 <p>A list of API endpoints</p>
@@ -110,6 +112,7 @@ code {
 <li><code>name</code> - <strong><code>string</code></strong> - Name of chapter</li>
 <li><code>number</code> - <strong><code>int</code></strong> - Number of the chapter</li>
 <li><code>verses</code> - <strong><code>array</code></strong> - Verses in the chapter</li>
+<li><code>english</code> - <strong><code>string</code></strong> - Name in english</li>
 </ul>
 
 <p></p>
