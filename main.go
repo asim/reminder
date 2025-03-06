@@ -140,25 +140,10 @@ func main() {
 	if *GenerateFlag {
 		fmt.Println("Generating html")
 
-		var about string
-
-		for _, q := range questions {
-			a, _ := gen(idx, q)
-			about += fmt.Sprintf("# %s", q)
-			about += fmt.Sprintln()
-			about += fmt.Sprintf("%s", a)
-			about += fmt.Sprintln()
-		}
-
+		// generate api doc
 		ap := api.Load()
 		apiHtml := html.RenderTemplate("API", "", ap.Markdown())
-		ihtml := html.RenderTemplate("Home", "", about)
-		shtml := html.RenderHTML("Search", "", html.Search)
-
-		// write html files
 		os.WriteFile(filepath.Join(".", "html", "files", "api.html"), []byte(apiHtml), 0644)
-		os.WriteFile(filepath.Join(".", "html", "files", "index.html"), []byte(ihtml), 0644)
-		os.WriteFile(filepath.Join(".", "html", "files", "search.html"), []byte(shtml), 0644)
 
 		// write json files
 		os.WriteFile(filepath.Join(".", "html", "files", "quran.json"), q.JSON(), 0644)
@@ -200,10 +185,8 @@ func main() {
 	}
 
 	// load the data from html
-
 	apiHtml := files.Get("api.html")
 	ihtml := files.Get("index.html")
-	shtml := files.Get("search.html")
 	otf := files.Get("arabic.otf")
 	qjson := files.Get("quran.json")
 	njson := files.Get("names.json")
@@ -348,6 +331,7 @@ func main() {
 	})
 
 	http.HandleFunc("/search", func(w http.ResponseWriter, r *http.Request) {
+		shtml := html.RenderHTML("Search", "", html.Search)
 		w.Write([]byte(shtml))
 	})
 
