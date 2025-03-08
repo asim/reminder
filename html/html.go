@@ -43,7 +43,7 @@ var Template = `
 }
 .arabic {
   font-family: 'arabic';
-  font-size: 1.5em;
+  font-size: 1.8em;
 }
 .chapter {
   margin-bottom: 10px;
@@ -65,6 +65,9 @@ code {
   text-align: center;
   margin-bottom: 25px;
   padding: 25px;
+}
+.right {
+  text-align: right;
 }
 @media only screen and (max-width: 600px) {
   #head a { margin-right: 5px; }

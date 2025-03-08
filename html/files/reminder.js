@@ -1,5 +1,5 @@
 var APP_PREFIX = 'reminder_';
-var VERSION = 'version_001';
+var VERSION = 'v1';
 var URLS = [    
   `/`,
   `/index.html`,
@@ -8,19 +8,24 @@ var URLS = [
 ]
 
 var CACHE_NAME = APP_PREFIX + VERSION
+
+async function networkFirst(request) {
+  try {
+    const networkResponse = await fetch(request);
+    if (networkResponse.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, networkResponse.clone());
+    }
+    return networkResponse;
+  } catch (error) {
+    const cachedResponse = await caches.match(request);
+    return cachedResponse || Response.error();
+  }
+}
+
 self.addEventListener('fetch', function (e) {
   console.log('Fetch request : ' + e.request.url);
-  e.respondWith(
-    caches.match(e.request).then(function (request) {
-      if (request) { 
-        console.log('Responding with cache : ' + e.request.url);
-        return request
-      } else {       
-        console.log('File is not cached, fetching : ' + e.request.url);
-        return fetch(e.request)
-      }
-    })
-  )
+  e.respondWith(networkFirst(event.request));
 })
 
 self.addEventListener('install', function (e) {

@@ -49,7 +49,7 @@ func (ch *Chapter) HTML() string {
 
 	if ch.Number != 9 && ch.Number != 1 {
 		data += fmt.Sprintln()
-		data += fmt.Sprintln(`<div class="arabic">` + Bismillah + `</div>`)
+		data += fmt.Sprintln(`<div class="arabic right">` + Bismillah + `</div>`)
 		data += fmt.Sprintln()
 		data += fmt.Sprintln(`<div class="english">` + English + `</div>`)
 		data += fmt.Sprintln()
@@ -60,7 +60,7 @@ func (ch *Chapter) HTML() string {
 		data += fmt.Sprintln()
 		data += fmt.Sprintf(`<h4 id="%d">%d:%d</h4>`, verse.Number, ch.Number, verse.Number)
 		data += fmt.Sprintln()
-		data += fmt.Sprintln(`<div class="arabic">` + verse.Arabic + `</div>`)
+		data += fmt.Sprintln(`<div class="arabic right">` + verse.Arabic + `</div>`)
 		data += fmt.Sprintln()
 		data += fmt.Sprintln(`<div class="english">` + verse.Text + `</div>`)
 		data += fmt.Sprintln()
@@ -79,7 +79,7 @@ func (v *Verse) HTML() string {
 	data += fmt.Sprintln()
 	data += fmt.Sprintf(`<h4>%d:%d</h4>`, v.Chapter, v.Number)
 	data += fmt.Sprintln()
-	data += fmt.Sprintln(`<div class="arabic">` + v.Arabic + `</div>`)
+	data += fmt.Sprintln(`<div class="arabic right">` + v.Arabic + `</div>`)
 	data += fmt.Sprintln()
 	data += fmt.Sprintln(`<div class="english">` + v.Text + `</div>`)
 	data += fmt.Sprintln()
