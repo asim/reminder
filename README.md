@@ -70,3 +70,7 @@ Say,
 “I ask no reward of you for this (Quran) —
 it is a reminder to the whole world.”
 ```
+
+## Community
+
+Come chat on [Discord](https://discord.gg/F3xXRGbp9d)
