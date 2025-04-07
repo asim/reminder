@@ -25,7 +25,7 @@ async function networkFirst(request) {
 
 self.addEventListener('fetch', function (e) {
   console.log('Fetch request : ' + e.request.url);
-  e.respondWith(networkFirst(event.request));
+  e.respondWith(networkFirst(e.request));
 })
 
 self.addEventListener('install', function (e) {
