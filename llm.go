@@ -52,7 +52,7 @@ func askLLM(ctx context.Context, contexts []string, question string) string {
 		},
 	}
 	res, err := openAIClient.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
-		Model:    openai.GPT4o,
+		Model:    openai.GPT4oMini,
 		Messages: messages,
 	})
 	if err != nil {
