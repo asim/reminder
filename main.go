@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -85,23 +84,6 @@ func indexHadith(idx *search.Index, b *hadith.Volumes) {
 			}
 		}
 	}
-}
-
-func gen(idx *search.Index, q string) (string, []string) {
-	res, err := idx.Query(q)
-	if err != nil {
-		return "", nil
-	}
-
-	var contexts []string
-
-	for _, r := range res {
-		b, _ := json.Marshal(r)
-		// TODO: maybe just provide text
-		contexts = append(contexts, string(b))
-	}
-
-	return askLLM(context.TODO(), contexts, q), contexts
 }
 
 func main() {
