@@ -7,26 +7,23 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 
 	"github.com/asim/reminder/api"
+	"github.com/asim/reminder/app"
+	"github.com/asim/reminder/app/files"
 	"github.com/asim/reminder/hadith"
-	"github.com/asim/reminder/html"
-	"github.com/asim/reminder/html/files"
 	"github.com/asim/reminder/names"
 	"github.com/asim/reminder/quran"
 	"github.com/asim/reminder/search"
 )
 
 var (
-	IndexFlag    = flag.Bool("index", false, "Index data for search. Stored at $HOME/reminder.idx")
-	ExportFlag   = flag.Bool("export", false, "Export the index data to $HOME/reminder.idx.gob.gz")
-	ImportFlag   = flag.Bool("import", false, "Import the index data from $HOME/reminder.idx.gob.gz")
-	GenerateFlag = flag.Bool("generate", false, "Generate the html files")
-	ServerFlag   = flag.Bool("serve", false, "Run the server")
+	IndexFlag  = flag.Bool("index", false, "Index data for search. Stored at $HOME/reminder.idx")
+	ExportFlag = flag.Bool("export", false, "Export the index data to $HOME/reminder.idx.gob.gz")
+	ImportFlag = flag.Bool("import", false, "Import the index data from $HOME/reminder.idx.gob.gz")
+	ServerFlag = flag.Bool("serve", false, "Run the server")
 )
 
 var history = map[string][]string{}
@@ -136,22 +133,14 @@ func main() {
 	n := names.Load()
 	b := hadith.Load()
 
-	// render the markdown as html
-	if *GenerateFlag {
-		fmt.Println("Generating html")
+	// generate api doc
+	ap := api.Load()
+	apiHtml := app.RenderTemplate("API", "", ap.Markdown())
 
-		// generate api doc
-		ap := api.Load()
-		apiHtml := html.RenderTemplate("API", "", ap.Markdown())
-		os.WriteFile(filepath.Join(".", "html", "files", "api.html"), []byte(apiHtml), 0644)
-
-		// write json files
-		os.WriteFile(filepath.Join(".", "html", "files", "quran.json"), q.JSON(), 0644)
-		os.WriteFile(filepath.Join(".", "html", "files", "names.json"), n.JSON(), 0644)
-		os.WriteFile(filepath.Join(".", "html", "files", "hadith.json"), b.JSON(), 0644)
-
-		return
-	}
+	// generate json
+	qjson := q.JSON()
+	njson := n.JSON()
+	hjson := b.JSON()
 
 	// index the quran in english
 	indexed := make(chan bool, 1)
@@ -185,12 +174,8 @@ func main() {
 	}
 
 	// load the data from html
-	apiHtml := files.Get("api.html")
 	ihtml := files.Get("index.html")
 	otf := files.Get("arabic.otf")
-	qjson := files.Get("quran.json")
-	njson := files.Get("names.json")
-	hjson := files.Get("hadith.json")
 
 	ico := files.Get("icon-192.png")
 	png := files.Get("reminder.png")
@@ -227,7 +212,7 @@ func main() {
 	})
 
 	http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
-		qhtml := html.RenderHTML("Quran", quran.Description, q.TOC())
+		qhtml := app.RenderHTML("Quran", quran.Description, q.TOC())
 
 		w.Write([]byte(qhtml))
 	})
@@ -245,7 +230,7 @@ func main() {
 		}
 
 		head := fmt.Sprintf("%d | Quran", ch)
-		qhtml := html.RenderHTML(head, "", q.Get(ch).HTML())
+		qhtml := app.RenderHTML(head, "", q.Get(ch).HTML())
 
 		w.Write([]byte(qhtml))
 	})
@@ -277,13 +262,13 @@ func main() {
 		vv := cc.Verses[ve-1]
 
 		head := fmt.Sprintf("%d:%d | Quran", ch, ve)
-		vhtml := html.RenderHTML(head, "", vv.HTML())
+		vhtml := app.RenderHTML(head, "", vv.HTML())
 
 		w.Write([]byte(vhtml))
 	})
 
 	http.HandleFunc("/names", func(w http.ResponseWriter, r *http.Request) {
-		qhtml := html.RenderHTML("Names", names.Description, n.TOC())
+		qhtml := app.RenderHTML("Names", names.Description, n.TOC())
 
 		w.Write([]byte(qhtml))
 	})
@@ -301,13 +286,13 @@ func main() {
 		}
 
 		head := fmt.Sprintf("%d | Names", name)
-		qhtml := html.RenderHTML(head, "", n.Get(name).HTML())
+		qhtml := app.RenderHTML(head, "", n.Get(name).HTML())
 
 		w.Write([]byte(qhtml))
 	})
 
 	http.HandleFunc("/hadith", func(w http.ResponseWriter, r *http.Request) {
-		qhtml := html.RenderHTML("Hadith", hadith.Description, b.TOC())
+		qhtml := app.RenderHTML("Hadith", hadith.Description, b.TOC())
 
 		w.Write([]byte(qhtml))
 	})
@@ -325,13 +310,13 @@ func main() {
 		}
 
 		head := fmt.Sprintf("%d | Hadith", ch)
-		qhtml := html.RenderHTML(head, "", b.Get(ch).HTML())
+		qhtml := app.RenderHTML(head, "", b.Get(ch).HTML())
 
 		w.Write([]byte(qhtml))
 	})
 
 	http.HandleFunc("/search", func(w http.ResponseWriter, r *http.Request) {
-		shtml := html.RenderHTML("Search", "", html.Search)
+		shtml := app.RenderHTML("Search", "", app.SearchTemplate)
 		w.Write([]byte(shtml))
 	})
 
@@ -512,7 +497,7 @@ func main() {
 			}
 
 			answer := askLLM(r.Context(), contexts, q)
-			answerMD := string(html.Render([]byte(answer)))
+			answerMD := string(app.Render([]byte(answer)))
 
 			output, _ := json.Marshal(map[string]interface{}{
 				"q":          q,

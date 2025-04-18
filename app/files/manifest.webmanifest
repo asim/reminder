@@ -1,0 +1,23 @@
+{
+  "name": "Reminder",
+  "short_name": "reminder",
+  "description": "Quran, Hadith and Names of Allah all in one app",
+  "scope": "/",
+  "start_url": "/",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "display": "standalone", 
+  "icons": [
+      {
+        "src": "/icon-192.png",
+        "type": "image/png",
+        "sizes": "192x192",
+	"purpose": "maskable"
+      },
+      {
+        "src": "/reminder.png",
+        "type": "image/png",
+        "sizes": "300x300"
+      }
+  ]
+}
