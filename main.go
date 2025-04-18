@@ -104,19 +104,6 @@ func gen(idx *search.Index, q string) (string, []string) {
 	return askLLM(context.TODO(), contexts, q), contexts
 }
 
-var questions = []string{
-	"What is the Reminder?",
-	"What is the Quran?",
-	"What is the Hadith?",
-	"Who is Allah?",
-	"Who is the prophet Muhammad",
-	"Why do we 'worship' Allah?",
-	"How do we 'worship' Allah?",
-	"What happens when we die?",
-	"How do I remember Allah?",
-	"How do I become Muslim?",
-}
-
 func main() {
 	flag.Parse()
 
