@@ -306,9 +306,10 @@ func main() {
 		w.Write(b)
 	})
 
-	http.HandleFunc("/api/chapters", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/api/quran/chapters", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		w.Write(q.Index().JSON())
+		b, _ := json.Marshal(q.Index().Chapters)
+		w.Write(b)
 	})
 
 	http.HandleFunc("/api/quran/{chapter}/{verse}", func(w http.ResponseWriter, r *http.Request) {
