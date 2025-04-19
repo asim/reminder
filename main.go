@@ -11,7 +11,6 @@ import (
 
 	"github.com/asim/reminder/api"
 	"github.com/asim/reminder/app"
-	"github.com/asim/reminder/app/files"
 	"github.com/asim/reminder/hadith"
 	"github.com/asim/reminder/names"
 	"github.com/asim/reminder/quran"
@@ -144,13 +143,13 @@ func main() {
 	}
 
 	// load the data from html
-	ihtml := files.Get("index.html")
-	otf := files.Get("arabic.otf")
+	ihtml := app.Get("index.html")
+	otf := app.Get("arabic.otf")
 
-	ico := files.Get("icon-192.png")
-	png := files.Get("reminder.png")
-	js := files.Get("reminder.js")
-	mfs := files.Get("manifest.webmanifest")
+	ico := app.Get("icon-192.png")
+	png := app.Get("reminder.png")
+	js := app.Get("reminder.js")
+	mfs := app.Get("manifest.webmanifest")
 
 	http.HandleFunc("/manifest.webmanifest", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(mfs))
@@ -169,7 +168,7 @@ func main() {
 		w.Write([]byte(js))
 	})
 
-	http.HandleFunc("/files/arabic.otf", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/arabic.otf", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(otf))
 	})
 
