@@ -56,11 +56,16 @@ func main() {
 	indexed := make(chan bool, 1)
 
 	if *IndexFlag {
+		// create a separate index that's persisted
+		// this is located in $HOME/reminder.idx
+		// it will need to be exported afterwards
+		sidx := search.New("reminder", true)
+
 		fmt.Println("Indexing data")
 		go func() {
-			indexQuran(idx, q)
-			indexNames(idx, n)
-			indexHadith(idx, b)
+			indexQuran(sidx, q)
+			indexNames(sidx, n)
+			indexHadith(sidx, b)
 			// done
 			close(indexed)
 		}()
@@ -429,4 +434,7 @@ func main() {
 			fmt.Printf("Server error: %v\n", err)
 		}
 	}
+
+	// wait for index
+	<-indexed
 }
