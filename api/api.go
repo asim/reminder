@@ -36,6 +36,21 @@ var Endpoints = []*Endpoint{
 		Description: "Returns the entire Quran",
 	},
 	{
+		Name:        "List of Quran Chapters",
+		Path:        "/api/quran/chapters",
+		Params:      nil,
+		Description: "Returns a list of Quran chapters",
+		Response: []*Value{{
+			Type: "JSON",
+			Params: []*Param{
+				{Name: "name", Value: "string", Description: "Transliterated name of chapter"},
+				{Name: "number", Value: "int", Description: "Number of the chapter"},
+				{Name: "english", Value: "string", Description: "English name of chapter"},
+				{Name: "verse_count", Value: "int", Description: "Number of verses in chapter"},
+			},
+		}},
+	},
+	{
 		Name:        "Quran by Chapter",
 		Path:        "/api/quran/{chapter}",
 		Params:      nil,

@@ -23,6 +23,7 @@ var (
 	ExportFlag = flag.Bool("export", false, "Export the index data to $HOME/reminder.idx.gob.gz")
 	ImportFlag = flag.Bool("import", false, "Import the index data from $HOME/reminder.idx.gob.gz")
 	ServerFlag = flag.Bool("serve", false, "Run the server")
+	EnvFlag    = flag.String("env", "dev", "Set the environment")
 )
 
 var history = map[string][]string{}
@@ -32,7 +33,7 @@ func indexContent(idx *search.Index, md map[string]string, text string) {
 	// TODO: use original json
 	lines := strings.Split(text, "\n")
 
-	fmt.Println("Indexing")
+	fmt.Println("Indexing: ", md["source"], md["chapter"], md["verse"])
 
 	if err := idx.Store(md, lines...); err != nil {
 		fmt.Println("Error indexing", err)
@@ -305,7 +306,12 @@ func main() {
 		}
 
 		b := q.Get(chapter).JSON()
+		w.Write(b)
+	})
 
+	http.HandleFunc("/api/quran/chapters", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		b, _ := json.Marshal(q.Index().Chapters)
 		w.Write(b)
 	})
 
@@ -495,7 +501,22 @@ func main() {
 
 	if *ServerFlag {
 		fmt.Println("Starting server :8080")
+		if err := http.ListenAndServe(":8080", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if *EnvFlag == "dev" {
+				w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+				w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+				w.Header().Set("Access-Control-Allow-Credentials", "true")
 
-		http.ListenAndServe(":8080", nil)
+				if r.Method == "OPTIONS" {
+					w.WriteHeader(http.StatusOK)
+					return
+				}
+			}
+
+			http.DefaultServeMux.ServeHTTP(w, r)
+		})); err != nil {
+			fmt.Printf("Server error: %v\n", err)
+		}
 	}
 }

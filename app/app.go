@@ -45,15 +45,13 @@ var Template = `
   font-family: 'arabic';
   font-size: 1.8em;
 }
-.chapter {
+.chapter a {
+  text-decoration: none;
   margin-bottom: 10px;
   border: 1px solid grey;
   border-radius: 5px;
   padding: 10px;
   display: block;
-}
-.chapter a {
-  text-decoration: none;
 }
 code {
   background: whitesmoke;
