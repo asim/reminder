@@ -183,6 +183,7 @@ func main() {
 
 	http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
 		qhtml := app.RenderHTML("Quran", quran.Description, q.TOC())
+
 		w.Write([]byte(qhtml))
 	})
 
@@ -238,6 +239,7 @@ func main() {
 
 	http.HandleFunc("/names", func(w http.ResponseWriter, r *http.Request) {
 		qhtml := app.RenderHTML("Names", names.Description, n.TOC())
+
 		w.Write([]byte(qhtml))
 	})
 
@@ -261,6 +263,7 @@ func main() {
 
 	http.HandleFunc("/hadith", func(w http.ResponseWriter, r *http.Request) {
 		qhtml := app.RenderHTML("Hadith", hadith.Description, b.TOC())
+
 		w.Write([]byte(qhtml))
 	})
 
@@ -337,6 +340,7 @@ func main() {
 
 		vee := cc.Verses[verse-1]
 		b := vee.JSON()
+
 		w.Write(b)
 	})
 
@@ -360,6 +364,7 @@ func main() {
 		}
 
 		b := b.Get(book).JSON()
+
 		w.Write(b)
 	})
 
