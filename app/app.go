@@ -1,12 +1,20 @@
 package app
 
 import (
+	"embed"
 	"fmt"
 
 	"github.com/gomarkdown/markdown"
 	"github.com/gomarkdown/markdown/html"
 	"github.com/gomarkdown/markdown/parser"
 )
+
+//go:embed html/*.html
+//go:embed html/*.otf
+//go:embed html/*.js
+//go:embed html/*.png
+//go:embed html/manifest.webmanifest
+var files embed.FS
 
 var Template = `
 <html>
@@ -37,7 +45,7 @@ var Template = `
     li { margin-bottom: 5px; }
 @font-face {
     font-family: 'arabic';
-    src: url('/files/arabic.otf') format('opentype');
+    src: url('/arabic.otf') format('opentype');
     font-weight: normal;
     font-style: normal;
 }
@@ -247,6 +255,15 @@ func Render(md []byte) []byte {
 	renderer := html.NewRenderer(opts)
 
 	return markdown.Render(doc, renderer)
+}
+
+func Get(name string) string {
+	f, err := files.ReadFile("html/" + name)
+	if err != nil {
+		return ""
+	}
+
+	return string(f)
 }
 
 func RenderHTML(title, desc, html string) string {
