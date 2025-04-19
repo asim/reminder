@@ -23,16 +23,40 @@ var (
 	ExportFlag = flag.Bool("export", false, "Export the index data to $HOME/reminder.idx.gob.gz")
 	ImportFlag = flag.Bool("import", false, "Import the index data from $HOME/reminder.idx.gob.gz")
 	ServerFlag = flag.Bool("serve", false, "Run the server")
+	EnvFlag    = flag.String("env", "dev", "Set the environment")
 )
 
 var history = map[string][]string{}
+
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		isDev := *EnvFlag == "dev"
+		if !isDev {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
 
 func indexContent(idx *search.Index, md map[string]string, text string) {
 	// index the documents
 	// TODO: use original json
 	lines := strings.Split(text, "\n")
 
-	fmt.Println("Indexing")
+	fmt.Println("Indexing: ", md["source"], md["chapter"], md["verse"])
 
 	if err := idx.Store(md, lines...); err != nil {
 		fmt.Println("Error indexing", err)
@@ -151,42 +175,43 @@ func main() {
 	js := files.Get("reminder.js")
 	mfs := files.Get("manifest.webmanifest")
 
-	http.HandleFunc("/manifest.webmanifest", func(w http.ResponseWriter, r *http.Request) {
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/manifest.webmanifest", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(mfs))
 	})
 
-	http.HandleFunc("/icon-192.png", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/icon-192.png", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(ico))
 	})
 
-	http.HandleFunc("/reminder.png", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/reminder.png", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(png))
 	})
 
-	http.HandleFunc("/reminder.js", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/reminder.js", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/javascript")
 		w.Write([]byte(js))
 	})
 
-	http.HandleFunc("/files/arabic.otf", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/files/arabic.otf", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(otf))
 	})
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(ihtml))
 	})
 
-	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(apiHtml))
 	})
 
-	http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
 		qhtml := app.RenderHTML("Quran", quran.Description, q.TOC())
-
 		w.Write([]byte(qhtml))
 	})
 
-	http.HandleFunc("/quran/{id}", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/quran/{id}", func(w http.ResponseWriter, r *http.Request) {
 		id := r.PathValue("id")
 		if len(id) == 0 {
 			return
@@ -204,7 +229,7 @@ func main() {
 		w.Write([]byte(qhtml))
 	})
 
-	http.HandleFunc("/quran/{id}/{ver}", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/quran/{id}/{ver}", func(w http.ResponseWriter, r *http.Request) {
 		id := r.PathValue("id")
 		if len(id) == 0 {
 			return
@@ -236,13 +261,12 @@ func main() {
 		w.Write([]byte(vhtml))
 	})
 
-	http.HandleFunc("/names", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/names", func(w http.ResponseWriter, r *http.Request) {
 		qhtml := app.RenderHTML("Names", names.Description, n.TOC())
-
 		w.Write([]byte(qhtml))
 	})
 
-	http.HandleFunc("/names/{id}", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/names/{id}", func(w http.ResponseWriter, r *http.Request) {
 		id := r.PathValue("id")
 		if len(id) == 0 {
 			return
@@ -260,13 +284,12 @@ func main() {
 		w.Write([]byte(qhtml))
 	})
 
-	http.HandleFunc("/hadith", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/hadith", func(w http.ResponseWriter, r *http.Request) {
 		qhtml := app.RenderHTML("Hadith", hadith.Description, b.TOC())
-
 		w.Write([]byte(qhtml))
 	})
 
-	http.HandleFunc("/hadith/{book}", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/hadith/{book}", func(w http.ResponseWriter, r *http.Request) {
 		book := r.PathValue("book")
 		if len(book) == 0 {
 			return
@@ -284,16 +307,16 @@ func main() {
 		w.Write([]byte(qhtml))
 	})
 
-	http.HandleFunc("/search", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/search", func(w http.ResponseWriter, r *http.Request) {
 		shtml := app.RenderHTML("Search", "", app.SearchTemplate)
 		w.Write([]byte(shtml))
 	})
 
-	http.HandleFunc("/api/quran", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/quran", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(qjson))
 	})
 
-	http.HandleFunc("/api/quran/{chapter}", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/quran/{chapter}", func(w http.ResponseWriter, r *http.Request) {
 		ch := r.PathValue("chapter")
 		if len(ch) == 0 {
 			return
@@ -305,11 +328,15 @@ func main() {
 		}
 
 		b := q.Get(chapter).JSON()
-
 		w.Write(b)
 	})
 
-	http.HandleFunc("/api/quran/{chapter}/{verse}", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/chapters", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(q.Index().JSON())
+	})
+
+	mux.HandleFunc("/api/quran/{chapter}/{verse}", func(w http.ResponseWriter, r *http.Request) {
 		ch := r.PathValue("chapter")
 		if len(ch) == 0 {
 			return
@@ -334,19 +361,18 @@ func main() {
 
 		vee := cc.Verses[verse-1]
 		b := vee.JSON()
-
 		w.Write(b)
 	})
 
-	http.HandleFunc("/api/names", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/names", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(njson))
 	})
 
-	http.HandleFunc("/api/hadith", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/hadith", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(hjson))
 	})
 
-	http.HandleFunc("/api/hadith/{book}", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/hadith/{book}", func(w http.ResponseWriter, r *http.Request) {
 		bk := r.PathValue("book")
 		if len(bk) == 0 {
 			return
@@ -358,11 +384,10 @@ func main() {
 		}
 
 		b := b.Get(book).JSON()
-
 		w.Write(b)
 	})
 
-	http.HandleFunc("/api/generate", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/generate", func(w http.ResponseWriter, r *http.Request) {
 		b, _ := ioutil.ReadAll(r.Body)
 		var data map[string]interface{}
 		json.Unmarshal(b, &data)
@@ -379,7 +404,7 @@ func main() {
 		w.Write([]byte(answer))
 	})
 
-	http.HandleFunc("/api/translate", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/translate", func(w http.ResponseWriter, r *http.Request) {
 		b, _ := ioutil.ReadAll(r.Body)
 		var data map[string]interface{}
 		json.Unmarshal(b, &data)
@@ -399,7 +424,7 @@ func main() {
 		w.Write([]byte(answer))
 	})
 
-	http.HandleFunc("/api/search", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/search", func(w http.ResponseWriter, r *http.Request) {
 		select {
 		case <-indexed:
 		default:
@@ -495,7 +520,8 @@ func main() {
 
 	if *ServerFlag {
 		fmt.Println("Starting server :8080")
-
-		http.ListenAndServe(":8080", nil)
+		if err := http.ListenAndServe(":8080", corsMiddleware(mux)); err != nil {
+			fmt.Printf("Server error: %v\n", err)
+		}
 	}
 }

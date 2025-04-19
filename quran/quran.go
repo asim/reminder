@@ -15,10 +15,11 @@ var English = `In the Name of Allah—the Most Compassionate, Most Merciful.`
 var Description = `The word of God, as revealed to Prophet Muhammad (peace be upon him). It is a guide for Muslims (believers) on faith, morality, and life through its 114 chapters.`
 
 type Chapter struct {
-	Name    string   `json:"name"`
-	Number  int      `json:"number"`
-	Verses  []*Verse `json:"verses,omitempty"`
-	English string   `json:"english"`
+	Name       string   `json:"name"`
+	Number     int      `json:"number"`
+	Verses     []*Verse `json:"verses,omitempty"`
+	English    string   `json:"english"`
+	VerseCount int      `json:"verse_count"`
 }
 
 type Verse struct {
@@ -46,14 +47,6 @@ func (ch *Chapter) HTML() string {
 	data += fmt.Sprintln()
 	data += fmt.Sprintf(`<h3>%s</h3>`, ch.Name)
 	data += fmt.Sprintln()
-
-	if ch.Number != 9 && ch.Number != 1 {
-		data += fmt.Sprintln()
-		data += fmt.Sprintln(`<div class="arabic right">` + Bismillah + `</div>`)
-		data += fmt.Sprintln()
-		data += fmt.Sprintln(`<div class="english">` + English + `</div>`)
-		data += fmt.Sprintln()
-	}
 
 	// max 286 ayahs
 	for _, verse := range ch.Verses {
@@ -99,8 +92,10 @@ func (q *Quran) Index() *Quran {
 
 	for _, ch := range q.Chapters {
 		chapter := &Chapter{
-			Name:   ch.Name,
-			Number: ch.Number,
+			Name:       ch.Name,
+			Number:     ch.Number,
+			English:    ch.English,
+			VerseCount: len(ch.Verses),
 		}
 		nq.Chapters = append(nq.Chapters, chapter)
 	}
@@ -196,6 +191,16 @@ func Load() *Quran {
 
 		arabicText := arabic[fmt.Sprintf("%d", chapter)].([]interface{})
 
+		// Add Bismillah as first verse for all chapters except 1 and 9
+		if chapter != 1 && chapter != 9 {
+			verses = append(verses, &Verse{
+				Chapter: chapter,
+				Number:  1,
+				Text:    English,
+				Arabic:  Bismillah,
+			})
+		}
+
 		for i, ayah := range data {
 			arabicAyah := arabicText[i].(map[string]interface{})
 			ch := int(arabicAyah["chapter"].(float64))
@@ -211,9 +216,14 @@ func Load() *Quran {
 				panic("arabic verse mismatch")
 			}
 
+			verseNum := num
+			if chapter != 1 && chapter != 9 {
+				verseNum++
+			}
+
 			verses = append(verses, &Verse{
 				Chapter: chapter,
-				Number:  num,
+				Number:  verseNum,
 				Text:    ayah.([]interface{})[1].(string),
 				Arabic:  ar,
 			})
@@ -221,10 +231,11 @@ func Load() *Quran {
 
 		// set the name
 		q.Chapters = append(q.Chapters, &Chapter{
-			Name:    name,
-			Number:  chapter,
-			Verses:  verses,
-			English: english,
+			Name:       name,
+			Number:     chapter,
+			Verses:     verses,
+			English:    english,
+			VerseCount: len(verses),
 		})
 
 	}
