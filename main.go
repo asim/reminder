@@ -143,38 +143,8 @@ func main() {
 	}
 
 	// load the data from html
-	ihtml := app.Get("index.html")
-	otf := app.Get("arabic.otf")
 
-	ico := app.Get("icon-192.png")
-	png := app.Get("reminder.png")
-	js := app.Get("reminder.js")
-	mfs := app.Get("manifest.webmanifest")
-
-	http.HandleFunc("/manifest.webmanifest", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(mfs))
-	})
-
-	http.HandleFunc("/icon-192.png", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(ico))
-	})
-
-	http.HandleFunc("/reminder.png", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(png))
-	})
-
-	http.HandleFunc("/reminder.js", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/javascript")
-		w.Write([]byte(js))
-	})
-
-	http.HandleFunc("/arabic.otf", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(otf))
-	})
-
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(ihtml))
-	})
+	http.Handle("/", app.Serve())
 
 	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(apiHtml))

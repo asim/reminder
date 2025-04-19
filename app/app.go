@@ -3,12 +3,16 @@ package app
 import (
 	"embed"
 	"fmt"
+	"io/fs"
+	"log"
+	"net/http"
 
 	"github.com/gomarkdown/markdown"
 	"github.com/gomarkdown/markdown/html"
 	"github.com/gomarkdown/markdown/parser"
 )
 
+//go:embed html/*.ico
 //go:embed html/*.html
 //go:embed html/*.otf
 //go:embed html/*.js
@@ -276,4 +280,13 @@ func RenderString(v string) string {
 
 func RenderTemplate(title string, desc, text string) string {
 	return fmt.Sprintf(Template, title, title, desc, RenderString(text))
+}
+
+func Serve() http.Handler {
+	var staticFS = fs.FS(files)
+	htmlContent, err := fs.Sub(staticFS, "html")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return http.FileServer(http.FS(htmlContent))
 }
