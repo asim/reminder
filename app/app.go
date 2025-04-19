@@ -243,6 +243,15 @@ document.addEventListener('DOMContentLoaded', function(){
 </script>
 `
 
+func Get(name string) string {
+	f, err := files.ReadFile("html/" + name)
+	if err != nil {
+		return ""
+	}
+
+	return string(f)
+}
+
 func Render(md []byte) []byte {
 	// create markdown parser with extensions
 	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
@@ -255,15 +264,6 @@ func Render(md []byte) []byte {
 	renderer := html.NewRenderer(opts)
 
 	return markdown.Render(doc, renderer)
-}
-
-func Get(name string) string {
-	f, err := files.ReadFile("html/" + name)
-	if err != nil {
-		return ""
-	}
-
-	return string(f)
 }
 
 func RenderHTML(title, desc, html string) string {
