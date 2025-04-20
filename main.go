@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -23,74 +23,14 @@ var (
 	ImportFlag = flag.Bool("import", false, "Import the index data from $HOME/reminder.idx.gob.gz")
 	ServerFlag = flag.Bool("serve", false, "Run the server")
 	EnvFlag    = flag.String("env", "dev", "Set the environment")
+	WebFlag    = flag.Bool("web", false, "Without this flag, the lite version will be served")
 )
 
 var history = map[string][]string{}
 
-func main() {
-	flag.Parse()
-
-	// create a new index
-	idx := search.New("reminder", false)
-
-	// Load the pre-existing data
-	if err := idx.Load(); err != nil {
-		fmt.Println(err)
-	}
-
-	// load data
-	q := quran.Load()
-	n := names.Load()
-	b := hadith.Load()
-
+func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *api.Api) {
 	// generate api doc
-	ap := api.Load()
-	apiHtml := app.RenderTemplate("API", "", ap.Markdown())
-
-	// generate json
-	qjson := q.JSON()
-	njson := n.JSON()
-	hjson := b.JSON()
-
-	// index the quran in english
-	indexed := make(chan bool, 1)
-
-	if *IndexFlag {
-		// create a separate index that's persisted
-		// this is located in $HOME/reminder.idx
-		// it will need to be exported afterwards
-		sidx := search.New("reminder", true)
-
-		fmt.Println("Indexing data")
-		go func() {
-			indexQuran(sidx, q)
-			indexNames(sidx, n)
-			indexHadith(sidx, b)
-			// done
-			close(indexed)
-		}()
-	} else {
-		close(indexed)
-	}
-
-	if *ExportFlag {
-		fmt.Println("Exporting index")
-		if err := idx.Export(); err != nil {
-			fmt.Println(err)
-		}
-		return
-	}
-
-	if *ImportFlag {
-		fmt.Println("Importing index")
-		if err := idx.Import(); err != nil {
-			fmt.Println(err)
-		}
-	}
-
-	// load the data from html
-
-	http.Handle("/", app.Serve())
+	apiHtml := app.RenderTemplate("API", "", a.Markdown())
 
 	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(apiHtml))
@@ -98,7 +38,6 @@ func main() {
 
 	http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
 		qhtml := app.RenderHTML("Quran", quran.Description, q.TOC())
-
 		w.Write([]byte(qhtml))
 	})
 
@@ -154,7 +93,6 @@ func main() {
 
 	http.HandleFunc("/names", func(w http.ResponseWriter, r *http.Request) {
 		qhtml := app.RenderHTML("Names", names.Description, n.TOC())
-
 		w.Write([]byte(qhtml))
 	})
 
@@ -178,7 +116,6 @@ func main() {
 
 	http.HandleFunc("/hadith", func(w http.ResponseWriter, r *http.Request) {
 		qhtml := app.RenderHTML("Hadith", hadith.Description, b.TOC())
-
 		w.Write([]byte(qhtml))
 	})
 
@@ -204,6 +141,72 @@ func main() {
 		shtml := app.RenderHTML("Search", "", app.SearchTemplate)
 		w.Write([]byte(shtml))
 	})
+}
+
+func main() {
+	flag.Parse()
+
+	// create a new index
+	idx := search.New("reminder", false)
+
+	// Load the pre-existing data
+	if err := idx.Load(); err != nil {
+		fmt.Println(err)
+	}
+
+	// load data
+	q := quran.Load()
+	n := names.Load()
+	b := hadith.Load()
+	a := api.Load()
+
+	// generate json
+	qjson := q.JSON()
+	njson := n.JSON()
+	hjson := b.JSON()
+
+	// index the quran in english
+	indexed := make(chan bool, 1)
+
+	if *IndexFlag {
+		// create a separate index that's persisted
+		// this is located in $HOME/reminder.idx
+		// it will need to be exported afterwards
+		sidx := search.New("reminder", true)
+
+		fmt.Println("Indexing data")
+		go func() {
+			indexQuran(sidx, q)
+			indexNames(sidx, n)
+			indexHadith(sidx, b)
+			// done
+			close(indexed)
+		}()
+	} else {
+		close(indexed)
+	}
+
+	if *ExportFlag {
+		fmt.Println("Exporting index")
+		if err := idx.Export(); err != nil {
+			fmt.Println(err)
+		}
+		return
+	}
+
+	if *ImportFlag {
+		fmt.Println("Importing index")
+		if err := idx.Import(); err != nil {
+			fmt.Println(err)
+		}
+	}
+
+	if *WebFlag {
+		http.Handle("/", app.Serve())
+	} else {
+		http.Handle("/", app.ServeLite())
+		registerLiteRoutes(q, n, b, a)
+	}
 
 	http.HandleFunc("/api/quran", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(qjson))
@@ -284,7 +287,7 @@ func main() {
 	})
 
 	http.HandleFunc("/api/generate", func(w http.ResponseWriter, r *http.Request) {
-		b, _ := ioutil.ReadAll(r.Body)
+		b, _ := io.ReadAll(r.Body)
 		var data map[string]interface{}
 		json.Unmarshal(b, &data)
 
@@ -301,7 +304,7 @@ func main() {
 	})
 
 	http.HandleFunc("/api/translate", func(w http.ResponseWriter, r *http.Request) {
-		b, _ := ioutil.ReadAll(r.Body)
+		b, _ := io.ReadAll(r.Body)
 		var data map[string]interface{}
 		json.Unmarshal(b, &data)
 
@@ -361,7 +364,7 @@ func main() {
 		}
 
 		if r.Method == "POST" {
-			b, _ := ioutil.ReadAll(r.Body)
+			b, _ := io.ReadAll(r.Body)
 			var data map[string]interface{}
 			json.Unmarshal(b, &data)
 

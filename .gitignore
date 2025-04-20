@@ -2,3 +2,4 @@ _site
 reminder
 index.md
 .env
+node_modules

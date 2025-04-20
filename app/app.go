@@ -12,13 +12,11 @@ import (
 	"github.com/gomarkdown/markdown/parser"
 )
 
-//go:embed html/*.ico
-//go:embed html/*.html
-//go:embed html/*.otf
-//go:embed html/*.js
-//go:embed html/*.png
-//go:embed html/manifest.webmanifest
-var files embed.FS
+//go:embed html/*
+var htmlFiles embed.FS
+
+//go:embed dist/*
+var distFiles embed.FS
 
 var Template = `
 <html>
@@ -248,7 +246,7 @@ document.addEventListener('DOMContentLoaded', function(){
 `
 
 func Get(name string) string {
-	f, err := files.ReadFile("html/" + name)
+	f, err := htmlFiles.ReadFile("html/" + name)
 	if err != nil {
 		return ""
 	}
@@ -282,11 +280,25 @@ func RenderTemplate(title string, desc, text string) string {
 	return fmt.Sprintf(Template, title, title, desc, RenderString(text))
 }
 
-func Serve() http.Handler {
-	var staticFS = fs.FS(files)
+func ServeLite() http.Handler {
+	var staticFS = fs.FS(htmlFiles)
 	htmlContent, err := fs.Sub(staticFS, "html")
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	return http.FileServer(http.FS(htmlContent))
+}
+
+func Serve() http.Handler {
+	var staticFS = fs.FS(distFiles)
+	htmlContent, err := fs.Sub(staticFS, "dist")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return FileServerWith404(http.FS(htmlContent), func(w http.ResponseWriter, r *http.Request) bool {
+		r.URL.Path = "/__spa-fallback.html"
+		return true
+	})
 }
