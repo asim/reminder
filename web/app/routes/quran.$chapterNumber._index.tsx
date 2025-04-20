@@ -1,9 +1,12 @@
-import type { Route } from '.react-router/types/app/routes/+types/quran.$chapterNumber';
+import type { Route } from '.react-router/types/app/routes/+types/quran.$chapterNumber._index';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { CircleChevronLeft, CircleChevronRight } from 'lucide-react';
-import { Link } from 'react-router';
+import { CircleChevronLeft, CircleChevronRight, Frown } from 'lucide-react';
+import { isRouteErrorResponse, Link } from 'react-router';
+import { PageError } from '~/components/interface/page-error';
 import { PrimaryButton } from '~/components/interface/primary-button';
+import { ChapterHeader } from '~/components/quran/chapter-header';
 import { getChapterOptions } from '~/queries/quran';
+import { FetchError } from '~/utils/http';
 import { queryClient } from '~/utils/query-client';
 
 export async function clientLoader(props: Route.LoaderArgs) {
@@ -25,10 +28,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
 
   return (
     <div className='max-w-4xl mx-auto'>
-      <div className='text-center mb-12'>
-        <h1 className='text-4xl font-bold mb-2'>{data.name}</h1>
-        <div className='text-xl text-gray-600'>Chapter {data.number}</div>
-      </div>
+      <ChapterHeader title={data.name} subtitle={`Chapter ${data.number}`} />
 
       <div className='space-y-8'>
         {data.verses.map((verse) => (
@@ -65,4 +65,8 @@ export default function QuranChapter(props: Route.ComponentProps) {
       </div>
     </div>
   );
+}
+
+export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+  return <PageError error={error} />;
 }

@@ -215,11 +215,15 @@ func main() {
 	http.HandleFunc("/api/quran/{chapter}", func(w http.ResponseWriter, r *http.Request) {
 		ch := r.PathValue("chapter")
 		if len(ch) == 0 {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("{}"))
 			return
 		}
 
 		chapter, _ := strconv.Atoi(ch)
 		if chapter < 1 || chapter > 114 {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("{}"))
 			return
 		}
 
