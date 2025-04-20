@@ -26,7 +26,7 @@ export default function Home() {
           className='flex flex-row gap-3 items-center justify-start py-3 px-5 w-full rounded-lg border border-black bg-black text-white hover:opacity-70 transition-all duration-200 cursor-pointer'
         >
           <Globe2 className='size-4' />
-          <span className='font-medium mr-1'>Application</span> Read Quran,
+          <span className='font-medium mr-1'>App</span> Read Quran,
           hadith, and more
         </Link>
         <Link

@@ -202,7 +202,7 @@ func main() {
 	}
 
 	if *WebFlag {
-		http.Handle("/", app.Serve())
+		http.Handle("/", app.ServeWeb())
 	} else {
 		http.Handle("/", app.ServeLite())
 		registerLiteRoutes(q, n, b, a)

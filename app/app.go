@@ -290,7 +290,7 @@ func ServeLite() http.Handler {
 	return http.FileServer(http.FS(htmlContent))
 }
 
-func Serve() http.Handler {
+func ServeWeb() http.Handler {
 	var staticFS = fs.FS(distFiles)
 	htmlContent, err := fs.Sub(staticFS, "dist")
 	if err != nil {
