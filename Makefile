@@ -15,8 +15,7 @@ dev-frontend:
 
 # Building
 build:
-	go build -o reminder main.go
-
-run:
-	./reminder
-
+	cd web && pnpm run build
+	find app/html -mindepth 1 -not -name '.gitignore' -delete
+	cp -r web/build/client/* app/html/
+	go build -o reminder .
