@@ -1,0 +1,14 @@
+@import 'tailwindcss';
+
+@font-face {
+  font-family: 'arabic';
+  src: url('/fonts/arabic.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+  font-size: 1.5em;
+}
+
+@theme {
+  --font-arabic: 'arabic';
+}

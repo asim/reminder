@@ -12,12 +12,7 @@ import (
 	"github.com/gomarkdown/markdown/parser"
 )
 
-//go:embed html/*.ico
-//go:embed html/*.html
-//go:embed html/*.otf
-//go:embed html/*.js
-//go:embed html/*.png
-//go:embed html/manifest.webmanifest
+//go:embed html/*
 var files embed.FS
 
 var Template = `
