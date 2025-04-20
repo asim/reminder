@@ -32,7 +32,7 @@ func FileServerWith404(root http.FileSystem, handler404 FSHandler404) http.Handl
 	fs := http.FileServer(root)
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		//make sure the url path starts with /
+		// make sure the url path starts with /
 		upath := r.URL.Path
 		if !strings.HasPrefix(upath, "/") {
 			upath = "/" + upath
