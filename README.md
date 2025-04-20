@@ -61,6 +61,25 @@ All queries are returned as JSON
 
 See [`/api`](https://reminder.dev/api) for more details 
 
+## Web
+
+To run the react based web app
+
+```
+# requires pnpm
+make setup
+```
+
+Build the app
+```
+make build
+```
+
+Pass the additional `--web` flag which will replace the built in Go app with the react app
+```
+reminder --web --serve
+```
+
 ## Notes
 
 The Quran says in [6:90](https://reminder.dev/quran/6/90)
