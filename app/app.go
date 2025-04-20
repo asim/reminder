@@ -283,5 +283,9 @@ func Serve() http.Handler {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return http.FileServer(http.FS(htmlContent))
+
+	return FileServerWith404(http.FS(htmlContent), func(w http.ResponseWriter, r *http.Request) bool {
+		r.URL.Path = "/__spa-fallback.html"
+		return true
+	})
 }
