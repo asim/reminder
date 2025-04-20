@@ -1,6 +1,9 @@
-.PHONY: dev dev-backend dev-frontend
+.PHONY: dev dev-backend dev-frontend build setup
 
-# Development mode
+setup:
+	cd web && pnpm install
+
+# Development
 dev:
 	@trap 'kill $$(jobs -p)' EXIT; \
 	make dev-backend & \
