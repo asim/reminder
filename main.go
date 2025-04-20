@@ -28,7 +28,10 @@ var (
 
 var history = map[string][]string{}
 
-func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, apiHtml string) {
+func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *api.Api) {
+	// generate api doc
+	apiHtml := app.RenderTemplate("API", "", a.Markdown())
+
 	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(apiHtml))
 	})
@@ -155,10 +158,7 @@ func main() {
 	q := quran.Load()
 	n := names.Load()
 	b := hadith.Load()
-
-	// generate api doc
-	ap := api.Load()
-	apiHtml := app.RenderTemplate("API", "", ap.Markdown())
+	a := api.Load()
 
 	// generate json
 	qjson := q.JSON()
@@ -201,13 +201,11 @@ func main() {
 		}
 	}
 
-	// load the data from html
-
 	if *WebFlag {
 		http.Handle("/", app.Serve())
 	} else {
 		http.Handle("/", app.ServeLite())
-		registerLiteRoutes(q, n, b, apiHtml)
+		registerLiteRoutes(q, n, b, a)
 	}
 
 	http.HandleFunc("/api/quran", func(w http.ResponseWriter, r *http.Request) {
