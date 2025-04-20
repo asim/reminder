@@ -6,7 +6,7 @@ export default {
   ssr: false,
   prerender: [
     '/',
-    '/app',
-    '/app/quran'
+    '/quran',
+    '/api',
   ]
 } satisfies Config;

@@ -13,7 +13,10 @@ import (
 )
 
 //go:embed html/*
-var files embed.FS
+var htmlFiles embed.FS
+
+//go:embed dist/*
+var distFiles embed.FS
 
 var Template = `
 <html>
@@ -243,7 +246,7 @@ document.addEventListener('DOMContentLoaded', function(){
 `
 
 func Get(name string) string {
-	f, err := files.ReadFile("html/" + name)
+	f, err := htmlFiles.ReadFile("html/" + name)
 	if err != nil {
 		return ""
 	}
@@ -277,9 +280,19 @@ func RenderTemplate(title string, desc, text string) string {
 	return fmt.Sprintf(Template, title, title, desc, RenderString(text))
 }
 
-func Serve() http.Handler {
-	var staticFS = fs.FS(files)
+func ServeLite() http.Handler {
+	var staticFS = fs.FS(htmlFiles)
 	htmlContent, err := fs.Sub(staticFS, "html")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return http.FileServer(http.FS(htmlContent))
+}
+
+func Serve() http.Handler {
+	var staticFS = fs.FS(distFiles)
+	htmlContent, err := fs.Sub(staticFS, "dist")
 	if err != nil {
 		log.Fatal(err)
 	}

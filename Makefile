@@ -19,6 +19,6 @@ dev-frontend:
 # Building
 build:
 	cd web && pnpm run build
-	find app/html -mindepth 1 -not -name '.gitignore' -delete
-	cp -r web/build/client/* app/html/
+	find app/dist -mindepth 1 -not -name '.gitignore' -delete
+	cp -r web/build/client/* app/dist/
 	go build -o reminder .

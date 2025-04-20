@@ -23,6 +23,7 @@ var (
 	ImportFlag = flag.Bool("import", false, "Import the index data from $HOME/reminder.idx.gob.gz")
 	ServerFlag = flag.Bool("serve", false, "Run the server")
 	EnvFlag    = flag.String("env", "dev", "Set the environment")
+	WebFlag    = flag.Bool("web", false, "Without this flag, the lite version will be served")
 )
 
 var history = map[string][]string{}
@@ -90,11 +91,16 @@ func main() {
 
 	// load the data from html
 
-	http.Handle("/", app.Serve())
+	if *WebFlag {
+		http.Handle("/", app.Serve())
+	} else {
+		http.Handle("/", app.ServeLite())
 
-	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(apiHtml))
-	})
+		// web has a separate documentation page for api
+		http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte(apiHtml))
+		})
+	}
 
 	http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
 		qhtml := app.RenderHTML("Quran", quran.Description, q.TOC())

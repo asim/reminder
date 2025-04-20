@@ -40,7 +40,7 @@ export default function Quran() {
           .map((chapter) => (
             <NavLink
               key={chapter.number}
-              to={`/app/quran/${chapter.number}`}
+              to={`/quran/${chapter.number}`}
               className={({ isActive }) =>
                 `py-2 px-4 text-sm border-b border-gray-200 hover:bg-gray-50 cursor-pointer ${
                   isActive ? 'bg-black pointer-events-none text-white' : ''
