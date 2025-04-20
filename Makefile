@@ -11,7 +11,7 @@ dev:
 	wait
 
 dev-backend:
-	go run . --serve
+	go run . --serve --web
 
 dev-frontend:
 	cd web && pnpm run dev

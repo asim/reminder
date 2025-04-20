@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -27,6 +27,118 @@ var (
 )
 
 var history = map[string][]string{}
+
+func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, apiHtml string) {
+	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(apiHtml))
+	})
+
+	http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
+		qhtml := app.RenderHTML("Quran", quran.Description, q.TOC())
+		w.Write([]byte(qhtml))
+	})
+
+	http.HandleFunc("/quran/{id}", func(w http.ResponseWriter, r *http.Request) {
+		id := r.PathValue("id")
+		if len(id) == 0 {
+			return
+		}
+
+		ch, _ := strconv.Atoi(id)
+
+		if ch < 1 || ch > 114 {
+			return
+		}
+
+		head := fmt.Sprintf("%d | Quran", ch)
+		qhtml := app.RenderHTML(head, "", q.Get(ch).HTML())
+
+		w.Write([]byte(qhtml))
+	})
+
+	http.HandleFunc("/quran/{id}/{ver}", func(w http.ResponseWriter, r *http.Request) {
+		id := r.PathValue("id")
+		if len(id) == 0 {
+			return
+		}
+
+		ver := r.PathValue("ver")
+		if len(ver) == 0 {
+			return
+		}
+
+		ch, _ := strconv.Atoi(id)
+		ve, _ := strconv.Atoi(ver)
+
+		if ch < 1 || ch > 114 {
+			return
+		}
+
+		cc := q.Get(ch)
+
+		if ve < 1 || ve > len(cc.Verses) {
+			return
+		}
+
+		vv := cc.Verses[ve-1]
+
+		head := fmt.Sprintf("%d:%d | Quran", ch, ve)
+		vhtml := app.RenderHTML(head, "", vv.HTML())
+
+		w.Write([]byte(vhtml))
+	})
+
+	http.HandleFunc("/names", func(w http.ResponseWriter, r *http.Request) {
+		qhtml := app.RenderHTML("Names", names.Description, n.TOC())
+		w.Write([]byte(qhtml))
+	})
+
+	http.HandleFunc("/names/{id}", func(w http.ResponseWriter, r *http.Request) {
+		id := r.PathValue("id")
+		if len(id) == 0 {
+			return
+		}
+
+		name, _ := strconv.Atoi(id)
+
+		if name < 1 || name > len(*n) {
+			return
+		}
+
+		head := fmt.Sprintf("%d | Names", name)
+		qhtml := app.RenderHTML(head, "", n.Get(name).HTML())
+
+		w.Write([]byte(qhtml))
+	})
+
+	http.HandleFunc("/hadith", func(w http.ResponseWriter, r *http.Request) {
+		qhtml := app.RenderHTML("Hadith", hadith.Description, b.TOC())
+		w.Write([]byte(qhtml))
+	})
+
+	http.HandleFunc("/hadith/{book}", func(w http.ResponseWriter, r *http.Request) {
+		book := r.PathValue("book")
+		if len(book) == 0 {
+			return
+		}
+
+		ch, _ := strconv.Atoi(book)
+
+		if ch < 1 || ch > len(b.Books) {
+			return
+		}
+
+		head := fmt.Sprintf("%d | Hadith", ch)
+		qhtml := app.RenderHTML(head, "", b.Get(ch).HTML())
+
+		w.Write([]byte(qhtml))
+	})
+
+	http.HandleFunc("/search", func(w http.ResponseWriter, r *http.Request) {
+		shtml := app.RenderHTML("Search", "", app.SearchTemplate)
+		w.Write([]byte(shtml))
+	})
+}
 
 func main() {
 	flag.Parse()
@@ -95,121 +207,8 @@ func main() {
 		http.Handle("/", app.Serve())
 	} else {
 		http.Handle("/", app.ServeLite())
-
-		// web has a separate documentation page for api
-		http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte(apiHtml))
-		})
+		registerLiteRoutes(q, n, b, apiHtml)
 	}
-
-	http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
-		qhtml := app.RenderHTML("Quran", quran.Description, q.TOC())
-
-		w.Write([]byte(qhtml))
-	})
-
-	http.HandleFunc("/quran/{id}", func(w http.ResponseWriter, r *http.Request) {
-		id := r.PathValue("id")
-		if len(id) == 0 {
-			return
-		}
-
-		ch, _ := strconv.Atoi(id)
-
-		if ch < 1 || ch > 114 {
-			return
-		}
-
-		head := fmt.Sprintf("%d | Quran", ch)
-		qhtml := app.RenderHTML(head, "", q.Get(ch).HTML())
-
-		w.Write([]byte(qhtml))
-	})
-
-	http.HandleFunc("/quran/{id}/{ver}", func(w http.ResponseWriter, r *http.Request) {
-		id := r.PathValue("id")
-		if len(id) == 0 {
-			return
-		}
-
-		ver := r.PathValue("ver")
-		if len(ver) == 0 {
-			return
-		}
-
-		ch, _ := strconv.Atoi(id)
-		ve, _ := strconv.Atoi(ver)
-
-		if ch < 1 || ch > 114 {
-			return
-		}
-
-		cc := q.Get(ch)
-
-		if ve < 1 || ve > len(cc.Verses) {
-			return
-		}
-
-		vv := cc.Verses[ve-1]
-
-		head := fmt.Sprintf("%d:%d | Quran", ch, ve)
-		vhtml := app.RenderHTML(head, "", vv.HTML())
-
-		w.Write([]byte(vhtml))
-	})
-
-	http.HandleFunc("/names", func(w http.ResponseWriter, r *http.Request) {
-		qhtml := app.RenderHTML("Names", names.Description, n.TOC())
-
-		w.Write([]byte(qhtml))
-	})
-
-	http.HandleFunc("/names/{id}", func(w http.ResponseWriter, r *http.Request) {
-		id := r.PathValue("id")
-		if len(id) == 0 {
-			return
-		}
-
-		name, _ := strconv.Atoi(id)
-
-		if name < 1 || name > len(*n) {
-			return
-		}
-
-		head := fmt.Sprintf("%d | Names", name)
-		qhtml := app.RenderHTML(head, "", n.Get(name).HTML())
-
-		w.Write([]byte(qhtml))
-	})
-
-	http.HandleFunc("/hadith", func(w http.ResponseWriter, r *http.Request) {
-		qhtml := app.RenderHTML("Hadith", hadith.Description, b.TOC())
-
-		w.Write([]byte(qhtml))
-	})
-
-	http.HandleFunc("/hadith/{book}", func(w http.ResponseWriter, r *http.Request) {
-		book := r.PathValue("book")
-		if len(book) == 0 {
-			return
-		}
-
-		ch, _ := strconv.Atoi(book)
-
-		if ch < 1 || ch > len(b.Books) {
-			return
-		}
-
-		head := fmt.Sprintf("%d | Hadith", ch)
-		qhtml := app.RenderHTML(head, "", b.Get(ch).HTML())
-
-		w.Write([]byte(qhtml))
-	})
-
-	http.HandleFunc("/search", func(w http.ResponseWriter, r *http.Request) {
-		shtml := app.RenderHTML("Search", "", app.SearchTemplate)
-		w.Write([]byte(shtml))
-	})
 
 	http.HandleFunc("/api/quran", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(qjson))
@@ -290,7 +289,7 @@ func main() {
 	})
 
 	http.HandleFunc("/api/generate", func(w http.ResponseWriter, r *http.Request) {
-		b, _ := ioutil.ReadAll(r.Body)
+		b, _ := io.ReadAll(r.Body)
 		var data map[string]interface{}
 		json.Unmarshal(b, &data)
 
@@ -307,7 +306,7 @@ func main() {
 	})
 
 	http.HandleFunc("/api/translate", func(w http.ResponseWriter, r *http.Request) {
-		b, _ := ioutil.ReadAll(r.Body)
+		b, _ := io.ReadAll(r.Body)
 		var data map[string]interface{}
 		json.Unmarshal(b, &data)
 
@@ -367,7 +366,7 @@ func main() {
 		}
 
 		if r.Method == "POST" {
-			b, _ := ioutil.ReadAll(r.Body)
+			b, _ := io.ReadAll(r.Body)
 			var data map[string]interface{}
 			json.Unmarshal(b, &data)
 
