@@ -1,13 +1,14 @@
 import type { Route } from '.react-router/types/app/routes/+types/quran.$chapterNumber._index';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { CircleChevronLeft, CircleChevronRight } from 'lucide-react';
-import { Fragment, useState } from 'react';
+import { Fragment } from 'react';
 import { Link } from 'react-router';
 import { PageError } from '~/components/interface/page-error';
 import { PrimaryButton } from '~/components/interface/primary-button';
 import { ChapterHeader } from '~/components/quran/chapter-header';
+import { ViewMode } from '~/components/quran/view-mode';
+import { useQuranViewMode } from '~/hooks/use-quran-view-mode';
 import { getChapterOptions } from '~/queries/quran';
-import { cn } from '~/utils/classname';
 import { queryClient } from '~/utils/query-client';
 
 export async function clientLoader(props: Route.LoaderArgs) {
@@ -19,8 +20,7 @@ export async function clientLoader(props: Route.LoaderArgs) {
 export default function QuranChapter(props: Route.ComponentProps) {
   const { chapterNumber } = props.params;
   const { data } = useSuspenseQuery(getChapterOptions(Number(chapterNumber)));
-
-  const [mode, setMode] = useState<'translation' | 'recitation'>('translation');
+  const [mode, setMode] = useQuranViewMode();
 
   if (!data) {
     return null;
@@ -31,28 +31,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
 
   return (
     <div className='max-w-4xl flex flex-col w-full h-full mx-auto'>
-      <div className='flex items-center justify-center gap-2 mb-8'>
-        <button
-          type='button'
-          onClick={() => setMode('translation')}
-          className={cn(
-            'px-4 py-2 rounded-md cursor-pointer',
-            mode === 'translation' && 'bg-gray-100'
-          )}
-        >
-          Translation Mode
-        </button>
-        <button
-          type='button'
-          onClick={() => setMode('recitation')}
-          className={cn(
-            'px-4 py-2 rounded-md cursor-pointer',
-            mode === 'recitation' && 'bg-gray-100'
-          )}
-        >
-          Recitation Mode
-        </button>
-      </div>
+      <ViewMode mode={mode} onChange={setMode} />
 
       <ChapterHeader title={data.name} subtitle={`Chapter ${data.number}`} />
 
