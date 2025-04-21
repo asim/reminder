@@ -1,8 +1,8 @@
 import type { Route } from '.react-router/types/app/routes/+types/quran';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
-import { useState } from 'react';
-import { NavLink, Outlet } from 'react-router';
+import { useEffect, useRef, useState } from 'react';
+import { NavLink, Outlet, useLocation } from 'react-router';
 import { listSurahsOptions } from '~/queries/quran';
 import { queryClient } from '~/utils/query-client';
 
@@ -13,6 +13,17 @@ export async function clientLoader(props: Route.LoaderArgs) {
 export default function Quran() {
   const { data: chapters } = useSuspenseQuery(listSurahsOptions());
   const [search, setSearch] = useState('');
+
+  const location = useLocation();
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({ top: 0 });
+      containerRef.current.scrollTo({ top: 0 });
+    }
+  }, [search, location.pathname]);
 
   return (
     <div className='flex flex-row h-screen'>
@@ -55,7 +66,10 @@ export default function Quran() {
           ))}
       </div>
 
-      <div className='flex flex-col overflow-y-auto flex-1 px-5 py-5'>
+      <div
+        ref={containerRef}
+        className='flex flex-col overflow-y-auto flex-1 px-5 py-5'
+      >
         <Outlet />
       </div>
     </div>

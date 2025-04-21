@@ -195,7 +195,7 @@ func Load() *Quran {
 		if chapter != 1 && chapter != 9 {
 			verses = append(verses, &Verse{
 				Chapter: chapter,
-				Number:  1,
+				Number:  0,
 				Text:    English,
 				Arabic:  Bismillah,
 			})
@@ -216,14 +216,9 @@ func Load() *Quran {
 				panic("arabic verse mismatch")
 			}
 
-			verseNum := num
-			if chapter != 1 && chapter != 9 {
-				verseNum++
-			}
-
 			verses = append(verses, &Verse{
 				Chapter: chapter,
-				Number:  verseNum,
+				Number:  num,
 				Text:    ayah.([]interface{})[1].(string),
 				Arabic:  ar,
 			})

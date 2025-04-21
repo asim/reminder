@@ -57,10 +57,10 @@ export async function httpCall<ResponseType = AppResponse>(
     const data = doesAcceptHtml ? await response.text() : await response.json();
 
     if (!response.ok) {
-      if (data.errors) {
-        throw new FetchError(response.status, data.message);
+      if (response.status === 404) {
+        throw new FetchError(response.status, 'Not Found');
       } else {
-        throw new Error('An unexpected error occurred');
+        throw new FetchError(response.status, data.message);
       }
     }
 
