@@ -10,6 +10,8 @@ leverage LLMs as a tool for searching. We
 do not offload reasoning to LLMs but they 
 are a new form of useful indexing for search.
 
+## Contents
+
 - [Features](#features)
 - [Install](#install)
 - [OpenAI Usage](#openai-usage)
