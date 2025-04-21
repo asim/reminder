@@ -42,7 +42,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
         >
           {data.verses.map((verse) => (
             <Fragment key={verse.number}>
-              {verse.arabic}
+              {verse.arabic.replace('۞', '')}
               &nbsp;۝&nbsp;&nbsp;
             </Fragment>
           ))}
@@ -58,7 +58,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
               className='border-b border-gray-100 pb-8'
             >
               <div className='text-3xl mb-4 text-right leading-loose font-arabic'>
-                {verse.arabic}
+                {verse.arabic.replace('۞', '')}
               </div>
               <div className='text-xl leading-relaxed'>{verse.text}</div>
               <div className='text-sm text-gray-500 mt-2'>
