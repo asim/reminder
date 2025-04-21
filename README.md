@@ -92,6 +92,8 @@ Pass the additional `--web` flag which will replace the built in Go app with the
 reminder --web --serve
 ```
 
+Otherwise we run a lite embedded Go web app 
+
 ## Notes
 
 The Quran says in [6:90](https://reminder.dev/quran/6/90)
