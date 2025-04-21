@@ -30,7 +30,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
   const nextChapter = Number(chapterNumber) + 1;
 
   return (
-    <div className='max-w-4xl flex flex-col w-full h-full mx-auto'>
+    <div className='max-w-4xl flex flex-col w-full min-h-full mx-auto'>
       <ViewMode mode={mode} onChange={setMode} />
 
       <ChapterHeader title={data.name} subtitle={`Chapter ${data.number}`} />
@@ -77,7 +77,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
         </div>
       )}
 
-      <div className='flex justify-between mt-8 mb-12'>
+      <div className='flex justify-between mt-8 mb-3'>
         <PrimaryButton asChild disabled={previousChapter <= 1}>
           <Link to={`/quran/${previousChapter}`}>
             <CircleChevronLeft className='size-4' />
@@ -92,6 +92,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
           </Link>
         </PrimaryButton>
       </div>
+      &nbsp;
     </div>
   );
 }
