@@ -103,4 +103,4 @@ We have been requested to verify the sources of data
 - [Names of Allah](https://github.com/asim/99-Names-Of-Allah)
 - [Sahih Bukhari](https://github.com/asim/bukhari)
 
-Some summarisation is provided by OpenAI but all sources of truth are authentic
+Summarisation is provided by OpenAI but all sources of truth are authentic
