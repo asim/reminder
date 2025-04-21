@@ -10,6 +10,16 @@ leverage LLMs as a tool for searching. We
 do not offload reasoning to LLMs but they 
 are a new form of useful indexing for search.
 
+- [Features](#features)
+- [Install](#install)
+- [OpenAI Usage](#openai-usage)
+- [Server](#server)
+- [API](#api)
+- [Web](#web)
+- [Notes](#notes)
+- [Community](#community)
+- [Sources](#sources)
+
 ## Features
 
 - Quran in English & Arabic
