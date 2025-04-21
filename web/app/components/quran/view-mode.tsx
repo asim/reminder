@@ -1,7 +1,7 @@
 import { cn } from '~/utils/classname';
-import { Languages, Book } from 'lucide-react';
+import { Languages, Book, BookA } from 'lucide-react';
 
-export type ViewMode = 'translation' | 'recitation';
+export type ViewMode = 'translation' | 'recitation' | 'english';
 
 type ViewModeProps = {
   mode: ViewMode;
@@ -9,8 +9,9 @@ type ViewModeProps = {
 };
 
 const MODES: Array<{ id: ViewMode; icon: React.ReactNode }> = [
-  { id: 'translation', icon: <Languages className="size-3.5" /> },
-  { id: 'recitation', icon: <Book className="size-3.5" /> }
+  { id: 'translation', icon: <Languages className='size-3.5' /> },
+  { id: 'recitation', icon: <Book className='size-3.5' /> },
+  { id: 'english', icon: <BookA className='size-3.5' /> },
 ];
 
 export function ViewMode(props: ViewModeProps) {

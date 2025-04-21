@@ -49,6 +49,14 @@ export default function QuranChapter(props: Route.ComponentProps) {
         </div>
       )}
 
+      {mode === 'english' && (
+        <div className='flex flex-grow flex-wrap text-left text-xl leading-loose'>
+          {data.verses.map((verse) => (
+            <Fragment key={verse.number}>{verse.text}&nbsp;</Fragment>
+          ))}
+        </div>
+      )}
+
       {mode == 'translation' && (
         <div className='space-y-8'>
           {data.verses.map((verse) => (
