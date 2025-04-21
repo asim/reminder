@@ -93,3 +93,14 @@ it is a reminder to the whole world.”
 ## Community
 
 Come chat on [Discord](https://discord.gg/F3xXRGbp9d)
+
+## Sources
+
+We have been requested to verify the sources of data
+
+- [Arabic Quran](https://github.com/asim/quran-json-arabic)
+- [English Quran](https://github.com/asim/quran-json)
+- [Names of Allah](https://github.com/asim/99-Names-Of-Allah)
+- [Sahih Bukhari](https://github.com/asim/bukhari)
+
+Some summarisation is provided by OpenAI but all sources of truth are authentic
