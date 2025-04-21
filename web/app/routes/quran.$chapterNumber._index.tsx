@@ -35,7 +35,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
 
       <ChapterHeader title={data.name} subtitle={`Chapter ${data.number}`} />
 
-      {mode === 'recitation' && (
+      {mode === 'arabic' && (
         <div
           dir='rtl'
           className='flex flex-grow flex-wrap font-arabic text-right text-3xl leading-loose'
