@@ -270,6 +270,12 @@ func main() {
 		w.Write([]byte(njson))
 	})
 
+	http.HandleFunc("/api/hadith/books", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		b, _ := json.Marshal(b.Index().Books)
+		w.Write(b)
+	})
+
 	http.HandleFunc("/api/hadith", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(hjson))
 	})

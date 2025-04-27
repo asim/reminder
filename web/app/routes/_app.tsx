@@ -13,7 +13,7 @@ export default function AppLayout() {
         </Link>
         <Link
           className='bg-white text-black px-2 py-0.5 rounded-md text-xs'
-          to='/hadith'
+          to='/hadith/1'
         >
           Hadith
         </Link>
