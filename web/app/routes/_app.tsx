@@ -1,4 +1,4 @@
-import { Code, MessageCircle } from 'lucide-react';
+import { Code, Search } from 'lucide-react';
 import { Outlet, NavLink } from 'react-router';
 import { cn } from '~/utils/classname';
 
@@ -25,9 +25,9 @@ export default function AppLayout() {
         </NavLink>
 
         <span className='text-gray-400 mx-2'>/</span>
-        <NavLink className={buttonClass} to='/chat'>
-          <MessageCircle className='size-3' />
-          Chat with AI
+        <NavLink className={buttonClass} to='/search'>
+          <Search className='size-3' />
+          Search
         </NavLink>
         <NavLink className={buttonClass} to='/api'>
           <Code className='size-3' />
