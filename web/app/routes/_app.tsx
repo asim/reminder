@@ -14,10 +14,10 @@ export default function AppLayout() {
   return (
     <div className='flex flex-col h-screen'>
       <div className='w-full text-sm justify-center py-2 bg-black text-white flex flex-row items-center gap-1'>
-        <NavLink className={buttonClass} to='/quran/1'>
+        <NavLink className={buttonClass} to='/quran'>
           Quran
         </NavLink>
-        <NavLink className={buttonClass} to='/hadith/1'>
+        <NavLink className={buttonClass} to='/hadith'>
           Hadith
         </NavLink>
         <NavLink className={buttonClass} to='/names'>
