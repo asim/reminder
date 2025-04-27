@@ -1,7 +1,7 @@
 export default function QuranIndex() {
   return (
     <div className='flex flex-col flex-1 p-8 max-w-3xl mx-auto'>
-      <h1 className='text-4xl font-semibold mb-6 text-center'>
+      <h1 className='text-4xl font-semibold mb-6 text-left'>
         The Quran
       </h1>
 
@@ -67,14 +67,13 @@ export default function QuranIndex() {
           </p>
         </section>
 
-        <section className='mt-8 bg-gray-50 p-4 rounded-lg border border-gray-200'>
+        <section className='mt-8 mb-12 bg-gray-50 p-4 rounded-lg border border-gray-200'>
           <h2 className='text-lg font-medium mb-2 text-gray-800'>
             Navigating the Quran
           </h2>
           <p className='text-gray-600'>
             Please select a surah from the navigation menu to begin exploring
-            the Quran. Each surah contains verses (ayat) that you can read,
-            listen to, and study in detail.
+            the Quran. Each surah contains verses (ayat) that you can read in Arabic as well as translations.
           </p>
         </section>
       </div>
