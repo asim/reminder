@@ -7,6 +7,8 @@ export default {
   prerender: [
     '/',
     '/quran',
+    '/hadith',
+    '/names',
     '/api',
   ]
 } satisfies Config;
