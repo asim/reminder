@@ -1,44 +1,38 @@
 import { Code, MessageCircle } from 'lucide-react';
-import { Link, Outlet } from 'react-router';
+import { Outlet, NavLink } from 'react-router';
+import { cn } from '~/utils/classname';
 
 export default function AppLayout() {
+  const buttonClass = ({ isActive }: { isActive: boolean }) =>
+    cn(
+      'bg-white transition-colors hover:opacity-100 flex items-center gap-1 text-black px-2 py-0.5 rounded-md text-xs',
+      isActive
+        ? 'bg-white opacity-100 text-black'
+        : 'bg-black text-white hover:bg-white hover:text-black'
+    );
+
   return (
     <div className='flex flex-col h-screen'>
       <div className='w-full text-sm justify-center py-2 bg-black text-white flex flex-row items-center gap-1'>
-        <Link
-          className='bg-white text-black px-2 py-0.5 rounded-md text-xs'
-          to='/quran/1'
-        >
+        <NavLink className={buttonClass} to='/quran/1'>
           Quran
-        </Link>
-        <Link
-          className='bg-white text-black px-2 py-0.5 rounded-md text-xs'
-          to='/hadith/1'
-        >
+        </NavLink>
+        <NavLink className={buttonClass} to='/hadith/1'>
           Hadith
-        </Link>
-        <Link
-          className='bg-white text-black px-2 py-0.5 rounded-md text-xs'
-          to='/names'
-        >
+        </NavLink>
+        <NavLink className={buttonClass} to='/names'>
           Names of Allah
-        </Link>
+        </NavLink>
 
         <span className='text-gray-400 mx-2'>/</span>
-        <Link
-          className='bg-white text-black px-2 py-0.5 rounded-md text-xs flex flex-row items-center gap-1'
-          to='/quran/1'
-        >
+        <NavLink className={buttonClass} to='/chat'>
           <MessageCircle className='size-3' />
           Chat with AI
-        </Link>
-        <Link
-          className='bg-white text-black px-2 py-0.5 rounded-md text-xs flex flex-row items-center gap-1'
-          to='/quran/1'
-        >
+        </NavLink>
+        <NavLink className={buttonClass} to='/api'>
           <Code className='size-3' />
           Use API
-        </Link>
+        </NavLink>
       </div>
       <Outlet />
     </div>
