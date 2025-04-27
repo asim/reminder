@@ -31,7 +31,7 @@ export default function AppLayout() {
         </NavLink>
         <NavLink className={buttonClass} to='/api'>
           <Code className='size-3' />
-          Use API
+          API Usage
         </NavLink>
       </div>
       <Outlet />
