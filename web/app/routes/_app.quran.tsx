@@ -1,4 +1,4 @@
-import type { Route } from '.react-router/types/app/routes/+types/quran';
+import type { Route } from '.react-router/types/app/routes/+types/_app.quran';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -26,7 +26,7 @@ export default function Quran() {
   }, [search, location.pathname]);
 
   return (
-    <div className='flex flex-row h-screen'>
+    <div className='flex flex-row h-full'>
       <div className='flex flex-col w-[250px] border-r border-gray-200 overflow-y-auto'>
         <div className='pl-7 pr-4 border-b border-gray-200 relative sticky top-0 bg-white'>
           <Search

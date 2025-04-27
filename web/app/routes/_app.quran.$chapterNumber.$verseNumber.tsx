@@ -1,4 +1,4 @@
-import type { Route } from '.react-router/types/app/routes/+types/quran.$chapterNumber.$verseNumber';
+import type { Route } from '.react-router/types/app/routes/+types/_app.quran.$chapterNumber.$verseNumber';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { CircleChevronLeft, CircleChevronRight } from 'lucide-react';
 import { Link } from 'react-router';
