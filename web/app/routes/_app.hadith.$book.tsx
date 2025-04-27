@@ -45,7 +45,7 @@ export default function HadithBook() {
   }, [book.hadiths, searchQuery]);
 
   return (
-    <div className='max-w-4xl mx-auto w-full'>
+    <div className='max-w-4xl mx-auto w-full mb-12 flex-grow'>
       <div className='text-center mt-8 mb-12'>
         <h1 className='text-4xl font-bold mb-2 flex items-center justify-center'>
           {book.name}
@@ -79,11 +79,11 @@ export default function HadithBook() {
         </div>
       </div>
 
-      <div className='space-y-8'>
+      <div className='space-y-4'>
         {filteredHadiths.map((hadith) => (
           <div
             key={`${hadith.info}-${hadith.by}-${bookNumber}`}
-            className='p-6 border border-gray-200 rounded-lg shadow-sm space-y-4 hover:border-gray-300 transition-colors'
+            className='p-6 border border-gray-200 rounded-lg space-y-4 hover:border-gray-300 transition-colors'
           >
             <div className='flex justify-between items-center'>
               <span className='font-medium text-gray-700'>
