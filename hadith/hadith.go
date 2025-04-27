@@ -18,9 +18,10 @@ type Volume struct {
 }
 
 type Book struct {
-	Name    string    `json:"name"`
-	Number  int       `json:"number"`
-	Hadiths []*Hadith `json:"hadiths"`
+	Name        string    `json:"name"`
+	Number      int       `json:"number"`
+	Hadiths     []*Hadith `json:"hadiths,omitempty"`
+	HadithCount int       `json:"hadith_count,omitempty"`
 }
 
 type Hadith struct {
@@ -79,8 +80,9 @@ func (v *Volumes) Index() *Volumes {
 
 	for _, book := range v.Books {
 		vv.Books = append(vv.Books, &Book{
-			Name:   book.Name,
-			Number: book.Number,
+			Name:        book.Name,
+			Number:      book.Number,
+			HadithCount: len(book.Hadiths),
 		})
 	}
 
@@ -158,6 +160,7 @@ func Load() *Volumes {
 				}
 
 				book.Hadiths = append(book.Hadiths, hadith)
+				book.HadithCount = len(book.Hadiths)
 			}
 
 			volume.Books = append(volume.Books, book)

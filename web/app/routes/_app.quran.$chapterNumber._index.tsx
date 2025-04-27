@@ -1,4 +1,4 @@
-import type { Route } from '.react-router/types/app/routes/+types/quran.$chapterNumber._index';
+import type { Route } from '.react-router/types/app/routes/+types/_app.quran.$chapterNumber._index';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { CircleChevronLeft, CircleChevronRight } from 'lucide-react';
 import { Fragment } from 'react';
@@ -30,11 +30,9 @@ export default function QuranChapter(props: Route.ComponentProps) {
   const nextChapter = Number(chapterNumber) + 1;
 
   return (
-    <div className='max-w-4xl flex flex-col w-full min-h-full mx-auto'>
+    <div className='max-w-4xl flex flex-col w-full mb-12 flex-grow mx-auto'>
       <ViewMode mode={mode} onChange={setMode} />
-
       <ChapterHeader title={data.name} subtitle={`Chapter ${data.number}`} />
-
       {mode === 'arabic' && (
         <div
           dir='rtl'
@@ -48,7 +46,6 @@ export default function QuranChapter(props: Route.ComponentProps) {
           ))}
         </div>
       )}
-
       {mode === 'english' && (
         <div className='flex flex-grow flex-wrap text-left text-xl leading-loose'>
           {data.verses.map((verse) => (
@@ -56,7 +53,6 @@ export default function QuranChapter(props: Route.ComponentProps) {
           ))}
         </div>
       )}
-
       {mode == 'translation' && (
         <div className='space-y-8'>
           {data.verses.map((verse) => (
@@ -76,7 +72,6 @@ export default function QuranChapter(props: Route.ComponentProps) {
           ))}
         </div>
       )}
-
       <div className='flex justify-between mt-8 mb-3'>
         <PrimaryButton asChild disabled={previousChapter <= 1}>
           <Link to={`/quran/${previousChapter}`}>
@@ -92,7 +87,6 @@ export default function QuranChapter(props: Route.ComponentProps) {
           </Link>
         </PrimaryButton>
       </div>
-      &nbsp;
     </div>
   );
 }

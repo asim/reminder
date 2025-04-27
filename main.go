@@ -270,6 +270,32 @@ func main() {
 		w.Write([]byte(njson))
 	})
 
+	http.HandleFunc("/api/names/{id}", func(w http.ResponseWriter, r *http.Request) {
+		id := r.PathValue("id")
+		if len(id) == 0 {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("{}"))
+			return
+		}
+
+		name, _ := strconv.Atoi(id)
+		if name < 1 || name > len(*n) {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("{}"))
+			return
+		}
+
+		b := n.Get(name)
+		json, _ := json.Marshal(b)
+		w.Write(json)
+	})
+
+	http.HandleFunc("/api/hadith/books", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		b, _ := json.Marshal(b.Index().Books)
+		w.Write(b)
+	})
+
 	http.HandleFunc("/api/hadith", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(hjson))
 	})
