@@ -15,7 +15,7 @@ import (
 //go:embed html/*
 var htmlFiles embed.FS
 
-//go:embed dist/*
+//go:embed all:dist
 var distFiles embed.FS
 
 var Template = `

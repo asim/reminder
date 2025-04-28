@@ -1,6 +1,7 @@
 package app
 
 import (
+	"log"
 	"net/http"
 	"os"
 	"path"
@@ -44,6 +45,8 @@ func FileServerWith404(root http.FileSystem, handler404 FSHandler404) http.Handl
 		f, err := root.Open(upath)
 		if err != nil {
 			if os.IsNotExist(err) {
+				log.Printf("Embedded asset not found: %s", upath)
+
 				// call handler
 				if handler404 != nil {
 					doDefault := handler404(w, r)
@@ -51,6 +54,8 @@ func FileServerWith404(root http.FileSystem, handler404 FSHandler404) http.Handl
 						return
 					}
 				}
+			} else {
+				log.Printf("error opening asset %s: %v", upath, err)
 			}
 		}
 
