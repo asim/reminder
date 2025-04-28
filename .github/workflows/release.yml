@@ -25,7 +25,7 @@ jobs:
           version: 10
       -
         name: Build web app
-        run: make web
+        run: make setup && make web
       -
         name: Set up Go
         uses: actions/setup-go@v1
