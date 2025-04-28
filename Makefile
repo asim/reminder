@@ -1,4 +1,4 @@
-.PHONY: dev dev-backend dev-frontend build setup
+.PHONY: dev dev-backend dev-frontend build setup web
 
 setup:
 	cd web && pnpm install
@@ -23,6 +23,7 @@ build:
 	cp -r web/build/client/* app/dist/
 	go build -o reminder .
 
+# Build web app
 web:
 	cd web && pnpm run build
 	find app/dist -mindepth 1 -not -name '.gitignore' -delete
