@@ -18,6 +18,14 @@ jobs:
       -
         name: Fetch tags
         run: git fetch --prune --unshallow --tags -f
+      - 
+        name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      -
+        name: Build web app
+        run: make web
       -
         name: Set up Go
         uses: actions/setup-go@v1
