@@ -73,9 +73,11 @@ All queries are returned as JSON
 
 See [`/api`](https://reminder.dev/api) for more details 
 
-## Web
+## App
 
-To run the react based web app
+The reminder bakes in a "lite" app by default. This can be replaced by a more featureful react app.
+
+To build the react app
 
 ```
 # requires pnpm
@@ -87,12 +89,10 @@ Build the app
 make build
 ```
 
-Pass the additional `--web` flag which will replace the built in Go app with the react app
+Pass the additional `--web` flag which replaces the lite app with the react app
 ```
 reminder --web --serve
 ```
-
-Otherwise we run a lite embedded Go web app 
 
 ## Notes
 
