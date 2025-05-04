@@ -13,7 +13,7 @@ export default function AppLayout() {
 
   return (
     <div className='flex flex-col h-screen overflow-hidden'>
-      <div className='w-full text-sm justify-center py-2 px-1 bg-black text-white flex flex-row items-center gap-1'>
+      <div className='w-full text-sm justify-center py-2 px-2 bg-black text-white flex flex-row items-center gap-1'>
         <NavLink className={buttonClass} to='/quran'>
           Quran
         </NavLink>
