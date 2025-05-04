@@ -31,48 +31,49 @@ export default function QuranVerse(props: Route.ComponentProps) {
   const hasPreviousChapter = previousChapter >= 1;
 
   return (
-    <div className='max-w-4xl flex flex-col w-full h-full mx-auto'>
+    <div className='max-w-4xl flex flex-col w-full mx-auto p-0 lg:p-8'>
       <ChapterHeader
         title={data.name}
+        translation={data.english}
         subtitle={`Verse ${data.number}:${verseNumber}`}
       />
 
       <div className='flex flex-col flex-grow'>
-        <div className='text-3xl mb-4 text-right leading-loose font-arabic'>
+        <div className='text-xl sm:text-2xl md:text-3xl mb-3 sm:mb-4 text-right leading-loose font-arabic'>
           {verse.arabic.replace('۞', '')}
         </div>
-        <div className='text-xl leading-relaxed'>{verse.text}</div>
+        <div className='text-base sm:text-lg md:text-xl leading-relaxed'>{verse.text}</div>
       </div>
 
-      <div className='flex justify-between mt-8 mb-12'>
+      <div className='flex justify-between mt-6 sm:mt-8 mb-8 sm:mb-12'>
         {hasPreviousVerse ? (
-          <PrimaryButton asChild disabled={previousVerse <= 1}>
+          <PrimaryButton asChild disabled={previousVerse <= 1} className='text-sm sm:text-base py-1 sm:py-2 px-2 sm:px-4'>
             <Link to={`/quran/${chapterNumber}/${previousVerse}`}>
-              <CircleChevronLeft className='size-4' />
-              Previous Verse
+              <CircleChevronLeft className='size-3 sm:size-4' />
+              <span className='ml-1'>Previous</span>
             </Link>
           </PrimaryButton>
         ) : (
-          <PrimaryButton asChild disabled={!hasPreviousChapter}>
+          <PrimaryButton asChild disabled={!hasPreviousChapter} className='text-sm sm:text-base py-1 sm:py-2 px-2 sm:px-4'>
             <Link to={`/quran/${previousChapter}`}>
-              <CircleChevronLeft className='size-4' />
-              Previous Chapter
+              <CircleChevronLeft className='size-3 sm:size-4' />
+              <span className='ml-1'>Previous</span>
             </Link>
           </PrimaryButton>
         )}
 
         {hasNextVerse ? (
-          <PrimaryButton asChild disabled={!hasNextVerse}>
+          <PrimaryButton asChild disabled={!hasNextVerse} className='text-sm sm:text-base py-1 sm:py-2 px-2 sm:px-4'>
             <Link to={`/quran/${chapterNumber}/${nextVerse}`}>
-              Next Verse
-              <CircleChevronRight className='size-4' />
+              <span className='mr-1'>Next</span>
+              <CircleChevronRight className='size-3 sm:size-4' />
             </Link>
           </PrimaryButton>
         ) : (
-          <PrimaryButton asChild disabled={!hasNextChapter}>
+          <PrimaryButton asChild disabled={!hasNextChapter} className='text-sm sm:text-base py-1 sm:py-2 px-2 sm:px-4'>
             <Link to={`/quran/${nextChapter}`}>
-              Next Chapter
-              <CircleChevronRight className='size-4' />
+              <span className='mr-1'>Next</span>
+              <CircleChevronRight className='size-3 sm:size-4' />
             </Link>
           </PrimaryButton>
         )}

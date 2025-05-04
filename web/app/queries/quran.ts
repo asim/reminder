@@ -25,6 +25,7 @@ type VerseType = {
 
 type ChapterResponseType = {
   name: string;
+  english: string;
   number: number;
   verses: VerseType[];
 };

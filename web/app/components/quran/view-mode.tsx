@@ -26,12 +26,12 @@ export function ViewMode(props: ViewModeProps) {
           type='button'
           onClick={() => onChange(viewMode.id)}
           className={cn(
-            'flex items-center text-sm gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer border border-black/10 hover:bg-black/5 capitalize',
+            'flex items-center text-sm gap-1.5 px-3 py-3 lg:py-1.5 rounded-lg cursor-pointer border border-black/10 hover:bg-black/5 capitalize',
             mode === viewMode.id && 'bg-black text-white hover:bg-black/90'
           )}
         >
           {viewMode.icon}
-          {viewMode.id}
+          <span className='hidden sm:inline'>{viewMode.id}</span>
         </button>
       ))}
     </div>
