@@ -37,14 +37,16 @@ export default function QuranChapter(props: Route.ComponentProps) {
   const [mode, setMode] = useQuranViewMode();
 
   useEffect(() => {
-    if (data && window.location.hash) {
-      const verseId = window.location.hash.substring(1);
-      const element = document.getElementById(verseId);
-      if (element) {
-        setTimeout(() => {
-          element.scrollIntoView({ behavior: 'instant' });
-        }, 100);
-      }
+    if (!data || !window.location.hash) {
+      return;
+    }
+
+    const verseId = window.location.hash.substring(1);
+    const element = document.getElementById(verseId);
+    if (element) {
+      setTimeout(() => {
+        element.scrollIntoView({ behavior: 'instant' });
+      }, 100);
     }
   }, [data, mode]);
 
