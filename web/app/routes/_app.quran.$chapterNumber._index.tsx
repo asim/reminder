@@ -32,7 +32,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
   return (
     <div className='max-w-4xl flex flex-col w-full mb-12 flex-grow mx-auto'>
       <ViewMode mode={mode} onChange={setMode} />
-      <ChapterHeader title={data.name} subtitle={`Chapter ${data.number}`} />
+      <ChapterHeader title={data.name} translation={data.english} subtitle={`Chapter ${data.number}`} />
       {mode === 'arabic' && (
         <div
           dir='rtl'

@@ -27,7 +27,7 @@ export default function Quran() {
 
   return (
     <div className='flex flex-row h-full'>
-      <div className='flex flex-col w-[250px] border-r border-gray-200 overflow-y-auto'>
+      <div className='flex flex-col pb-15 w-[250px] border-r border-gray-200 overflow-y-auto'>
         <div className='pl-7 pr-4 border-b border-gray-200 relative sticky top-0 bg-white'>
           <Search
             size={15}
