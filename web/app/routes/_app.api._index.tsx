@@ -125,17 +125,17 @@ const endpoints: Endpoint[] = [
 export default function Api() {
   return (
     <div className='flex flex-col h-full overflow-y-auto'>
-      <div className='max-w-4xl mx-auto px-4 py-8 w-full'>
-        <h1 className='text-3xl font-bold mb-8'>Endpoints</h1>
-        <p className='mb-8'>A list of API endpoints</p>
+      <div className='max-w-4xl mx-auto px-4 py-4 sm:py-6 lg:py-8 w-full p-0 lg:p-8'>
+        <h1 className='text-xl sm:text-2xl md:text-3xl font-bold mb-4 sm:mb-6 lg:mb-8'>Endpoints</h1>
+        <p className='mb-4 sm:mb-6 lg:mb-8 text-sm sm:text-base'>A list of API endpoints</p>
 
-        <div className='space-y-12'>
+        <div className='space-y-6 sm:space-y-8 lg:space-y-12'>
           {endpoints.map((endpoint, index) => (
-            <div key={index} className='border-t pt-8'>
-              <h2 className='text-xl font-semibold mb-4'>{endpoint.title}</h2>
-              <p className='mb-4'>{endpoint.description}</p>
+            <div key={index} className='border-t pt-4 sm:pt-6 lg:pt-8'>
+              <h2 className='text-lg sm:text-xl font-semibold mb-2 sm:mb-4'>{endpoint.title}</h2>
+              <p className='mb-3 sm:mb-4 text-sm sm:text-base'>{endpoint.description}</p>
 
-              <div className='bg-gray-50 p-4 font-mono mb-4'>
+              <div className='bg-gray-50 p-2 sm:p-4 font-mono mb-3 sm:mb-4 text-xs sm:text-sm overflow-x-auto'>
                 {endpoint.method && (
                   <span className='font-semibold'>{endpoint.method} </span>
                 )}
@@ -143,53 +143,57 @@ export default function Api() {
               </div>
 
               {endpoint.params && (
-                <div className='mb-4'>
-                  <h3 className='font-semibold mb-2'>Request Parameters</h3>
-                  <p className='mb-2'>Format: {endpoint.requestFormat}</p>
-                  <table className='w-full border-collapse'>
-                    <thead>
-                      <tr className='border-b'>
-                        <th className='text-left py-2'>Field</th>
-                        <th className='text-left py-2'>Type</th>
-                        <th className='text-left py-2'>Description</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {endpoint.params.map((param, idx) => (
-                        <tr key={idx} className='border-b'>
-                          <td className='py-2'>{param.name}</td>
-                          <td className='py-2'>{param.type}</td>
-                          <td className='py-2'>{param.description}</td>
+                <div className='mb-3 sm:mb-4'>
+                  <h3 className='font-semibold mb-1 sm:mb-2 text-sm sm:text-base'>Request Parameters</h3>
+                  <p className='mb-2 text-xs sm:text-sm'>Format: {endpoint.requestFormat}</p>
+                  <div className='overflow-x-auto'>
+                    <table className='w-full border-collapse min-w-full'>
+                      <thead>
+                        <tr className='border-b'>
+                          <th className='text-left py-1 sm:py-2 text-xs sm:text-sm'>Field</th>
+                          <th className='text-left py-1 sm:py-2 text-xs sm:text-sm'>Type</th>
+                          <th className='text-left py-1 sm:py-2 text-xs sm:text-sm'>Description</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {endpoint.params.map((param, idx) => (
+                          <tr key={idx} className='border-b'>
+                            <td className='py-1 sm:py-2 text-xs sm:text-sm'>{param.name}</td>
+                            <td className='py-1 sm:py-2 text-xs sm:text-sm'>{param.type}</td>
+                            <td className='py-1 sm:py-2 text-xs sm:text-sm'>{param.description}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
 
               <div>
-                <h3 className='font-semibold mb-2'>Response</h3>
-                <p className='mb-2'>Format: {endpoint.responseFormat}</p>
+                <h3 className='font-semibold mb-1 sm:mb-2 text-sm sm:text-base'>Response</h3>
+                <p className='mb-2 text-xs sm:text-sm'>Format: {endpoint.responseFormat}</p>
 
                 {endpoint.responseFields && (
-                  <table className='w-full border-collapse'>
-                    <thead>
-                      <tr className='border-b'>
-                        <th className='text-left py-2'>Field</th>
-                        <th className='text-left py-2'>Type</th>
-                        <th className='text-left py-2'>Description</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {endpoint.responseFields.map((field, idx) => (
-                        <tr key={idx} className='border-b'>
-                          <td className='py-2'>{field.name}</td>
-                          <td className='py-2'>{field.type}</td>
-                          <td className='py-2'>{field.description}</td>
+                  <div className='overflow-x-auto'>
+                    <table className='w-full border-collapse min-w-full'>
+                      <thead>
+                        <tr className='border-b'>
+                          <th className='text-left py-1 sm:py-2 text-xs sm:text-sm'>Field</th>
+                          <th className='text-left py-1 sm:py-2 text-xs sm:text-sm'>Type</th>
+                          <th className='text-left py-1 sm:py-2 text-xs sm:text-sm'>Description</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {endpoint.responseFields.map((field, idx) => (
+                          <tr key={idx} className='border-b'>
+                            <td className='py-1 sm:py-2 text-xs sm:text-sm'>{field.name}</td>
+                            <td className='py-1 sm:py-2 text-xs sm:text-sm'>{field.type}</td>
+                            <td className='py-1 sm:py-2 text-xs sm:text-sm'>{field.description}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
               </div>
             </div>
