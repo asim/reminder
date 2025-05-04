@@ -45,33 +45,33 @@ export default function HadithBook() {
   }, [book.hadiths, searchQuery]);
 
   return (
-    <div className='max-w-4xl mx-auto w-full mb-12 flex-grow'>
-      <div className='text-center mt-8 mb-12'>
-        <h1 className='text-4xl font-bold mb-2 flex items-center justify-center'>
+    <div className='max-w-4xl mx-auto w-full mb-8 sm:mb-12 flex-grow p-0 lg:p-8'>
+      <div className='text-center mt-0 sm:mt-6 md:mt-8 mb-4 sm:mb-8 md:mb-12'>
+        <h1 className='text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2 flex items-center justify-center'>
           {book.name}
         </h1>
-        <div className='text-xl text-gray-600'>
+        <div className='text-base sm:text-lg md:text-xl text-gray-600'>
           Total Ahadith — {book.hadith_count}
         </div>
       </div>
 
       {/* Search filter */}
-      <div className='flex mb-6 justify-start w-full'>
+      <div className='flex mb-4 sm:mb-6 justify-start w-full'>
         <div className='relative w-full'>
-          <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-            <Search className='h-4 w-4 text-gray-500' />
+          <div className='absolute inset-y-0 left-0 pl-2 sm:pl-3 flex items-center pointer-events-none'>
+            <Search className='h-3 w-3 sm:h-4 sm:w-4 text-gray-500' />
           </div>
           <input
             type='text'
             placeholder={`Search in ${book.name}...`}
-            className='w-full pl-10 p-2 border border-gray-300 rounded-md'
+            className='w-full text-sm sm:text-base pl-8 sm:pl-10 p-1.5 sm:p-2 border border-gray-300 rounded-md'
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className='absolute inset-y-0 right-0 pr-3 flex items-center'
+              className='absolute inset-y-0 right-0 pr-2 sm:pr-3 flex items-center'
             >
               <span className='text-gray-500 hover:text-gray-700'>×</span>
             </button>
@@ -79,20 +79,20 @@ export default function HadithBook() {
         </div>
       </div>
 
-      <div className='space-y-4'>
+      <div className='space-y-3 sm:space-y-4'>
         {filteredHadiths.map((hadith) => (
           <div
             key={`${hadith.info}-${hadith.by}-${bookNumber}`}
-            className='p-6 border border-gray-200 rounded-lg space-y-4 hover:border-gray-300 transition-colors'
+            className='p-3 sm:p-4 md:p-6 border border-gray-200 rounded-lg space-y-2 sm:space-y-4 hover:border-gray-300 transition-colors'
           >
-            <div className='flex justify-between items-center'>
-              <span className='font-medium text-gray-700'>
+            <div className='flex gap-2 lg:mb-0 mb-4 lg:gap-0 lg:flex-row flex-col justify-start lg:justify-between items-start lg:items-center'>
+              <span className='text-sm sm:text-base font-medium text-gray-700'>
                 {hadith.info.trim().replace(/:$/, '')}
               </span>
-              <span className='font-medium text-gray-700'>{hadith.by}</span>
+              <span className='text-sm text-balance sm:text-base font-medium text-gray-700'>{hadith.by}</span>
             </div>
 
-            <p className='text-gray-800 text-lg leading-relaxed'>
+            <p className='text-gray-800 text-base sm:text-lg leading-relaxed'>
               {hadith.text}
             </p>
           </div>
