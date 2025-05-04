@@ -1,7 +1,7 @@
 import type { Route } from '.react-router/types/app/routes/+types/_app.quran.$chapterNumber._index';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { CircleChevronLeft, CircleChevronRight } from 'lucide-react';
-import { Fragment } from 'react';
+import { Fragment, useEffect } from 'react';
 import { Link } from 'react-router';
 import { PageError } from '~/components/interface/page-error';
 import { PrimaryButton } from '~/components/interface/primary-button';
@@ -35,6 +35,18 @@ export default function QuranChapter(props: Route.ComponentProps) {
   const { chapterNumber } = props.params;
   const { data } = useSuspenseQuery(getChapterOptions(Number(chapterNumber)));
   const [mode, setMode] = useQuranViewMode();
+
+  useEffect(() => {
+    if (data && window.location.hash) {
+      const verseId = window.location.hash.substring(1);
+      const element = document.getElementById(verseId);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'instant' });
+        }, 100);
+      }
+    }
+  }, [data, mode]);
 
   if (!data) {
     return null;
@@ -75,6 +87,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
         <div className='space-y-3 sm:space-y-8'>
           {data.verses.map((verse) => (
             <div
+              id={`${verse.number}`}
               data-chapter-verse={`${data.number}:${verse.number}`}
               key={verse.number}
               className='border-b border-gray-100 pb-3 sm:pb-8'
@@ -85,9 +98,12 @@ export default function QuranChapter(props: Route.ComponentProps) {
               <div className='text-base sm:text-lg md:text-xl leading-relaxed'>
                 {verse.text}
               </div>
-              <div className='text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2'>
+              <a
+                href={`#${verse.number}`}
+                className='text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2'
+              >
                 Verse {verse.number}
-              </div>
+              </a>
             </div>
           ))}
         </div>
