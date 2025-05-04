@@ -1,11 +1,29 @@
+export function meta() {
+  return [
+    { title: 'Quran - Reminder' },
+    {
+      property: 'og:title',
+      content: 'Quran - Reminder',
+    },
+    {
+      name: 'description',
+      content: 'Read the Quran, the holy book of Islam',
+    },
+  ];
+}
+
 export default function QuranIndex() {
   return (
     <div className='flex flex-col flex-1 p-0 lg:p-8 mx-auto w-full lg:max-w-3xl'>
-      <h1 className='text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-6 text-left'>The Quran</h1>
+      <h1 className='text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-6 text-left'>
+        The Quran
+      </h1>
 
       <div className='space-y-4 sm:space-y-6'>
         <section>
-          <h2 className='text-lg sm:text-xl font-medium mb-1 sm:mb-2'>What is the Quran?</h2>
+          <h2 className='text-lg sm:text-xl font-medium mb-1 sm:mb-2'>
+            What is the Quran?
+          </h2>
           <p className='text-sm sm:text-base text-gray-700'>
             The Quran is the holy book of Islam, believed to be the word of
             Allah as revealed to the Prophet Muhammad through the angel Gabriel.
@@ -17,7 +35,9 @@ export default function QuranIndex() {
         </section>
 
         <section>
-          <p className='text-sm sm:text-base text-gray-700 mb-2 sm:mb-4'>Some key facts about the Quran:</p>
+          <p className='text-sm sm:text-base text-gray-700 mb-2 sm:mb-4'>
+            Some key facts about the Quran:
+          </p>
           <ul className='list-disc pl-4 sm:pl-6 space-y-1 sm:space-y-2 text-sm sm:text-base text-gray-700'>
             <li>
               Revealed to Prophet Muhammad (Peace Be Upon Him) over a period of
@@ -39,7 +59,9 @@ export default function QuranIndex() {
         </section>
 
         <section>
-          <h2 className='text-lg sm:text-xl font-medium mb-1 sm:mb-2'>Structure</h2>
+          <h2 className='text-lg sm:text-xl font-medium mb-1 sm:mb-2'>
+            Structure
+          </h2>
           <p className='text-sm sm:text-base text-gray-700'>
             Each chapter (surah) of the Quran has a name, often derived from a
             notable word or theme within it. Surahs are classified as either
@@ -54,7 +76,9 @@ export default function QuranIndex() {
         </section>
 
         <section>
-          <h2 className='text-lg sm:text-xl font-medium mb-1 sm:mb-2'>Significance</h2>
+          <h2 className='text-lg sm:text-xl font-medium mb-1 sm:mb-2'>
+            Significance
+          </h2>
           <p className='text-sm sm:text-base text-gray-700'>
             For Muslims, the Quran is more than just a religious text—it's a
             comprehensive guide to life. It addresses spiritual, social, legal,

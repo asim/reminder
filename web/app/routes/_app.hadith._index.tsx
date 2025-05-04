@@ -1,10 +1,29 @@
+export function meta() {
+  return [
+    { title: 'Hadith - Reminder' },
+    {
+      property: 'og:title',
+      content: 'Hadith - Reminder',
+    },
+    {
+      name: 'description',
+      content:
+        'Read the Hadith, the sayings of Prophet Muhammad (Peace Be Upon Him)',
+    },
+  ];
+}
+
 export default function HadithIndex() {
   return (
     <div className='flex flex-col flex-1 p-0 lg:p-8 mx-auto w-full max-w-3xl'>
-      <h1 className='text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-6 text-left'>Hadith</h1>
+      <h1 className='text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-6 text-left'>
+        Hadith
+      </h1>
 
       <section className='mb-4 sm:mb-8'>
-        <h2 className='text-lg sm:text-xl font-medium mb-2 sm:mb-3'>What are Hadith?</h2>
+        <h2 className='text-lg sm:text-xl font-medium mb-2 sm:mb-3'>
+          What are Hadith?
+        </h2>
         <p className='text-sm sm:text-base text-gray-700 mb-2 sm:mb-3'>
           Hadith are the recorded sayings, actions, and silent approvals of
           Prophet Muhammad (Peace Be Upon Him). These narrations were
@@ -15,7 +34,9 @@ export default function HadithIndex() {
       </section>
 
       <section className='mb-4 sm:mb-8'>
-        <h2 className='text-lg sm:text-xl font-medium mb-2 sm:mb-3'>Hadith and the Quran</h2>
+        <h2 className='text-lg sm:text-xl font-medium mb-2 sm:mb-3'>
+          Hadith and the Quran
+        </h2>
         <p className='text-sm sm:text-base text-gray-700 mb-2 sm:mb-3'>
           While the Quran is the direct word of God revealed to Prophet
           Muhammad, hadith complement the Quran by providing context,
@@ -26,7 +47,9 @@ export default function HadithIndex() {
       </section>
 
       <section className='mb-4 sm:mb-8'>
-        <h2 className='text-lg sm:text-xl font-medium mb-2 sm:mb-3'>Collections of Hadith</h2>
+        <h2 className='text-lg sm:text-xl font-medium mb-2 sm:mb-3'>
+          Collections of Hadith
+        </h2>
         <p className='text-sm sm:text-base text-gray-700 mb-2 sm:mb-3'>
           Over time, scholars compiled various collections of hadith, carefully
           verifying their authenticity through a rigorous methodology. The most

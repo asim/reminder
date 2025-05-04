@@ -2,6 +2,21 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router';
 import { getNameOptions } from '~/queries/names';
 
+export function meta() {
+  return [
+    { title: 'Names of Allah - Reminder' },
+    {
+      property: 'og:title',
+      content: 'Names of Allah - Reminder',
+    },
+    {
+      name: 'description',
+      content:
+        'Learn about the Names of Allah, the 99 attributes and qualities through which Muslims identify and connect with Allah',
+    },
+  ];
+}
+
 export default function NameDetail() {
   const params = useParams();
   const nameNumber = parseInt(params.nameNumber || '');
@@ -45,7 +60,9 @@ export default function NameDetail() {
 
         {name.location && name.location.length > 0 && (
           <div className='p-5 sm:p-4 md:p-6 border border-gray-200 rounded-lg space-y-2 sm:space-y-4'>
-            <h2 className='text-lg sm:text-xl font-semibold'>Locations in Quran</h2>
+            <h2 className='text-lg sm:text-xl font-semibold'>
+              Locations in Quran
+            </h2>
             <div className='flex flex-wrap gap-2'>
               {name.location.filter(Boolean).map((loc, index) => (
                 <Link

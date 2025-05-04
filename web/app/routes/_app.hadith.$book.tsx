@@ -6,6 +6,21 @@ import { queryClient } from '~/utils/query-client';
 import { useState, useMemo, useEffect } from 'react';
 import { Search } from 'lucide-react';
 
+export function meta() {
+  return [
+    { title: 'Hadith - Reminder' },
+    {
+      property: 'og:title',
+      content: 'Hadith - Reminder',
+    },
+    {
+      name: 'description',
+      content:
+        'Read the Hadith, the sayings of Prophet Muhammad (Peace Be Upon Him)',
+    },
+  ];
+}
+
 export async function clientLoader(props: Route.LoaderArgs) {
   const bookNumber = parseInt(props.params.book);
   if (isNaN(bookNumber)) return;
@@ -89,7 +104,9 @@ export default function HadithBook() {
               <span className='text-sm sm:text-base font-medium text-gray-700'>
                 {hadith.info.trim().replace(/:$/, '')}
               </span>
-              <span className='text-sm text-balance sm:text-base font-medium text-gray-700'>{hadith.by}</span>
+              <span className='text-sm text-balance sm:text-base font-medium text-gray-700'>
+                {hadith.by}
+              </span>
             </div>
 
             <p className='text-gray-800 text-base sm:text-lg leading-relaxed'>

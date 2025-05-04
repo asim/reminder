@@ -11,6 +11,20 @@ import { useQuranViewMode } from '~/hooks/use-quran-view-mode';
 import { getChapterOptions } from '~/queries/quran';
 import { queryClient } from '~/utils/query-client';
 
+export function meta() {
+  return [
+    { title: 'Quran - Reminder' },
+    {
+      property: 'og:title',
+      content: 'Quran - Reminder',
+    },
+    {
+      name: 'description',
+      content: 'Read the Quran, the holy book of Islam',
+    },
+  ];
+}
+
 export async function clientLoader(props: Route.LoaderArgs) {
   await queryClient.ensureQueryData(
     getChapterOptions(Number(props.params.chapterNumber))
@@ -32,7 +46,11 @@ export default function QuranChapter(props: Route.ComponentProps) {
   return (
     <div className='max-w-4xl flex flex-col w-full mb-8 sm:mb-12 flex-grow mx-auto p-0 lg:p-8'>
       <ViewMode mode={mode} onChange={setMode} />
-      <ChapterHeader title={data.name} translation={data.english} subtitle={`Chapter ${data.number}`} />
+      <ChapterHeader
+        title={data.name}
+        translation={data.english}
+        subtitle={`Chapter ${data.number}`}
+      />
       {mode === 'arabic' && (
         <div
           dir='rtl'
@@ -64,7 +82,9 @@ export default function QuranChapter(props: Route.ComponentProps) {
               <div className='text-xl sm:text-2xl md:text-3xl mb-3 sm:mb-4 text-right leading-loose font-arabic'>
                 {verse.arabic.replace('۞', '')}
               </div>
-              <div className='text-base sm:text-lg md:text-xl leading-relaxed'>{verse.text}</div>
+              <div className='text-base sm:text-lg md:text-xl leading-relaxed'>
+                {verse.text}
+              </div>
               <div className='text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2'>
                 Verse {verse.number}
               </div>
@@ -73,14 +93,22 @@ export default function QuranChapter(props: Route.ComponentProps) {
         </div>
       )}
       <div className='flex justify-between mt-6 sm:mt-8 mb-3'>
-        <PrimaryButton asChild disabled={previousChapter <= 1} className='text-sm sm:text-base py-2 sm:py-2 px-3 sm:px-4'>
+        <PrimaryButton
+          asChild
+          disabled={previousChapter <= 1}
+          className='text-sm sm:text-base py-2 sm:py-2 px-3 sm:px-4'
+        >
           <Link to={`/quran/${previousChapter}`}>
             <CircleChevronLeft className='size-4' />
             <span className='ml-1'>Previous</span>
           </Link>
         </PrimaryButton>
 
-        <PrimaryButton asChild disabled={nextChapter >= 114} className='text-sm sm:text-base py-2 sm:py-2 px-3 sm:px-4'>
+        <PrimaryButton
+          asChild
+          disabled={nextChapter >= 114}
+          className='text-sm sm:text-base py-2 sm:py-2 px-3 sm:px-4'
+        >
           <Link to={`/quran/${nextChapter}`}>
             <span className='mr-1'>Next</span>
             <CircleChevronRight className='size-4' />

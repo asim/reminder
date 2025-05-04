@@ -4,6 +4,21 @@ import { searchOptions, getSearchHistoryOptions } from '~/queries/search';
 import { cn } from '~/utils/classname';
 import { Loader2 } from 'lucide-react';
 
+export function meta() {
+  return [
+    { title: 'Search - Reminder' },
+    {
+      property: 'og:title',
+      content: 'Search - Reminder',
+    },
+    {
+      name: 'description',
+      content:
+        'Search the Quran, Hadith, and more through our app and API',
+    },
+  ];
+}
+
 export default function SearchIndex() {
   const [query, setQuery] = useState('');
   const [submittedQuery, setSubmittedQuery] = useState('');
@@ -45,7 +60,9 @@ export default function SearchIndex() {
   return (
     <div className='w-full flex flex-col flex-1 overflow-y-auto'>
       <div className='flex flex-col flex-1 w-full p-4 sm:p-6 lg:p-8 max-w-3xl mx-auto'>
-        <h1 className='text-xl lg:block hidden sm:text-2xl font-medium mb-2'>Search</h1>
+        <h1 className='text-xl lg:block hidden sm:text-2xl font-medium mb-2'>
+          Search
+        </h1>
 
         <form onSubmit={handleSubmit} className='mb-4 sm:mb-6'>
           <div className='relative'>
@@ -66,11 +83,15 @@ export default function SearchIndex() {
           </div>
         </form>
 
-        {isLoading && <div className='mb-3 sm:mb-4 text-sm sm:text-base'>Seeking...</div>}
+        {isLoading && (
+          <div className='mb-3 sm:mb-4 text-sm sm:text-base'>Seeking...</div>
+        )}
 
         {searchResults && (
           <div className='mb-6 sm:mb-8 border border-gray-200 rounded-md p-3 sm:p-4'>
-            <div className='mb-2 sm:mb-3 text-lg sm:text-xl font-medium'>{searchResults.q}</div>
+            <div className='mb-2 sm:mb-3 text-lg sm:text-xl font-medium'>
+              {searchResults.q}
+            </div>
             <div
               className='mb-3 sm:mb-4 text-sm sm:text-base'
               dangerouslySetInnerHTML={{ __html: searchResults.answer }}
@@ -115,7 +136,9 @@ export default function SearchIndex() {
           historyData.history &&
           historyData.history.length > 0 && (
             <div>
-              <h2 className='text-lg sm:text-xl font-medium mb-2 sm:mb-3'>Recent Searches</h2>
+              <h2 className='text-lg sm:text-xl font-medium mb-2 sm:mb-3'>
+                Recent Searches
+              </h2>
               <div className='text-sm sm:text-base'>
                 {historyData.history.map((item, idx) => {
                   const isQuestion = !item.startsWith('<p>');
