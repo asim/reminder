@@ -27,10 +27,10 @@ export default function Quran() {
   const sidebarItems: SidebarItem[] =
     chapters?.map((chapter) => ({
       key: chapter.number,
-      text: chapter.name,
+      text: chapter.english,
       path: `/quran/${chapter.number}`,
       number: chapter.number,
-      searchableText: [chapter.name],
+      searchableText: [chapter.english],
     })) || [];
 
   return (
