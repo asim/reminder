@@ -3,3 +3,4 @@ reminder
 index.md
 .env
 node_modules
+.pnpm-store

@@ -1,0 +1,39 @@
+{
+  "name": "Reminder Development",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "features": {
+    "ghcr.io/devcontainers/features/go:1": {
+      "version": "1.23"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/common-utils:2": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.organizeImports": "explicit"
+        }
+      }
+    }
+  },
+  "remoteUser": "vscode",
+  "forwardPorts": [
+    8080,
+    5173
+  ],
+  "portsAttributes": {
+    "8080": {
+      "label": "Frontend",
+      "onAutoForward": "notify"
+    },
+    "5173": {
+      "label": "Backend",
+      "onAutoForward": "notify"
+    }
+  }
+}
