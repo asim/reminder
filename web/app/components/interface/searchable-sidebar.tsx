@@ -9,6 +9,7 @@ export type SidebarItem = {
   path: string;
   number: string | number;
   searchableText: string[];
+  extra?: string;
 };
 
 type SearchableSidebarProps = {
@@ -87,7 +88,12 @@ export function SearchableSidebar(props: SearchableSidebarProps) {
               <span className='tabular-nums w-[20px] text-right mr-3 text-xs text-gray-400 inline-block'>
                 {item.number}
               </span>
-              <span className='truncate'>{item.text}</span>
+              <div className="truncate">
+                <div>{item.text}</div>
+                {item.extra && (
+                  <div className="text-gray-400 text-xs">{item.extra}</div>
+                )}
+              </div>
             </NavLink>
           ))}
       </div>
