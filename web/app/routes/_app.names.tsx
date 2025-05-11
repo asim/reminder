@@ -22,10 +22,11 @@ export default function Names() {
 
   const sidebarItems: SidebarItem[] = names?.map(name => ({
     key: name.number,
-    text: name.meaning,
+    text: name.english,
     path: `/names/${name.number}`,
     number: name.number,
-    searchableText: [name.meaning, name.english]
+    searchableText: [name.meaning, name.english],
+    extra: name.meaning
   })) || [];
 
   return (
