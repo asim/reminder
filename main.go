@@ -23,7 +23,7 @@ var (
 	ImportFlag = flag.Bool("import", false, "Import the index data from $HOME/reminder.idx.gob.gz")
 	ServerFlag = flag.Bool("serve", false, "Run the server")
 	EnvFlag    = flag.String("env", "dev", "Set the environment")
-	WebFlag    = flag.Bool("web", false, "Without this flag, the lite version will be served")
+	WebFlag    = flag.Bool("web", false, "Use the react web app built in app/dist")
 )
 
 var history = map[string][]string{}

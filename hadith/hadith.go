@@ -19,6 +19,7 @@ type Volume struct {
 
 type Book struct {
 	Name        string    `json:"name"`
+	English     string    `json:"english"`
 	Number      int       `json:"number"`
 	Hadiths     []*Hadith `json:"hadiths,omitempty"`
 	HadithCount int       `json:"hadith_count,omitempty"`
@@ -83,6 +84,7 @@ func (v *Volumes) Index() *Volumes {
 			Name:        book.Name,
 			Number:      book.Number,
 			HadithCount: len(book.Hadiths),
+			English:     book.English,
 		})
 	}
 
@@ -130,8 +132,16 @@ func Load() *Volumes {
 	if err != nil {
 		panic(err.Error())
 	}
+
+	f2, err := files.ReadFile("data/contents.json")
+	if err != nil {
+		panic(err.Error())
+	}
 	var data []interface{}
 	json.Unmarshal(f, &data)
+
+	var contents []interface{}
+	json.Unmarshal(f2, &contents)
 
 	// per volume
 	for _, entry := range data {
@@ -143,11 +153,14 @@ func Load() *Volumes {
 		for num, b := range d["books"].([]interface{}) {
 			bk := b.(map[string]interface{})
 
-			name := strings.Split(bk["name"].(string), ". ")[1]
+			english := strings.Split(bk["name"].(string), ". ")[1]
+
+			name := contents[num].(map[string]interface{})["translation"].(string)
 
 			book := &Book{
-				Name:   name,
-				Number: num + 1,
+				Name:    name,
+				Number:  num + 1,
+				English: english,
 			}
 
 			for _, h := range bk["hadiths"].([]interface{}) {

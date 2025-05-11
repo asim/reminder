@@ -96,6 +96,7 @@ var Endpoints = []*Endpoint{
 			Type: "JSON",
 			Params: []*Param{
 				{Name: "name", Value: "string", Description: "Name of book"},
+				{Name: "english", Value: "string", Description: "Name of book in English"},
 				{Name: "hadiths", Value: "array", Description: "Hadiths in the book"},
 			},
 		}},

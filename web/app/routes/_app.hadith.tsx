@@ -28,7 +28,8 @@ export default function Hadith() {
       text: book.name,
       path: `/hadith/${number}`,
       number,
-      searchableText: [book.name]
+      searchableText: [book.name, book.english],
+      extra: book.english
     };
   }) || [];
 

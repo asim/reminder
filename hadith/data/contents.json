@@ -1,0 +1,584 @@
+[
+  {
+    "book": 1,
+    "name": "The Book of Revelation",
+    "arabic": "كِتَاب بَدْء الْوَحْي",
+    "translation": "Kitāb Badʾ al-Waḥy"
+  },
+  {
+    "book": 2,
+    "name": "The Book of Belief",
+    "arabic": "كِتَاب الْإِيمَان",
+    "translation": "Kitāb al-Īmān"
+  },
+  {
+    "book": 3,
+    "name": "The Book of Knowledge",
+    "arabic": "كِتَاب الْعِلْم",
+    "translation": "Kitāb al-ʿIlm"
+  },
+  {
+    "book": 4,
+    "name": "The Book of Ablutions (Wudu')",
+    "arabic": "كِتَاب الْوُضُوء",
+    "translation": "Kitāb al-Wuḍūʾ"
+  },
+  {
+    "book": 5,
+    "name": "The Book of Bathing (Ghusl)",
+    "arabic": "كِتَاب الْغُسْل",
+    "translation": "Kitāb al-Ghusl"
+  },
+  {
+    "book": 6,
+    "name": "The Book of Menstrual Periods",
+    "arabic": "كِتَاب الْحَيْض",
+    "translation": "Kitāb al-Ḥayḍ"
+  },
+  {
+    "book": 7,
+    "name": "The Book of Rubbing hands and feet with dust (Tayammum)",
+    "arabic": "كِتَاب التَّيَمُّم",
+    "translation": "Kitāb at-Tayammum"
+  },
+  {
+    "book": 8,
+    "name": "The Book of Prayers (Salat)",
+    "arabic": "كِتَاب الصَّلَاة",
+    "translation": "Kitāb aṣ-Ṣalāh"
+  },
+  {
+    "book": 9,
+    "name": "The Book of the Times of As-Salat (Prayers)",
+    "arabic": "كِتَاب مَوَاقِيت الصَّلَاة",
+    "translation": "Kitāb Mawāqīt aṣ-Ṣalāh"
+  },
+  {
+    "book": 10,
+    "name": "The Book of the Adhan (The Call to Prayer)",
+    "arabic": "كِتَاب الْأَذَان",
+    "translation": "Kitāb al-ʾAḏān"
+  },
+  {
+    "book": 11,
+    "name": "The Book of الجمعة (Friday Prayer)",
+    "arabic": "كِتَاب الْجُمُعَة",
+    "translation": "Kitāb al-Jumuʿah"
+  },
+  {
+    "book": 12,
+    "name": "The Book of Salat-ul-Khauf (The Prayer During Fear)",
+    "arabic": "كِتَاب صَلَاة الْخَوْف",
+    "translation": "Kitāb Ṣalāt al-Khawf"
+  },
+  {
+    "book": 13,
+    "name": "The Book of العيدين (The Two Eid Festivals)",
+    "arabic": "كِتَاب الْعِيدَيْن",
+    "translation": "Kitāb al-ʿĪdayn"
+  },
+  {
+    "book": 14,
+    "name": "The Book of الوتر (Witr Prayer)",
+    "arabic": "كِتَاب الْوِتْر",
+    "translation": "Kitāb al-Witr"
+  },
+  {
+    "book": 15,
+    "name": "The Book of الاستسقاء (Invoking Allah for Rain)",
+    "arabic": "كِتَاب الِاسْتِسْقَاء",
+    "translation": "Kitāb al-Istisqāʾ"
+  },
+  {
+    "book": 16,
+    "name": "The Book of الكسوف (Eclipses)",
+    "arabic": "كِتَاب الْكُسُوف",
+    "translation": "Kitāb al-Kusūf"
+  },
+  {
+    "book": 17,
+    "name": "The Book of سجود القرآن (Prostration During Recital of the Qur'an)",
+    "arabic": "كِتَاب سُجُود الْقُرْآن",
+    "translation": "Kitāb Sujūd al-Qurʾān"
+  },
+  {
+    "book": 18,
+    "name": "The Book of تقصير الصلاة (Shortening the Prayers (At-Taqseer))",
+    "arabic": "كِتَاب التَّقْصِير",
+    "translation": "Kitāb at-Taqṣīr"
+  },
+  {
+    "book": 19,
+    "name": "The Book of التهجد (Prayer at Night (Tahajjud))",
+    "arabic": "كِتَاب التَّهَجُّد",
+    "translation": "Kitāb at-Tahajjud"
+  },
+  {
+    "book": 20,
+    "name": "The Book of الجنائز (Funerals (Al-Janaa'iz))",
+    "arabic": "كِتَاب الْجَنَائِز",
+    "translation": "Kitāb al-Janāʾiz"
+  },
+  {
+    "book": 21,
+    "name": "The Book of الزكاة (Zakat (Obligatory Charity Tax))",
+    "arabic": "كِتَاب الزَّكَاة",
+    "translation": "Kitāb az-Zakāh"
+  },
+  {
+    "book": 22,
+    "name": "The Book of الحج (Hajj (Pilgrimage))",
+    "arabic": "كِتَاب الْحَجّ",
+    "translation": "Kitāb al-Ḥajj"
+  },
+  {
+    "book": 23,
+    "name": "The Book of العمرة (Umrah (Minor Pilgrimage))",
+    "arabic": "كِتَاب الْعُمْرَة",
+    "translation": "Kitāb al-ʿUmrah"
+  },
+  {
+    "book": 24,
+    "name": "The Book of المحصر (Al-Muhsar)",
+    "arabic": "كِتَاب الْمُحْصَر",
+    "translation": "Kitāb al-Muḥṣar"
+  },
+  {
+    "book": 25,
+    "name": "The Book of جزاء الصيد (Jaza' as-Said (Penalty for Hunting))",
+    "arabic": "كِتَاب جَزَاء الصَّيْد",
+    "translation": "Kitāb Jazāʾ aṣ-Ṣayd"
+  },
+  {
+    "book": 26,
+    "name": "The Book of فضائل المدينة (Virtues of Al-Madina)",
+    "arabic": "كِتَاب فَضَائِل الْمَدِينَة",
+    "translation": "Kitāb Faḍāʾil al-Madīnah"
+  },
+  {
+    "book": 27,
+    "name": "The Book of المحصر (Al-Muhsar)",
+    "arabic": "كِتَاب الْمُحْصَر",
+    "translation": "Kitāb al-Muḥṣar"
+  },
+  {
+    "book": 28,
+    "name": "The Book of أحصر (Husr)",
+    "arabic": "كِتَاب أَحْصَر",
+    "translation": "Kitāb Aḥṣar"
+  },
+  {
+    "book": 29,
+    "name": "The Book of فضائل مكة (Virtues of Makkah)",
+    "arabic": "كِتَاب فَضَائِل مَكَّة",
+    "translation": "Kitāb Faḍāʾil Makkah"
+  },
+  {
+    "book": 30,
+    "name": "The Book of الصوم (Fasting)",
+    "arabic": "كِتَاب الصَّوْم",
+    "translation": "Kitāb aṣ-Ṣawm"
+  },
+  {
+    "book": 31,
+    "name": "The Book of التراويح (Tarawih Prayers)",
+    "arabic": "كِتَاب التَّرَاوِيح",
+    "translation": "Kitāb at-Tarāwīḥ"
+  },
+  {
+    "book": 32,
+    "name": "The Book of فضل ليلة القدر (Virtues of the Night of Qadr)",
+    "arabic": "كِتَاب فَضْل لَيْلَة الْقَدْر",
+    "translation": "Kitāb Faḍl Laylat al-Qadr"
+  },
+  {
+    "book": 33,
+    "name": "The Book of الاعتكاف (I'tikaf)",
+    "arabic": "كِتَاب الِاعْتِكَاف",
+    "translation": "Kitāb al-Iʿtikāf"
+  },
+  {
+    "book": 34,
+    "name": "The Book of البيوع (Sales and Trade)",
+    "arabic": "كِتَاب الْبُيُوع",
+    "translation": "Kitāb al-Buyūʿ"
+  },
+  {
+    "book": 35,
+    "name": "The Book of السلم (As-Salam)",
+    "arabic": "كِتَاب السَّلَم",
+    "translation": "Kitāb as-Salam"
+  },
+  {
+    "book": 36,
+    "name": "The Book of الشفعة (Ash-Shuf'a)",
+    "arabic": "كِتَاب الشُّفْعَة",
+    "translation": "Kitāb ash-Shufʿah"
+  },
+  {
+    "book": 37,
+    "name": "The Book of الإجارة (Al-Ijarah)",
+    "arabic": "كِتَاب الْإِجَارَة",
+    "translation": "Kitāb al-ʾIjārah"
+  },
+  {
+    "book": 38,
+    "name": "The Book of الحوالات (Al-Hawalat)",
+    "arabic": "كِتَاب الْحَوَالَات",
+    "translation": "Kitāb al-Ḥawālāt"
+  },
+  {
+    "book": 39,
+    "name": "The Book of الكفالة (Al-Kafala)",
+    "arabic": "كِتَاب الْكَفَالَة",
+    "translation": "Kitāb al-Kafālah"
+  },
+  {
+    "book": 40,
+    "name": "The Book of الوكالة (Al-Wakalah)",
+    "arabic": "كِتَاب الْوَكَالَة",
+    "translation": "Kitāb al-Wakālah"
+  },
+  {
+    "book": 41,
+    "name": "The Book of المزارعة (Al-Muzara'a)",
+    "arabic": "كِتَاب الْمُزَارَعَة",
+    "translation": "Kitāb al-Muzāraʿah"
+  },
+  {
+    "book": 42,
+    "name": "The Book of المساقاة (Al-Musaqat)",
+    "arabic": "كِتَاب الْمُسَاقَاة",
+    "translation": "Kitāb al-Musāqāh"
+  },
+  {
+    "book": 43,
+    "name": "The Book of الرهن (Ar-Rahn)",
+    "arabic": "كِتَاب الرَّهْن",
+    "translation": "Kitāb ar-Rahn"
+  },
+  {
+    "book": 44,
+    "name": "The Book of العتق (Al-'Itq (Manumission of Slaves))",
+    "arabic": "كِتَاب الْعِتْق",
+    "translation": "Kitāb al-ʿItq"
+  },
+  {
+    "book": 45,
+    "name": "The Book of الهبة وفضلها والتحريض عليها (Al-Hibah (Gifts))",
+    "arabic": "كِتَاب الْهِبَة وَفَضْلهَا وَالتَّحْرِيض عَلَيْهَا",
+    "translation": "Kitāb al-Hibah wa Faḍlihā wa at-Taḥrīḍ ʿalayhā"
+  },
+  {
+    "book": 46,
+    "name": "The Book of الشهادات (Ash-Shahadat (Testimonies))",
+    "arabic": "كِتَاب الشَّهَادَات",
+    "translation": "Kitāb ash-Shahādāt"
+  },
+  {
+    "book": 47,
+    "name": "The Book of الصلح (As-Sulh (Reconciliation))",
+    "arabic": "كِتَاب الصُّلْح",
+    "translation": "Kitāb aṣ-Ṣulḥ"
+  },
+  {
+    "book": 48,
+    "name": "The Book of الشروط (Ash-Shurut (Conditions))",
+    "arabic": "كِتَاب الشُّرُوط",
+    "translation": "Kitāb ash-Shurūṭ"
+  },
+  {
+    "book": 49,
+    "name": "The Book of الوصايا (Al-Wasaya (Wills and Testaments))",
+    "arabic": "كِتَاب الْوَصَايَا",
+    "translation": "Kitāb al-Waṣāyā"
+  },
+  {
+    "book": 50,
+    "name": "The Book of فضائل القرآن (Virtues of the Qur'an)",
+    "arabic": "كِتَاب فَضَائِل الْقُرْآن",
+    "translation": "Kitāb Faḍāʾil al-Qurʾān"
+  },
+  {
+    "book": 51,
+    "name": "The Book of النكاح (An-Nikah (Marriage))",
+    "arabic": "كِتَاب النِّكَاح",
+    "translation": "Kitāb an-Nikāḥ"
+  },
+  {
+    "book": 52,
+    "name": "The Book of الطلاق (At-Talaq (Divorce))",
+    "arabic": "كِتَاب الطَّلَاق",
+    "translation": "Kitāb aṭ-Ṭalāq"
+  },
+  {
+    "book": 53,
+    "name": "The Book of النفقات (An-Nafaqaat (Maintenance))",
+    "arabic": "كِتَاب النَّفَقَات",
+    "translation": "Kitāb an-Nafaqāt"
+  },
+  {
+    "book": 54,
+    "name": "The Book of الأطعمة (Al-At'ima (Food))",
+    "arabic": "كِتَاب الْأَطْعِمَة",
+    "translation": "Kitāb al-ʾAṭʿimah"
+  },
+  {
+    "book": 55,
+    "name": "The Book of العقيقة (Al-'Aqiqa)",
+    "arabic": "كِتَاب الْعَقِيقَة",
+    "translation": "Kitāb al-ʿAqīqah"
+  },
+  {
+    "book": 56,
+    "name": "The Book of الذبائح والصيد (Adh-Dhaba'ih Was-Said (Slaughtering and Hunting))",
+    "arabic": "كِتَاب الذَّبَائِح وَالصَّيْد",
+    "translation": "Kitāb aḏ-Ḏabāʾiḥ wa aṣ-Ṣayd"
+  },
+  {
+    "book": 57,
+    "name": "The Book of الأشربة (Al-Ashriba (Drinks))",
+    "arabic": "كِتَاب الْأَشْرِبَة",
+    "translation": "Kitāb al-ʾAshribah"
+  },
+  {
+    "book": 58,
+    "name": "The Book of المرضى (Al-Marda (Patients))",
+    "arabic": "كِتَاب الْمَرْضَى",
+    "translation": "Kitāb al-Marḍá"
+  },
+  {
+    "book": 59,
+    "name": "The Book of الطب (At-Tibb (Medicine))",
+    "arabic": "كِتَاب الطِّبّ",
+    "translation": "Kitāb aṭ-Ṭibb"
+  },
+  {
+    "book": 60,
+    "name": "The Book of فضائل الصحابة (Virtues of the Companions of the Prophet ﷺ)",
+    "arabic": "كِتَاب فَضَائِل الصَّحَابَة",
+    "translation": "Kitāb Faḍāʾil aṣ-Ṣaḥābah"
+  },
+  {
+    "book": 61,
+    "name": "The Book of المناقب (Al-Manaqib (Merits))",
+    "arabic": "كِتَاب الْمَنَاقِب",
+    "translation": "Kitāb al-Manāqib"
+  },
+  {
+    "book": 62,
+    "name": "The Book of فضائل الأنصار (Virtues of the Ansar)",
+    "arabic": "كِتَاب فَضَائِل الْأَنْصَار",
+    "translation": "Kitāb Faḍāʾil al-ʾAnṣār"
+  },
+  {
+    "book": 63,
+    "name": "The Book of المغازي (Al-Maghazi (The Book of المغازي))",
+    "arabic": "كِتَاب الْمَغَازِي",
+    "translation": "Kitāb al-Maghāzī"
+  },
+  {
+    "book": 64,
+    "name": "The Book of تفسير القرآن (Tafsir Al-Qur'an (Exegesis of the Qur'an))",
+    "arabic": "كِتَاب تَفْسِير الْقُرْآن",
+    "translation": "Kitāb Tafsīr al-Qurʾān"
+  },
+  {
+    "book": 65,
+    "name": "The Book of فضائل القرآن (Virtues of the Qur'an)",
+    "arabic": "كِتَاب فَضَائِل الْقُرْآن",
+    "translation": "Kitāb Faḍāʾil al-Qurʾān"
+  },
+  {
+    "book": 66,
+    "name": "The Book of فضائل الذكر والدعاء والصلوات على النبي ﷺ (Virtues of Dhikr, Du'a and Salat upon the Prophet ﷺ)",
+    "arabic": "كِتَاب فَضَائِل الذِّكْر وَالدُّعَاء وَالصَّلَوَات عَلَى النَّبِيِّ ﷺ",
+    "translation": "Kitāb Faḍāʾil aḏ-Dhikr wa ad-Duʿāʾ wa aṣ-Ṣalawāt ʿalá an-Nabī ﷺ"
+  },
+  {
+    "book": 67,
+    "name": "The Book of الأيمان والنذور (Al-Aiman Wan-Nudhur (Oaths and Vows))",
+    "arabic": "كِتَاب الْأَيْمَان وَالنُّذُور",
+    "translation": "Kitāb al-ʾAymān wa an-Nuḏūr"
+  },
+  {
+    "book": 68,
+    "name": "The Book of كفارات الأيمان (Kaffarat Al-Aiman)",
+    "arabic": "كِتَاب كَفَّارَات الْأَيْمَان",
+    "translation": "Kitāb Kaffārāt al-ʾAymān"
+  },
+  {
+    "book": 69,
+    "name": "The Book of الفرائض (Al-Fara'id (The Laws of Inheritance))",
+    "arabic": "كِتَاب الْفَرَائِض",
+    "translation": "Kitāb al-Farāʾiḍ"
+  },
+  {
+    "book": 70,
+    "name": "The Book of الحدود (Al-Hudud (Prescribed Punishments))",
+    "arabic": "كِتَاب الْحُدُود",
+    "translation": "Kitāb al-Ḥudūd"
+  },
+  {
+    "book": 71,
+    "name": "The Book of الديات (Ad-Diyat (Blood Money))",
+    "arabic": "كِتَاب الدِّيَات",
+    "translation": "Kitāb ad-Diyāt"
+  },
+  {
+    "book": 72,
+    "name": "The Book of المحاربين من أهل الكفر والردة (Al-Muharibin Min Ahl Al-Kufr War-Riddah)",
+    "arabic": "كِتَاب الْمُحَارِبِينَ مِنْ أَهْل الْكُفْر وَالرِّدَّة",
+    "translation": "Kitāb al-Muḥāribīn min Ahl al-Kufr wa ar-Riddah"
+  },
+  {
+    "book": 73,
+    "name": "The Book of الإكراه (Al-Ikrah (Compulsion))",
+    "arabic": "كِتَاب الْإِكْرَاه",
+    "translation": "Kitāb al-ʾIkrāh"
+  },
+  {
+    "book": 74,
+    "name": "The Book of الحيل (Al-Hiyal (Tricks))",
+    "arabic": "كِتَاب الْحِيَل",
+    "translation": "Kitāb al-Ḥiyal"
+  },
+  {
+    "book": 75,
+    "name": "The Book of التعبير (At-Ta'bir (Interpretation of Dreams))",
+    "arabic": "كِتَاب التَّعْبِير",
+    "translation": "Kitāb at-Taʿbīr"
+  },
+  {
+    "book": 76,
+    "name": "The Book of الفتن (Al-Fitan (Trials and Tribulations))",
+    "arabic": "كِتَاب الْفِتَن",
+    "translation": "Kitāb al-Fitan"
+  },
+  {
+    "book": 77,
+    "name": "The Book of الأحكام (Al-Ahkam (Judicial Decisions))",
+    "arabic": "كِتَاب الْأَحْكَام",
+    "translation": "Kitāb al-ʾAḥkām"
+  },
+  {
+    "book": 78,
+    "name": "The Book of التمني (At-Tamanni (Wishing))",
+    "arabic": "كِتَاب التَّمَنِّي",
+    "translation": "Kitāb at-Tamannī"
+  },
+  {
+    "book": 79,
+    "name": "The Book of الأدب (Al-Adab (Good Manners))",
+    "arabic": "كِتَاب الْأَدَب",
+    "translation": "Kitāb al-ʾAdab"
+  },
+  {
+    "book": 80,
+    "name": "The Book of الاستئذان (Al-Isti'dhan (Asking Permission))",
+    "arabic": "كِتَاب الِاسْتِئْذَان",
+    "translation": "Kitāb al-ʾIstīʾḏān"
+  },
+  {
+    "book": 81,
+    "name": "The Book of المرضى (Al-Marda (Patients))",
+    "arabic": "كِتَاب الْمَرْضَى",
+    "translation": "Kitāb al-Marḍá"
+  },
+  {
+    "book": 82,
+    "name": "The Book of الطب (At-Tibb (Medicine))",
+    "arabic": "كِتَاب الطِّبّ",
+    "translation": "Kitāb aṭ-Ṭibb"
+  },
+  {
+    "book": 83,
+    "name": "The Book of فضائل القرآن (Virtues of the Qur'an)",
+    "arabic": "كِتَاب فَضَائِل الْقُرْآن",
+    "translation": "Kitāb Faḍāʾil al-Qurʾān"
+  },
+  {
+    "book": 84,
+    "name": "The Book of التاريخ (At-Tarikh (History))",
+    "arabic": "كِتَاب التَّارِيخ",
+    "translation": "Kitāb at-Tārīkh"
+  },
+  {
+    "book": 85,
+    "name": "The Book of الرقاق (Ar-Riqaq (Softening of the Hearts))",
+    "arabic": "كِتَاب الرِّقَاق",
+    "translation": "Kitāb ar-Riqāq"
+  },
+  {
+    "book": 86,
+    "name": "The Book of القدر (Al-Qadar (Divine Decree))",
+    "arabic": "كِتَاب الْقَدَر",
+    "translation": "Kitāb al-Qadar"
+  },
+  {
+    "book": 87,
+    "name": "The Book of الأيمان والنذور (Al-Aiman Wan-Nudhur (Oaths and Vows))",
+    "arabic": "كِتَاب الْأَيْمَان وَالنُّذُور",
+    "translation": "Kitāb al-ʾAymān wa an-Nuḏūr"
+  },
+  {
+    "book": 88,
+    "name": "The Book of الكفارات (Al-Kaffarat (Expiations))",
+    "arabic": "كِتَاب الْكَفَّارَات",
+    "translation": "Kitāb al-Kaffārāt"
+  },
+  {
+    "book": 89,
+    "name": "The Book of الفرائض (Al-Fara'id (The Laws of Inheritance))",
+    "arabic": "كِتَاب الْفَرَائِض",
+    "translation": "Kitāb al-Farāʾiḍ"
+  },
+  {
+    "book": 90,
+    "name": "The Book of الحدود (Al-Hudud (Prescribed Punishments))",
+    "arabic": "كِتَاب الْحُدُود",
+    "translation": "Kitāb al-Ḥudūd"
+  },
+  {
+    "book": 91,
+    "name": "The Book of الديات (Ad-Diyat (Blood Money))",
+    "arabic": "كِتَاب الدِّيَات",
+    "translation": "Kitāb ad-Diyāt"
+  },
+  {
+    "book": 92,
+    "name": "The Book of الفتن (Al-Fitan (Trials and Tribulations))",
+    "arabic": "كِتَاب الْفِتَن",
+    "translation": "Kitāb al-Fitan"
+  },
+  {
+    "book": 93,
+    "name": "The Book of الأحكام (Al-Ahkam (Judicial Decisions))",
+    "arabic": "كِتَاب الْأَحْكَام",
+    "translation": "Kitāb al-ʾAḥkām"
+  },
+  {
+    "book": 94,
+    "name": "The Book of التمني (At-Tamanni (Wishing))",
+    "arabic": "كِتَاب التَّمَنِّي",
+    "translation": "Kitāb at-Tamannī"
+  },
+  {
+    "book": 95,
+    "name": "The Book of أخبار الآحاد (Akhbar Al-Ahad (Single Narrations))",
+    "arabic": "كِتَاب أَخْبَار الْآحَاد",
+    "translation": "Kitāb ʾAkhbār al-ʾĀḥād"
+  },
+  {
+    "book": 96,
+    "name": "The Book of الاعتصام بالكتاب والسنة (Al-I'tisam Bil-Kitab Was-Sunnah (Holding Fast to the Book and the Sunnah))",
+    "arabic": "كِتَاب الِاعْتِصَام بِالْكِتَابِ وَالسُّنَّة",
+    "translation": "Kitāb al-ʾIʿtiṣām Bil-Kitāb wa as-Sunnah"
+  },
+  {
+    "book": 97,
+    "name": "The Book of التوحيد (At-Tawhid (Oneness of Allah))",
+    "arabic": "كِتَاب التَّوْحِيد",
+    "translation": "Kitāb at-Tawḥīd"
+  }
+]
