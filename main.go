@@ -5,9 +5,12 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/asim/reminder/api"
 	"github.com/asim/reminder/app"
@@ -263,6 +266,43 @@ func main() {
 		vee := cc.Verses[verse-1]
 		b := vee.JSON()
 
+		w.Write(b)
+	})
+
+	var mtx sync.RWMutex
+	var name string
+	var hadith string
+	var verse string
+
+	daily := func() {
+		mtx.Lock()
+		r := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+		nam := (*n)[r.Int()%len((*n))]
+		book := b.Books[r.Int()%len(b.Books)]
+		chap := q.Chapters[r.Int()%len(q.Chapters)]
+		ver := chap.Verses[r.Int()%len(chap.Verses)]
+		had := book.Hadiths[r.Int()%len(book.Hadiths)]
+
+		name = fmt.Sprintf("%s - %s - %s - %s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
+		verse = fmt.Sprintf("%s - %d:%d", ver.Text, ver.Chapter, ver.Number)
+		hadith = fmt.Sprintf("%s - %s - %s", had.Text, had.By, strings.Split(had.Info, ":")[0])
+		mtx.Unlock()
+
+		time.Sleep(time.Hour * 24)
+	}
+
+	go daily()
+
+	http.HandleFunc("/api/daily", func(w http.ResponseWriter, r *http.Request) {
+		mtx.RLock()
+		day := map[string]interface{}{
+			"name":   name,
+			"hadith": hadith,
+			"verse":  verse,
+		}
+		mtx.RUnlock()
+		b, _ := json.Marshal(day)
 		w.Write(b)
 	})
 
