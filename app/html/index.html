@@ -16,9 +16,8 @@
     #head {
       position: fixed;
       background: white;
-      padding: 15px 0 15px 0;
       top: 0;
-      width: 100%;
+      width: 100%
     }
     #head a { margin-right: 10px; color: black; font-weight: bold; text-decoration: none; }
     #container { height: 100%; max-width: 1024px; margin: 0 auto; padding: 25px;}
@@ -61,19 +60,28 @@ code {
 @media only screen and (max-width: 600px) {
   #head a { margin-right: 5px; }
 }
+#brand {
+  display: inline-block;
+  padding: 20px;
+}
+#nav {
+  float: right;
+  padding: 20px;
+}
     </style>
   </head>
   <body>
-    <div id="container">
-      <div id="head">
-        <a href="/">[Reminder]</a>
-        <a href="/api">API</a>
-        <a href="/quran">Quran</a>
-        <a href="/names">Names</a>
-        <a href="/hadith">Hadith</a>
-        <a href="/search">Search</a>
-        <button id="install" hidden>Install PWA</button>
+    <div id="head">
+      <div id="brand">
+        <a href="/">Reminder</a>
       </div>
+      <div id="nav">
+        <a href="/app">App</a>
+        <a href="/api">API</a>
+      </div>
+      <button id="install" hidden>Install PWA</button>
+    </div>
+    <div id="container">
       <div id="title">Welcome</div>
       <div id="desc">The reminder is a web app and API for the Quran, Hadith and names of Allah.</div>
       <div id="content"><h1 id="what-is-the-reminder">Why is it called the Reminder?</h1>

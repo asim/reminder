@@ -5,9 +5,12 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/asim/reminder/api"
 	"github.com/asim/reminder/app"
@@ -31,6 +34,12 @@ var history = map[string][]string{}
 func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *api.Api) {
 	// generate api doc
 	apiHtml := app.RenderTemplate("API", "", a.Markdown())
+
+	appHtml := app.RenderHTML("App", "The reminder web app", app.Index)
+
+	http.HandleFunc("/app", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(appHtml))
+	})
 
 	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(apiHtml))
@@ -263,6 +272,60 @@ func main() {
 		vee := cc.Verses[verse-1]
 		b := vee.JSON()
 
+		w.Write(b)
+	})
+
+	var mtx sync.RWMutex
+	var name string
+	var hadith string
+	var verse string
+
+	daily := func() {
+		mtx.Lock()
+		r := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+		nam := (*n)[r.Int()%len((*n))]
+		book := b.Books[r.Int()%len(b.Books)]
+		chap := q.Chapters[r.Int()%len(q.Chapters)]
+		ver := chap.Verses[r.Int()%len(chap.Verses)]
+		had := book.Hadiths[r.Int()%len(book.Hadiths)]
+
+		name = fmt.Sprintf("%s - %s - %s - %s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
+		verse = fmt.Sprintf("%s - %d:%d", ver.Text, ver.Chapter, ver.Number)
+		hadith = fmt.Sprintf("%s - %s - %s", had.Text, had.By, strings.Split(had.Info, ":")[0])
+		mtx.Unlock()
+
+		time.Sleep(time.Hour * 24)
+	}
+
+	go daily()
+
+	// TODO: add to react web app
+	http.HandleFunc("/daily", func(w http.ResponseWriter, r *http.Request) {
+		template := `
+<h3>Verse</h3>
+%s
+<h3>Hadith</h3>
+%s
+<h3>Name</h3>
+%s`
+
+		mtx.RLock()
+		data := fmt.Sprintf(template, verse, hadith, name)
+		mtx.RUnlock()
+		html := app.RenderHTML("Daily Reminder", "Daily reminder from the quran, hadith and names of Allah", data)
+		w.Write([]byte(html))
+	})
+
+	http.HandleFunc("/api/daily", func(w http.ResponseWriter, r *http.Request) {
+		mtx.RLock()
+		day := map[string]interface{}{
+			"name":   name,
+			"hadith": hadith,
+			"verse":  verse,
+		}
+		mtx.RUnlock()
+		b, _ := json.Marshal(day)
 		w.Write(b)
 	})
 

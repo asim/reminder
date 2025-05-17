@@ -29,6 +29,20 @@ type Value struct {
 
 var Endpoints = []*Endpoint{
 	{
+		Name:        "Daily verse, hadith and name of Allah",
+		Path:        "/api/daily",
+		Params:      nil,
+		Description: "Returns a verse of the quran, hadith and name of Allah",
+		Response: []*Value{{
+			Type: "JSON",
+			Params: []*Param{
+				{Name: "name", Value: "string", Description: "Name of Allah"},
+				{Name: "hadith", Value: "string", Description: "Hadith from Sahih Bukhari"},
+				{Name: "verse", Value: "string", Description: "A verse of the Quran"},
+			},
+		}},
+	},
+	{
 		Name:        "Quran",
 		Path:        "/api/quran",
 		Params:      nil,
