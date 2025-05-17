@@ -35,6 +35,12 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 	// generate api doc
 	apiHtml := app.RenderTemplate("API", "", a.Markdown())
 
+	appHtml := app.RenderHTML("App", "The reminder web app", app.Index)
+
+	http.HandleFunc("/app", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(appHtml))
+	})
+
 	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(apiHtml))
 	})

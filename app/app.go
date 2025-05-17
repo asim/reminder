@@ -34,7 +34,6 @@ var Template = `
     #head {
       position: fixed;
       background: white;
-      padding: 15px 0 15px 0;
       top: 0;
       width: 100%%;
     }
@@ -80,19 +79,36 @@ code {
 @media only screen and (max-width: 600px) {
   #head a { margin-right: 5px; }
 }
+#brand {
+  display: inline-block;
+  padding: 20px;
+}
+#brand a {
+  border: 1px solid grey;
+  border-radius: 5px;
+  padding: 5px;
+}
+#nav {
+ float: right;
+ padding: 20px 20px 20px 0;
+}
     </style>
   </head>
   <body>
-    <div id="container">
-      <div id="head">
-        <a href="/">[Reminder]</a>
-        <a href="/api">API</a>
+    <div id="head">
+      <div id="brand">
+        <a href="/">&nbsp;R&nbsp;</a>
+      </div>
+      <div id="nav">
+        <a href="/daily">Daily</a>
         <a href="/quran">Quran</a>
         <a href="/names">Names</a>
         <a href="/hadith">Hadith</a>
         <a href="/search">Search</a>
-        <button id="install" hidden>Install PWA</button>
       </div>
+      <button id="install" hidden>Install PWA</button>
+    </div>
+    <div id="container">
       <div id="title">%s</div>
       <div id="desc">%s</div>
       <div id="content">%s</div>
@@ -243,6 +259,27 @@ document.addEventListener('DOMContentLoaded', function(){
     });
 }, false);
 </script>
+`
+
+var Index = `
+<style>
+#app a {
+    text-decoration: none;
+    margin-bottom: 10px;
+    border: 1px solid grey;
+    border-radius: 5px;
+    padding: 10px;
+    display: block;
+}
+</style>
+
+<div id="app">
+        <a href="/daily">Daily Reminder</a>
+        <a href="/quran">Read the Quran</a>
+        <a href="/names">Names of Allah</a>
+        <a href="/hadith">Hadith (Bukhari)</a>
+        <a href="/search">Ask a Question</a>
+</div>
 `
 
 func Get(name string) string {
