@@ -294,6 +294,23 @@ func main() {
 
 	go daily()
 
+	// TODO: add to react web app
+	http.HandleFunc("/daily", func(w http.ResponseWriter, r *http.Request) {
+		template := `
+<h3>Verse</h3>
+%s
+<h3>Hadith</h3>
+%s
+<h3>Name</h3>
+%s`
+
+		mtx.RLock()
+		data := fmt.Sprintf(template, verse, hadith, name)
+		mtx.RUnlock()
+		html := app.RenderHTML("Daily Reminder", "Daily reminder from the quran, hadith and names of Allah", data)
+		w.Write([]byte(html))
+	})
+
 	http.HandleFunc("/api/daily", func(w http.ResponseWriter, r *http.Request) {
 		mtx.RLock()
 		day := map[string]interface{}{
