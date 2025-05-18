@@ -91,6 +91,7 @@ var Endpoints = []*Endpoint{
 				{Name: "number", Value: "int", Description: "Number of the verse"},
 				{Name: "text", Value: "string", Description: "Text of the verse"},
 				{Name: "arabic", Value: "string", Description: "Arabic text of the verse"},
+				{Name: "words", Value: "array", Description: "Word by word translation"},
 			},
 		}},
 	},

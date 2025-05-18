@@ -7,6 +7,7 @@ import (
 )
 
 //go:embed data/*.json
+//go:embed data/words/*.json
 var files embed.FS
 
 var Bismillah = `بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ`
@@ -23,10 +24,17 @@ type Chapter struct {
 }
 
 type Verse struct {
-	Chapter int    `json:"chapter"`
-	Number  int    `json:"number"`
-	Text    string `json:"text"`
-	Arabic  string `json:"arabic"`
+	Chapter int     `json:"chapter"`
+	Number  int     `json:"number"`
+	Text    string  `json:"text"`
+	Arabic  string  `json:"arabic"`
+	Words   []*Word `json:"words"`
+}
+
+type Word struct {
+	English         string `json:"english"`
+	Arabic          string `json:"arabic"`
+	Transliteration string `json:"transliteration"`
 }
 
 type Quran struct {
@@ -183,6 +191,13 @@ func Load() *Quran {
 		var data []interface{}
 		json.Unmarshal(f, &data)
 
+		f2, err := files.ReadFile(fmt.Sprintf("data/words/%d.json", chapter))
+		if err != nil {
+			panic(err.Error())
+		}
+		var words map[string]interface{}
+		json.Unmarshal(f2, &words)
+
 		english := data[0].(map[string]interface{})["name"].(map[string]interface{})["translated"].(string)
 		name := data[0].(map[string]interface{})["name"].(map[string]interface{})["transliterated"].(string)
 		data = data[1:]
@@ -216,12 +231,27 @@ func Load() *Quran {
 				panic("arabic verse mismatch")
 			}
 
+			// get words
+			inum := fmt.Sprintf("%v", num)
+			w := words[inum].(map[string]interface{})["w"].([]interface{})
+			var wbw []*Word
+			for _, word := range w {
+				wordmap := word.(map[string]interface{})
+				wbw = append(wbw, &Word{
+					Arabic:          wordmap["c"].(string),
+					English:         wordmap["e"].(string),
+					Transliteration: wordmap["d"].(string),
+				})
+			}
+
 			verses = append(verses, &Verse{
 				Chapter: chapter,
 				Number:  num,
 				Text:    ayah.([]interface{})[1].(string),
 				Arabic:  ar,
+				Words:   wbw,
 			})
+
 		}
 
 		// set the name
