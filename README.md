@@ -116,5 +116,6 @@ We have been requested to verify the sources of data
 - [English Quran](https://github.com/asim/quran-json)
 - [Names of Allah](https://github.com/asim/99-Names-Of-Allah)
 - [Sahih Bukhari](https://github.com/asim/bukhari)
+- [Word by word](https://github.com/asim/quranwbw)
 
 Summarisation is provided by OpenAI but all sources of truth are authentic
