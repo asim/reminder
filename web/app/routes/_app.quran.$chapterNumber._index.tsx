@@ -11,6 +11,12 @@ import { useQuranViewMode } from '~/hooks/use-quran-view-mode';
 import { getChapterOptions } from '~/queries/quran';
 import { queryClient } from '~/utils/query-client';
 
+function toArabicNumber(num: number) {
+  return num
+    .toString()
+    .replace(/\d/g, (d) => String.fromCharCode(0x0660 + Number(d)));
+}
+
 export function meta() {
   return [
     { title: 'Quran - Reminder' },
@@ -72,8 +78,8 @@ export default function QuranChapter(props: Route.ComponentProps) {
         >
           {data.verses.map((verse) => (
             <Fragment key={verse.number}>
-              {verse.arabic.replace('۞', '')}
-              &nbsp;۝&nbsp;&nbsp;
+              {verse.arabic}
+              &nbsp;{toArabicNumber(verse.number)}&nbsp;&nbsp;
             </Fragment>
           ))}
         </div>
@@ -95,7 +101,10 @@ export default function QuranChapter(props: Route.ComponentProps) {
               className='border-b border-gray-100 pb-3 sm:pb-8'
             >
               <div className='text-xl sm:text-2xl md:text-3xl mb-3 sm:mb-4 text-right leading-loose font-arabic'>
-                {verse.arabic.replace('۞', '')}
+                {verse.arabic}
+                <span className='text-xl sm:text-2xl md:text-3xl mx-2 align-middle'>
+                  {toArabicNumber(verse.number)}
+                </span>
               </div>
               <div className='text-base sm:text-lg md:text-xl leading-relaxed'>
                 {verse.text}
