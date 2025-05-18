@@ -79,7 +79,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
           {data.verses.map((verse) => (
             <Fragment key={verse.number}>
               {verse.arabic}
-              {toArabicNumber(verse.number)}
+              &nbsp;{toArabicNumber(verse.number)}&nbsp;&nbsp;
             </Fragment>
           ))}
         </div>
