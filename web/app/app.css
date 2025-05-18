@@ -12,3 +12,9 @@
 @theme {
   --font-arabic: 'arabic';
 }
+
+.verse-arabic-word:hover {
+  color: #b45309;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
