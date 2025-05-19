@@ -74,7 +74,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
       {mode === 'arabic' && (
         <div
           dir='rtl'
-          className='flex flex-grow flex-wrap font-arabic text-right text-xl sm:text-2xl md:text-3xl leading-loose'
+          className='flex flex-grow flex-wrap font-arabic text-right text-xl sm:text-2xl md:text-3xl leading-loose content-start'
         >
           {data.verses.map((verse) => (
             <Fragment key={verse.number}>
