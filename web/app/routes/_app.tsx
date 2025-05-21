@@ -23,6 +23,9 @@ export default function AppLayout() {
         <NavLink className={buttonClass} to='/names'>
           Names
         </NavLink>
+        <NavLink className={buttonClass} to='/daily'>
+          Daily
+        </NavLink>
 
         <div className='hidden lg:flex items-center gap-2'>
           <span className='text-gray-400 hidden lg:block mx-1'>/</span>
