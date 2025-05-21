@@ -31,7 +31,11 @@ export default function Quran() {
       path: `/quran/${chapter.number}`,
       number: chapter.number,
       extra: chapter.english,
-      searchableText: [chapter.english],
+      searchableText: [
+        chapter.english,      // English name
+        chapter.name,         // Transliteration
+        String(chapter.number) 
+      ]
     })) || [];
 
   return (
