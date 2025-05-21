@@ -128,6 +128,17 @@ const endpoints: Endpoint[] = [
       },
     ],
   },
+  {
+    title: 'Daily Reminder',
+    description: 'Returns a verse of the Quran, a hadith, and a name of Allah for the day',
+    url: '/api/daily',
+    responseFormat: 'JSON',
+    responseFields: [
+      { name: 'name', type: 'string', description: 'Name of Allah' },
+      { name: 'hadith', type: 'string', description: 'Hadith from Sahih Bukhari' },
+      { name: 'verse', type: 'string', description: 'A verse of the Quran' },
+    ],
+  },
 ];
 
 export default function Api() {
