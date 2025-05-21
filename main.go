@@ -29,7 +29,9 @@ var (
 	WebFlag    = flag.Bool("web", false, "Without this flag, the lite version will be served")
 )
 
+var mtx sync.RWMutex
 var history = map[string][]string{}
+var dailyName, dailyVerse, dailyHadith string
 
 func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *api.Api) {
 	// generate api doc
@@ -43,6 +45,22 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 
 	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(apiHtml))
+	})
+
+	http.HandleFunc("/daily", func(w http.ResponseWriter, r *http.Request) {
+		template := `
+<h3>Verse</h3>
+%s
+<h3>Hadith</h3>
+%s
+<h3>Name</h3>
+%s`
+
+		mtx.RLock()
+		data := fmt.Sprintf(template, dailyVerse, dailyHadith, dailyName)
+		mtx.RUnlock()
+		html := app.RenderHTML("Daily Reminder", "Daily reminder from the quran, hadith and names of Allah", data)
+		w.Write([]byte(html))
 	})
 
 	http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
@@ -275,11 +293,6 @@ func main() {
 		w.Write(b)
 	})
 
-	var mtx sync.RWMutex
-	var name string
-	var hadith string
-	var verse string
-
 	daily := func() {
 		mtx.Lock()
 		r := rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -290,9 +303,9 @@ func main() {
 		ver := chap.Verses[r.Int()%len(chap.Verses)]
 		had := book.Hadiths[r.Int()%len(book.Hadiths)]
 
-		name = fmt.Sprintf("%s - %s - %s - %s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
-		verse = fmt.Sprintf("%s - %d:%d", ver.Text, ver.Chapter, ver.Number)
-		hadith = fmt.Sprintf("%s - %s - %s", had.Text, had.By, strings.Split(had.Info, ":")[0])
+		dailyName = fmt.Sprintf("%s - %s - %s - %s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
+		dailyVerse = fmt.Sprintf("%s - %d:%d", ver.Text, ver.Chapter, ver.Number)
+		dailyHadith = fmt.Sprintf("%s - %s - %s", had.Text, had.By, strings.Split(had.Info, ":")[0])
 		mtx.Unlock()
 
 		time.Sleep(time.Hour * 24)
@@ -300,29 +313,12 @@ func main() {
 
 	go daily()
 
-	// TODO: add to react web app
-	http.HandleFunc("/daily", func(w http.ResponseWriter, r *http.Request) {
-		template := `
-<h3>Verse</h3>
-%s
-<h3>Hadith</h3>
-%s
-<h3>Name</h3>
-%s`
-
-		mtx.RLock()
-		data := fmt.Sprintf(template, verse, hadith, name)
-		mtx.RUnlock()
-		html := app.RenderHTML("Daily Reminder", "Daily reminder from the quran, hadith and names of Allah", data)
-		w.Write([]byte(html))
-	})
-
 	http.HandleFunc("/api/daily", func(w http.ResponseWriter, r *http.Request) {
 		mtx.RLock()
 		day := map[string]interface{}{
-			"name":   name,
-			"hadith": hadith,
-			"verse":  verse,
+			"name":   dailyName,
+			"hadith": dailyHadith,
+			"verse":  dailyVerse,
 		}
 		mtx.RUnlock()
 		b, _ := json.Marshal(day)
