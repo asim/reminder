@@ -294,21 +294,23 @@ func main() {
 	})
 
 	daily := func() {
-		mtx.Lock()
-		r := rand.New(rand.NewSource(time.Now().UnixNano()))
+		for {
+			mtx.Lock()
+			r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
-		nam := (*n)[r.Int()%len((*n))]
-		book := b.Books[r.Int()%len(b.Books)]
-		chap := q.Chapters[r.Int()%len(q.Chapters)]
-		ver := chap.Verses[r.Int()%len(chap.Verses)]
-		had := book.Hadiths[r.Int()%len(book.Hadiths)]
+			nam := (*n)[r.Int()%len((*n))]
+			book := b.Books[r.Int()%len(b.Books)]
+			chap := q.Chapters[r.Int()%len(q.Chapters)]
+			ver := chap.Verses[r.Int()%len(chap.Verses)]
+			had := book.Hadiths[r.Int()%len(book.Hadiths)]
 
-		dailyName = fmt.Sprintf("%s - %s - %s - %s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
-		dailyVerse = fmt.Sprintf("%s - %d:%d", ver.Text, ver.Chapter, ver.Number)
-		dailyHadith = fmt.Sprintf("%s - %s - %s", had.Text, had.By, strings.Split(had.Info, ":")[0])
-		mtx.Unlock()
+			dailyName = fmt.Sprintf("%s - %s - %s - %s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
+			dailyVerse = fmt.Sprintf("%s - %d:%d", ver.Text, ver.Chapter, ver.Number)
+			dailyHadith = fmt.Sprintf("%s - %s - %s", had.Text, had.By, strings.Split(had.Info, ":")[0])
+			mtx.Unlock()
 
-		time.Sleep(time.Hour * 24)
+			time.Sleep(time.Hour * 24)
+		}
 	}
 
 	go daily()
