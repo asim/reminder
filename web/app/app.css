@@ -9,12 +9,18 @@
   font-size: 1.5em;
 }
 
-@theme {
-  --font-arabic: 'arabic';
-}
-
 .verse-arabic-word:hover {
   color: #b45309;
   cursor: pointer;
   transition: color 0.3s ease;
+}
+
+@media (max-width: 640px) {
+  .max-w-2xl {
+    min-height: 100vh;
+    padding-bottom: 6rem !important;
+  }
+  .space-y-8 {
+    padding-bottom: 4rem !important;
+  }
 }

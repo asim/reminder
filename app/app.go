@@ -78,6 +78,8 @@ code {
 }
 @media only screen and (max-width: 600px) {
   #head a { margin-right: 5px; }
+  #container { padding-bottom: 120px !important; min-height: 100vh; }
+  #content { padding-bottom: 120px !important; min-height: 60vh; }
 }
 #brand {
   display: inline-block;
