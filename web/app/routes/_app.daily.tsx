@@ -15,7 +15,7 @@ export default function DailyPage() {
   });
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
+    <div className="max-w-2xl mx-auto px-4 py-8 overflow-auto">
       <h1 className="text-2xl font-bold mb-6 text-center">Daily Reminder</h1>
       {isLoading && <p className="text-center">Loading...</p>}
       {error && <p className="text-center text-red-500">Failed to load daily reminder.</p>}
