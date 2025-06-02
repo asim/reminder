@@ -12,7 +12,7 @@ export function meta() {
 
 export default function IslamPage() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 md:px-8 py-12 sm:py-16 bg-white">
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 md:px-8 py-12 sm:py-16 bg-white overflow-auto">
       <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 text-center">The Pillars of Islam</h1>
       <p className="text-gray-600 text-lg sm:text-xl mb-8 text-center max-w-2xl">
         Welcome! This page introduces the foundational pillars and core concepts of Islam in a simple, accessible way for everyone.
