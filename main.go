@@ -168,6 +168,12 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 		shtml := app.RenderHTML("Search", "", app.SearchTemplate)
 		w.Write([]byte(shtml))
 	})
+
+	http.HandleFunc("/islam", func(w http.ResponseWriter, r *http.Request) {
+		html := app.Get("concepts.html")
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write([]byte(html))
+	})
 }
 
 func main() {
