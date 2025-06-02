@@ -12,8 +12,8 @@ export function meta() {
 
 export default function IslamPage() {
   return (
-    <div className="flex flex-col flex-1 p-0 lg:p-8 mx-auto w-full max-w-3xl">
-      <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-6 text-left">
+    <div className='flex flex-col flex-1 p-0 lg:p-8 mx-auto w-full lg:max-w-3xl overflow-y-auto px-5 py-5'>
+      <h1 className='text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-6 text-left'>
         The Pillars of Islam
       </h1>
 
