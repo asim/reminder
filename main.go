@@ -532,7 +532,7 @@ func main() {
 
 			// Strip trailing slash globally (except for "/")
 			if r.URL.Path != "/" && len(r.URL.Path) > 1 && strings.HasSuffix(r.URL.Path, "/") {
-				r.URL.Path = strings.TrimRight(r.URL.Path, "/")
+				r.URL.Path = strings.TrimSuffix(r.URL.Path, "/")
 			}
 
 			http.DefaultServeMux.ServeHTTP(w, r)
