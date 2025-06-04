@@ -145,10 +145,11 @@ export default function QuranChapter(props: Route.ComponentProps) {
                 {verse.text}
               </div>
               <a
-                href={`#${verse.number}`}
-                className='text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2'
+                href={verse.number !== 0 ? `/quran/${data.number}/${verse.number}` : undefined}
+                className={`text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2${verse.number === 0 ? ' hidden' : ''}`}
+                style={verse.number === 0 ? { display: 'none' } : {}}
               >
-                Verse {verse.number}
+                {verse.number !== 0 ? `${data.number}:${verse.number}` : ''}
               </a>
             </div>
           ))}
