@@ -532,7 +532,14 @@ func main() {
 
 			// Strip trailing slash globally (except for "/")
 			if r.URL.Path != "/" && len(r.URL.Path) > 1 && strings.HasSuffix(r.URL.Path, "/") {
-				r.URL.Path = strings.TrimSuffix(r.URL.Path, "/")
+				// Internal rewrite: shallow copy request with trimmed path
+				newReq := new(http.Request)
+				*newReq = *r
+				urlCopy := *r.URL
+				urlCopy.Path = strings.TrimSuffix(r.URL.Path, "/")
+				newReq.URL = &urlCopy
+				http.DefaultServeMux.ServeHTTP(w, newReq)
+				return
 			}
 
 			http.DefaultServeMux.ServeHTTP(w, r)
