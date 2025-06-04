@@ -175,7 +175,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   return <PageError error={error} />;
 }
 
-import React, { useState, useRef, useEffect, Fragment } from 'react';
+import React, { useState, useRef } from 'react';
 
 function WordPopup({ word, isLast, verseNumber }: { word: { arabic: string; english: string; transliteration: string }; isLast: boolean; verseNumber: number }) {
   const [show, setShow] = useState(false);
