@@ -78,17 +78,29 @@ export default function QuranChapter(props: Route.ComponentProps) {
         >
           {data.verses.map((verse) => (
             <Fragment key={verse.number}>
-              {verse.arabic.split(' ').map((word, idx, arr) => (
-                <span key={idx} className='verse-arabic-word'>
-                  {word}
-                  {idx === arr.length - 1 && (
-                    <span className='mx-2 font-arabic'>
-                      {toArabicNumber(verse.number)}
+              {verse.words && verse.words.length > 0
+                ? verse.words.map((word, idx, arr) => (
+                    <span key={idx} className='verse-arabic-word'>
+                      {word.arabic}
+                      {idx === arr.length - 1 && (
+                        <span className='mx-2 font-arabic'>
+                          {toArabicNumber(verse.number)}
+                        </span>
+                      )}
+                      &nbsp;
                     </span>
-                  )}
-                  &nbsp;
-                </span>
-              ))}
+                  ))
+                : verse.arabic.split(' ').map((word, idx, arr) => (
+                    <span key={idx} className='verse-arabic-word'>
+                      {word}
+                      {idx === arr.length - 1 && (
+                        <span className='mx-2 font-arabic'>
+                          {toArabicNumber(verse.number)}
+                        </span>
+                      )}
+                      &nbsp;
+                    </span>
+                  ))}
             </Fragment>
           ))}
         </div>
@@ -110,26 +122,34 @@ export default function QuranChapter(props: Route.ComponentProps) {
               className='border-b border-gray-100 pb-3 sm:pb-8'
             >
               <div className='flex flex-row-reverse flex-wrap text-xl sm:text-2xl md:text-3xl mb-3 sm:mb-4 text-right leading-loose font-arabic'>
-                {verse.arabic.split(' ').map((word, idx, arr) => (
-                  <span key={idx} className='verse-arabic-word'>
-                    {word}
-                    {idx === arr.length - 1 && (
-                      <span className='mx-2 font-arabic'>
-                        {toArabicNumber(verse.number)}
+                {verse.words && verse.words.length > 0
+                  ? verse.words.map((word, idx, arr) => (
+                      <span key={idx} className='verse-arabic-word flex flex-col items-center mr-2 mb-2'>
+                        <span>{word.arabic}</span>
+                        <span className='text-xs sm:text-sm mt-1 px-1 rounded bg-gray-100 text-gray-700'>{word.english}</span>
+                        {idx === arr.length - 1 && (
+                          <span className='mx-2 font-arabic'>{toArabicNumber(verse.number)}</span>
+                        )}
                       </span>
-                    )}
-                    &nbsp;
-                  </span>
-                ))}
+                    ))
+                  : verse.arabic.split(' ').map((word, idx, arr) => (
+                      <span key={idx} className='verse-arabic-word mr-2 mb-2'>
+                        {word}
+                        {idx === arr.length - 1 && (
+                          <span className='mx-2 font-arabic'>{toArabicNumber(verse.number)}</span>
+                        )}
+                      </span>
+                    ))}
               </div>
               <div className='text-base sm:text-lg md:text-xl leading-relaxed'>
                 {verse.text}
               </div>
               <a
-                href={`#${verse.number}`}
-                className='text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2'
+                href={verse.number !== 0 ? `/quran/${data.number}/${verse.number}` : undefined}
+                className={`text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2${verse.number === 0 ? ' hidden' : ''}`}
+                style={verse.number === 0 ? { display: 'none' } : {}}
               >
-                Verse {verse.number}
+                {verse.number !== 0 ? `${data.number}:${verse.number}` : ''}
               </a>
             </div>
           ))}

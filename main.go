@@ -238,7 +238,19 @@ func main() {
 	if *WebFlag {
 		http.Handle("/", app.ServeWeb())
 	} else {
-		http.Handle("/", app.ServeLite())
+		http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Strip trailing slash globally (except for "/") for lite app only
+			if r.URL.Path != "/" && len(r.URL.Path) > 1 && strings.HasSuffix(r.URL.Path, "/") {
+				newReq := new(http.Request)
+				*newReq = *r
+				urlCopy := *r.URL
+				urlCopy.Path = strings.TrimSuffix(r.URL.Path, "/")
+				newReq.URL = &urlCopy
+				app.ServeLite().ServeHTTP(w, newReq)
+				return
+			}
+			app.ServeLite().ServeHTTP(w, r)
+		}))
 		registerLiteRoutes(q, n, b, a)
 	}
 

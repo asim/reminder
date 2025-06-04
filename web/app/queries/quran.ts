@@ -16,11 +16,18 @@ export const listSurahsOptions = () => ({
   },
 });
 
+type WordByWord = {
+  arabic: string;
+  english: string;
+  transliteration: string;
+};
+
 type VerseType = {
   chapter: number;
   number: number;
   text: string;
   arabic: string;
+  words?: WordByWord[];
 };
 
 type ChapterResponseType = {
