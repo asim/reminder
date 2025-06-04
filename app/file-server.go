@@ -45,8 +45,23 @@ func FileServerWith404(root http.FileSystem, handler404 FSHandler404) http.Handl
 		f, err := root.Open(upath)
 		if err != nil {
 			if os.IsNotExist(err) {
+				// If path ends with a trailing slash, try again without it
+				if len(upath) > 1 && strings.HasSuffix(upath, "/") {
+					altPath := strings.TrimSuffix(upath, "/")
+					f2, err2 := root.Open(altPath)
+					if err2 == nil {
+						f2.Close()
+						// Rewrite the request path and serve
+						r2 := new(http.Request)
+						*r2 = *r
+						urlCopy := *r.URL
+						urlCopy.Path = altPath
+						r2.URL = &urlCopy
+						fs.ServeHTTP(w, r2)
+						return
+					}
+				}
 				log.Printf("Embedded asset not found: %s", upath)
-
 				// call handler
 				if handler404 != nil {
 					doDefault := handler404(w, r)
