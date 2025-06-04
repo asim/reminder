@@ -78,17 +78,26 @@ export default function QuranChapter(props: Route.ComponentProps) {
         >
           {data.verses.map((verse) => (
             <Fragment key={verse.number}>
-              {verse.arabic.split(' ').map((word, idx, arr) => (
-                <span key={idx} className='verse-arabic-word'>
-                  {word}
-                  {idx === arr.length - 1 && (
-                    <span className='mx-2 font-arabic'>
-                      {toArabicNumber(verse.number)}
+              {verse.words && verse.words.length > 0
+                ? verse.words.map((word, idx, arr) => (
+                    <WordPopup
+                      key={idx}
+                      word={word}
+                      isLast={idx === arr.length - 1}
+                      verseNumber={verse.number}
+                    />
+                  ))
+                : verse.arabic.split(' ').map((word, idx, arr) => (
+                    <span key={idx} className='verse-arabic-word'>
+                      {word}
+                      {idx === arr.length - 1 && (
+                        <span className='mx-2 font-arabic'>
+                          {toArabicNumber(verse.number)}
+                        </span>
+                      )}
+                      &nbsp;
                     </span>
-                  )}
-                  &nbsp;
-                </span>
-              ))}
+                  ))}
             </Fragment>
           ))}
         </div>
@@ -164,4 +173,41 @@ export default function QuranChapter(props: Route.ComponentProps) {
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   return <PageError error={error} />;
+}
+
+import React, { useState, useRef, useEffect, Fragment } from 'react';
+
+function WordPopup({ word, isLast, verseNumber }: { word: { arabic: string; english: string; transliteration: string }; isLast: boolean; verseNumber: number }) {
+  const [show, setShow] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    function handleClick(event: MouseEvent) {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setShow(false);
+      }
+    }
+    if (show) {
+      document.addEventListener('mousedown', handleClick);
+    } else {
+      document.removeEventListener('mousedown', handleClick);
+    }
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [show]);
+
+  return (
+    <span ref={ref} className='relative verse-arabic-word' style={{ cursor: 'pointer', display: 'inline-block' }}>
+      <span onClick={() => setShow((s) => !s)}>{word.arabic}</span>
+      {show && (
+        <span className='absolute z-50 bg-white border border-gray-300 rounded shadow-lg px-2 py-1 text-xs sm:text-sm text-gray-900 whitespace-nowrap' style={{ top: '2.2em', right: 0 }}>
+          <span className='block font-bold'>{word.english}</span>
+          <span className='block text-gray-500'>{word.transliteration}</span>
+        </span>
+      )}
+      {isLast && (
+        <span className='mx-2 font-arabic'>{toArabicNumber(verseNumber)}</span>
+      )}
+      &nbsp;
+    </span>
+  );
 }
