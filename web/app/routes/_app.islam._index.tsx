@@ -18,15 +18,15 @@ export default function IslamPage() {
       </h1>
 
       <section className='mb-4 sm:mb-8'>
-        <h2 className='text-lg sm:text-xl font-medium mb-2 sm:mb-3'>What is Islam?</h2>
-        <p className='text-sm sm:text-base text-gray-700 mb-2 sm:mb-4'>
+        <h2 className='text-xl sm:text-2xl font-semibold mb-2 sm:mb-3'>What is Islam?</h2>
+        <p className='text-base sm:text-lg text-gray-700 mb-2 sm:mb-4'>
           Islam is a monotheistic faith centered on the belief in one God (Allah), who is merciful, compassionate, and just. Muslims believe that God sent prophets throughout history to guide humanity, with the final prophet being Muhammad (peace be upon him). Islam teaches submission to the will of God, striving for righteousness, and living a life of compassion, justice, and service to others. The Quran and the teachings of Prophet Muhammad (Hadith) form the foundation of Islamic belief and practice.
         </p>
       </section>
 
       <section className='mb-4 sm:mb-8'>
-        <h2 className='text-lg sm:text-xl font-medium mb-2 sm:mb-3'>Pillars of Islam</h2>
-        <p className='text-sm sm:text-base text-gray-700 mb-2 sm:mb-4'>
+        <h2 className='text-xl sm:text-2xl font-semibold mb-2 sm:mb-3'>Pillars of Islam</h2>
+        <p className='text-base sm:text-lg text-gray-700 mb-2 sm:mb-4'>
           The Pillars of Islam are five essential acts of worship and practice that form the foundation of a Muslim's faith and actions. They are considered the core duties that every Muslim is expected to observe, serving as a guide for living a life devoted to God and in service to others.
         </p>
         <ol className='list-decimal list-inside space-y-2 text-base sm:text-lg'>
@@ -39,8 +39,8 @@ export default function IslamPage() {
       </section>
 
       <section className='mb-8 sm:mb-12'>
-        <h2 className='text-lg sm:text-xl font-medium mb-2 sm:mb-3'>Articles of Faith</h2>
-        <p className='text-sm sm:text-base text-gray-700 mb-2 sm:mb-4'>
+        <h2 className='text-xl sm:text-2xl font-semibold mb-2 sm:mb-3'>Articles of Faith</h2>
+        <p className='text-base sm:text-lg text-gray-700 mb-2 sm:mb-4'>
           The Articles of Faith are six core beliefs that every Muslim holds. These beliefs define a Muslim's understanding of the world, the unseen, and the relationship between God, humanity, and the universe. They provide the spiritual and theological framework for Islamic faith.
         </p>
         <ul className='list-disc list-inside space-y-2 text-base sm:text-lg'>
