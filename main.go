@@ -177,6 +177,15 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 	})
 }
 
+func stripTrailingSlashMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" && len(r.URL.Path) > 1 && strings.HasSuffix(r.URL.Path, "/") {
+			r.URL.Path = strings.TrimRight(r.URL.Path, "/")
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 	flag.Parse()
 
@@ -238,7 +247,8 @@ func main() {
 	if *WebFlag {
 		http.Handle("/", app.ServeWeb())
 	} else {
-		http.Handle("/", app.ServeLite())
+		// Wrap ServeLite with the trailing slash middleware
+		http.Handle("/", stripTrailingSlashMiddleware(app.ServeLite()))
 		registerLiteRoutes(q, n, b, a)
 	}
 
