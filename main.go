@@ -51,11 +51,11 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 	http.HandleFunc("/daily", func(w http.ResponseWriter, r *http.Request) {
 		template := `
 <h3>Verse</h3>
-%s
+<a href="%s" class="block">%s</a>
 <h3>Hadith</h3>
-%s
+<a href="%s" class="block">%s</a>
 <h3>Name</h3>
-%s`
+<a href="%s" class="block">%s</a>`
 
 		mtx.RLock()
 		verseLink := links["verse"]

@@ -26,9 +26,9 @@ type Book struct {
 }
 
 type Hadith struct {
-	Info   string `json:"info"`
-	By     string `json:"by"`
-	Text   string `json:"text"`
+	Info string `json:"info"`
+	By   string `json:"by"`
+	Text string `json:"text"`
 }
 
 type Volumes struct {

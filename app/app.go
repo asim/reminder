@@ -76,6 +76,14 @@ code {
 .right {
   text-align: right;
 }
+.block {
+    text-decoration: none;
+    margin-bottom: 10px;
+    border: 1px solid grey;
+    border-radius: 5px;
+    padding: 10px;
+    display: block;
+}
 @media only screen and (max-width: 600px) {
   #head a { margin-right: 5px; }
 }
