@@ -39,6 +39,7 @@ var Endpoints = []*Endpoint{
 				{Name: "name", Value: "string", Description: "Name of Allah"},
 				{Name: "hadith", Value: "string", Description: "Hadith from Sahih Bukhari"},
 				{Name: "verse", Value: "string", Description: "A verse of the Quran"},
+				{Name: "links", Value: "map", Description: "Links to relevant content"},
 			},
 		}},
 	},

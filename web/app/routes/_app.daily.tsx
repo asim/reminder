@@ -26,19 +26,19 @@ export default function DailyPage() {
           <section>
             <h2 className="text-lg font-semibold mb-2">Quran Verse</h2>
             <div className="bg-blue-50 rounded p-4 text-base shadow">
-              {data.verse}
+              <a href={data.links['verse']}>{data.verse}</a>
             </div>
           </section>
           <section>
             <h2 className="text-lg font-semibold mb-2">Hadith</h2>
             <div className="bg-green-50 rounded p-4 text-base shadow">
-              {data.hadith}
+              <a href={data.links['hadith']}>{data.hadith}</a>
             </div>
           </section>
           <section>
             <h2 className="text-lg font-semibold mb-2">Name of Allah</h2>
             <div className="bg-yellow-50 rounded p-4 text-base shadow">
-              {data.name}
+              <a href={data.links['name']}>{data.name}</a>
             </div>
           </section>
         </div>

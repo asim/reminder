@@ -4,6 +4,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -25,9 +26,9 @@ type Book struct {
 }
 
 type Hadith struct {
-	Info string `json:"info"`
-	By   string `json:"by"`
-	Text string `json:"text"`
+	Info   string `json:"info"`
+	By     string `json:"by"`
+	Text   string `json:"text"`
 }
 
 type Volumes struct {
@@ -140,14 +141,16 @@ func Load() *Volumes {
 			Name: d["name"].(string),
 		}
 
-		for num, b := range d["books"].([]interface{}) {
+		for _, b := range d["books"].([]interface{}) {
 			bk := b.(map[string]interface{})
 
-			name := strings.Split(bk["name"].(string), ". ")[1]
+			parts := strings.Split(bk["name"].(string), ". ")
+			num, name := parts[0], parts[1]
+			n, _ := strconv.Atoi(num)
 
 			book := &Book{
 				Name:   name,
-				Number: num + 1,
+				Number: n,
 			}
 
 			for _, h := range bk["hadiths"].([]interface{}) {

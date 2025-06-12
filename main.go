@@ -32,6 +32,7 @@ var (
 var mtx sync.RWMutex
 var history = map[string][]string{}
 var dailyName, dailyVerse, dailyHadith string
+var links = map[string]string{}
 
 func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *api.Api) {
 	// generate api doc
@@ -57,7 +58,11 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 %s`
 
 		mtx.RLock()
-		data := fmt.Sprintf(template, dailyVerse, dailyHadith, dailyName)
+		verseLink := links["verse"]
+		hadithLink := links["hadith"]
+		nameLink := links["name"]
+
+		data := fmt.Sprintf(template, verseLink, dailyVerse, hadithLink, dailyHadith, nameLink, dailyName)
 		mtx.RUnlock()
 		html := app.RenderHTML("Daily Reminder", "Daily reminder from the quran, hadith and names of Allah", data)
 		w.Write([]byte(html))
@@ -326,6 +331,14 @@ func main() {
 			dailyName = fmt.Sprintf("%s - %s - %s - %s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
 			dailyVerse = fmt.Sprintf("%s - %d:%d", ver.Text, ver.Chapter, ver.Number)
 			dailyHadith = fmt.Sprintf("%s - %s - %s", had.Text, had.By, strings.Split(had.Info, ":")[0])
+
+			num := strings.TrimSpace(strings.Split(strings.Split(had.Info, "Number")[1], ":")[0])
+
+			links = map[string]string{
+				"verse":  fmt.Sprintf("/quran/%d#%d", ver.Chapter, ver.Number),
+				"hadith": fmt.Sprintf("/hadith/%d#%s", book.Number, num),
+				"name":   fmt.Sprintf("/names/%d", nam.Number),
+			}
 			mtx.Unlock()
 
 			time.Sleep(time.Hour * 24)
@@ -340,6 +353,7 @@ func main() {
 			"name":   dailyName,
 			"hadith": dailyHadith,
 			"verse":  dailyVerse,
+			"links":  links,
 		}
 		mtx.RUnlock()
 		b, _ := json.Marshal(day)
