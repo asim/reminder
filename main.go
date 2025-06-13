@@ -64,7 +64,7 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 		hadithLink := links["hadith"]
 		nameLink := links["name"]
 
-		data := fmt.Sprintf(template, verseLink, dailyVerse, hadithLink, dailyHadith, nameLink, dailyName, dailyUpdated.Format(time.DateTime))
+		data := fmt.Sprintf(template, verseLink, dailyVerse, hadithLink, dailyHadith, nameLink, dailyName, dailyUpdated.Format(time.RFC850))
 		mtx.RUnlock()
 		html := app.RenderHTML("Daily Reminder", "Daily reminder from the quran, hadith and names of Allah", data)
 		w.Write([]byte(html))
@@ -358,7 +358,7 @@ func main() {
 			"hadith":  dailyHadith,
 			"verse":   dailyVerse,
 			"links":   links,
-			"updated": dailyUpdated.Format(time.DateTime),
+			"updated": dailyUpdated.Format(time.RFC850),
 		}
 		mtx.RUnlock()
 		b, _ := json.Marshal(day)
