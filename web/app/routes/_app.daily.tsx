@@ -41,6 +41,9 @@ export default function DailyPage() {
               <a href={data.links['name']}>{data.name}</a>
             </div>
           </section>
+          <section>
+            <div>Updated {data.updated}</div>
+          </section>
         </div>
       )}
     </div>

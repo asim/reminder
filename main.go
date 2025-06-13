@@ -33,6 +33,7 @@ var mtx sync.RWMutex
 var history = map[string][]string{}
 var dailyName, dailyVerse, dailyHadith string
 var links = map[string]string{}
+var dailyUpdated = time.Time{}
 
 func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *api.Api) {
 	// generate api doc
@@ -55,14 +56,15 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 <h3>Hadith</h3>
 <a href="%s" class="block">%s</a>
 <h3>Name</h3>
-<a href="%s" class="block">%s</a>`
-
+<a href="%s" class="block">%s</a>
+<p>Updated %s</p>
+`
 		mtx.RLock()
 		verseLink := links["verse"]
 		hadithLink := links["hadith"]
 		nameLink := links["name"]
 
-		data := fmt.Sprintf(template, verseLink, dailyVerse, hadithLink, dailyHadith, nameLink, dailyName)
+		data := fmt.Sprintf(template, verseLink, dailyVerse, hadithLink, dailyHadith, nameLink, dailyName, dailyUpdated.Format(time.DateTime))
 		mtx.RUnlock()
 		html := app.RenderHTML("Daily Reminder", "Daily reminder from the quran, hadith and names of Allah", data)
 		w.Write([]byte(html))
@@ -339,6 +341,8 @@ func main() {
 				"hadith": fmt.Sprintf("/hadith/%d#%s", book.Number, num),
 				"name":   fmt.Sprintf("/names/%d", nam.Number),
 			}
+
+			dailyUpdated = time.Now()
 			mtx.Unlock()
 
 			time.Sleep(time.Hour * 24)
@@ -350,10 +354,11 @@ func main() {
 	http.HandleFunc("/api/daily", func(w http.ResponseWriter, r *http.Request) {
 		mtx.RLock()
 		day := map[string]interface{}{
-			"name":   dailyName,
-			"hadith": dailyHadith,
-			"verse":  dailyVerse,
-			"links":  links,
+			"name":    dailyName,
+			"hadith":  dailyHadith,
+			"verse":   dailyVerse,
+			"links":   links,
+			"updated": dailyUpdated.Format(time.DateTime),
 		}
 		mtx.RUnlock()
 		b, _ := json.Marshal(day)
