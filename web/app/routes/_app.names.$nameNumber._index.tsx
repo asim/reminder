@@ -44,9 +44,6 @@ export default function NameDetail() {
               {name.english}
             </div>
           </div>
-          <p className='text-gray-800 text-base sm:text-lg leading-relaxed'>
-            {name.description.replace(/\\"/g, '')}
-          </p>
         </div>
 
         {name.summary && (
