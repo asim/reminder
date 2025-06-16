@@ -133,7 +133,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
                       </span>
                     ))
                   : verse.arabic.split(' ').map((word, idx, arr) => (
-                      <span key={idx} className='verse-arabic-word mr-2 mb-2'>
+                      <span key={idx} className='verse-arabic-word text-2xl mr-2 mb-2'>
                         {word}
                         {idx === arr.length - 1 && (
                           <span className='mx-2 font-arabic'>{toArabicNumber(verse.number)}</span>
