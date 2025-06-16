@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { httpGet } from '~/utils/http';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { httpGet, httpPost } from '~/utils/http';
 import React from 'react';
 
 interface DailyResponse {
@@ -9,16 +9,36 @@ interface DailyResponse {
 }
 
 export default function DailyPage() {
-  const { data, isLoading, error } = useQuery<DailyResponse>({
+  const queryClient = useQueryClient();
+  const { data, isLoading, error, isFetching } = useQuery<DailyResponse>({
     queryKey: ['daily'],
     queryFn: async () => httpGet<DailyResponse>('/api/daily'),
   });
 
+  // Refresh handler
+  const handleRefresh = async () => {
+    try {
+      await httpPost('/api/daily/refresh', {});
+      queryClient.invalidateQueries(['daily']);
+    } catch (e) {
+      // Optionally handle error
+    }
+  };
+
   return (
     <div className='flex flex-col flex-1 p-0 lg:p-8 mx-auto w-full lg:max-w-3xl overflow-y-auto px-5 py-5'>
-      <h1 className='text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-6 text-left'>
-        Daily Reminder
-      </h1>
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <h1 className='text-2xl sm:text-3xl md:text-4xl font-semibold text-left'>
+          Daily Reminder
+        </h1>
+        <button
+          className="ml-4 px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition disabled:opacity-50"
+          onClick={handleRefresh}
+          disabled={isFetching}
+        >
+          {isFetching ? 'Refreshing...' : 'Refresh'}
+        </button>
+      </div>
       {isLoading && <p className="text-center">Loading...</p>}
       {error && <p className="text-center text-red-500">Failed to load daily reminder.</p>}
       {data && (
