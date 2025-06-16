@@ -319,16 +319,17 @@ func main() {
 		w.Write(b)
 	})
 
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+
 	daily := func() {
 		for {
 			mtx.Lock()
-			r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
-			nam := (*n)[r.Int()%len((*n))]
-			book := b.Books[r.Int()%len(b.Books)]
-			chap := q.Chapters[r.Int()%len(q.Chapters)]
-			ver := chap.Verses[r.Int()%len(chap.Verses)]
-			had := book.Hadiths[r.Int()%len(book.Hadiths)]
+			nam := (*n)[rnd.Int()%len((*n))]
+			book := b.Books[rnd.Int()%len(b.Books)]
+			chap := q.Chapters[rnd.Int()%len(q.Chapters)]
+			ver := chap.Verses[rnd.Int()%len(chap.Verses)]
+			had := book.Hadiths[rnd.Int()%len(book.Hadiths)]
 
 			dailyName = fmt.Sprintf("%s - %s - %s - %s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
 			dailyVerse = fmt.Sprintf("%s - %d:%d", ver.Text, ver.Chapter, ver.Number)
@@ -361,6 +362,41 @@ func main() {
 			"updated": dailyUpdated.Format(time.RFC850),
 		}
 		mtx.RUnlock()
+		b, _ := json.Marshal(day)
+		w.Write(b)
+	})
+
+	http.HandleFunc("/api/daily/refresh", func(w http.ResponseWriter, r *http.Request) {
+		nam := (*n)[rnd.Int()%len((*n))]
+		book := b.Books[rnd.Int()%len(b.Books)]
+		chap := q.Chapters[rnd.Int()%len(q.Chapters)]
+		ver := chap.Verses[rnd.Int()%len(chap.Verses)]
+		had := book.Hadiths[rnd.Int()%len(book.Hadiths)]
+
+		mtx.Lock()
+
+		dailyName = fmt.Sprintf("%s - %s - %s - %s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
+		dailyVerse = fmt.Sprintf("%s - %d:%d", ver.Text, ver.Chapter, ver.Number)
+		dailyHadith = fmt.Sprintf("%s - %s - %s", had.Text, had.By, strings.Split(had.Info, ":")[0])
+
+		num := strings.TrimSpace(strings.Split(strings.Split(had.Info, "Number")[1], ":")[0])
+
+		links = map[string]string{
+			"verse":  fmt.Sprintf("/quran/%d#%d", ver.Chapter, ver.Number),
+			"hadith": fmt.Sprintf("/hadith/%d#%s", book.Number, num),
+			"name":   fmt.Sprintf("/names/%d", nam.Number),
+		}
+
+		dailyUpdated = time.Now()
+		day := map[string]interface{}{
+			"name":    dailyName,
+			"hadith":  dailyHadith,
+			"verse":   dailyVerse,
+			"links":   links,
+			"updated": dailyUpdated.Format(time.RFC850),
+		}
+		mtx.Unlock()
+
 		b, _ := json.Marshal(day)
 		w.Write(b)
 	})

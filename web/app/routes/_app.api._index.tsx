@@ -137,6 +137,21 @@ const endpoints: Endpoint[] = [
       { name: 'name', type: 'string', description: 'Name of Allah' },
       { name: 'hadith', type: 'string', description: 'Hadith from Sahih Bukhari' },
       { name: 'verse', type: 'string', description: 'A verse of the Quran' },
+      { name: 'links', type: 'map', description: 'Links to the sources' },
+      { name: 'updated', type: 'string', description: 'Timestamp of update' },
+    ],
+  },
+  {
+    title: 'Daily Reminder Refresh',
+    description: 'Returns a refreshed verse of the Quran, a hadith, and a name of Allah for the day',
+    url: '/api/daily/refresh',
+    responseFormat: 'JSON',
+    responseFields: [
+      { name: 'name', type: 'string', description: 'Name of Allah' },
+      { name: 'hadith', type: 'string', description: 'Hadith from Sahih Bukhari' },
+      { name: 'verse', type: 'string', description: 'A verse of the Quran' },
+      { name: 'links', type: 'map', description: 'Links to the sources' },
+      { name: 'updated', type: 'string', description: 'Timestamp of update' },
     ],
   },
 ];
