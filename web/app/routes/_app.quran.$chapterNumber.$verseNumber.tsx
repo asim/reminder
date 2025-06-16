@@ -39,7 +39,7 @@ export default function QuranVerse(props: Route.ComponentProps) {
       />
 
       <div className='flex flex-col flex-grow'>
-        <div className='text-xl sm:text-2xl md:text-3xl mb-3 sm:mb-4 text-right leading-loose font-arabic'>
+        <div className='text-2xl sm:text-2xl md:text-3xl mb-3 sm:mb-4 text-right leading-loose font-arabic'>
           {verse.arabic.replace('۞', '')}
         </div>
         <div className='text-base sm:text-lg md:text-xl leading-relaxed'>{verse.text}</div>
