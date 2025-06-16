@@ -39,7 +39,7 @@ export default function DailyPage() {
           Daily Reminder
         </h1>
         <button
-          className="ml-4 px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition disabled:opacity-50"
+          className="ml-4 px-2 py-1 text-sm bg-black text-white rounded shadow hover:bg-gray-800 transition disabled:opacity-50"
           onClick={handleRefresh}
           disabled={isFetching || refreshing}
         >
