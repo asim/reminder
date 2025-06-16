@@ -40,6 +40,23 @@ var Endpoints = []*Endpoint{
 				{Name: "hadith", Value: "string", Description: "Hadith from Sahih Bukhari"},
 				{Name: "verse", Value: "string", Description: "A verse of the Quran"},
 				{Name: "links", Value: "map", Description: "Links to relevant content"},
+				{Name: "updated", Value: "string", Description: "Time of last update"},
+			},
+		}},
+	},
+	{
+		Name:        "Refreshed daily verse, hadith and name of Allah",
+		Path:        "/api/daily/refresh",
+		Params:      nil,
+		Description: "Returns a refreshed daily verse of the quran, hadith and name of Allah",
+		Response: []*Value{{
+			Type: "JSON",
+			Params: []*Param{
+				{Name: "name", Value: "string", Description: "Name of Allah"},
+				{Name: "hadith", Value: "string", Description: "Hadith from Sahih Bukhari"},
+				{Name: "verse", Value: "string", Description: "A verse of the Quran"},
+				{Name: "links", Value: "map", Description: "Links to relevant content"},
+				{Name: "updated", Value: "string", Description: "Time of the refresh"},
 			},
 		}},
 	},
