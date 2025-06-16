@@ -373,9 +373,11 @@ func main() {
 		ver := chap.Verses[rnd.Int()%len(chap.Verses)]
 		had := book.Hadiths[rnd.Int()%len(book.Hadiths)]
 
-		dailyName := fmt.Sprintf("%s - %s - %s - %s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
-		dailyVerse := fmt.Sprintf("%s - %d:%d", ver.Text, ver.Chapter, ver.Number)
-		dailyHadith := fmt.Sprintf("%s - %s - %s", had.Text, had.By, strings.Split(had.Info, ":")[0])
+		mtx.Lock()
+
+		dailyName = fmt.Sprintf("%s - %s - %s - %s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
+		dailyVerse = fmt.Sprintf("%s - %d:%d", ver.Text, ver.Chapter, ver.Number)
+		dailyHadith = fmt.Sprintf("%s - %s - %s", had.Text, had.By, strings.Split(had.Info, ":")[0])
 
 		num := strings.TrimSpace(strings.Split(strings.Split(had.Info, "Number")[1], ":")[0])
 
@@ -385,13 +387,15 @@ func main() {
 			"name":   fmt.Sprintf("/names/%d", nam.Number),
 		}
 
+		dailyUpdated = time.Now()
 		day := map[string]interface{}{
 			"name":    dailyName,
 			"hadith":  dailyHadith,
 			"verse":   dailyVerse,
 			"links":   links,
-			"updated": time.Now().Format(time.RFC850),
+			"updated": dailyUpdated.Format(time.RFC850),
 		}
+		mtx.Unlock()
 
 		b, _ := json.Marshal(day)
 		w.Write(b)
