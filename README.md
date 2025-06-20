@@ -19,8 +19,8 @@ are a new form of useful indexing for search.
 - [API](#api)
 - [Web](#web)
 - [Notes](#notes)
-- [Community](#community)
 - [Sources](#sources)
+- [Development](#development)
 
 ## Features
 
@@ -104,10 +104,6 @@ Say,
 it is a reminder to the whole world.”
 ```
 
-## Community
-
-Come chat on [Discord](https://discord.gg/F3xXRGbp9d)
-
 ## Sources
 
 We have been requested to verify the sources of data
@@ -119,3 +115,8 @@ We have been requested to verify the sources of data
 - [Word by word](https://github.com/asim/quranwbw)
 
 Summarisation is provided by OpenAI but all sources of truth are authentic
+
+## Development
+
+Come chat on [Discord](https://discord.gg/F3xXRGbp9d) about feature development
+
