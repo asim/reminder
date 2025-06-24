@@ -18,8 +18,7 @@ func normalize(s string) string {
 	return strings.Join(strings.Fields(s), " ")
 }
 
-// Fixes the word-by-word Arabic using arabic.json as reference, in order of arabic.json
-func fixWordByWord() {
+func wordByWord() {
 	arabicPath := "quran/data/arabic.json"
 	wordsDir := "quran/data/words"
 
@@ -192,6 +191,6 @@ func verifyWordByWord() {
 }
 
 func main() {
-	fixWordByWord()
+	wordByWord()
 	verifyWordByWord()
 }
