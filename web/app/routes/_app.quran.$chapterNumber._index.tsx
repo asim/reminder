@@ -121,40 +121,19 @@ export default function QuranChapter(props: Route.ComponentProps) {
               key={verse.number}
               className='border-b border-gray-100 pb-3 sm:pb-8'
             >
-              <div className='flex flex-row-reverse flex-wrap text-xl sm:text-2xl md:text-3xl mb-3 sm:mb-4 text-right leading-loose font-arabic'>
-                {verse.words && verse.words.length > 0
-                  ? verse.words.map((word, idx, arr) => {
-                      if (idx === arr.length - 1) {
-                        return (
-                          <span key={idx} className='verse-arabic-word text-2xl flex flex-col items-center mr-2 mb-2'>
-                            <span className='flex flex-row items-center' dir="rtl">
-                              <span>{word.arabic}</span>
-                              <span className='mx-2 font-arabic'>{toArabicNumber(verse.number)}</span>
-                            </span>
-                            <span className='text-xs sm:text-sm mt-1 px-1 rounded bg-gray-100 text-gray-700'>{word.english}</span>
-                          </span>
-                        );
-                      } else {
-                        return (
-                          <span key={idx} className='verse-arabic-word text-2xl flex flex-col items-center mr-2 mb-2'>
-                            <span>{word.arabic}</span>
-                            <span className='text-xs sm:text-sm mt-1 px-1 rounded bg-gray-100 text-gray-700'>{word.english}</span>
-                          </span>
-                        );
-                      }
-                    })
-                  : verse.arabic.split(' ').map((word, idx, arr) => (
-                      idx === arr.length - 1 ? (
-                        <span key={idx} className='verse-arabic-word text-2xl flex flex-row items-center mr-2 mb-2' dir="rtl">
-                          <span>{word}</span>
-                          <span className='mx-2 font-arabic'>{toArabicNumber(verse.number)}</span>
-                        </span>
-                      ) : (
-                        <span key={idx} className='verse-arabic-word text-2xl mr-2 mb-2'>
-                          {word}
-                        </span>
-                      )
-                    ))}
+              <div className='flex flex-row-reverse flex-wrap text-xl sm:text-2xl md:text-3xl mb-3 sm:mb-4 text-right leading-loose font-arabic items-end'>
+                {verse.words && verse.words.length > 0 &&
+                  verse.words.map((word, idx) => (
+                    <span key={idx} className='verse-arabic-word text-2xl flex flex-col items-center mr-2 mb-2'>
+                      <span>{word.arabic}</span>
+                      <span className='text-xs sm:text-sm mt-1 px-1 rounded bg-gray-100 text-gray-700'>{word.english}</span>
+                    </span>
+                  ))
+                }
+                {/* Render the verse number symbol outside the words */}
+                <span className='mx-2 font-arabic text-2xl flex items-center' dir="rtl">
+                  {toArabicNumber(verse.number)}
+                </span>
               </div>
               <div className='text-base sm:text-lg md:text-xl leading-relaxed'>
                 {verse.text}
