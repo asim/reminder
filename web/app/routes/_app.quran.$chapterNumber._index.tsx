@@ -126,9 +126,11 @@ export default function QuranChapter(props: Route.ComponentProps) {
                   ? verse.words.map((word, idx, arr) => {
                       if (idx === arr.length - 1) {
                         return (
-                          <span key={idx} className='verse-arabic-word text-2xl flex flex-row items-center mr-2 mb-2' dir="rtl">
-                            <span>{word.arabic}</span>
-                            <span className='mx-2 font-arabic'>{toArabicNumber(verse.number)}</span>
+                          <span key={idx} className='verse-arabic-word text-2xl flex flex-col items-center mr-2 mb-2'>
+                            <span className='flex flex-row items-center' dir="rtl">
+                              <span>{word.arabic}</span>
+                              <span className='mx-2 font-arabic'>{toArabicNumber(verse.number)}</span>
+                            </span>
                             <span className='text-xs sm:text-sm mt-1 px-1 rounded bg-gray-100 text-gray-700'>{word.english}</span>
                           </span>
                         );
