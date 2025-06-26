@@ -4,44 +4,7 @@ import { Code, Globe2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 function getHijriDate() {
-  // Simple approximation; for production use a library or API
-  const GREGORIAN_EPOCH = 1721425.5;
-  const ISLAMIC_EPOCH = 1948439.5;
-  function toJulian(date) {
-    return (
-      GREGORIAN_EPOCH - 1 +
-      365 * (date.getFullYear() - 1) +
-      Math.floor((date.getFullYear() - 1) / 4) -
-      Math.floor((date.getFullYear() - 1) / 100) +
-      Math.floor((date.getFullYear() - 1) / 400) +
-      Math.floor(
-        (367 * (date.getMonth() + 1) - 362) / 12 +
-          (date.getMonth() + 1 <= 2 ? 0 : date.getFullYear() % 4 === 0 && (date.getFullYear() % 100 !== 0 || date.getFullYear() % 400 === 0) ? -1 : -2) +
-          date.getDate()
-      )
-    );
-  }
-  function toHijri(gDate) {
-    const jd = toJulian(gDate);
-    const days = Math.floor(jd) - ISLAMIC_EPOCH;
-    const year = Math.floor((30 * days + 10646) / 10631);
-    const month = Math.min(
-      12,
-      Math.ceil((days - 29 - hijriToJD(year, 1, 1)) / 29.5) + 1
-    );
-    const day = Math.floor(jd) - hijriToJD(year, month, 1) + 1;
-    return { year, month, day };
-  }
-  function hijriToJD(year, month, day) {
-    return (
-      day +
-      Math.ceil(29.5 * (month - 1)) +
-      (year - 1) * 354 +
-      Math.floor((3 + 11 * year) / 30) +
-      ISLAMIC_EPOCH -
-      1
-    );
-  }
+  // Umm al-Qura calendar approximation
   const hijriMonths = [
     'Muharram',
     'Safar',
@@ -57,8 +20,46 @@ function getHijriDate() {
     'Dhu al-Hijjah',
   ];
   const today = new Date();
-  const { year, month, day } = toHijri(today);
-  return { year, month: hijriMonths[month - 1], day };
+  let day = today.getDate();
+  let month = today.getMonth();
+  let year = today.getFullYear();
+
+  // Julian day calculation
+  if (month < 2) {
+    year -= 1;
+    month += 12;
+  }
+  const a = Math.floor(year / 100);
+  const b = 2 - a + Math.floor(a / 4);
+  const jd =
+    Math.floor(365.25 * (year + 4716)) +
+    Math.floor(30.6001 * (month + 1)) +
+    day +
+    b -
+    1524.5;
+
+  // Hijri date calculation
+  const islamicEpoch = 1948439.5;
+  const days = Math.floor(jd) - islamicEpoch;
+  const hYear = Math.floor((30 * days + 10646) / 10631);
+  const hMonth = Math.min(
+    12,
+    Math.ceil((days - 29 - hijriToJD(hYear, 1, 1)) / 29.5) + 1
+  );
+  const hDay = Math.floor(jd) - hijriToJD(hYear, hMonth, 1) + 1;
+
+  function hijriToJD(year, month, day) {
+    return (
+      day +
+      Math.ceil(29.5 * (month - 1)) +
+      (year - 1) * 354 +
+      Math.floor((3 + 11 * year) / 30) +
+      islamicEpoch -
+      1
+    );
+  }
+
+  return { year: hYear, month: hijriMonths[hMonth - 1], day: hDay };
 }
 
 export function meta({}: Route.MetaArgs) {
