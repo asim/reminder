@@ -2,8 +2,8 @@ import { Link } from 'react-router';
 import type { Route } from './+types/_index';
 import { Code, Globe2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import HijriDate from 'hijri-date';
 
+// Pure JS Hijri date conversion (Tabular Islamic calendar)
 function getHijriDate() {
   const hijriMonths = [
     'Muharram',
@@ -20,12 +20,41 @@ function getHijriDate() {
     'Dhu al-Hijjah',
   ];
   const today = new Date();
-  const hijri = new HijriDate(today);
-  return {
-    year: hijri.getFullYear(),
-    month: hijriMonths[hijri.getMonth()],
-    day: hijri.getDate(),
-  };
+  let day = today.getDate();
+  let month = today.getMonth() + 1; // JS months are 0-based
+  let year = today.getFullYear();
+
+  // Julian day calculation
+  if (month <= 2) {
+    year -= 1;
+    month += 12;
+  }
+  const a = Math.floor(year / 100);
+  const b = 2 - a + Math.floor(a / 4);
+  const jd =
+    Math.floor(365.25 * (year + 4716)) +
+    Math.floor(30.6001 * (month + 1)) +
+    day +
+    b -
+    1524.5;
+
+  // Hijri date calculation (Tabular Islamic calendar)
+  const islamicEpoch = 1948439.5;
+  const days = Math.floor(jd - islamicEpoch);
+  const hYear = Math.floor((30 * days + 10646) / 10631);
+  const firstDayOfYear = islamicEpoch + 354 * (hYear - 1) + Math.floor((3 + 11 * hYear) / 30);
+  let hMonth = Math.floor((jd - firstDayOfYear) / 29.5) + 1;
+  if (hMonth > 12) hMonth = 12;
+  const firstDayOfMonth = firstDayOfYear + 29.5 * (hMonth - 1);
+  let hDay = Math.floor(jd - firstDayOfMonth + 1);
+  if (hDay < 1) {
+    hMonth += 1;
+    hDay = 1;
+    if (hMonth > 12) {
+      hMonth = 1;
+    }
+  }
+  return { year: hYear, month: hijriMonths[hMonth - 1], day: hDay };
 }
 
 export function meta({}: Route.MetaArgs) {
