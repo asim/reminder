@@ -4,7 +4,7 @@ import { Code, Globe2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 function getHijriDate() {
-  // Umm al-Qura calendar approximation
+  // Tabular Islamic calendar (Kuwaiti algorithm)
   const hijriMonths = [
     'Muharram',
     'Safar',
@@ -38,32 +38,20 @@ function getHijriDate() {
     b -
     1524.5;
 
-  // Hijri date calculation
+  // Hijri date calculation (Kuwaiti algorithm)
   const islamicEpoch = 1948439.5;
-  const days = Math.floor(jd - islamicEpoch);
+  const days = Math.floor(jd) - Math.floor(islamicEpoch);
   const hYear = Math.floor((30 * days + 10646) / 10631);
-  function hijriToJD(year: number, month: number, day: number) {
-    return (
-      day +
-      Math.ceil(29.5 * (month - 1)) +
-      (year - 1) * 354 +
-      Math.floor((3 + 11 * year) / 30) +
-      islamicEpoch -
-      1
-    );
-  }
-  const firstDayOfYear = hijriToJD(hYear, 1, 1);
-  let hMonth = Math.floor((jd - firstDayOfYear) / 29.5) + 1;
+  const firstDayOfYear = islamicEpoch + 354 * (hYear - 1) + Math.floor((3 + 11 * hYear) / 30);
+  let hMonth = Math.ceil((jd - firstDayOfYear) / 29.5) + 1;
   if (hMonth > 12) hMonth = 12;
-  const firstDayOfMonth = hijriToJD(hYear, hMonth, 1);
+  const firstDayOfMonth = firstDayOfYear + 29.5 * (hMonth - 1);
   let hDay = Math.floor(jd - firstDayOfMonth + 1);
   if (hDay < 1) {
-    // If day is less than 1, it's the first of the next month
     hMonth += 1;
     hDay = 1;
     if (hMonth > 12) {
       hMonth = 1;
-      // Optionally increment year, but not needed for display
     }
   }
   return { year: hYear, month: hijriMonths[hMonth - 1], day: hDay };
@@ -89,7 +77,7 @@ export default function Home() {
   return (
     <div className='flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 md:px-8 py-12 sm:py-16 bg-white'>
       <div className='absolute top-4 left-4 text-left'>
-        <div className='font-semibold text-lg'>Salam,</div>
+        <div className='font-semibold text-lg'>Salam</div>
         <div>
           Today is the {hijri.day} of {hijri.month}, {hijri.year}
         </div>
