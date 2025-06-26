@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import type { Route } from './+types/_index';
 import { Code, Globe2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import HijriDate from 'hijri-date/lib/safe';
+import HijriDate from 'hijri-date';
 
 function getHijriDate() {
   const hijriMonths = [
