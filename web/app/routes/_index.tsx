@@ -21,11 +21,11 @@ function getHijriDate() {
   ];
   const today = new Date();
   let day = today.getDate();
-  let month = today.getMonth();
+  let month = today.getMonth() + 1; // JS months are 0-based
   let year = today.getFullYear();
 
   // Julian day calculation
-  if (month < 2) {
+  if (month <= 2) {
     year -= 1;
     month += 12;
   }
