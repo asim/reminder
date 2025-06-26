@@ -1,6 +1,65 @@
 import { Link } from 'react-router';
 import type { Route } from './+types/_index';
 import { Code, Globe2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
+function getHijriDate() {
+  // Simple approximation; for production use a library or API
+  const GREGORIAN_EPOCH = 1721425.5;
+  const ISLAMIC_EPOCH = 1948439.5;
+  function toJulian(date) {
+    return (
+      GREGORIAN_EPOCH - 1 +
+      365 * (date.getFullYear() - 1) +
+      Math.floor((date.getFullYear() - 1) / 4) -
+      Math.floor((date.getFullYear() - 1) / 100) +
+      Math.floor((date.getFullYear() - 1) / 400) +
+      Math.floor(
+        (367 * (date.getMonth() + 1) - 362) / 12 +
+          (date.getMonth() + 1 <= 2 ? 0 : date.getFullYear() % 4 === 0 && (date.getFullYear() % 100 !== 0 || date.getFullYear() % 400 === 0) ? -1 : -2) +
+          date.getDate()
+      )
+    );
+  }
+  function toHijri(gDate) {
+    const jd = toJulian(gDate);
+    const days = Math.floor(jd) - ISLAMIC_EPOCH;
+    const year = Math.floor((30 * days + 10646) / 10631);
+    const month = Math.min(
+      12,
+      Math.ceil((days - 29 - hijriToJD(year, 1, 1)) / 29.5) + 1
+    );
+    const day = Math.floor(jd) - hijriToJD(year, month, 1) + 1;
+    return { year, month, day };
+  }
+  function hijriToJD(year, month, day) {
+    return (
+      day +
+      Math.ceil(29.5 * (month - 1)) +
+      (year - 1) * 354 +
+      Math.floor((3 + 11 * year) / 30) +
+      ISLAMIC_EPOCH -
+      1
+    );
+  }
+  const hijriMonths = [
+    'Muharram',
+    'Safar',
+    'Rabiʿ al-awwal',
+    'Rabiʿ al-thani',
+    'Jumada al-awwal',
+    'Jumada al-thani',
+    'Rajab',
+    'Shaʿban',
+    'Ramadan',
+    'Shawwal',
+    'Dhu al-Qiʿdah',
+    'Dhu al-Hijjah',
+  ];
+  const today = new Date();
+  const { year, month, day } = toHijri(today);
+  return { year, month: hijriMonths[month - 1], day };
+}
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -13,8 +72,21 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
+  const [hijri, setHijri] = useState({ year: 0, month: '', day: 0 });
+
+  useEffect(() => {
+    setHijri(getHijriDate());
+  }, []);
+
   return (
     <div className='flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 md:px-8 py-12 sm:py-16 bg-white'>
+      <div className='absolute top-4 left-4 text-left'>
+        <div className='font-semibold text-lg'>Salam,</div>
+        <div>
+          Today is the {hijri.day} of {hijri.month}, {hijri.year}
+        </div>
+      </div>
+
       <h1 className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-2 sm:mb-4 font-bold tracking-tight text-center'>reminder</h1>
       <p className='text-gray-600 text-balance text-lg sm:text-xl mb-6 sm:mb-8 md:mb-10 text-center max-w-md'>
         Quran, hadith, and more as an app and API
