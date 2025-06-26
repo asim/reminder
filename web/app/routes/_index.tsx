@@ -41,7 +41,7 @@ function getHijriDate() {
   // Hijri date calculation (Tabular Islamic calendar)
   const islamicEpoch = 1948439.5;
   const days = Math.floor(jd - islamicEpoch);
-  const hYear = Math.floor((30 * days + 10646) / 10631);
+  let hYear = Math.floor((30 * days + 10646) / 10631);
   const firstDayOfYear = islamicEpoch + 354 * (hYear - 1) + Math.floor((3 + 11 * hYear) / 30);
   let hMonth = Math.floor((jd - firstDayOfYear) / 29.5) + 1;
   if (hMonth > 12) hMonth = 12;
@@ -52,6 +52,47 @@ function getHijriDate() {
     hDay = 1;
     if (hMonth > 12) {
       hMonth = 1;
+    }
+  }
+  // Correction: If today is the Gregorian equivalent of 1 Muharram, show it as such
+  if (hMonth === 12 && hDay >= 29) {
+    // Check if tomorrow is 1 Muharram
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    let tDay = tomorrow.getDate();
+    let tMonth = tomorrow.getMonth() + 1;
+    let tYear = tomorrow.getFullYear();
+    if (tMonth <= 2) {
+      tYear -= 1;
+      tMonth += 12;
+    }
+    const ta = Math.floor(tYear / 100);
+    const tb = 2 - ta + Math.floor(ta / 4);
+    const tjd =
+      Math.floor(365.25 * (tYear + 4716)) +
+      Math.floor(30.6001 * (tMonth + 1)) +
+      tDay +
+      tb -
+      1524.5;
+    const tdays = Math.floor(tjd - islamicEpoch);
+    const thYear = Math.floor((30 * tdays + 10646) / 10631);
+    const tfirstDayOfYear = islamicEpoch + 354 * (thYear - 1) + Math.floor((3 + 11 * thYear) / 30);
+    let thMonth = Math.floor((tjd - tfirstDayOfYear) / 29.5) + 1;
+    if (thMonth > 12) thMonth = 12;
+    const tfirstDayOfMonth = tfirstDayOfYear + 29.5 * (thMonth - 1);
+    let thDay = Math.floor(tjd - tfirstDayOfMonth + 1);
+    if (thDay < 1) {
+      thMonth += 1;
+      thDay = 1;
+      if (thMonth > 12) {
+        thMonth = 1;
+      }
+    }
+    if (thMonth === 1 && thDay === 1) {
+      hMonth = 1;
+      hDay = 1;
+      // Optionally increment year
+      if (thYear > hYear) hYear = thYear;
     }
   }
   return { year: hYear, month: hijriMonths[hMonth - 1], day: hDay };
