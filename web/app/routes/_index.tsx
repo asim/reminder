@@ -98,6 +98,16 @@ function getHijriDate() {
   return { year: hYear, month: hijriMonths[hMonth - 1], day: hDay };
 }
 
+function getOrdinal(n: number) {
+  if (n === 1) return 'st';
+  if (n === 2) return 'nd';
+  if (n === 3) return 'rd';
+  if (n % 10 === 1 && n % 100 !== 11) return 'st';
+  if (n % 10 === 2 && n % 100 !== 12) return 'nd';
+  if (n % 10 === 3 && n % 100 !== 13) return 'rd';
+  return 'th';
+}
+
 export function meta({}: Route.MetaArgs) {
   return [
     { title: 'Reminder - Quran & Hadith' },
@@ -120,7 +130,8 @@ export default function Home() {
       <div className='absolute top-4 left-4 text-left'>
         <div className='font-semibold text-lg'>Salam</div>
         <div>
-          Today is the {hijri.day} of {hijri.month}, {hijri.year}
+          Today is the {hijri.day}
+          <sup>{getOrdinal(hijri.day)}</sup> of {hijri.month}, {hijri.year}
         </div>
       </div>
 
