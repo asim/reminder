@@ -53,13 +53,19 @@ function getHijriDate() {
     );
   }
   const firstDayOfYear = hijriToJD(hYear, 1, 1);
-  const hMonth = Math.min(
-    12,
-    Math.ceil((jd - firstDayOfYear + 1) / 29.5)
-  );
+  let hMonth = Math.floor((jd - firstDayOfYear) / 29.5) + 1;
+  if (hMonth > 12) hMonth = 12;
   const firstDayOfMonth = hijriToJD(hYear, hMonth, 1);
-  const hDay = Math.floor(jd - firstDayOfMonth + 1);
-
+  let hDay = Math.floor(jd - firstDayOfMonth + 1);
+  if (hDay < 1) {
+    // If day is less than 1, it's the first of the next month
+    hMonth += 1;
+    hDay = 1;
+    if (hMonth > 12) {
+      hMonth = 1;
+      // Optionally increment year, but not needed for display
+    }
+  }
   return { year: hYear, month: hijriMonths[hMonth - 1], day: hDay };
 }
 
