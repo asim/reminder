@@ -3,7 +3,7 @@ import type { Route } from './+types/_index';
 import { Code, Globe2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-function getHijriDate(): { year: number; month: string; day: number } {
+function getHijriDate() {
   // Umm al-Qura calendar approximation
   const hijriMonths = [
     'Muharram',
@@ -24,24 +24,25 @@ function getHijriDate(): { year: number; month: string; day: number } {
   let month = today.getMonth() + 1; // JS months are 0-based
   let year = today.getFullYear();
 
-  // Accurate Hijri conversion (Tabular Islamic Calendar)
-  // Source: https://webspace.science.uu.nl/~gent0113/islam/addfiles/islamtabcal.htm
+  // Julian day calculation
+  if (month <= 2) {
+    year -= 1;
+    month += 12;
+  }
+  const a = Math.floor(year / 100);
+  const b = 2 - a + Math.floor(a / 4);
   const jd =
-    Math.floor((1461 * (year + 4800 + Math.floor((month - 14) / 12))) / 4) +
-    Math.floor((367 * (month - 2 - 12 * Math.floor((month - 14) / 12))) / 12) -
-    Math.floor((3 * Math.floor((year + 4900 + Math.floor((month - 14) / 12)) / 100)) / 4) +
-    day -
-    32075;
-  const islamicEpoch = 1948439;
-  const days = jd - islamicEpoch;
-  let hYear = Math.floor((30 * days + 10646) / 10631);
-  let hMonth = Math.min(
-    12,
-    Math.ceil((days - 29 - hijriToJD(hYear, 1, 1)) / 29.5) + 1
-  );
-  let hDay = jd - hijriToJD(hYear, hMonth, 1) + 1;
+    Math.floor(365.25 * (year + 4716)) +
+    Math.floor(30.6001 * (month + 1)) +
+    day +
+    b -
+    1524.5;
 
-  function hijriToJD(year: number, month: number, day: number): number {
+  // Hijri date calculation
+  const islamicEpoch = 1948439.5;
+  const days = Math.floor(jd - islamicEpoch);
+  const hYear = Math.floor((30 * days + 10646) / 10631);
+  function hijriToJD(year: number, month: number, day: number) {
     return (
       day +
       Math.ceil(29.5 * (month - 1)) +
@@ -51,10 +52,13 @@ function getHijriDate(): { year: number; month: string; day: number } {
       1
     );
   }
-
-  // Clamp values to valid ranges
-  hMonth = Math.max(1, Math.min(12, hMonth));
-  hDay = Math.max(1, Math.min(30, hDay));
+  const firstDayOfYear = hijriToJD(hYear, 1, 1);
+  const hMonth = Math.min(
+    12,
+    Math.ceil((jd - firstDayOfYear + 1) / 29.5)
+  );
+  const firstDayOfMonth = hijriToJD(hYear, hMonth, 1);
+  const hDay = Math.floor(jd - firstDayOfMonth + 1);
 
   return { year: hYear, month: hijriMonths[hMonth - 1], day: hDay };
 }
