@@ -356,7 +356,7 @@ func main() {
 	http.HandleFunc("/api/daily", func(w http.ResponseWriter, r *http.Request) {
 		mtx.RLock()
 		display := HijriDate()
-		message := "Salam, today is " + display
+		message := "Salam, today is the" + display
 		resp := map[string]interface{}{
 			"name":    dailyName,
 			"hadith":  dailyHadith,
@@ -394,7 +394,7 @@ func main() {
 
 		dailyUpdated = time.Now()
 		display := HijriDate()
-		message := "Salam, today is " + display
+		message := "Salam, today is the" + display
 		day := map[string]interface{}{
 			"name":    dailyName,
 			"hadith":  dailyHadith,
