@@ -160,7 +160,7 @@ const endpoints: Endpoint[] = [
     url: '/api/hijri/date',
     responseFormat: 'JSON',
     responseFields: [
-      { name: 'date', type: 'string', description: 'Hijri date in YYYY-MM-DD format (Umm al-Qura)' },
+      { name: 'date', type: 'string', description: 'Hijri date in DD-MM-YYYY format (Umm al-Qura)' },
       { name: 'display', type: 'string', description: 'Nicely formatted Hijri date for display' },
     ],
   },
