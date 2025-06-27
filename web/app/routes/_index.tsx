@@ -54,23 +54,6 @@ export default function Home() {
           <span className='hidden lg:inline'>Develop using our free API</span>
         </Link>
       </div>
-
-      <div className='flex flex-col gap-2 mt-8 w-full max-w-2xl'>
-        <h2 className='text-2xl font-bold mb-2'>API Endpoints</h2>
-        <ul className='list-disc list-inside text-left text-base'>
-          <li><b>/api/hijri/date</b> – Get today's Hijri date (Umm al-Qura calendar). Returns <code>{`{"date": "YYYY-MM-DD", "display": "Today is the 1st of Muharram, 1447"}`}</code></li>
-          <li><b>/api/daily</b> – Daily verse, hadith, and name of Allah</li>
-          <li><b>/api/daily/refresh</b> – Refresh daily verse, hadith, and name of Allah</li>
-          <li><b>/api/quran</b> – Returns the entire Quran</li>
-          <li><b>/api/quran/chapters</b> – List of Quran chapters</li>
-          <li><b>/api/quran/&#123;chapter&#125;</b> – Quran by chapter</li>
-          <li><b>/api/quran/&#123;chapter&#125;/&#123;verse&#125;</b> – Quran by verse</li>
-          <li><b>/api/hadith</b> – Returns the entire Hadith</li>
-          <li><b>/api/hadith/&#123;book&#125;</b> – Hadith by book</li>
-          <li><b>/api/names</b> – Names of Allah</li>
-          <li><b>/api/search</b> – Get summarised answers via an LLM</li>
-        </ul>
-      </div>
     </div>
   );
 }
