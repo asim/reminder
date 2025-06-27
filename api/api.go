@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"net/http"
 )
 
 type Api struct {
@@ -160,6 +161,19 @@ var Endpoints = []*Endpoint{
 			},
 		}},
 	},
+	{
+		Name:        "Hijri Date (Umm al-Qura)",
+		Path:        "/api/hijri/date",
+		Params:      nil,
+		Description: "Returns today's Hijri date (Umm al-Qura calendar)",
+		Response: []*Value{{
+			Type: "JSON",
+			Params: []*Param{
+				{Name: "date", Value: "string", Description: "Hijri date in YYYY-MM-DD format (Umm al-Qura)"},
+				{Name: "display", Value: "string", Description: "Nicely formatted Hijri date for display"},
+			},
+		}},
+	},
 }
 
 func (a *Api) Markdown() string {
@@ -225,4 +239,9 @@ func Load() *Api {
 	a := new(Api)
 	a.Endpoints = Endpoints
 	return a
+}
+
+// Register the new endpoint in your API router
+func RegisterRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("/api/hijri/date", HijriDateHandler)
 }

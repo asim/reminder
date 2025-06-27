@@ -8,3 +8,8 @@ require (
 	github.com/philippgille/chromem-go v0.7.0
 	github.com/sashabaranov/go-openai v1.35.6
 )
+
+require (
+	github.com/hablullah/go-hijri v1.0.2 // indirect
+	github.com/hablullah/go-juliandays v1.0.0 // indirect
+)
