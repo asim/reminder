@@ -169,7 +169,7 @@ var Endpoints = []*Endpoint{
 		Response: []*Value{{
 			Type: "JSON",
 			Params: []*Param{
-				{Name: "date", Value: "string", Description: "Hijri date in YYYY-MM-DD format (Umm al-Qura)"},
+				{Name: "date", Value: "string", Description: "Hijri date in DD-MM-YYYY format (Umm al-Qura)"},
 				{Name: "display", Value: "string", Description: "Nicely formatted Hijri date for display"},
 			},
 		}},
