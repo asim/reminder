@@ -640,8 +640,7 @@ func HijriDate() string {
 		return "th"
 	}
 	months := []string{"Muharram", "Safar", "Rabiʿ al-awwal", "Rabiʿ al-thani", "Jumada al-awwal", "Jumada al-thani", "Rajab", "Shaʿban", "Ramadan", "Shawwal", "Dhu al-Qiʿdah", "Dhu al-Hijjah"}
-	display := "Today is the " +
-		fmt.Sprintf("%d", h.Day) +
+	display := fmt.Sprintf("%d", h.Day) +
 		ordinal(h.Day) +
 		" of " + months[int(h.Month)-1] + ", " + fmt.Sprintf("%d", h.Year)
 	return display

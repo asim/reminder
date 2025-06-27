@@ -55,7 +55,7 @@ export default function DailyPage() {
         <div className="space-y-8">
           {/* Salam and Hijri date message at the top */}
           <section>
-            <div className="font-semibold text-lg mb-2">{displayData.message}</div>
+            <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">{displayData.message}</h2>
           </section>
           <section>
             <h2 className="text-lg font-semibold mb-2">Quran Verse</h2>
