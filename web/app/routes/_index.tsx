@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
 import type { Route } from './+types/_index';
 import { Code, Globe2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 // Pure JS Hijri date conversion (Tabular Islamic calendar)
 function getHijriDate() {
@@ -119,11 +119,7 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  const [hijri, setHijri] = useState({ year: 0, month: '', day: 0 });
-
-  useEffect(() => {
-    setHijri(getHijriDate());
-  }, []);
+  const [hijri] = useState(getHijriDate());
 
   return (
     <div className='flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 md:px-8 py-12 sm:py-16 bg-white'>
