@@ -18,6 +18,7 @@ import (
 	"github.com/asim/reminder/names"
 	"github.com/asim/reminder/quran"
 	"github.com/asim/reminder/search"
+	hijri "github.com/hablullah/go-hijri"
 )
 
 var (
@@ -354,16 +355,20 @@ func main() {
 
 	http.HandleFunc("/api/daily", func(w http.ResponseWriter, r *http.Request) {
 		mtx.RLock()
-		day := map[string]interface{}{
+		display := HijriDate()
+		message := "Salam, today is " + display
+		resp := map[string]interface{}{
 			"name":    dailyName,
 			"hadith":  dailyHadith,
 			"verse":   dailyVerse,
 			"links":   links,
 			"updated": dailyUpdated.Format(time.RFC850),
+			"message": message,
 		}
 		mtx.RUnlock()
-		b, _ := json.Marshal(day)
-		w.Write(b)
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(resp)
 	})
 
 	http.HandleFunc("/api/daily/refresh", func(w http.ResponseWriter, r *http.Request) {
@@ -388,12 +393,15 @@ func main() {
 		}
 
 		dailyUpdated = time.Now()
+		display := HijriDate()
+		message := "Salam, today is " + display
 		day := map[string]interface{}{
 			"name":    dailyName,
 			"hadith":  dailyHadith,
 			"verse":   dailyVerse,
 			"links":   links,
 			"updated": dailyUpdated.Format(time.RFC850),
+			"message": message,
 		}
 		mtx.Unlock()
 
@@ -607,4 +615,34 @@ func main() {
 
 	// wait for index
 	<-indexed
+}
+
+func HijriDate() string {
+	now := time.Now()
+	h, err := hijri.CreateUmmAlQuraDate(now)
+	if err != nil {
+		return ""
+	}
+	ordinal := func(n int64) string {
+		if n == 1 {
+			return "st"
+		} else if n == 2 {
+			return "nd"
+		} else if n == 3 {
+			return "rd"
+		} else if n%10 == 1 && n%100 != 11 {
+			return "st"
+		} else if n%10 == 2 && n%100 != 12 {
+			return "nd"
+		} else if n%10 == 3 && n%100 != 13 {
+			return "rd"
+		}
+		return "th"
+	}
+	months := []string{"Muharram", "Safar", "Rabiʿ al-awwal", "Rabiʿ al-thani", "Jumada al-awwal", "Jumada al-thani", "Rajab", "Shaʿban", "Ramadan", "Shawwal", "Dhu al-Qiʿdah", "Dhu al-Hijjah"}
+	display := "Today is the " +
+		fmt.Sprintf("%d", h.Day) +
+		ordinal(h.Day) +
+		" of " + months[int(h.Month)-1] + ", " + fmt.Sprintf("%d", h.Year)
+	return display
 }

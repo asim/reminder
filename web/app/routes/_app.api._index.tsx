@@ -139,6 +139,7 @@ const endpoints: Endpoint[] = [
       { name: 'verse', type: 'string', description: 'A verse of the Quran' },
       { name: 'links', type: 'map', description: 'Links to the sources' },
       { name: 'updated', type: 'string', description: 'Timestamp of update' },
+      { name: 'message', type: 'string', description: 'Salam, today is ... (Hijri date)' },
     ],
   },
   {
@@ -152,6 +153,7 @@ const endpoints: Endpoint[] = [
       { name: 'verse', type: 'string', description: 'A verse of the Quran' },
       { name: 'links', type: 'map', description: 'Links to the sources' },
       { name: 'updated', type: 'string', description: 'Timestamp of update' },
+      { name: 'message', type: 'string', description: 'Salam, today is ... (Hijri date)' },
     ],
   },
   {

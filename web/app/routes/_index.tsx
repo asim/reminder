@@ -1,9 +1,8 @@
+import { Code, Globe2 } from 'lucide-react';
 import { Link } from 'react-router';
 import type { Route } from './+types/_index';
-import { Code, Globe2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
 
-export function meta({}: Route.MetaArgs) {
+export function meta({ }: Route.MetaArgs) {
   return [
     { title: 'Reminder - Quran & Hadith' },
     {
@@ -14,23 +13,8 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  const [hijri, setHijri] = useState<{ date: string; display: string } | null>(null);
-
-  useEffect(() => {
-    fetch('/api/hijri/date')
-      .then((res) => res.json())
-      .then((data) => setHijri(data));
-  }, []);
-
   return (
     <div className='flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 md:px-8 py-12 sm:py-16 bg-white'>
-      <div className='absolute top-4 left-4 text-left'>
-        <div className='font-semibold text-lg'>Salam</div>
-        <div>
-          {hijri ? hijri.display : 'Loading Hijri date...'}
-        </div>
-      </div>
-
       <h1 className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-2 sm:mb-4 font-bold tracking-tight text-center'>reminder</h1>
       <p className='text-gray-600 text-balance text-lg sm:text-xl mb-6 sm:mb-8 md:mb-10 text-center max-w-md'>
         Quran, hadith, and more as an app and API

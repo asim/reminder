@@ -10,7 +10,7 @@ import (
 )
 
 type HijriDateResponse struct {
-	Date   string `json:"date"`
+	Date    string `json:"date"`
 	Display string `json:"display"`
 }
 
@@ -48,7 +48,7 @@ func HijriDateHandler(w http.ResponseWriter, r *http.Request) {
 		" of " + months[int(h.Month)-1] + ", " + fmt.Sprintf("%d", h.Year)
 
 	resp := HijriDateResponse{
-		Date:   dateStr,
+		Date:    dateStr,
 		Display: display,
 	}
 	w.Header().Set("Content-Type", "application/json")

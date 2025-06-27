@@ -6,6 +6,9 @@ interface DailyResponse {
   name: string;
   hadith: string;
   verse: string;
+  links: Record<string, string>;
+  updated: string;
+  message: string;
 }
 
 export default function DailyPage() {
@@ -50,6 +53,10 @@ export default function DailyPage() {
       {error && <p className="text-center text-red-500">Failed to load daily reminder.</p>}
       {displayData && (
         <div className="space-y-8">
+          {/* Salam and Hijri date message at the top */}
+          <section>
+            <div className="font-semibold text-lg mb-2">{displayData.message}</div>
+          </section>
           <section>
             <h2 className="text-lg font-semibold mb-2">Quran Verse</h2>
             <div className="bg-blue-50 rounded p-4 text-base shadow">
