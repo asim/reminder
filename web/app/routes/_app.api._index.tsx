@@ -154,6 +154,16 @@ const endpoints: Endpoint[] = [
       { name: 'updated', type: 'string', description: 'Timestamp of update' },
     ],
   },
+  {
+    title: 'Hijri Date (Umm al-Qura)',
+    description: "Returns today's Hijri date (Umm al-Qura calendar)",
+    url: '/api/hijri/date',
+    responseFormat: 'JSON',
+    responseFields: [
+      { name: 'date', type: 'string', description: 'Hijri date in YYYY-MM-DD format (Umm al-Qura)' },
+      { name: 'display', type: 'string', description: 'Nicely formatted Hijri date for display' },
+    ],
+  },
 ];
 
 export default function Api() {

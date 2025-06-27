@@ -582,6 +582,8 @@ func main() {
 		}
 	})
 
+	api.RegisterRoutes(http.DefaultServeMux)
+
 	if *ServerFlag {
 		fmt.Println("Starting server :8080")
 		if err := http.ListenAndServe(":8080", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
