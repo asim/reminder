@@ -10,7 +10,7 @@ import { ViewMode } from '~/components/quran/view-mode';
 import { useQuranViewMode } from '~/hooks/use-quran-view-mode';
 import { getChapterOptions } from '~/queries/quran';
 import { queryClient } from '~/utils/query-client';
-import { useWordByWordToggle } from '~/hooks/use-word-by-word-toggle';
+import { useWordByWordToggle } from '~/use-word-by-word-toggle';
 
 function toArabicNumber(num: number) {
   return num
