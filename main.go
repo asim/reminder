@@ -332,9 +332,9 @@ func main() {
 			ver := chap.Verses[rnd.Int()%len(chap.Verses)]
 			had := book.Hadiths[rnd.Int()%len(book.Hadiths)]
 
-			dailyName = fmt.Sprintf("%s - %s - %s - %s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
-			dailyVerse = fmt.Sprintf("%s - %d:%d", ver.Text, ver.Chapter, ver.Number)
-			dailyHadith = fmt.Sprintf("%s - %s - %s", had.Text, had.By, strings.Split(had.Info, ":")[0])
+			dailyName = fmt.Sprintf("%s - %s - %s\n\n%s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
+			dailyVerse = fmt.Sprintf("%s\n\n%s - %s - %d:%d", ver.Text, chap.Name, chap.English, ver.Chapter, ver.Number)
+			dailyHadith = fmt.Sprintf("%s\n\n%s - %s - %s", had.Text, book.Name, had.By, strings.Split(had.Info, ":")[0])
 
 			num := strings.TrimSpace(strings.Split(strings.Split(had.Info, "Number")[1], ":")[0])
 
@@ -380,9 +380,9 @@ func main() {
 
 		mtx.Lock()
 
-		dailyName = fmt.Sprintf("%s - %s - %s - %s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
-		dailyVerse = fmt.Sprintf("%s - %d:%d", ver.Text, ver.Chapter, ver.Number)
-		dailyHadith = fmt.Sprintf("%s - %s - %s", had.Text, had.By, strings.Split(had.Info, ":")[0])
+		dailyName = fmt.Sprintf("%s - %s - %s\n\n%s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
+		dailyVerse = fmt.Sprintf("%s\n\n%s - %s -  %d:%d", ver.Text, chap.Name, chap.English, ver.Chapter, ver.Number)
+		dailyHadith = fmt.Sprintf("%s\n\n%s - %s - %s", had.Text, book.Name, had.By, strings.Split(had.Info, ":")[0])
 
 		num := strings.TrimSpace(strings.Split(strings.Split(had.Info, "Number")[1], ":")[0])
 

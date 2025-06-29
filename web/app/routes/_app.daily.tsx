@@ -56,22 +56,25 @@ export default function DailyPage() {
           {/* Salam and Hijri date message at the top */}
           <section>
             <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">{displayData.message}</h2>
+            <div className="text-sm sm:text-base text-gray-700">
+              Read a verse, hadith and name of Allah to reflect, reset and strengthen your intention
+            </div>
           </section>
           <section>
-            <h2 className="text-lg font-semibold mb-2">Quran Verse</h2>
-            <div className="bg-blue-50 rounded p-4 text-base shadow">
+            <h2 className="text-lg font-semibold mb-2">Verse</h2>
+            <div className="whitespace-pre-wrap leading-snug bg-blue-50 rounded p-4 text-base shadow">
               <a href={displayData.links['verse']}>{displayData.verse}</a>
             </div>
           </section>
           <section>
             <h2 className="text-lg font-semibold mb-2">Hadith</h2>
-            <div className="bg-green-50 rounded p-4 text-base shadow">
+            <div className="whitespace-pre-wrap leading-snug bg-green-50 rounded p-4 text-base shadow">
               <a href={displayData.links['hadith']}>{displayData.hadith}</a>
             </div>
           </section>
           <section>
             <h2 className="text-lg font-semibold mb-2">Name of Allah</h2>
-            <div className="bg-yellow-50 rounded p-4 text-base shadow">
+            <div className="whitespace-pre-wrap leading-snug bg-yellow-50 rounded p-4 text-base shadow">
               <a href={displayData.links['name']}>{displayData.name}</a>
             </div>
           </section>
