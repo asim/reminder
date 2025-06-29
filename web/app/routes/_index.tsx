@@ -16,16 +16,14 @@ export default function Home() {
   return (
     <div className='flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 md:px-8 py-12 sm:py-16 bg-white'>
       {/* Fixed nav bar at the top, matching AppLayout */}
-      <nav className='fixed top-0 left-0 w-full z-20 bg-black text-white flex flex-row items-center gap-1 px-2 py-2 text-sm justify-center'>
-        <NavLink to='/daily' className='bg-white text-black px-2 py-0.5 rounded-md text-xs mx-1'>Daily</NavLink>
-        <NavLink to='/quran' className='bg-white text-black px-2 py-0.5 rounded-md text-xs mx-1'>Quran</NavLink>
-        <NavLink to='/hadith' className='bg-white text-black px-2 py-0.5 rounded-md text-xs mx-1'>Hadith</NavLink>
-        <NavLink to='/names' className='bg-white text-black px-2 py-0.5 rounded-md text-xs mx-1'>Names</NavLink>
-        <NavLink to='/islam' className='bg-white text-black px-2 py-0.5 rounded-md text-xs mx-1'>Islam</NavLink>
-        <NavLink to='/search' className='bg-white text-black px-2 py-0.5 rounded-md text-xs mx-1 flex items-center gap-1'><Search className='size-3' />Search</NavLink>
-        <NavLink to='/api' className='bg-white text-black px-2 py-0.5 rounded-md text-xs mx-1 flex items-center gap-1'><Code className='size-3' />API</NavLink>
+      <nav className='fixed top-5 left-0 w-full z-20 text-black flex flex-row items-center gap-1 px-4 py-4 text-sm justify-center'>
+        <NavLink to='/daily' className='px-2 py-0.5 text-xs'>Daily</NavLink>
+        <NavLink to='/quran' className='px-2 py-0.5 text-xs'>Quran</NavLink>
+        <NavLink to='/hadith' className='px-2 py-0.5 text-xs'>Hadith</NavLink>
+        <NavLink to='/names' className='px-2 py-0.5 text-xs'>Names</NavLink>
+        <NavLink to='/search' className='px-2 py-0.5 text-xs flex items-center gap-1'><Search className='size-3' />Search</NavLink>
       </nav>
-      <div className='pt-16 w-full flex flex-col items-center'>
+      <div className='w-full flex flex-col items-center'>
         <h1 className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-2 sm:mb-4 font-bold tracking-tight text-center'>reminder</h1>
         <p className='text-gray-600 text-balance text-lg sm:text-xl mb-6 sm:mb-8 md:mb-10 text-center max-w-md'>
           Quran, hadith, and more as an app and API
