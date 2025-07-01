@@ -1,10 +1,12 @@
 package api
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -64,6 +66,13 @@ func LoadOrGenerateVAPIDKeys() error {
 		return err
 	}
 	VAPIDPublicKey = string(pub)
+	// Debug: print decoded length and first byte
+	decoded, err := decodeBase64URL(VAPIDPublicKey)
+	if err == nil {
+		log.Printf("[VAPID] Decoded public key length: %d, first byte: %d", len(decoded), decoded[0])
+	} else {
+		log.Printf("[VAPID] Failed to decode public key: %v", err)
+	}
 	// Load private key
 	priv, err := os.ReadFile(privPath)
 	if err != nil {
@@ -71,6 +80,12 @@ func LoadOrGenerateVAPIDKeys() error {
 	}
 	VAPIDPrivateKey = string(priv)
 	return nil
+}
+
+// Helper to decode base64url
+func decodeBase64URL(s string) ([]byte, error) {
+	s = strings.TrimSpace(s)
+	return base64.RawURLEncoding.DecodeString(s)
 }
 
 func fileExists(path string) bool {
