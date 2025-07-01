@@ -7,6 +7,7 @@ import (
 	"io"
 	"math/rand"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -35,6 +36,8 @@ var history = map[string][]string{}
 var dailyName, dailyVerse, dailyHadith string
 var links = map[string]string{}
 var dailyUpdated = time.Time{}
+var lastPushDateFile = "last_push_date.txt"
+var lastPushDate string
 
 func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *api.Api) {
 	// generate api doc
@@ -185,8 +188,26 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 	})
 }
 
+func loadLastPushDate() string {
+	b, err := os.ReadFile(lastPushDateFile)
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(b))
+}
+
+func saveLastPushDate(date string) {
+	_ = os.WriteFile(lastPushDateFile, []byte(date), 0644)
+}
+
 func main() {
 	flag.Parse()
+
+	// Load push subscriptions
+	_ = api.LoadPushSubscriptions()
+
+	// Load or generate VAPID keys
+	_ = api.LoadOrGenerateVAPIDKeys()
 
 	// create a new index
 	idx := search.New("reminder", false)
@@ -347,6 +368,26 @@ func main() {
 			dailyUpdated = time.Now()
 			mtx.Unlock()
 
+			// Only send push notification if not already sent today
+			today := time.Now().Format("2006-01-02")
+			if lastPushDate != today {
+				// Compose a user-friendly notification message
+				notification := fmt.Sprintf(
+					"Salam, today is the "+HijriDate(),
+					"%s\n\nVerse:\n%s\n\nHadith:\n%s\n\nName of Allah:\n%s",
+					dailyVerse,
+					dailyHadith,
+					dailyName,
+				)
+				payload := map[string]interface{}{
+					"title": "Daily Reminder",
+					"body": notification,
+				}
+				b, _ := json.Marshal(payload)
+				api.SendPushToAll(string(b))
+				lastPushDate = today
+				saveLastPushDate(today)
+			}
 			time.Sleep(time.Hour * 24)
 		}
 	}
@@ -591,6 +632,8 @@ func main() {
 	})
 
 	api.RegisterRoutes(http.DefaultServeMux)
+	httpMux := http.DefaultServeMux
+	api.RegisterPushRoutes(httpMux)
 
 	if *ServerFlag {
 		fmt.Println("Starting server :8080")

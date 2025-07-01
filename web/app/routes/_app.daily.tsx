@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { httpGet, httpPost } from '~/utils/http';
 import React, { useState } from 'react';
+import { subscribeUserToPush } from '../utils/push';
 
 interface DailyResponse {
   name: string;
@@ -35,19 +36,41 @@ export default function DailyPage() {
 
   const displayData = localData || data;
 
+  const [pushStatus, setPushStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [pushMsg, setPushMsg] = useState('');
+
+  async function handlePushSubscribe() {
+    setPushStatus('idle');
+    setPushMsg('');
+    try {
+      // Fetch VAPID public key from backend
+      const resp = await fetch('/api/push/vapidPublicKey');
+      if (!resp.ok) throw new Error('Failed to fetch VAPID key');
+      const publicKey = await resp.text();
+      await subscribeUserToPush(publicKey);
+      setPushStatus('success');
+      setPushMsg('Subscribed to daily notifications!');
+    } catch (e) {
+      setPushStatus('error');
+      setPushMsg('Failed to subscribe to notifications.');
+    }
+  }
+
   return (
     <div className='flex flex-col flex-1 p-0 lg:p-8 mx-auto w-full lg:max-w-3xl overflow-y-auto px-5 py-5'>
       <div className="flex items-center justify-between mb-4 sm:mb-6">
         <h1 className='text-2xl sm:text-3xl md:text-4xl font-semibold text-left'>
           Daily Reminder
         </h1>
-        <button
-          className="ml-4 px-2 py-1 text-sm bg-black text-white rounded shadow hover:bg-gray-800 transition disabled:opacity-50"
-          onClick={handleRefresh}
-          disabled={isFetching || refreshing}
-        >
-          {(isFetching || refreshing) ? 'Refreshing...' : 'Refresh'}
-        </button>
+        <div className='flex gap-2'>
+          <button
+            className="px-2 py-1 text-sm bg-black text-white rounded shadow hover:bg-gray-800 transition disabled:opacity-50"
+            onClick={handleRefresh}
+            disabled={isFetching || refreshing}
+          >
+            {(isFetching || refreshing) ? 'Refreshing...' : 'Refresh'}
+          </button>
+        </div>
       </div>
       {isLoading && <p className="text-center">Loading...</p>}
       {error && <p className="text-center text-red-500">Failed to load daily reminder.</p>}
@@ -83,6 +106,17 @@ export default function DailyPage() {
           </section>
         </div>
       )}
+      <div className='flex gap-2 mt-2'>
+        <button
+          className='px-2 py-1 text-sm bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition'
+          onClick={handlePushSubscribe}
+        >
+          Enable Daily Push Notifications
+        </button>
+        {pushMsg && (
+          <span className={pushStatus === 'success' ? 'text-green-600' : 'text-red-600'}>{pushMsg}</span>
+        )}
+      </div>
     </div>
   );
 }
