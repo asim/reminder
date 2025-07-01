@@ -49,7 +49,7 @@ func LoadOrGenerateVAPIDKeys() error {
 	}
 
 	if !privExists || !pubExists {
-		pub, priv, err := webpush.GenerateVAPIDKeys()
+		priv, pub, err := webpush.GenerateVAPIDKeys()
 		if err != nil {
 			return err
 		}
