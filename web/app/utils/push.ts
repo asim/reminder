@@ -7,17 +7,38 @@ export async function registerServiceWorker() {
 }
 
 export async function subscribeUserToPush(publicKey: string) {
-  const registration = await registerServiceWorker();
-  const subscription = await registration.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: urlBase64ToUint8Array(publicKey),
-  });
-  // Send subscription to backend
-  await fetch('/api/push/subscribe', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(subscription),
-  });
+  let registration;
+  try {
+    registration = await registerServiceWorker();
+  } catch (err) {
+    console.error('Service worker registration failed:', err);
+    throw new Error('Service worker registration failed: ' + err);
+  }
+  let subscription;
+  try {
+    subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(publicKey),
+    });
+  } catch (err) {
+    console.error('PushManager.subscribe failed:', err);
+    throw new Error('PushManager.subscribe failed: ' + err);
+  }
+  try {
+    const resp = await fetch('/api/push/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(subscription),
+    });
+    if (!resp.ok) {
+      const text = await resp.text();
+      console.error('Backend /api/push/subscribe failed:', resp.status, text);
+      throw new Error('Backend /api/push/subscribe failed: ' + text);
+    }
+  } catch (err) {
+    console.error('Failed to send subscription to backend:', err);
+    throw err;
+  }
   return subscription;
 }
 
