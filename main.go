@@ -381,7 +381,7 @@ func main() {
 				)
 				payload := map[string]interface{}{
 					"title": "Daily Reminder",
-					"body": notification,
+					"body":  notification,
 				}
 				b, _ := json.Marshal(payload)
 				api.SendPushToAll(string(b))
