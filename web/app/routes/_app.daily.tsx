@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { httpGet, httpPost } from '~/utils/http';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { subscribeUserToPush } from '../utils/push';
+import { unsubscribeUserFromPush } from '../utils/push-unsub';
 
 interface DailyResponse {
   name: string;
@@ -35,19 +37,83 @@ export default function DailyPage() {
 
   const displayData = localData || data;
 
+  const [pushStatus, setPushStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [pushMsg, setPushMsg] = useState('');
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Check if push subscription exists
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then(reg => {
+        reg.pushManager.getSubscription().then(sub => {
+          setNotificationsEnabled(!!sub);
+        });
+      });
+    }
+  }, []);
+
+  async function handlePushSubscribe() {
+    setPushStatus('idle');
+    setPushMsg('');
+    try {
+      // Fetch VAPID public key from backend
+      const resp = await fetch('/api/push/vapidPublicKey');
+      if (!resp.ok) throw new Error('Failed to fetch VAPID key');
+      const publicKey = await resp.text();
+      await subscribeUserToPush(publicKey);
+      setPushStatus('success');
+      setPushMsg('Subscribed to daily notifications!');
+      setNotificationsEnabled(true);
+    } catch (e) {
+      setPushStatus('error');
+      setPushMsg('Failed to subscribe to notifications.');
+    }
+  }
+
+  async function handlePushUnsubscribe() {
+    setPushStatus('idle');
+    setPushMsg('');
+    try {
+      await unsubscribeUserFromPush();
+      setPushStatus('success');
+      setPushMsg('Notifications disabled.');
+      setNotificationsEnabled(false);
+    } catch (e) {
+      setPushStatus('error');
+      setPushMsg('Failed to disable notifications.');
+    }
+  }
+
   return (
     <div className='flex flex-col flex-1 p-0 lg:p-8 mx-auto w-full lg:max-w-3xl overflow-y-auto px-5 py-5'>
+      {/* Push message at the very top of the page */}
+      {pushMsg && (
+        <div className={
+          'w-full mb-4 text-center py-2 rounded ' +
+          (pushStatus === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')
+        }>
+          {pushMsg}
+        </div>
+      )}
       <div className="flex items-center justify-between mb-4 sm:mb-6">
         <h1 className='text-2xl sm:text-3xl md:text-4xl font-semibold text-left'>
           Daily Reminder
         </h1>
-        <button
-          className="ml-4 px-2 py-1 text-sm bg-black text-white rounded shadow hover:bg-gray-800 transition disabled:opacity-50"
-          onClick={handleRefresh}
-          disabled={isFetching || refreshing}
-        >
-          {(isFetching || refreshing) ? 'Refreshing...' : 'Refresh'}
-        </button>
+        <div className='flex gap-2'>
+          <button
+            className="px-2 py-1 text-sm bg-black text-white rounded shadow hover:bg-gray-800 transition disabled:opacity-50 cursor-pointer"
+            onClick={handleRefresh}
+            disabled={isFetching || refreshing}
+          >
+            {(isFetching || refreshing) ? 'Refreshing...' : 'Refresh'}
+          </button>
+          <button
+            className={notificationsEnabled ? 'px-2 py-1 text-sm bg-gray-600 text-white rounded shadow hover:bg-gray-700 transition cursor-pointer' : 'px-2 py-1 text-sm bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition cursor-pointer'}
+            onClick={notificationsEnabled ? handlePushUnsubscribe : handlePushSubscribe}
+          >
+            {notificationsEnabled ? 'Disable Notifications' : 'Enable Notifications'}
+          </button>
+        </div>
       </div>
       {isLoading && <p className="text-center">Loading...</p>}
       {error && <p className="text-center text-red-500">Failed to load daily reminder.</p>}

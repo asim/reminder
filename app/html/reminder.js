@@ -12,7 +12,7 @@ var CACHE_NAME = APP_PREFIX + VERSION
 async function networkFirst(request) {
   try {
     const networkResponse = await fetch(request);
-    if (networkResponse.ok) {
+    if (networkResponse.ok && request.method === 'GET') {
       const cache = await caches.open(CACHE_NAME);
       cache.put(request, networkResponse.clone());
     }
