@@ -111,7 +111,7 @@ export default function DailyPage() {
           className='px-2 py-1 text-sm bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition'
           onClick={handlePushSubscribe}
         >
-          Enable Daily Push Notifications
+          Enable Notifications
         </button>
         {pushMsg && (
           <span className={pushStatus === 'success' ? 'text-green-600' : 'text-red-600'}>{pushMsg}</span>
