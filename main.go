@@ -375,8 +375,7 @@ func main() {
 			if lastPushDate != today {
 				// Compose a user-friendly notification message
 				notification := fmt.Sprintf(
-					"Salam, today is the "+HijriDate(),
-					"%s\n\nVerse:\n%s\n\nHadith:\n%s\n\nName of Allah:\n%s",
+					"Salam, today is the "+HijriDate()+"\n\nVerse:\n%s\n\nHadith:\n%s\n\nName of Allah:\n%s",
 					dailyVerse,
 					dailyHadith,
 					dailyName,
@@ -386,7 +385,13 @@ func main() {
 					"body":  notification,
 				}
 				b, _ := json.Marshal(payload)
-				api.SendPushToAll(string(b))
+				errors := api.SendPushToAll(string(b))
+				if len(errors) > 0 {
+					fmt.Println("Push notification errors:")
+					for _, err := range errors {
+						fmt.Println(err)
+					}
+				}
 				lastPushDate = today
 				saveLastPushDate(today)
 			}

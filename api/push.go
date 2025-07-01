@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -202,14 +203,18 @@ func SendPushNotification(sub PushSubscription, payload string) error {
 	return nil
 }
 
-func SendPushToAll(payload string) {
+func SendPushToAll(payload string) []string {
 	subs := ListPushSubscriptions()
+	errors := []string{}
 	for _, sub := range subs {
 		err := SendPushNotification(sub, payload)
 		if err != nil {
-			log.Printf("Failed to send push to %s: %v", sub.Endpoint, err)
+			errMsg := fmt.Sprintf("Failed to send push to %s: %v", sub.Endpoint, err)
+			log.Println(errMsg)
+			errors = append(errors, errMsg)
 		}
 		// avoid rate limits
 		time.Sleep(100 * time.Millisecond)
 	}
+	return errors
 }
