@@ -92,14 +92,14 @@ export default function DailyPage() {
         </h1>
         <div className='flex gap-2'>
           <button
-            className="px-2 py-1 text-sm bg-black text-white rounded shadow hover:bg-gray-800 transition disabled:opacity-50"
+            className="px-2 py-1 text-sm bg-black text-white rounded shadow hover:bg-gray-800 transition disabled:opacity-50 cursor-pointer"
             onClick={handleRefresh}
             disabled={isFetching || refreshing}
           >
             {(isFetching || refreshing) ? 'Refreshing...' : 'Refresh'}
           </button>
           <button
-            className={notificationsEnabled ? 'px-2 py-1 text-sm bg-gray-600 text-white rounded shadow hover:bg-gray-700 transition' : 'px-2 py-1 text-sm bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition'}
+            className={notificationsEnabled ? 'px-2 py-1 text-sm bg-gray-600 text-white rounded shadow hover:bg-gray-700 transition cursor-pointer' : 'px-2 py-1 text-sm bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition cursor-pointer'}
             onClick={notificationsEnabled ? handlePushUnsubscribe : handlePushSubscribe}
           >
             {notificationsEnabled ? 'Disable Notifications' : 'Enable Notifications'}

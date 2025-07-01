@@ -114,15 +114,15 @@ func SavePushSubscriptions() error {
 
 func AddPushSubscription(sub PushSubscription) error {
 	pushMtx.Lock()
-	defer pushMtx.Unlock()
 	pushSubscriptions[sub.Endpoint] = sub
+	pushMtx.Unlock()
 	return SavePushSubscriptions()
 }
 
 func RemovePushSubscription(endpoint string) error {
 	pushMtx.Lock()
-	defer pushMtx.Unlock()
 	delete(pushSubscriptions, endpoint)
+	pushMtx.Unlock()
 	return SavePushSubscriptions()
 }
 

@@ -390,7 +390,7 @@ func main() {
 				lastPushDate = today
 				saveLastPushDate(today)
 			}
-			time.Sleep(time.Hour * 24)
+			time.Sleep(time.Second * 10)
 		}
 	}
 
