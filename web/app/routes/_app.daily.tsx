@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { httpGet, httpPost } from '~/utils/http';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { subscribeUserToPush } from '../utils/push';
+import { unsubscribeUserFromPush } from '../utils/push-unsub';
 
 interface DailyResponse {
   name: string;
@@ -38,6 +39,18 @@ export default function DailyPage() {
 
   const [pushStatus, setPushStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [pushMsg, setPushMsg] = useState('');
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Check if push subscription exists
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then(reg => {
+        reg.pushManager.getSubscription().then(sub => {
+          setNotificationsEnabled(!!sub);
+        });
+      });
+    }
+  }, []);
 
   async function handlePushSubscribe() {
     setPushStatus('idle');
@@ -50,9 +63,24 @@ export default function DailyPage() {
       await subscribeUserToPush(publicKey);
       setPushStatus('success');
       setPushMsg('Subscribed to daily notifications!');
+      setNotificationsEnabled(true);
     } catch (e) {
       setPushStatus('error');
       setPushMsg('Failed to subscribe to notifications.');
+    }
+  }
+
+  async function handlePushUnsubscribe() {
+    setPushStatus('idle');
+    setPushMsg('');
+    try {
+      await unsubscribeUserFromPush();
+      setPushStatus('success');
+      setPushMsg('Notifications disabled.');
+      setNotificationsEnabled(false);
+    } catch (e) {
+      setPushStatus('error');
+      setPushMsg('Failed to disable notifications.');
     }
   }
 
@@ -69,6 +97,12 @@ export default function DailyPage() {
             disabled={isFetching || refreshing}
           >
             {(isFetching || refreshing) ? 'Refreshing...' : 'Refresh'}
+          </button>
+          <button
+            className={notificationsEnabled ? 'px-2 py-1 text-sm bg-gray-600 text-white rounded shadow hover:bg-gray-700 transition' : 'px-2 py-1 text-sm bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition'}
+            onClick={notificationsEnabled ? handlePushUnsubscribe : handlePushSubscribe}
+          >
+            {notificationsEnabled ? 'Disable Notifications' : 'Enable Notifications'}
           </button>
         </div>
       </div>
@@ -107,12 +141,6 @@ export default function DailyPage() {
         </div>
       )}
       <div className='flex gap-2 mt-2'>
-        <button
-          className='px-2 py-1 text-sm bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition'
-          onClick={handlePushSubscribe}
-        >
-          Enable Notifications
-        </button>
         {pushMsg && (
           <span className={pushStatus === 'success' ? 'text-green-600' : 'text-red-600'}>{pushMsg}</span>
         )}
