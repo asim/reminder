@@ -7,6 +7,9 @@ export async function registerServiceWorker() {
 }
 
 export async function subscribeUserToPush(publicKey: string) {
+  console.log('VAPID public key from backend:', publicKey);
+  const keyArray = urlBase64ToUint8Array(publicKey);
+  console.log('Uint8Array length:', keyArray.length, 'Uint8Array:', keyArray);
   let registration;
   try {
     registration = await registerServiceWorker();
@@ -18,7 +21,7 @@ export async function subscribeUserToPush(publicKey: string) {
   try {
     subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(publicKey),
+      applicationServerKey: keyArray,
     });
   } catch (err) {
     console.error('PushManager.subscribe failed:', err);
