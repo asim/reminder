@@ -86,6 +86,15 @@ export default function DailyPage() {
 
   return (
     <div className='flex flex-col flex-1 p-0 lg:p-8 mx-auto w-full lg:max-w-3xl overflow-y-auto px-5 py-5'>
+      {/* Push message at the very top of the page */}
+      {pushMsg && (
+        <div className={
+          'w-full mb-4 text-center py-2 rounded ' +
+          (pushStatus === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')
+        }>
+          {pushMsg}
+        </div>
+      )}
       <div className="flex items-center justify-between mb-4 sm:mb-6">
         <h1 className='text-2xl sm:text-3xl md:text-4xl font-semibold text-left'>
           Daily Reminder
@@ -140,11 +149,6 @@ export default function DailyPage() {
           </section>
         </div>
       )}
-      <div className='flex gap-2 mt-2'>
-        {pushMsg && (
-          <span className={pushStatus === 'success' ? 'text-green-600' : 'text-red-600'}>{pushMsg}</span>
-        )}
-      </div>
     </div>
   );
 }
