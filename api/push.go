@@ -183,6 +183,7 @@ func RegisterPushRoutes(mux *http.ServeMux) {
 }
 
 func SendPushNotification(sub PushSubscription, payload string) error {
+	fmt.Println("Pushing to sub", sub.Endpoint)
 	subscription := &webpush.Subscription{
 		Endpoint: sub.Endpoint,
 		Keys: webpush.Keys{

@@ -374,12 +374,13 @@ func main() {
 			today := time.Now().Format("2006-01-02")
 			if lastPushDate != today {
 				// Compose a user-friendly notification message
-				notification := fmt.Sprintf(
-					"Salam, today is the "+HijriDate()+"\n\nVerse:\n%s\n\nHadith:\n%s\n\nName of Allah:\n%s",
-					dailyVerse,
-					dailyHadith,
-					dailyName,
-				)
+				notifyVerse := dailyVerse
+
+				if len(dailyVerse) > 250 {
+					notifyVerse = notifyVerse[:250] + "..."
+				}
+				notification := dailyVerse
+
 				payload := map[string]interface{}{
 					"title": "Daily Reminder",
 					"body":  notification,
@@ -395,7 +396,7 @@ func main() {
 				lastPushDate = today
 				saveLastPushDate(today)
 			}
-			time.Sleep(time.Second * 10)
+			time.Sleep(time.Hour * 24)
 		}
 	}
 
