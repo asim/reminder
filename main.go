@@ -38,7 +38,7 @@ var links = map[string]string{}
 var dailyUpdated = time.Time{}
 var reminderDir = api.ReminderDir
 var lastPushDateFile = api.ReminderPath("last_push_date.txt")
-var lastPushDate string
+var lastPushDate = loadLastPushDate()
 
 func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *api.Api) {
 	// generate api doc
@@ -372,6 +372,7 @@ func main() {
 
 			// Only send push notification if not already sent today
 			today := time.Now().Format("2006-01-02")
+
 			if lastPushDate != today {
 				// Compose a user-friendly notification message
 				notifyVerse := dailyVerse
@@ -396,7 +397,9 @@ func main() {
 				lastPushDate = today
 				saveLastPushDate(today)
 			}
-			time.Sleep(time.Hour * 24)
+
+			// check every hour
+			time.Sleep(time.Hour)
 		}
 	}
 
@@ -508,7 +511,7 @@ func main() {
 		w.Write(b)
 	})
 
-	http.HandleFunc("/api/generate", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/api/explain", func(w http.ResponseWriter, r *http.Request) {
 		b, _ := io.ReadAll(r.Body)
 		var data map[string]interface{}
 		json.Unmarshal(b, &data)
@@ -516,7 +519,8 @@ func main() {
 		q := data["q"].(string)
 
 		prompt := `Generate a detailed summary for the following with it's meaning and origin, output the response as JSON with the fields: 
-		name, description, summary. Each field itself should be a string.
+		text, context, summary. Each field itself should be a string. Text is the text that was provided. Context is contextual information 
+		for the origin of the text or background information required. Summary is a more detailed summary in relation to the text and context.
 
 		%s
 		`

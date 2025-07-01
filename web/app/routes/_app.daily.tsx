@@ -100,6 +100,7 @@ export default function DailyPage() {
           Daily Reminder
         </h1>
         <div className='flex gap-2'>
+	  {/*
           <button
             className="px-2 py-1 text-sm bg-black text-white rounded shadow hover:bg-gray-800 transition disabled:opacity-50 cursor-pointer"
             onClick={handleRefresh}
@@ -107,6 +108,7 @@ export default function DailyPage() {
           >
             {(isFetching || refreshing) ? 'Refreshing...' : 'Refresh'}
           </button>
+	  */}
           <button
             className={notificationsEnabled ? 'px-2 py-1 text-sm bg-gray-600 text-white rounded shadow hover:bg-gray-700 transition cursor-pointer' : 'px-2 py-1 text-sm bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition cursor-pointer'}
             onClick={notificationsEnabled ? handlePushUnsubscribe : handlePushSubscribe}
@@ -128,18 +130,27 @@ export default function DailyPage() {
           </section>
           <section>
             <h2 className="text-lg font-semibold mb-2">Verse</h2>
+            <div className="text-sm sm:text-base text-gray-700 mb-2">
+              A verse from the Quran
+            </div>
             <div className="whitespace-pre-wrap leading-snug bg-blue-50 rounded p-4 text-base shadow">
               <a href={displayData.links['verse']}>{displayData.verse}</a>
             </div>
           </section>
           <section>
             <h2 className="text-lg font-semibold mb-2">Hadith</h2>
+            <div className="text-sm sm:text-base text-gray-700 mb-2">
+              A hadith from sahih bukhari
+            </div>
             <div className="whitespace-pre-wrap leading-snug bg-green-50 rounded p-4 text-base shadow">
               <a href={displayData.links['hadith']}>{displayData.hadith}</a>
             </div>
           </section>
           <section>
             <h2 className="text-lg font-semibold mb-2">Name of Allah</h2>
+            <div className="text-sm sm:text-base text-gray-700 mb-2">
+              A beautiful name from the 99 names of Allah
+            </div>
             <div className="whitespace-pre-wrap leading-snug bg-yellow-50 rounded p-4 text-base shadow">
               <a href={displayData.links['name']}>{displayData.name}</a>
             </div>
