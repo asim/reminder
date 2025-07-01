@@ -15,7 +15,7 @@ type Users struct {
 	Users map[string]User `json:"users"`
 }
 
-var usersFile = "users.json"
+var usersFile = ReminderPath("users.json")
 var users = &Users{Users: make(map[string]User)}
 
 func LoadUsers() error {
@@ -33,6 +33,7 @@ func LoadUsers() error {
 func SaveUsers() error {
 	users.mu.RLock()
 	defer users.mu.RUnlock()
+	_ = os.MkdirAll(ReminderDir, 0700)
 	f, err := os.Create(usersFile)
 	if err != nil {
 		return err

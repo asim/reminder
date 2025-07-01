@@ -36,7 +36,8 @@ var history = map[string][]string{}
 var dailyName, dailyVerse, dailyHadith string
 var links = map[string]string{}
 var dailyUpdated = time.Time{}
-var lastPushDateFile = "last_push_date.txt"
+var reminderDir = api.ReminderDir
+var lastPushDateFile = api.ReminderPath("last_push_date.txt")
 var lastPushDate string
 
 func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *api.Api) {
@@ -197,6 +198,7 @@ func loadLastPushDate() string {
 }
 
 func saveLastPushDate(date string) {
+	_ = os.MkdirAll(reminderDir, 0700)
 	_ = os.WriteFile(lastPushDateFile, []byte(date), 0644)
 }
 

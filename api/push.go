@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -19,7 +20,7 @@ type PushSubscription struct {
 	Keys     map[string]interface{} `json:"keys"`
 }
 
-var pushFile = "push_subscriptions.json"
+var pushFile = ReminderPath("push_subscriptions.json")
 var pushMtx sync.RWMutex
 var pushSubscriptions = make(map[string]PushSubscription)
 
@@ -29,9 +30,9 @@ var VAPIDPrivateKey string
 var VAPIDEmail = "mailto:admin@reminder.local"
 
 func LoadOrGenerateVAPIDKeys() error {
-	dir := os.ExpandEnv("$HOME/.reminder/keys")
-	privPath := dir + "/vapid_private.pem"
-	pubPath := dir + "/vapid_public.b64"
+	dir := ReminderPath("keys")
+	privPath := filepath.Join(dir, "vapid_private.pem")
+	pubPath := filepath.Join(dir, "vapid_public.b64")
 
 	// Ensure directory exists
 	if err := os.MkdirAll(dir, 0700); err != nil {
@@ -86,11 +87,6 @@ func LoadOrGenerateVAPIDKeys() error {
 func decodeBase64URL(s string) ([]byte, error) {
 	s = strings.TrimSpace(s)
 	return base64.RawURLEncoding.DecodeString(s)
-}
-
-func fileExists(path string) bool {
-	_, err := os.Stat(path)
-	return err == nil
 }
 
 func LoadPushSubscriptions() error {
