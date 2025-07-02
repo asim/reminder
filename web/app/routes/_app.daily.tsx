@@ -124,9 +124,10 @@ export default function DailyPage() {
           {/* Salam and Hijri date message at the top */}
           <section>
             <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">{displayData.message}</h2>
-            <div className="text-sm sm:text-base text-gray-700">
+            <div className="text-sm sm:text-base text-gray-700 mb-2">
               Read a verse, hadith and name of Allah to reflect, reset and strengthen your intention
             </div>
+            <img src="/reflect.jpg" className="rounded"/>
           </section>
           <section>
             <h2 className="text-lg font-semibold mb-2">Verse</h2>

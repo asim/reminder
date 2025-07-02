@@ -12,6 +12,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode"
 
 	"github.com/asim/reminder/api"
 	"github.com/asim/reminder/app"
@@ -345,6 +346,21 @@ func main() {
 
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 
+	isCapital := func(s string) bool {
+		if len(s) == 0 {
+			return false // An empty string doesn't have a capitalized first letter
+		}
+
+		firstChar := []rune(s)[0] // Convert string to slice of runes to handle Unicode characters
+
+		// Check if the first character is a letter
+		if !unicode.IsLetter(firstChar) {
+			return false // If it's not a letter, it can't be capitalized
+		}
+
+		return unicode.IsUpper(firstChar)
+	}
+
 	daily := func() {
 		for {
 			mtx.Lock()
@@ -354,6 +370,18 @@ func main() {
 			chap := q.Chapters[rnd.Int()%len(q.Chapters)]
 			ver := chap.Verses[rnd.Int()%len(chap.Verses)]
 			had := book.Hadiths[rnd.Int()%len(book.Hadiths)]
+
+			// make sure we're starting from the begining of a verse
+			if !isCapital(ver.Text) {
+				mtx.Unlock()
+				continue
+			}
+
+			// skip zero verse e.g bismillah
+			if ver.Number == 0 {
+				mtx.Unlock()
+				continue
+			}
 
 			dailyName = fmt.Sprintf("%s - %s - %s\n\n%s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
 			dailyVerse = fmt.Sprintf("%s\n\n%s - %s - %d:%d", ver.Text, chap.Name, chap.English, ver.Chapter, ver.Number)
