@@ -3,6 +3,7 @@ import { httpGet, httpPost } from '~/utils/http';
 import React, { useState, useEffect } from 'react';
 import { subscribeUserToPush } from '../utils/push';
 import { unsubscribeUserFromPush } from '../utils/push-unsub';
+import DailySidebar from './_app.daily.index';
 
 interface DailyResponse {
   name: string;
@@ -85,82 +86,78 @@ export default function DailyPage() {
   }
 
   return (
-    <div className='flex flex-col flex-1 p-0 lg:p-8 mx-auto w-full lg:max-w-3xl overflow-y-auto px-5 py-5'>
-      {/* Push message at the very top of the page */}
-      {pushMsg && (
-        <div className={
-          'w-full mb-4 text-center py-2 rounded ' +
-          (pushStatus === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')
-        }>
-          {pushMsg}
-        </div>
-      )}
-      <div className="flex items-center justify-between mb-4 sm:mb-6">
-        <h1 className='text-2xl sm:text-3xl md:text-4xl font-semibold text-left'>
-          Daily Reminder
-        </h1>
-        <div className='flex gap-2'>
-	  {/*
-          <button
-            className="px-2 py-1 text-sm bg-black text-white rounded shadow hover:bg-gray-800 transition disabled:opacity-50 cursor-pointer"
-            onClick={handleRefresh}
-            disabled={isFetching || refreshing}
-          >
-            {(isFetching || refreshing) ? 'Refreshing...' : 'Refresh'}
-          </button>
-	  */}
-          <button
-            className={notificationsEnabled ? 'px-2 py-1 text-sm bg-gray-600 text-white rounded shadow hover:bg-gray-700 transition cursor-pointer' : 'px-2 py-1 text-sm bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition cursor-pointer'}
-            onClick={notificationsEnabled ? handlePushUnsubscribe : handlePushSubscribe}
-          >
-            {notificationsEnabled ? 'Disable Notifications' : 'Enable Notifications'}
-          </button>
-        </div>
+    <div className='flex flex-row h-full'>
+      <div className='hidden lg:block w-64 bg-gray-50 border-r overflow-y-auto'>
+        <DailySidebar />
       </div>
-      {isLoading && <p className="text-center">Loading...</p>}
-      {error && <p className="text-center text-red-500">Failed to load daily reminder.</p>}
-      {displayData && (
-        <div className="space-y-8">
-          {/* Salam and Hijri date message at the top */}
-          <section>
-            <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">{displayData.message}</h2>
-            <div className="text-sm sm:text-base text-gray-700 mb-2">
-              Read a verse, hadith and name of Allah to reflect, reset and strengthen your intention
-            </div>
-            <img src="/reflect.jpg" className="rounded"/>
-          </section>
-          <section>
-            <h2 className="text-lg font-semibold mb-2">Verse</h2>
-            <div className="text-sm sm:text-base text-gray-700 mb-2">
-              A verse from the Quran
-            </div>
-            <div className="whitespace-pre-wrap leading-snug bg-blue-50 rounded p-4 text-base shadow">
-              <a href={displayData.links['verse']}>{displayData.verse}</a>
-            </div>
-          </section>
-          <section>
-            <h2 className="text-lg font-semibold mb-2">Hadith</h2>
-            <div className="text-sm sm:text-base text-gray-700 mb-2">
-              A hadith from sahih bukhari
-            </div>
-            <div className="whitespace-pre-wrap leading-snug bg-green-50 rounded p-4 text-base shadow">
-              <a href={displayData.links['hadith']}>{displayData.hadith}</a>
-            </div>
-          </section>
-          <section>
-            <h2 className="text-lg font-semibold mb-2">Name of Allah</h2>
-            <div className="text-sm sm:text-base text-gray-700 mb-2">
-              A beautiful name from the 99 names of Allah
-            </div>
-            <div className="whitespace-pre-wrap leading-snug bg-yellow-50 rounded p-4 text-base shadow">
-              <a href={displayData.links['name']}>{displayData.name}</a>
-            </div>
-          </section>
-          <section>
-            <div>Updated {displayData.updated}</div>
-          </section>
+      <div className='flex flex-col flex-1 p-0 lg:p-8 mx-auto w-full lg:max-w-3xl overflow-y-auto px-5 py-5'>
+        {/* Push message at the very top of the page */}
+        {pushMsg && (
+          <div className={
+            'w-full mb-4 text-center py-2 rounded ' +
+            (pushStatus === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')
+          }>
+            {pushMsg}
+          </div>
+        )}
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <h1 className='text-2xl sm:text-3xl md:text-4xl font-semibold text-left'>
+            Daily Reminder
+          </h1>
+          <div className='flex gap-2'>
+            <button
+              className={notificationsEnabled ? 'px-2 py-1 text-sm bg-gray-600 text-white rounded shadow hover:bg-gray-700 transition cursor-pointer' : 'px-2 py-1 text-sm bg-blue-600 text-white rounded shadow hover:bg-blue-700 transition cursor-pointer'}
+              onClick={notificationsEnabled ? handlePushUnsubscribe : handlePushSubscribe}
+            >
+              {notificationsEnabled ? 'Disable Notifications' : 'Enable Notifications'}
+            </button>
+          </div>
         </div>
-      )}
+        {isLoading && <p className="text-center">Loading...</p>}
+        {error && <p className="text-center text-red-500">Failed to load daily reminder.</p>}
+        {displayData && (
+          <div className="space-y-8">
+            {/* Salam and Hijri date message at the top */}
+            <section>
+              <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">{displayData.message}</h2>
+              <div className="text-sm sm:text-base text-gray-700 mb-2">
+                Read a verse, hadith and name of Allah to reflect, reset and strengthen your intention
+              </div>
+              <img src="/reflect.jpg" className="rounded"/>
+            </section>
+            <section>
+              <h2 className="text-lg font-semibold mb-2">Verse</h2>
+              <div className="text-sm sm:text-base text-gray-700 mb-2">
+                A verse from the Quran
+              </div>
+              <div className="whitespace-pre-wrap leading-snug bg-blue-50 rounded p-4 text-base shadow">
+                <a href={displayData.links['verse']}>{displayData.verse}</a>
+              </div>
+            </section>
+            <section>
+              <h2 className="text-lg font-semibold mb-2">Hadith</h2>
+              <div className="text-sm sm:text-base text-gray-700 mb-2">
+                A hadith from sahih bukhari
+              </div>
+              <div className="whitespace-pre-wrap leading-snug bg-green-50 rounded p-4 text-base shadow">
+                <a href={displayData.links['hadith']}>{displayData.hadith}</a>
+              </div>
+            </section>
+            <section>
+              <h2 className="text-lg font-semibold mb-2">Name of Allah</h2>
+              <div className="text-sm sm:text-base text-gray-700 mb-2">
+                A beautiful name from the 99 names of Allah
+              </div>
+              <div className="whitespace-pre-wrap leading-snug bg-yellow-50 rounded p-4 text-base shadow">
+                <a href={displayData.links['name']}>{displayData.name}</a>
+              </div>
+            </section>
+            <section>
+              <div>Updated {displayData.updated}</div>
+            </section>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
