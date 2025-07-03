@@ -40,6 +40,7 @@ var dailyUpdated = time.Time{}
 var reminderDir = api.ReminderDir
 var lastPushDateFile = api.ReminderPath("last_push_date.txt")
 var lastPushDate = loadLastPushDate()
+var dailyIndex = loadDailyIndex()
 
 func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *api.Api) {
 	// generate api doc
@@ -201,6 +202,19 @@ func loadLastPushDate() string {
 func saveLastPushDate(date string) {
 	_ = os.MkdirAll(reminderDir, 0700)
 	_ = os.WriteFile(lastPushDateFile, []byte(date), 0644)
+}
+
+// On startup, load daily index
+func loadDailyIndex() map[string]interface{} {
+	dailyFile := api.ReminderPath("daily.json")
+	var idx map[string]interface{}
+	if b, err := os.ReadFile(dailyFile); err == nil {
+		json.Unmarshal(b, &idx)
+	}
+	if idx == nil {
+		idx = make(map[string]interface{})
+	}
+	return idx
 }
 
 func main() {
@@ -432,6 +446,7 @@ func main() {
 				b, _ := json.MarshalIndent(allDaily, "", "  ")
 				_ = os.MkdirAll(api.ReminderDir, 0700)
 				_ = os.WriteFile(dailyFile, b, 0644)
+				dailyIndex = allDaily // update in-memory index
 
 				payload := map[string]interface{}{
 					"title": "Daily Reminder",
@@ -509,6 +524,15 @@ func main() {
 		mtx.Unlock()
 
 		b, _ := json.Marshal(day)
+		w.Write(b)
+	})
+
+	// Add daily index API endpoint
+	http.HandleFunc("/api/daily/index", func(w http.ResponseWriter, r *http.Request) {
+		mtx.RLock()
+		b, _ := json.MarshalIndent(dailyIndex, "", "  ")
+		mtx.RUnlock()
+		w.Header().Set("Content-Type", "application/json")
 		w.Write(b)
 	})
 
