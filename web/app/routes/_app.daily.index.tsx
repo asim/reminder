@@ -27,10 +27,10 @@ export default function DailySidebar() {
 
   const sidebarItems: SidebarItem[] = entries.map(([date, entry], index) => ({
     key: date,
-    text: entry.date,
+    text: entry.hijri,
     path: `/daily/${date}`,
     number: index + 1, // Use index as a simple number
-    extra: entry.hijri,
+    extra: entry.date,
     searchableText: [entry.hijri, entry.date, entry.verse, entry.hadith, entry.name, entry.message],
   }));
 
