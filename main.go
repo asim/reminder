@@ -430,6 +430,8 @@ func main() {
 					"name":    dailyName,
 					"hijri":   hijriDate,
 					"date":    today,
+					"links":   links,
+					"updated": dailyUpdated.Format(time.RFC850),
 					"message": message,
 				}
 
@@ -472,6 +474,33 @@ func main() {
 	go daily()
 
 	http.HandleFunc("/api/daily", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			var req struct{ Date string `json:"date,omitempty"` }
+			b, _ := io.ReadAll(r.Body)
+			json.Unmarshal(b, &req)
+
+			var resp interface{}
+
+			if len(req.Date) > 0 {
+				mtx.RLock()
+
+				if entry, ok := dailyIndex[req.Date]; ok {
+					resp = entry
+				} else {
+					w.WriteHeader(http.StatusNotFound)
+					w.Write([]byte(`{"error":"Not found"}`))
+					mtx.RUnlock()
+					return
+				}
+				
+				mtx.RUnlock()
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(resp)
+				return
+			}
+		}
+
+		// GET: default current day
 		mtx.RLock()
 		display := HijriDate()
 		message := "Salam, today is the " + display
@@ -484,12 +513,11 @@ func main() {
 			"message": message,
 		}
 		mtx.RUnlock()
-
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(resp)
 	})
 
-	http.HandleFunc("/api/daily/refresh", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/api/daily/reset", func(w http.ResponseWriter, r *http.Request) {
 		nam := (*n)[rnd.Int()%len((*n))]
 		book := b.Books[rnd.Int()%len(b.Books)]
 		chap := q.Chapters[rnd.Int()%len(q.Chapters)]

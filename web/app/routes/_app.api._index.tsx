@@ -143,10 +143,15 @@ const endpoints: Endpoint[] = [
     ],
   },
   {
-    title: 'Daily Reminder Refresh',
-    description: 'Returns a refreshed verse of the Quran, a hadith, and a name of Allah for the day',
-    url: '/api/daily/refresh',
+    title: 'Daily Reminder (by Date)',
+    description: 'Returns the daily reminder for a specific date if available. POST a JSON body with an optional "date" field (YYYY-MM-DD).',
+    url: '/api/daily',
+    method: 'POST',
+    requestFormat: 'JSON',
     responseFormat: 'JSON',
+    params: [
+      { name: 'date', type: 'string', description: 'Date in YYYY-MM-DD format (optional, defaults to today)' },
+    ],
     responseFields: [
       { name: 'name', type: 'string', description: 'Name of Allah' },
       { name: 'hadith', type: 'string', description: 'Hadith from Sahih Bukhari' },
@@ -154,16 +159,8 @@ const endpoints: Endpoint[] = [
       { name: 'links', type: 'map', description: 'Links to the sources' },
       { name: 'updated', type: 'string', description: 'Timestamp of update' },
       { name: 'message', type: 'string', description: 'Salam, today is ... (Hijri date)' },
-    ],
-  },
-  {
-    title: 'Hijri Date (Umm al-Qura)',
-    description: "Returns today's Hijri date (Umm al-Qura calendar)",
-    url: '/api/hijri/date',
-    responseFormat: 'JSON',
-    responseFields: [
-      { name: 'date', type: 'string', description: 'Hijri date in DD-MM-YYYY format (Umm al-Qura)' },
-      { name: 'display', type: 'string', description: 'Nicely formatted Hijri date for display' },
+      { name: 'date', type: 'string', description: 'Gregorian date (YYYY-MM-DD)' },
+      { name: 'hijri', type: 'string', description: 'Hijri date (display format)' },
     ],
   },
 ];
