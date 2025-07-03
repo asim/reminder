@@ -408,13 +408,36 @@ func main() {
 				if len(dailyVerse) > 250 {
 					notifyVerse = notifyVerse[:250] + "..."
 				}
-				notification := dailyVerse
+				hijriDate := HijriDate()
+				message := "Salam, today is the " + hijriDate
+				dailyData := map[string]interface{}{
+					"verse":   dailyVerse,
+					"hadith":  dailyHadith,
+					"name":    dailyName,
+					"hijri":   hijriDate,
+					"date":    today,
+					"message": message,
+				}
+
+				// Save to daily.json
+				dailyFile := api.ReminderPath("daily.json")
+				var allDaily map[string]interface{}
+				if b, err := os.ReadFile(dailyFile); err == nil {
+					json.Unmarshal(b, &allDaily)
+				}
+				if allDaily == nil {
+					allDaily = make(map[string]interface{})
+				}
+				allDaily[today] = dailyData
+				b, _ := json.MarshalIndent(allDaily, "", "  ")
+				_ = os.MkdirAll(api.ReminderDir, 0700)
+				_ = os.WriteFile(dailyFile, b, 0644)
 
 				payload := map[string]interface{}{
 					"title": "Daily Reminder",
-					"body":  notification,
+					"body":  notifyVerse,
 				}
-				b, _ := json.Marshal(payload)
+				b, _ = json.Marshal(payload)
 				errors := api.SendPushToAll(string(b))
 				if len(errors) > 0 {
 					fmt.Println("Push notification errors:")
