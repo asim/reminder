@@ -25,11 +25,11 @@ export default function DailySidebar() {
   // Sort by date descending
   const entries = Object.entries(data).sort((a, b) => b[0].localeCompare(a[0]));
 
-  const sidebarItems: SidebarItem[] = entries.map(([date, entry]) => ({
+  const sidebarItems: SidebarItem[] = entries.map(([date, entry], index) => ({
     key: date,
     text: entry.date,
     path: `/daily/${date}`,
-    number: Number(date.replace(/-/g, '')),
+    number: index + 1, // Use index as a simple number
     extra: entry.hijri,
     searchableText: [entry.hijri, entry.date, entry.verse, entry.hadith, entry.name, entry.message],
   }));
