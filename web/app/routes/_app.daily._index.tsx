@@ -23,9 +23,6 @@ export default function DailyIndex() {
   // Defensive: check for required fields in data
   const { verse, hadith, name, links: rawLinks, updated, message } = data;
   const links = rawLinks || {};
-  if (!verse || !hadith || !name || !links.verse || !links.hadith || !links.name) {
-    return <div className="p-4 text-red-500">Daily reminder data is incomplete.</div>;
-  }
 
   return (
     <div className="space-y-8">

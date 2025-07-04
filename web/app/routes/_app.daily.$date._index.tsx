@@ -30,11 +30,9 @@ export default function DailyByDate() {
   if (isLoading) return <div className="p-4">Loading...</div>;
   if (error || !data) return <div className="p-4 text-red-500">Failed to load daily reminder for {date}.</div>;
 
-  // Defensive: check for required fields in data
-  const { verse, hadith, name, links, updated, message, hijri: hijriDate } = data;
-  if (!verse || !hadith || !name || !links || !links['verse'] || !links['hadith'] || !links['name']) {
-    return <div className="p-4 text-red-500">Daily reminder data is incomplete.</div>;
-  }
+  // Defensive: extract fields, but render whatever is present
+  const { verse, hadith, name, links: rawLinks, updated, message, hijri: hijriDate } = data;
+  const links = rawLinks || {};
 
   return (
     <div className="space-y-8">
@@ -50,21 +48,21 @@ export default function DailyByDate() {
         <h2 className="text-lg font-semibold mb-2">Verse</h2>
         <div className="text-sm sm:text-base text-gray-700 mb-2">A verse from the Quran</div>
         <div className="whitespace-pre-wrap leading-snug bg-blue-50 rounded p-4 text-base shadow">
-          <a href={data.links['verse']}>{data.verse}</a>
+          {links.verse ? <a href={links.verse}>{verse}</a> : verse}
         </div>
       </section>
       <section>
         <h2 className="text-lg font-semibold mb-2">Hadith</h2>
         <div className="text-sm sm:text-base text-gray-700 mb-2">A hadith from sahih bukhari</div>
         <div className="whitespace-pre-wrap leading-snug bg-green-50 rounded p-4 text-base shadow">
-          <a href={data.links['hadith']}>{data.hadith}</a>
+          {links.hadith ? <a href={links.hadith}>{hadith}</a> : hadith}
         </div>
       </section>
       <section>
         <h2 className="text-lg font-semibold mb-2">Name of Allah</h2>
         <div className="text-sm sm:text-base text-gray-700 mb-2">A beautiful name from the 99 names of Allah</div>
         <div className="whitespace-pre-wrap leading-snug bg-yellow-50 rounded p-4 text-base shadow">
-          <a href={data.links['name']}>{data.name}</a>
+          {links.name ? <a href={links.name}>{name}</a> : name}
         </div>
       </section>
       <section>
