@@ -16,12 +16,11 @@ interface DailyResponse {
 }
 
 export default function DailyLayout() {
+  // Match Quran/Hadith layout: sidebar and content in flex-row, content scrollable, padding
   return (
-    <div className="flex h-full">
-      <div className="w-full lg:w-64">
-        <DailySidebarNav />
-      </div>
-      <div className="flex-1">
+    <div className="flex flex-row h-full">
+      <DailySidebarNav />
+      <div className="flex flex-col overflow-y-auto flex-1 px-5 py-5">
         <Outlet />
       </div>
     </div>
