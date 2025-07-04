@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { httpGet } from '~/utils/http';
 import React from 'react';
+import { Outlet } from 'react-router';
 import { SearchableSidebar, type SidebarItem } from '~/components/interface/searchable-sidebar';
 
 interface DailyIndexEntry {
@@ -35,9 +36,17 @@ export default function DailySidebar() {
   }));
 
   return (
-    <SearchableSidebar
-      items={sidebarItems}
-      searchPlaceholder='Search daily reminders'
-    />
+    <div className="flex h-full">
+      <div className="w-full lg:w-64">
+        <SearchableSidebar
+          items={sidebarItems}
+          searchPlaceholder="Search daily reminders"
+        />
+      </div>
+      <div className="flex-1">
+        {/* This Outlet will render the selected daily entry */}
+        <Outlet />
+      </div>
+    </div>
   );
 }
