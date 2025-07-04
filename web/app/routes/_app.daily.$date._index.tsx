@@ -25,9 +25,16 @@ export default function DailyByDate() {
     enabled: !!date,
   });
 
+
   if (!date) return <div className="p-4 text-red-500">No date provided</div>;
   if (isLoading) return <div className="p-4">Loading...</div>;
   if (error || !data) return <div className="p-4 text-red-500">Failed to load daily reminder for {date}.</div>;
+
+  // Defensive: check for required fields in data
+  const { verse, hadith, name, links, updated, message, hijri: hijriDate } = data;
+  if (!verse || !hadith || !name || !links || !links['verse'] || !links['hadith'] || !links['name']) {
+    return <div className="p-4 text-red-500">Daily reminder data is incomplete.</div>;
+  }
 
   return (
     <div className="space-y-8">

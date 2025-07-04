@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { httpGet } from '~/utils/http';
 import React from 'react';
@@ -7,7 +6,7 @@ interface DailyResponse {
   name: string;
   hadith: string;
   verse: string;
-  links: Record<string, string>;
+  links?: Record<string, string>;
   updated: string;
   message: string;
 }
@@ -20,6 +19,15 @@ export default function DailyIndex() {
 
   if (isLoading) return <div className="p-4">Loading...</div>;
   if (error || !data) return <div className="p-4 text-red-500">Failed to load daily reminder.</div>;
+
+  // Defensive: check for required fields in data
+  const { verse, hadith, name, links, updated, message } = data;
+  if (!verse || !hadith || !name || !links || !links['verse'] || !links['hadith'] || !links['name']) {
+    return <div className="p-4 text-red-500">Daily reminder data is incomplete.</div>;
+  }
+
+  // Defensive: ensure links is always an object
+  const links = data.links || {};
 
   return (
     <div className="space-y-8">
@@ -34,21 +42,21 @@ export default function DailyIndex() {
         <h2 className="text-lg font-semibold mb-2">Verse</h2>
         <div className="text-sm sm:text-base text-gray-700 mb-2">A verse from the Quran</div>
         <div className="whitespace-pre-wrap leading-snug bg-blue-50 rounded p-4 text-base shadow">
-          <a href={data.links['verse']}>{data.verse}</a>
+          {links.verse ? <a href={links.verse}>{data.verse}</a> : data.verse}
         </div>
       </section>
       <section>
         <h2 className="text-lg font-semibold mb-2">Hadith</h2>
         <div className="text-sm sm:text-base text-gray-700 mb-2">A hadith from sahih bukhari</div>
         <div className="whitespace-pre-wrap leading-snug bg-green-50 rounded p-4 text-base shadow">
-          <a href={data.links['hadith']}>{data.hadith}</a>
+          {links.hadith ? <a href={links.hadith}>{data.hadith}</a> : data.hadith}
         </div>
       </section>
       <section>
         <h2 className="text-lg font-semibold mb-2">Name of Allah</h2>
         <div className="text-sm sm:text-base text-gray-700 mb-2">A beautiful name from the 99 names of Allah</div>
         <div className="whitespace-pre-wrap leading-snug bg-yellow-50 rounded p-4 text-base shadow">
-          <a href={data.links['name']}>{data.name}</a>
+          {links.name ? <a href={links.name}>{data.name}</a> : data.name}
         </div>
       </section>
       <section>
