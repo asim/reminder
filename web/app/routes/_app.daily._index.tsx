@@ -25,7 +25,7 @@ export default function DailyIndex() {
   const links = rawLinks || {};
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-4xl mx-auto w-full mb-8 sm:mb-12 flex-grow p-0 lg:p-8 space-y-8">
       <section>
         <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">{data.message}</h2>
         <div className="text-sm sm:text-base text-gray-700 mb-2">
@@ -34,28 +34,28 @@ export default function DailyIndex() {
         <img src="/reflect.jpg" className="rounded"/>
       </section>
       <section>
-        <h2 className="text-lg font-semibold mb-2">Verse</h2>
+        <h2 className="text-lg font-semibold mb-2 mt-2">Verse</h2>
         <div className="text-sm sm:text-base text-gray-700 mb-2">A verse from the Quran</div>
         <div className="whitespace-pre-wrap leading-snug bg-blue-50 rounded p-4 text-base shadow">
           {links.verse ? <a href={links.verse}>{data.verse}</a> : data.verse}
         </div>
       </section>
       <section>
-        <h2 className="text-lg font-semibold mb-2">Hadith</h2>
+        <h2 className="text-lg font-semibold mb-2 mt-2">Hadith</h2>
         <div className="text-sm sm:text-base text-gray-700 mb-2">A hadith from sahih bukhari</div>
         <div className="whitespace-pre-wrap leading-snug bg-green-50 rounded p-4 text-base shadow">
           {links.hadith ? <a href={links.hadith}>{data.hadith}</a> : data.hadith}
         </div>
       </section>
       <section>
-        <h2 className="text-lg font-semibold mb-2">Name of Allah</h2>
+        <h2 className="text-lg font-semibold mb-2 mt-2">Name of Allah</h2>
         <div className="text-sm sm:text-base text-gray-700 mb-2">A beautiful name from the 99 names of Allah</div>
         <div className="whitespace-pre-wrap leading-snug bg-yellow-50 rounded p-4 text-base shadow">
           {links.name ? <a href={links.name}>{data.name}</a> : data.name}
         </div>
       </section>
       <section>
-        <div>Updated {data.updated}</div>
+        <div className="mt-2">Updated {data.updated}</div>
       </section>
     </div>
   );

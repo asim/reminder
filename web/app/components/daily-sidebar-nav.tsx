@@ -30,7 +30,7 @@ export default function DailySidebarNav() {
     text: entry.date,
     path: `/daily/${date}`,
     number: index + 1,
-    extra: entry.hadith,
+    extra: entry.hijri,
     searchableText: [entry.date, entry.verse, entry.hadith, entry.name, entry.message],
   }));
 
