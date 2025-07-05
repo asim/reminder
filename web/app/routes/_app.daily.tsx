@@ -17,12 +17,35 @@ interface DailyResponse {
 
 export default function DailyLayout() {
   // Match Quran/Hadith layout: sidebar and content in flex-row, content scrollable, padding
+  // Defensive: render sidebar and content regardless of sidebar fetch errors
   return (
     <div className="flex flex-row h-full">
-      <DailySidebarNav />
+      <ErrorBoundary>
+        <DailySidebarNav />
+      </ErrorBoundary>
       <div className="flex flex-col overflow-y-auto flex-1 px-5 py-5">
         <Outlet />
       </div>
     </div>
   );
+}
+
+// Simple error boundary to prevent sidebar errors from breaking the page
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: any, info: any) {
+    // Optionally log error
+  }
+  render() {
+    if (this.state.hasError) {
+      return <div className="w-full lg:w-64 p-4 text-gray-400">Sidebar unavailable</div>;
+    }
+    return this.props.children;
+  }
 }
