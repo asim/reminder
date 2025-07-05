@@ -10,24 +10,22 @@ interface DailyIndexEntry {
   date: string; // hijri
   gregorian: string;
   message: string;
+  hijri?: string;
 }
 
-function formatDate(dateString) {
-  const date = new Date(dateString); // Create a Date object from the "YYYY-MM-DD" string
-
+function formatDate(dateString: string) {
+  const date = new Date(dateString);
   // Options for formatting the date
-  const options = {
-    weekday: 'long', // e.g., "Saturday"
-    year: 'numeric', // e.g., "2025"
-    month: 'long',   // e.g., "June"
-    day: 'numeric'   // e.g., "25"
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
   };
-
-  // Use toLocaleDateString to format the date
-  // The 'en-GB' locale provides day before month, and the options tailor the output
   return date.toLocaleDateString('en-GB', options);
 }
 
+export default function DailySidebarNav() {
   const { data } = useSuspenseQuery({
     queryKey: ['daily-index'],
     queryFn: async () => httpGet<Record<string, DailyIndexEntry>>('/api/daily/index'),
@@ -35,14 +33,15 @@ function formatDate(dateString) {
   if (!data) return null;
 
   // Sort by date descending
-  const entries = Object.entries(data).sort((a, b) => b[0].localeCompare(a[0]));
+
+  const entries = Object.entries(data).sort((a, b) => b[0].localeCompare(a[0])) as [string, DailyIndexEntry][];
 
   const sidebarItems: SidebarItem[] = entries.map(([date, entry], index) => ({
     key: date,
     text: formatDate(entry.date),
     path: `/daily/${date}`,
     number: index + 1,
-    extra: entry.hijri,
+    extra: (entry as DailyIndexEntry).hijri,
     searchableText: [entry.date, entry.verse, entry.hadith, entry.name, entry.message],
   }));
 
