@@ -14,6 +14,18 @@ interface DailyResponse {
   hijri?: string;
 }
 
+function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  // Options for formatting the date
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  };
+  return date.toLocaleDateString('en-GB', options);
+}
+
 export default function DailyByDate() {
   const { date } = useParams<{ date: string }>();
   const { data } = useSuspenseQuery<DailyResponse>({
@@ -31,13 +43,10 @@ export default function DailyByDate() {
 
   return (
     <div className="max-w-4xl mx-auto w-full mb-8 sm:mb-12 flex-grow p-0 lg:p-8 space-y-8">
-      <section>
-        <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">{data.message}</h2>
-        <div className="text-sm sm:text-base text-gray-700 mb-2">
-          Read a verse, hadith and name of Allah to reflect, reset and strengthen your intention
-        </div>
-        <div className="text-xs text-gray-500 mb-2">{data.hijri || data.date}</div>
-      </section>
+      <div className="text-center">
+        <div className="text-base sm:text-lg md:text-xl text-gray-600">{data.hijri}</div>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">{formatDate(data.date)}</h1>
+      </div>
       <section>
         <h2 className="text-lg font-semibold mb-2 mt-2">Verse</h2>
         <div className="text-sm sm:text-base text-gray-700 mb-2">A verse from the Quran</div>
