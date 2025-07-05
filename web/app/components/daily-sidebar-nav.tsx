@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { httpGet } from '~/utils/http';
 import { SearchableSidebar, type SidebarItem } from '~/components/interface/searchable-sidebar';
 import React from 'react';
@@ -28,14 +28,10 @@ function formatDate(dateString) {
   return date.toLocaleDateString('en-GB', options);
 }
 
-export default function DailySidebarNav() {
-  const { data, isLoading, error } = useQuery<Record<string, DailyIndexEntry>>({
+  const { data } = useSuspenseQuery({
     queryKey: ['daily-index'],
     queryFn: async () => httpGet<Record<string, DailyIndexEntry>>('/api/daily/index'),
   });
-
-  if (isLoading) return <div className='p-2 text-xs'>Loading daily index...</div>;
-  if (error) return <div className='p-2 text-xs text-red-500'>Failed to load daily index.</div>;
   if (!data) return null;
 
   // Sort by date descending

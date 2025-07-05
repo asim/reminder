@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { httpGet } from '~/utils/http';
 import React from 'react';
 
@@ -11,15 +11,10 @@ interface DailyResponse {
   message: string;
 }
 
-export default function DailyIndex() {
-  const { data, isLoading, error } = useQuery<DailyResponse>({
+  const { data } = useSuspenseQuery<DailyResponse>({
     queryKey: ['daily'],
     queryFn: async () => httpGet<DailyResponse>('/api/daily'),
   });
-
-  if (isLoading) return <div className="p-4">Loading...</div>;
-  if (error || !data) return <div className="p-4 text-red-500">Failed to load daily reminder.</div>;
-
   // Defensive: check for required fields in data
   const { verse, hadith, name, links: rawLinks, updated, message } = data;
   const links = rawLinks || {};
