@@ -33,6 +33,7 @@ const endpoints: Endpoint[] = [
   {
     title: 'Quran',
     description: 'Returns the entire Quran',
+    method: 'GET',
     url: '/api/quran',
     responseFormat: 'JSON',
   },
@@ -40,6 +41,7 @@ const endpoints: Endpoint[] = [
     title: 'List of Quran Chapters',
     description: 'Returns a list of Quran chapters',
     url: '/api/quran/chapters',
+    method: 'GET',
     responseFormat: 'JSON',
     responseFields: [
       {
@@ -64,6 +66,7 @@ const endpoints: Endpoint[] = [
     title: 'Quran by Chapter',
     description: 'Returns a chapter of the quran',
     url: '/api/quran/{chapter}',
+    method: 'GET',
     responseFormat: 'JSON',
     responseFields: [
       { name: 'name', type: 'string', description: 'Name of chapter' },
@@ -76,6 +79,7 @@ const endpoints: Endpoint[] = [
     title: 'Quran by Verse',
     description: 'Returns a verse of the quran',
     url: '/api/quran/{chapter}/{verse}',
+    method: 'GET',
     responseFormat: 'JSON',
     responseFields: [
       { name: 'chapter', type: 'int', description: 'Chapter of the verse' },
@@ -92,12 +96,14 @@ const endpoints: Endpoint[] = [
     title: 'Hadith',
     description: 'Returns the entire Hadith',
     url: '/api/hadith',
+    method: 'GET',
     responseFormat: 'JSON',
   },
   {
     title: 'Hadith by Book',
     description: 'Returns a book from the hadith',
     url: '/api/hadith/{book}',
+    method: 'GET',
     responseFormat: 'JSON',
     responseFields: [
       { name: 'name', type: 'string', description: 'Name of book' },
@@ -108,6 +114,7 @@ const endpoints: Endpoint[] = [
     title: 'Names',
     description: 'Returns the names of Allah',
     url: '/api/names',
+    method: 'GET',
     responseFormat: 'JSON',
   },
   {
@@ -132,6 +139,7 @@ const endpoints: Endpoint[] = [
     title: 'Daily Reminder',
     description: 'Returns a verse of the Quran, a hadith, and a name of Allah for the day',
     url: '/api/daily',
+    method: 'GET',
     responseFormat: 'JSON',
     responseFields: [
       { name: 'name', type: 'string', description: 'Name of Allah' },
@@ -143,9 +151,10 @@ const endpoints: Endpoint[] = [
     ],
   },
   {
-    title: 'Daily Reminder Refresh',
-    description: 'Returns a refreshed verse of the Quran, a hadith, and a name of Allah for the day',
-    url: '/api/daily/refresh',
+    title: 'Daily Reminder (by Date)',
+    description: 'Returns the daily reminder for a specific date if available. POST a JSON body with an optional "date" field (YYYY-MM-DD).',
+    url: '/api/daily/{date}',
+    method: 'GET',
     responseFormat: 'JSON',
     responseFields: [
       { name: 'name', type: 'string', description: 'Name of Allah' },
@@ -154,16 +163,8 @@ const endpoints: Endpoint[] = [
       { name: 'links', type: 'map', description: 'Links to the sources' },
       { name: 'updated', type: 'string', description: 'Timestamp of update' },
       { name: 'message', type: 'string', description: 'Salam, today is ... (Hijri date)' },
-    ],
-  },
-  {
-    title: 'Hijri Date (Umm al-Qura)',
-    description: "Returns today's Hijri date (Umm al-Qura calendar)",
-    url: '/api/hijri/date',
-    responseFormat: 'JSON',
-    responseFields: [
-      { name: 'date', type: 'string', description: 'Hijri date in DD-MM-YYYY format (Umm al-Qura)' },
-      { name: 'display', type: 'string', description: 'Nicely formatted Hijri date for display' },
+      { name: 'date', type: 'string', description: 'Gregorian date (YYYY-MM-DD)' },
+      { name: 'hijri', type: 'string', description: 'Hijri date (display format)' },
     ],
   },
 ];

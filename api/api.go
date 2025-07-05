@@ -47,10 +47,10 @@ var Endpoints = []*Endpoint{
 		}},
 	},
 	{
-		Name:        "Refreshed daily verse, hadith and name of Allah",
-		Path:        "/api/daily/refresh",
+		Name:        "Daily reminder by date",
+		Path:        "/api/daily/{date}",
 		Params:      nil,
-		Description: "Returns a refreshed daily verse of the quran, hadith and name of Allah",
+		Description: "Returns a verse of the quran, hadith and name of Allah for the date",
 		Response: []*Value{{
 			Type: "JSON",
 			Params: []*Param{
@@ -58,7 +58,7 @@ var Endpoints = []*Endpoint{
 				{Name: "hadith", Value: "string", Description: "Hadith from Sahih Bukhari"},
 				{Name: "verse", Value: "string", Description: "A verse of the Quran"},
 				{Name: "links", Value: "map", Description: "Links to relevant content"},
-				{Name: "updated", Value: "string", Description: "Time of the refresh"},
+				{Name: "updated", Value: "string", Description: "Time of last update"},
 				{Name: "message", Value: "string", Description: "Salam, today is ... (Hijri date)"},
 			},
 		}},
@@ -173,6 +173,27 @@ var Endpoints = []*Endpoint{
 			Params: []*Param{
 				{Name: "date", Value: "string", Description: "Hijri date in DD-MM-YYYY format (Umm al-Qura)"},
 				{Name: "display", Value: "string", Description: "Nicely formatted Hijri date for display"},
+			},
+		}},
+	},
+	{
+		Name: "Daily verse, hadith and name of Allah (by Date)",
+		Path: "/api/daily",
+		Params: []*Param{
+			{Name: "date", Value: "string", Description: "(POST only) Date in YYYY-MM-DD format. Optional. If omitted, returns today's entry."},
+		},
+		Description: "Returns a verse of the Quran, hadith, and name of Allah for the given date (POST) or today (GET). POST with a JSON body containing an optional 'date' field. If the date is not found, returns 404.",
+		Response: []*Value{{
+			Type: "JSON",
+			Params: []*Param{
+				{Name: "name", Value: "string", Description: "Name of Allah"},
+				{Name: "hadith", Value: "string", Description: "Hadith from Sahih Bukhari"},
+				{Name: "verse", Value: "string", Description: "A verse of the Quran"},
+				{Name: "links", Value: "map", Description: "Links to relevant content"},
+				{Name: "updated", Value: "string", Description: "Time of last update"},
+				{Name: "message", Value: "string", Description: "Salam, today is ... (Hijri date)"},
+				{Name: "date", Value: "string", Description: "Gregorian date (YYYY-MM-DD)"},
+				{Name: "hijri", Value: "string", Description: "Hijri date (display format)"},
 			},
 		}},
 	},

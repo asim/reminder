@@ -15,7 +15,7 @@ export function meta() {
 
 export default function NamesIndex() {
   return (
-    <div className='flex flex-col flex-1 p-0 lg:p-8 mx-auto w-full max-w-3xl'>
+    <div className='flex flex-col flex-1 p-0 lg:p-8 mx-auto w-full max-w-4xl'>
       <h1 className='text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-6 text-left'>
         The Names of Allah
       </h1>

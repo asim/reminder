@@ -40,6 +40,7 @@ var dailyUpdated = time.Time{}
 var reminderDir = api.ReminderDir
 var lastPushDateFile = api.ReminderPath("last_push_date.txt")
 var lastPushDate = loadLastPushDate()
+var dailyIndex = loadDailyIndex()
 
 func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *api.Api) {
 	// generate api doc
@@ -201,6 +202,19 @@ func loadLastPushDate() string {
 func saveLastPushDate(date string) {
 	_ = os.MkdirAll(reminderDir, 0700)
 	_ = os.WriteFile(lastPushDateFile, []byte(date), 0644)
+}
+
+// On startup, load daily index
+func loadDailyIndex() map[string]interface{} {
+	dailyFile := api.ReminderPath("daily.json")
+	var idx map[string]interface{}
+	if b, err := os.ReadFile(dailyFile); err == nil {
+		json.Unmarshal(b, &idx)
+	}
+	if idx == nil {
+		idx = make(map[string]interface{})
+	}
+	return idx
 }
 
 func main() {
@@ -408,13 +422,39 @@ func main() {
 				if len(dailyVerse) > 250 {
 					notifyVerse = notifyVerse[:250] + "..."
 				}
-				notification := dailyVerse
+				hijriDate := HijriDate()
+				message := "Salam, today is the " + hijriDate
+				dailyData := map[string]interface{}{
+					"verse":   dailyVerse,
+					"hadith":  dailyHadith,
+					"name":    dailyName,
+					"hijri":   hijriDate,
+					"date":    today,
+					"links":   links,
+					"updated": dailyUpdated.Format(time.RFC850),
+					"message": message,
+				}
+
+				// Save to daily.json
+				dailyFile := api.ReminderPath("daily.json")
+				var allDaily map[string]interface{}
+				if b, err := os.ReadFile(dailyFile); err == nil {
+					json.Unmarshal(b, &allDaily)
+				}
+				if allDaily == nil {
+					allDaily = make(map[string]interface{})
+				}
+				allDaily[today] = dailyData
+				b, _ := json.MarshalIndent(allDaily, "", "  ")
+				_ = os.MkdirAll(api.ReminderDir, 0700)
+				_ = os.WriteFile(dailyFile, b, 0644)
+				dailyIndex = allDaily // update in-memory index
 
 				payload := map[string]interface{}{
 					"title": "Daily Reminder",
-					"body":  notification,
+					"body":  notifyVerse,
 				}
-				b, _ := json.Marshal(payload)
+				b, _ = json.Marshal(payload)
 				errors := api.SendPushToAll(string(b))
 				if len(errors) > 0 {
 					fmt.Println("Push notification errors:")
@@ -434,6 +474,7 @@ func main() {
 	go daily()
 
 	http.HandleFunc("/api/daily", func(w http.ResponseWriter, r *http.Request) {
+		// GET: default current day
 		mtx.RLock()
 		display := HijriDate()
 		message := "Salam, today is the " + display
@@ -446,12 +487,34 @@ func main() {
 			"message": message,
 		}
 		mtx.RUnlock()
-
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(resp)
 	})
 
-	http.HandleFunc("/api/daily/refresh", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/api/daily/{date}", func(w http.ResponseWriter, r *http.Request) {
+		date := r.PathValue("date")
+		if len(date) == 0 {
+			date = time.Now().Format("2006-01-02")
+		}
+
+		mtx.RLock()
+
+		var resp interface{}
+		if entry, ok := dailyIndex[date]; ok {
+			resp = entry
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte(`{"error":"Not found"}`))
+			mtx.RUnlock()
+			return
+		}
+
+		mtx.RUnlock()
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(resp)
+	})
+
+	http.HandleFunc("/api/daily/reset", func(w http.ResponseWriter, r *http.Request) {
 		nam := (*n)[rnd.Int()%len((*n))]
 		book := b.Books[rnd.Int()%len(b.Books)]
 		chap := q.Chapters[rnd.Int()%len(q.Chapters)]
@@ -486,6 +549,15 @@ func main() {
 		mtx.Unlock()
 
 		b, _ := json.Marshal(day)
+		w.Write(b)
+	})
+
+	// Add daily index API endpoint
+	http.HandleFunc("/api/daily/index", func(w http.ResponseWriter, r *http.Request) {
+		mtx.RLock()
+		b, _ := json.MarshalIndent(dailyIndex, "", "  ")
+		mtx.RUnlock()
+		w.Header().Set("Content-Type", "application/json")
 		w.Write(b)
 	})
 
