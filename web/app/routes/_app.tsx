@@ -15,7 +15,7 @@ export default function AppLayout() {
     <div className='flex flex-col h-screen overflow-hidden'>
       <div className='w-full text-sm py-2 px-2 bg-black text-white flex flex-row items-center gap-1'>
         {/* Left-aligned reminder link */}
-        <span className="hidden md:inline-block font-bold px-2 mr-8 order-1">
+        <span className="hidden md:inline-block font-bold px-2 ml-8 mr-8 order-1">
           <a href="/">reminder</a>
         </span>
         {/* Centered nav links */}
@@ -38,7 +38,6 @@ export default function AppLayout() {
         </div>
         {/* Right-aligned search/api links */}
         <div className='hidden lg:flex items-center gap-2 order-3'>
-          <span className='text-gray-400 hidden lg:block mx-1'>/</span>
           <NavLink className={buttonClass} to='/search'>
             <Search className='size-3' />
             Search

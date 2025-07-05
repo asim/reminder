@@ -31,7 +31,6 @@ export default function DailyIndex() {
         <div className="text-sm sm:text-base text-gray-700 mb-2">
           Read a verse, hadith and name of Allah to reflect, reset and strengthen your intention
         </div>
-        <img src="/reflect.jpg" className="rounded"/>
       </section>
       <section>
         <h2 className="text-lg font-semibold mb-2 mt-2">Verse</h2>
