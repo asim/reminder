@@ -492,7 +492,7 @@ func main() {
 	})
 
 	http.HandleFunc("/api/daily/{date}", func(w http.ResponseWriter, r *http.Request) {
-		date := r.PathValue("chapter") 
+		date := r.PathValue("date")
 		if len(date) == 0 {
 			date = time.Now().Format("2006-01-02")
 		}
@@ -508,7 +508,7 @@ func main() {
 			mtx.RUnlock()
 			return
 		}
-		
+
 		mtx.RUnlock()
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(resp)

@@ -23,7 +23,7 @@ export default function DailyLayout() {
       <ErrorBoundary>
         <DailySidebarNav />
       </ErrorBoundary>
-      <div className="flex flex-col flex-1 p-0 lg:p-8 mx-auto w-full lg:max-w-3xl space-y-8 overflow-y-auto">
+      <div className="flex flex-col overflow-y-auto flex-1 px-5 py-5">
         <Outlet />
       </div>
     </div>

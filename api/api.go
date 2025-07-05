@@ -177,8 +177,8 @@ var Endpoints = []*Endpoint{
 		}},
 	},
 	{
-		Name:        "Daily verse, hadith and name of Allah (by Date)",
-		Path:        "/api/daily",
+		Name: "Daily verse, hadith and name of Allah (by Date)",
+		Path: "/api/daily",
 		Params: []*Param{
 			{Name: "date", Value: "string", Description: "(POST only) Date in YYYY-MM-DD format. Optional. If omitted, returns today's entry."},
 		},
