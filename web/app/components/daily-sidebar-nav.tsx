@@ -12,6 +12,22 @@ interface DailyIndexEntry {
   message: string;
 }
 
+function formatDate(dateString) {
+  const date = new Date(dateString); // Create a Date object from the "YYYY-MM-DD" string
+
+  // Options for formatting the date
+  const options = {
+    weekday: 'long', // e.g., "Saturday"
+    year: 'numeric', // e.g., "2025"
+    month: 'long',   // e.g., "June"
+    day: 'numeric'   // e.g., "25"
+  };
+
+  // Use toLocaleDateString to format the date
+  // The 'en-GB' locale provides day before month, and the options tailor the output
+  return date.toLocaleDateString('en-GB', options);
+}
+
 export default function DailySidebarNav() {
   const { data, isLoading, error } = useQuery<Record<string, DailyIndexEntry>>({
     queryKey: ['daily-index'],
@@ -27,7 +43,7 @@ export default function DailySidebarNav() {
 
   const sidebarItems: SidebarItem[] = entries.map(([date, entry], index) => ({
     key: date,
-    text: entry.date,
+    text: formatDate(entry.date),
     path: `/daily/${date}`,
     number: index + 1,
     extra: entry.hijri,

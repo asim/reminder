@@ -26,6 +26,9 @@ export default function DailyIndex() {
 
   return (
     <div className="max-w-4xl mx-auto w-full mb-8 sm:mb-12 flex-grow p-0 lg:p-8 space-y-8">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-6 text-left">
+        Daily Reminder
+      </h1>
       <section>
         <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">{data.message}</h2>
         <div className="text-sm sm:text-base text-gray-700 mb-2">

@@ -15,7 +15,7 @@ export type DailyData = {
 export const getDailyByDateOptions = (date: string) => ({
   queryKey: ['get-daily', date],
   queryFn: async () => {
-    const data = await httpPost<DailyData>('/api/daily', { date });
+    const data = await httpPost<DailyData>(`/api/daily/${date}`);
     return data;
   },
 });

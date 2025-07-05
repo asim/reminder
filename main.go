@@ -474,32 +474,6 @@ func main() {
 	go daily()
 
 	http.HandleFunc("/api/daily", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodPost {
-			var req struct{ Date string `json:"date,omitempty"` }
-			b, _ := io.ReadAll(r.Body)
-			json.Unmarshal(b, &req)
-
-			var resp interface{}
-
-			if len(req.Date) > 0 {
-				mtx.RLock()
-
-				if entry, ok := dailyIndex[req.Date]; ok {
-					resp = entry
-				} else {
-					w.WriteHeader(http.StatusNotFound)
-					w.Write([]byte(`{"error":"Not found"}`))
-					mtx.RUnlock()
-					return
-				}
-				
-				mtx.RUnlock()
-				w.Header().Set("Content-Type", "application/json")
-				json.NewEncoder(w).Encode(resp)
-				return
-			}
-		}
-
 		// GET: default current day
 		mtx.RLock()
 		display := HijriDate()
@@ -512,6 +486,29 @@ func main() {
 			"updated": dailyUpdated.Format(time.RFC850),
 			"message": message,
 		}
+		mtx.RUnlock()
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(resp)
+	})
+
+	http.HandleFunc("/api/daily/{date}", func(w http.ResponseWriter, r *http.Request) {
+		date := r.PathValue("chapter") 
+		if len(date) == 0 {
+			date = time.Now().Format("2006-01-02")
+		}
+
+		mtx.RLock()
+
+		var resp interface{}
+		if entry, ok := dailyIndex[date]; ok {
+			resp = entry
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte(`{"error":"Not found"}`))
+			mtx.RUnlock()
+			return
+		}
+		
 		mtx.RUnlock()
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(resp)

@@ -20,7 +20,7 @@ export default function DailyByDate() {
     queryKey: ['daily-by-date', date],
     queryFn: async () => {
       if (!date) throw new Error('No date provided');
-      return httpPost<DailyResponse>('/api/daily', { date });
+      return httpPost<DailyResponse>(`/api/daily/${date}`);
     },
     enabled: !!date,
   });
@@ -41,7 +41,6 @@ export default function DailyByDate() {
         <div className="text-sm sm:text-base text-gray-700 mb-2">
           Read a verse, hadith and name of Allah to reflect, reset and strengthen your intention
         </div>
-        <img src="/reflect.jpg" className="rounded mb-2" />
         <div className="text-xs text-gray-500 mb-2">{data.hijri || data.date}</div>
       </section>
       <section>
