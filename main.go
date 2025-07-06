@@ -453,6 +453,9 @@ func main() {
 				payload := map[string]interface{}{
 					"title": "Daily Reminder",
 					"body":  notifyVerse,
+					"data": map[string]interface{}{
+						"url": "/daily/" + today,
+					},
 				}
 				b, _ = json.Marshal(payload)
 				errors := api.SendPushToAll(string(b))
