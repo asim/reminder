@@ -175,7 +175,7 @@ func RegisterPushRoutes(mux *http.ServeMux) {
 	})
 
 	// Expose VAPID public key to frontend
-	mux.HandleFunc("/api/push/vapidPublicKey", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/api/push/key", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/plain")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(VAPIDPublicKey))
