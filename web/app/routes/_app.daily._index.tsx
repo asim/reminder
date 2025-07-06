@@ -63,7 +63,7 @@ function NotificationButton() {
         </button>
       ) : (
         <button
-          className="bg-black-600 text-white px-4 py-2 rounded text-sm cursor-pointer shadow hover:bg-black-700"
+          className="bg-gray-800 text-white px-4 py-2 rounded text-sm cursor-pointer shadow hover:bg-gray-700"
           onClick={handleSubscribe}
           disabled={loading}
         >
