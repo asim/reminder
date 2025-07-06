@@ -10,6 +10,18 @@ function NotificationButton() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Check subscription status on mount
+  React.useEffect(() => {
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      navigator.serviceWorker.getRegistration('/reminder.js').then(reg => {
+        if (!reg) return setEnabled(false);
+        reg.pushManager.getSubscription().then(sub => {
+          setEnabled(!!sub);
+        });
+      });
+    }
+  }, []);
+
   async function handleSubscribe() {
     setLoading(true);
     setError(null);
