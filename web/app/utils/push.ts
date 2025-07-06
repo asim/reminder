@@ -1,7 +1,7 @@
 // Utility for registering service worker and subscribing to push
 export async function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
-    return navigator.serviceWorker.register('/service-worker.js');
+    return navigator.serviceWorker.register('/reminder.js');
   }
   throw new Error('Service workers are not supported');
 }
