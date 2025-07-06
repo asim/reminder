@@ -261,9 +261,13 @@ func main() {
 	// load data
 	fmt.Println("Initialising data")
 	q := quran.Load()
+	fmt.Println("Loaded Quran")
 	n := names.Load()
+	fmt.Println("Loaded Names")
 	b := hadith.Load()
+	fmt.Println("Loaded Hadith")
 	a := api.Load()
+	fmt.Println("Loaded API")
 
 	// generate json
 	qjson := q.JSON()
