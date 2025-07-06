@@ -67,7 +67,7 @@ export default function SearchIndex() {
           Seek knowledge from the Quran, Hadith and names of Allah
         </div>
         <form onSubmit={handleSubmit} className='mb-4 sm:mb-6'>
-          <div className='relative'>
+          <div className='relative flex'>
             <input
               className='w-full p-2 sm:p-3 border border-gray-300 rounded-md text-sm sm:text-base disabled:opacity-90'
               placeholder={isLoading ? 'Seeking...' : 'Ask a question'}
@@ -77,6 +77,13 @@ export default function SearchIndex() {
               disabled={isLoading}
               autoFocus
             />
+            <button
+              type='submit'
+              className='ml-2 px-3 py-2 rounded bg-black text-white text-xs sm:text-sm hover:bg-gray-800 disabled:opacity-60'
+              disabled={isLoading || !query.trim()}
+            >
+              Search
+            </button>
             {isLoading && (
               <div className='absolute right-3 top-1/2 -translate-y-1/2'>
                 <Loader2 className='animate-spin h-4 w-4 sm:h-5 sm:w-5 text-gray-400' />
