@@ -35,6 +35,7 @@ export default function SearchIndex() {
   });
 
   const handleSubmit = (e: React.FormEvent) => {
+    console.log('handleSubmit called');
     e.preventDefault();
     if (!query.trim()) {
       return;
@@ -66,13 +67,16 @@ export default function SearchIndex() {
         <div className="text-sm sm:text-base text-gray-700 mb-2">
           Seek knowledge from the Quran, Hadith and names of Allah
         </div>
-        <form onSubmit={handleSubmit} className='mb-4 sm:mb-6'>
+        <form onSubmit={handleSubmit} method="post" className='mb-4 sm:mb-6'>
           <div className='relative flex'>
             <input
               className='w-full p-2 sm:p-3 border border-gray-300 rounded-md text-sm sm:text-base disabled:opacity-90'
               placeholder={isLoading ? 'Seeking...' : 'Ask a question'}
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                console.log('Input changed:', e.target.value);
+                setQuery(e.target.value);
+              }}
               autoComplete='off'
               disabled={isLoading}
               autoFocus
