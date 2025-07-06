@@ -16,7 +16,7 @@ function NotificationButton() {
     try {
       const resp = await fetch(VAPID_PUBLIC_KEY_ENDPOINT);
       if (!resp.ok) throw new Error('Failed to get VAPID key');
-      const { key } = await resp.json();
+      const key = await resp.text();
       await subscribeUserToPush(key);
       setEnabled(true);
     } catch (err: any) {
