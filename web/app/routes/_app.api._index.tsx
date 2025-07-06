@@ -152,7 +152,7 @@ const endpoints: Endpoint[] = [
   },
   {
     title: 'Daily Reminder (by Date)',
-    description: 'Returns the daily reminder for a specific date if available. POST a JSON body with an optional "date" field (YYYY-MM-DD).',
+    description: 'Returns the daily reminder for a specific date. The "date" format is YYYY-MM-DD.',
     url: '/api/daily/{date}',
     method: 'GET',
     responseFormat: 'JSON',
