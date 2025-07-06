@@ -1,6 +1,67 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { httpGet } from '~/utils/http';
-import React from 'react';
+import React, { useState } from 'react';
+import { subscribeUserToPush } from '../utils/push';
+import { unsubscribeUserFromPush } from '../utils/push-unsub';
+// VAPID public key endpoint
+const VAPID_PUBLIC_KEY_ENDPOINT = '/api/push/key';
+function NotificationButton() {
+  const [enabled, setEnabled] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubscribe() {
+    setLoading(true);
+    setError(null);
+    try {
+      const resp = await fetch(VAPID_PUBLIC_KEY_ENDPOINT);
+      if (!resp.ok) throw new Error('Failed to get VAPID key');
+      const { key } = await resp.json();
+      await subscribeUserToPush(key);
+      setEnabled(true);
+    } catch (err: any) {
+      setError(err.message || 'Failed to enable notifications');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleUnsubscribe() {
+    setLoading(true);
+    setError(null);
+    try {
+      await unsubscribeUserFromPush();
+      setEnabled(false);
+    } catch (err: any) {
+      setError(err.message || 'Failed to disable notifications');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="my-4">
+      {enabled ? (
+        <button
+          className="bg-red-500 text-white px-4 py-2 rounded shadow hover:bg-red-600"
+          onClick={handleUnsubscribe}
+          disabled={loading}
+        >
+          Disable Notifications
+        </button>
+      ) : (
+        <button
+          className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700"
+          onClick={handleSubscribe}
+          disabled={loading}
+        >
+          Enable Notifications
+        </button>
+      )}
+      {error && <div className="text-red-500 mt-2 text-sm">{error}</div>}
+    </div>
+  );
+}
 
 
 interface DailyResponse {
@@ -23,9 +84,12 @@ export default function DailyIndex() {
 
   return (
     <div className="max-w-4xl mx-auto w-full mb-8 sm:mb-12 flex-grow p-0 lg:p-8 space-y-8">
-      <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-6 text-left">
-        Daily Reminder
-      </h1>
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-left">
+          Daily Reminder
+        </h1>
+        <div className="ml-4"><NotificationButton /></div>
+      </div>
       <section>
         <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">{message}</h2>
         <div className="text-sm sm:text-base text-gray-700 mb-2">
