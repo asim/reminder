@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -13,7 +14,6 @@ import (
 	"time"
 
 	"github.com/SherClockHolmes/webpush-go"
-	"log"
 )
 
 type PushSubscription struct {
@@ -71,9 +71,9 @@ func LoadOrGenerateVAPIDKeys() error {
 	// Debug: print decoded length and first byte
 	decoded, err := decodeBase64URL(VAPIDPublicKey)
 	if err == nil {
-		log.Printf("[VAPID] Decoded public key length: %d, first byte: %d", len(decoded), decoded[0])
+		fmt.Printf("[VAPID] Decoded public key length: %d, first byte: %d\n", len(decoded), decoded[0])
 	} else {
-		log.Printf("[VAPID] Failed to decode public key: %v", err)
+		fmt.Printf("[VAPID] Failed to decode public key: %v\n", err)
 	}
 	// Load private key
 	priv, err := os.ReadFile(privPath)

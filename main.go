@@ -42,6 +42,21 @@ var lastPushDateFile = api.ReminderPath("last_push_date.txt")
 var lastPushDate = loadLastPushDate()
 var dailyIndex = loadDailyIndex()
 
+func isCapital(s string) bool {
+	if len(s) == 0 {
+		return false // An empty string doesn't have a capitalized first letter
+	}
+
+	firstChar := []rune(s)[0] // Convert string to slice of runes to handle Unicode characters
+
+	// Check if the first character is a letter
+	if !unicode.IsLetter(firstChar) {
+		return false // If it's not a letter, it can't be capitalized
+	}
+
+	return unicode.IsUpper(firstChar)
+}
+
 func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *api.Api) {
 	// generate api doc
 	apiHtml := app.RenderTemplate("API", "", a.Markdown())
@@ -192,6 +207,7 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 }
 
 func loadLastPushDate() string {
+	fmt.Println("Load last pushdate")
 	b, err := os.ReadFile(lastPushDateFile)
 	if err != nil {
 		return ""
@@ -206,6 +222,7 @@ func saveLastPushDate(date string) {
 
 // On startup, load daily index
 func loadDailyIndex() map[string]interface{} {
+	fmt.Println("Load daily index")
 	dailyFile := api.ReminderPath("daily.json")
 	var idx map[string]interface{}
 	if b, err := os.ReadFile(dailyFile); err == nil {
@@ -218,23 +235,31 @@ func loadDailyIndex() map[string]interface{} {
 }
 
 func main() {
+	fmt.Println("New rand source")
+	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
+
 	flag.Parse()
 
 	// Load push subscriptions
+	fmt.Println("Loading subscriptions")
 	_ = api.LoadPushSubscriptions()
 
 	// Load or generate VAPID keys
+	fmt.Println("Loading VAPID keys")
 	_ = api.LoadOrGenerateVAPIDKeys()
 
-	// create a new index
+	// create a new indexa
+	fmt.Println("Generating index")
 	idx := search.New("reminder", false)
 
 	// Load the pre-existing data
+	fmt.Println("Loading index")
 	if err := idx.Load(); err != nil {
 		fmt.Println(err)
 	}
 
 	// load data
+	fmt.Println("Initialising data")
 	q := quran.Load()
 	n := names.Load()
 	b := hadith.Load()
@@ -282,8 +307,10 @@ func main() {
 	}
 
 	if *WebFlag {
+		fmt.Println("Registering web handler")
 		http.Handle("/", app.ServeWeb())
 	} else {
+		fmt.Println("Registering lite handler")
 		http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Strip trailing slash globally (except for "/") for lite app only
 			if r.URL.Path != "/" && len(r.URL.Path) > 1 && strings.HasSuffix(r.URL.Path, "/") {
@@ -357,124 +384,6 @@ func main() {
 
 		w.Write(b)
 	})
-
-	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
-
-	isCapital := func(s string) bool {
-		if len(s) == 0 {
-			return false // An empty string doesn't have a capitalized first letter
-		}
-
-		firstChar := []rune(s)[0] // Convert string to slice of runes to handle Unicode characters
-
-		// Check if the first character is a letter
-		if !unicode.IsLetter(firstChar) {
-			return false // If it's not a letter, it can't be capitalized
-		}
-
-		return unicode.IsUpper(firstChar)
-	}
-
-	daily := func() {
-		for {
-			mtx.Lock()
-
-			nam := (*n)[rnd.Int()%len((*n))]
-			book := b.Books[rnd.Int()%len(b.Books)]
-			chap := q.Chapters[rnd.Int()%len(q.Chapters)]
-			ver := chap.Verses[rnd.Int()%len(chap.Verses)]
-			had := book.Hadiths[rnd.Int()%len(book.Hadiths)]
-
-			// make sure we're starting from the begining of a verse
-			if !isCapital(ver.Text) {
-				mtx.Unlock()
-				continue
-			}
-
-			// skip zero verse e.g bismillah
-			if ver.Number == 0 {
-				mtx.Unlock()
-				continue
-			}
-
-			dailyName = fmt.Sprintf("%s - %s - %s\n\n%s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
-			dailyVerse = fmt.Sprintf("%s\n\n%s - %s - %d:%d", ver.Text, chap.Name, chap.English, ver.Chapter, ver.Number)
-			dailyHadith = fmt.Sprintf("%s\n\n%s - %s - %s", had.Text, book.Name, had.By, strings.Split(had.Info, ":")[0])
-
-			num := strings.TrimSpace(strings.Split(strings.Split(had.Info, "Number")[1], ":")[0])
-
-			links = map[string]string{
-				"verse":  fmt.Sprintf("/quran/%d#%d", ver.Chapter, ver.Number),
-				"hadith": fmt.Sprintf("/hadith/%d#%s", book.Number, num),
-				"name":   fmt.Sprintf("/names/%d", nam.Number),
-			}
-
-			dailyUpdated = time.Now()
-			mtx.Unlock()
-
-			// Only send push notification if not already sent today
-			today := time.Now().Format("2006-01-02")
-
-			if lastPushDate != today {
-				// Compose a user-friendly notification message
-				notifyVerse := dailyVerse
-
-				if len(dailyVerse) > 250 {
-					notifyVerse = notifyVerse[:250] + "..."
-				}
-				hijriDate := HijriDate()
-				message := "Salam, today is the " + hijriDate
-				dailyData := map[string]interface{}{
-					"verse":   dailyVerse,
-					"hadith":  dailyHadith,
-					"name":    dailyName,
-					"hijri":   hijriDate,
-					"date":    today,
-					"links":   links,
-					"updated": dailyUpdated.Format(time.RFC850),
-					"message": message,
-				}
-
-				// Save to daily.json
-				dailyFile := api.ReminderPath("daily.json")
-				var allDaily map[string]interface{}
-				if b, err := os.ReadFile(dailyFile); err == nil {
-					json.Unmarshal(b, &allDaily)
-				}
-				if allDaily == nil {
-					allDaily = make(map[string]interface{})
-				}
-				allDaily[today] = dailyData
-				b, _ := json.MarshalIndent(allDaily, "", "  ")
-				_ = os.MkdirAll(api.ReminderDir, 0700)
-				_ = os.WriteFile(dailyFile, b, 0644)
-				dailyIndex = allDaily // update in-memory index
-
-				payload := map[string]interface{}{
-					"title": "Daily Reminder",
-					"body":  notifyVerse,
-					"data": map[string]interface{}{
-						"url": "/daily/" + today,
-					},
-				}
-				b, _ = json.Marshal(payload)
-				errors := api.SendPushToAll(string(b))
-				if len(errors) > 0 {
-					fmt.Println("Push notification errors:")
-					for _, err := range errors {
-						fmt.Println(err)
-					}
-				}
-				lastPushDate = today
-				saveLastPushDate(today)
-			}
-
-			// check every hour
-			time.Sleep(time.Hour)
-		}
-	}
-
-	go daily()
 
 	http.HandleFunc("/api/daily", func(w http.ResponseWriter, r *http.Request) {
 		// GET: default current day
@@ -746,11 +655,119 @@ func main() {
 		}
 	})
 
+	fmt.Println("Registering routes")
 	api.RegisterRoutes(http.DefaultServeMux)
 	httpMux := http.DefaultServeMux
 	api.RegisterPushRoutes(httpMux)
 
+	daily := func() {
+		for {
+			fmt.Println("Running daily")
+
+			mtx.Lock()
+
+			nam := (*n)[rnd.Int()%len((*n))]
+			book := b.Books[rnd.Int()%len(b.Books)]
+			chap := q.Chapters[rnd.Int()%len(q.Chapters)]
+			ver := chap.Verses[rnd.Int()%len(chap.Verses)]
+			had := book.Hadiths[rnd.Int()%len(book.Hadiths)]
+
+			// make sure we're starting from the begining of a verse
+			if !isCapital(ver.Text) {
+				mtx.Unlock()
+				continue
+			}
+
+			// skip zero verse e.g bismillah
+			if ver.Number == 0 {
+				mtx.Unlock()
+				continue
+			}
+
+			dailyName = fmt.Sprintf("%s - %s - %s\n\n%s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
+			dailyVerse = fmt.Sprintf("%s\n\n%s - %s - %d:%d", ver.Text, chap.Name, chap.English, ver.Chapter, ver.Number)
+			dailyHadith = fmt.Sprintf("%s\n\n%s - %s - %s", had.Text, book.Name, had.By, strings.Split(had.Info, ":")[0])
+
+			num := strings.TrimSpace(strings.Split(strings.Split(had.Info, "Number")[1], ":")[0])
+
+			links = map[string]string{
+				"verse":  fmt.Sprintf("/quran/%d#%d", ver.Chapter, ver.Number),
+				"hadith": fmt.Sprintf("/hadith/%d#%s", book.Number, num),
+				"name":   fmt.Sprintf("/names/%d", nam.Number),
+			}
+
+			dailyUpdated = time.Now()
+			mtx.Unlock()
+
+			// Only send push notification if not already sent today
+			today := time.Now().Format("2006-01-02")
+
+			if lastPushDate != today {
+				// Compose a user-friendly notification message
+				notifyVerse := dailyVerse
+
+				if len(dailyVerse) > 250 {
+					notifyVerse = notifyVerse[:250] + "..."
+				}
+				hijriDate := HijriDate()
+				message := "Salam, today is the " + hijriDate
+				dailyData := map[string]interface{}{
+					"verse":   dailyVerse,
+					"hadith":  dailyHadith,
+					"name":    dailyName,
+					"hijri":   hijriDate,
+					"date":    today,
+					"links":   links,
+					"updated": dailyUpdated.Format(time.RFC850),
+					"message": message,
+				}
+
+				// Save to daily.json
+				dailyFile := api.ReminderPath("daily.json")
+				var allDaily map[string]interface{}
+				if b, err := os.ReadFile(dailyFile); err == nil {
+					json.Unmarshal(b, &allDaily)
+				}
+				if allDaily == nil {
+					allDaily = make(map[string]interface{})
+				}
+				allDaily[today] = dailyData
+				b, _ := json.MarshalIndent(allDaily, "", "  ")
+				_ = os.MkdirAll(api.ReminderDir, 0700)
+				_ = os.WriteFile(dailyFile, b, 0644)
+				dailyIndex = allDaily // update in-memory index
+
+				payload := map[string]interface{}{
+					"title": "Daily Reminder",
+					"body":  notifyVerse,
+					"data": map[string]interface{}{
+						"url": "/daily/" + today,
+					},
+				}
+
+				b, _ = json.Marshal(payload)
+				fmt.Println("Sending push notification")
+				errors := api.SendPushToAll(string(b))
+				if len(errors) > 0 {
+					fmt.Println("Push notification errors:")
+					for _, err := range errors {
+						fmt.Println(err)
+					}
+				}
+
+				lastPushDate = today
+				saveLastPushDate(today)
+			}
+
+			// check every hour
+			time.Sleep(time.Hour)
+		}
+	}
+
 	if *ServerFlag {
+		fmt.Println("Starting daily")
+		go daily()
+
 		fmt.Println("Starting server :8080")
 		if err := http.ListenAndServe(":8080", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if *EnvFlag == "dev" {
