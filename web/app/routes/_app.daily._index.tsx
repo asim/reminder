@@ -55,19 +55,19 @@ function NotificationButton() {
     <div className="my-4">
       {enabled ? (
         <button
-          className="bg-red-500 text-white px-4 py-2 rounded shadow hover:bg-red-600"
+          className="bg-gray-500 text-white px-4 py-2 rounded text-sm cursor-pointer shadow hover:bg-gray-600"
           onClick={handleUnsubscribe}
           disabled={loading}
         >
-          Disable Notifications
+          Unsubscribe
         </button>
       ) : (
         <button
-          className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700"
+          className="bg-black-600 text-white px-4 py-2 rounded text-sm cursor-pointer shadow hover:bg-black-700"
           onClick={handleSubscribe}
           disabled={loading}
         >
-          Enable Notifications
+          Subscribe
         </button>
       )}
       {error && <div className="text-red-500 mt-2 text-sm">{error}</div>}
