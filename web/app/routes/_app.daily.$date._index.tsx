@@ -47,6 +47,7 @@ export default function DailyByDate() {
         <div className="text-base sm:text-lg md:text-xl text-gray-600">{data.hijri}</div>
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">{formatDate(data.date)}</h1>
       </div>
+      <p className="mb-2 mt-2 text-center">{message}</p>
       <section>
         <h2 className="text-lg font-semibold mb-2 mt-2">Verse</h2>
         <div className="text-sm sm:text-base text-gray-700 mb-2">A verse from the Quran</div>

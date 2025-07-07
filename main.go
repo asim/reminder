@@ -392,8 +392,7 @@ func main() {
 	http.HandleFunc("/api/daily", func(w http.ResponseWriter, r *http.Request) {
 		// GET: default current day
 		mtx.RLock()
-		display := HijriDate()
-		message := "Salam, today is the " + display
+		message := "In the Name of Allah—the Most Beneficent, Most Merciful"
 		resp := map[string]interface{}{
 			"name":    dailyName,
 			"hadith":  dailyHadith,
@@ -401,6 +400,8 @@ func main() {
 			"links":   links,
 			"updated": dailyUpdated.Format(time.RFC850),
 			"message": message,
+			"hijri":   HijriDate(),
+			"date":    dailyUpdated.Format("2006-01-02"),
 		}
 		mtx.RUnlock()
 		w.Header().Set("Content-Type", "application/json")
@@ -452,8 +453,7 @@ func main() {
 		}
 
 		dailyUpdated = time.Now()
-		display := HijriDate()
-		message := "Salam, today is the " + display
+		message := "In the Name of Allah—the Most Beneficent, Most Merciful"
 		day := map[string]interface{}{
 			"name":    dailyName,
 			"hadith":  dailyHadith,
@@ -461,6 +461,8 @@ func main() {
 			"links":   links,
 			"updated": dailyUpdated.Format(time.RFC850),
 			"message": message,
+			"hijri":   HijriDate(),
+			"date":    dailyUpdated.Format("2006-01-02"),
 		}
 		mtx.Unlock()
 
