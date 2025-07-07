@@ -102,15 +102,42 @@ export default function DailyIndex() {
         </h1>
         <div className="ml-4"><NotificationButton /></div>
       </div>
+      <div>In the name of Allah, the most beneficent, the most merciful</div>
+      <section>
+        <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">What is the Reminder?</h2>
+        <div className="text-sm sm:text-base text-gray-700 mb-2">
+          The reminder (a word often used to describe the Quran) is an app and API for the Quran, 
+          hadith and names of Allah. It is a way to share the message of Islam with everyone in need.
+          A resource by which we can renew our intention and work towards the best result in the afterlife 
+          inshallah.
+        </div>
+      </section>
       <section>
         <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">Why are we here?</h2>
         <div className="text-sm sm:text-base text-gray-700 mb-2">
-          We are here to worship Allah - Subhanahu wa Ta'ala. To uphold the obligatory acts of faith, 
-          prayer, charity, fasting and hajj as commanded by Allah and his messenger Muhammad (pbuh).
+          This life is a test. We were put here by God to know him and to worship him. To do good deeds and uphold 
+          the obligatory acts of faith, prayer, charity, fasting and hajj as demonstrated by our prophet Muhammad (pbuh).
           We are in constant need of this Reminder. Let us internalise the purpose of our creation.
           Read a verse, hadith and name of Allah to reflect, reset and strengthen your intention.
-          This life is a test, let us succeed together and reap the rewards in this life and the next, 
-          inshallah.
+          May we reap the rewards of our actions in this life and the next.
+        </div>
+      </section>
+      <section>
+        <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">Who is Allah?</h2>
+        <div className="text-sm sm:text-base text-gray-700 mb-2">
+          Allah is the creator of everything. He is the one and only God.
+
+          <p className="mt-2">Surah Al-Ikhlas (The Sincerity) describes it best:</p>
+
+          <p className="border-l-5 p-4 mt-2 mb-2 italic">
+            He is Allah, the One.<br />
+            The eternal, the Absolute.<br />
+            He did not beget, nor was he begotten.<br />
+            And there is none like him. 
+            <br /><br />
+
+            <a href="/quran/112" className="text-sm">Quran 112</a>
+          </p>
         </div>
       </section>
         <section className='mt-4 sm:mt-4 mb-8 sm:mb-8 bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-200'>
