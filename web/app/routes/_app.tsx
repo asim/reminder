@@ -20,6 +20,9 @@ export default function AppLayout() {
         </span>
         {/* Centered nav links */}
         <div className="flex-1 flex flex-row justify-center gap-1 order-2">
+          <NavLink className={buttonClass} to='/daily'>
+            Daily
+          </NavLink>
           <NavLink className={buttonClass} to='/quran'>
             Quran
           </NavLink>
@@ -28,9 +31,6 @@ export default function AppLayout() {
           </NavLink>
           <NavLink className={buttonClass} to='/names'>
             Names
-          </NavLink>
-          <NavLink className={buttonClass} to='/daily'>
-            Daily
           </NavLink>
           <NavLink className={buttonClass} to='/islam'>
             Islam

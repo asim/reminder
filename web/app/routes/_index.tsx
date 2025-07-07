@@ -1,4 +1,4 @@
-import { Code, Globe2, Search } from 'lucide-react';
+import { Code, Globe2 } from 'lucide-react';
 import { Link, NavLink } from 'react-router';
 import type { Route } from './+types/_index';
 
@@ -21,7 +21,7 @@ export default function Home() {
         <NavLink to='/quran' className='px-2 py-0.5 text-xs'>Quran</NavLink>
         <NavLink to='/hadith' className='px-2 py-0.5 text-xs'>Hadith</NavLink>
         <NavLink to='/names' className='px-2 py-0.5 text-xs'>Names</NavLink>
-        <NavLink to='/search' className='px-2 py-0.5 text-xs flex items-center gap-1'><Search className='size-3' />Search</NavLink>
+        <NavLink to='/islam' className='px-2 py-0.5 text-xs'>Islam</NavLink>
       </nav>
       <div className='w-full flex flex-col items-center'>
         <h1 className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-2 sm:mb-4 font-bold tracking-tight text-center'>reminder</h1>
@@ -31,7 +31,7 @@ export default function Home() {
 
         <div className='flex flex-row lg:flex-col gap-2 w-full max-w-xs sm:max-w-sm md:max-w-md'>
           <Link
-            to='/quran'
+            to='/daily'
             className='flex flex-row gap-2 sm:gap-3 items-center justify-start py-2.5 sm:py-3 px-4 sm:px-5 w-full rounded-lg border border-black bg-black text-white hover:opacity-70 transition-all duration-200 cursor-pointer'
           >
             <Globe2 className='size-4' />

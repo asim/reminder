@@ -52,7 +52,7 @@ function NotificationButton() {
   }
 
   return (
-    <div className="my-4">
+    <div>
       {enabled ? (
         <button
           className="bg-gray-500 text-white px-4 py-2 rounded text-sm cursor-pointer shadow hover:bg-gray-600"
@@ -103,10 +103,33 @@ export default function DailyIndex() {
         <div className="ml-4"><NotificationButton /></div>
       </div>
       <section>
-        <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">{message}</h2>
+        <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">Why are we here?</h2>
         <div className="text-sm sm:text-base text-gray-700 mb-2">
-          Read a verse, hadith and name of Allah to reflect, reset and strengthen your intention
+          We are here to worship Allah - Subhanahu wa Ta'ala. To uphold the obligatory acts of faith, 
+          prayer, charity, fasting and hajj as commanded by Allah and his messenger Muhammad (pbuh).
+          We are in constant need of this Reminder. Let us internalise the purpose of our creation.
+          Read a verse, hadith and name of Allah to reflect, reset and strengthen your intention.
+          This life is a test, let us succeed together and reap the rewards in this life and the next, 
+          inshallah.
         </div>
+      </section>
+        <section className='mt-4 sm:mt-4 mb-8 sm:mb-8 bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-200'>
+          <h2 className='text-base sm:text-lg font-medium mb-1 sm:mb-2 text-gray-800'>
+            Navigating the Reminder
+          </h2>
+          <p className='text-sm sm:text-base text-gray-600'>
+            Select a daily reminder from the menu which encompasses a verse of the Quran, 
+            hadith from sahih al-bukhari and a name of Allah. Read, reflect and reset. 
+            If you need further reading, see the hourly updates below.
+
+            Once you have read a few, continue strengthening your faith by reading more 
+            of the Quran, hadith or names of Allah in our app and making it a daily habit.
+
+            Subscribe to daily notifications using the Subscribe button in the top right.
+          </p>
+        </section>
+      <section>
+        <h2 className="text-lg sm:text-xl font-medium">Hourly Updates</h2>
       </section>
       <section>
         <h2 className="text-lg font-semibold mb-2 mt-2">Verse</h2>
