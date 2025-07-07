@@ -14,6 +14,9 @@ interface DailyIndexEntry {
 }
 
 function formatDate(dateString: string) {
+  if (dateString == "latest") {
+    return "Latest Reminder"
+  }
   const date = new Date(dateString);
   // Options for formatting the date
   const options: Intl.DateTimeFormatOptions = {

@@ -234,6 +234,23 @@ func loadDailyIndex() map[string]interface{} {
 	return idx
 }
 
+func saveDaily(date string, data map[string]interface{}) {
+	// Save to daily.json
+	dailyFile := api.ReminderPath("daily.json")
+	var allDaily map[string]interface{}
+	if b, err := os.ReadFile(dailyFile); err == nil {
+		json.Unmarshal(b, &allDaily)
+	}
+	if allDaily == nil {
+		allDaily = make(map[string]interface{})
+	}
+	allDaily[date] = data
+	b, _ := json.MarshalIndent(allDaily, "", "  ")
+	_ = os.MkdirAll(api.ReminderDir, 0700)
+	_ = os.WriteFile(dailyFile, b, 0644)
+	dailyIndex = allDaily // update in-memory index
+}
+
 func main() {
 	fmt.Println("New rand source")
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -703,45 +720,40 @@ func main() {
 			}
 
 			dailyUpdated = time.Now()
-			mtx.Unlock()
-
-			// Only send push notification if not already sent today
+			hijriDate := HijriDate()
+			message := "In the Name of Allah—the Most Beneficent, Most Merciful"
 			today := time.Now().Format("2006-01-02")
 
+			dailyData := map[string]interface{}{
+				"verse":   dailyVerse,
+				"hadith":  dailyHadith,
+				"name":    dailyName,
+				"hijri":   "Updated hourly",
+				"date":    "latest",
+				"links":   links,
+				"updated": dailyUpdated.Format(time.RFC850),
+				"message": message,
+			}
+
+			saveDaily("latest", dailyData)
+
+			mtx.Unlock()
+
 			if lastPushDate != today {
+				mtx.Lock()
+
 				// Compose a user-friendly notification message
 				notifyVerse := dailyVerse
 
 				if len(dailyVerse) > 250 {
 					notifyVerse = notifyVerse[:250] + "..."
 				}
-				hijriDate := HijriDate()
-				message := "Salam, today is the " + hijriDate
-				dailyData := map[string]interface{}{
-					"verse":   dailyVerse,
-					"hadith":  dailyHadith,
-					"name":    dailyName,
-					"hijri":   hijriDate,
-					"date":    today,
-					"links":   links,
-					"updated": dailyUpdated.Format(time.RFC850),
-					"message": message,
-				}
+
+				dailyData["hijri"] = hijriDate
+				dailyData["date"] = today
 
 				// Save to daily.json
-				dailyFile := api.ReminderPath("daily.json")
-				var allDaily map[string]interface{}
-				if b, err := os.ReadFile(dailyFile); err == nil {
-					json.Unmarshal(b, &allDaily)
-				}
-				if allDaily == nil {
-					allDaily = make(map[string]interface{})
-				}
-				allDaily[today] = dailyData
-				b, _ := json.MarshalIndent(allDaily, "", "  ")
-				_ = os.MkdirAll(api.ReminderDir, 0700)
-				_ = os.WriteFile(dailyFile, b, 0644)
-				dailyIndex = allDaily // update in-memory index
+				saveDaily(today, dailyData)
 
 				payload := map[string]interface{}{
 					"title": "Daily Reminder",
@@ -751,8 +763,10 @@ func main() {
 					},
 				}
 
-				b, _ = json.Marshal(payload)
+				b, _ := json.Marshal(payload)
+
 				fmt.Println("Sending push notification")
+
 				errors := api.SendPushToAll(string(b))
 				if len(errors) > 0 {
 					fmt.Println("Push notification errors:")
@@ -763,6 +777,8 @@ func main() {
 
 				lastPushDate = today
 				saveLastPushDate(today)
+
+				mtx.Unlock()
 			}
 
 			// check every hour
