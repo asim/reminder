@@ -17,10 +17,10 @@ import (
 	"github.com/asim/reminder/api"
 	"github.com/asim/reminder/app"
 	"github.com/asim/reminder/hadith"
+	"github.com/asim/reminder/hijri"
 	"github.com/asim/reminder/names"
 	"github.com/asim/reminder/quran"
 	"github.com/asim/reminder/search"
-	hijri "github.com/hablullah/go-hijri"
 )
 
 var (
@@ -417,7 +417,7 @@ func main() {
 			"links":   links,
 			"updated": dailyUpdated.Format(time.RFC850),
 			"message": message,
-			"hijri":   HijriDate(),
+			"hijri":   hijri.Date().Date,
 			"date":    dailyUpdated.Format("2006-01-02"),
 		}
 		mtx.RUnlock()
@@ -478,7 +478,7 @@ func main() {
 			"links":   links,
 			"updated": dailyUpdated.Format(time.RFC850),
 			"message": message,
-			"hijri":   HijriDate(),
+			"hijri":   hijri.Date().Date,
 			"date":    dailyUpdated.Format("2006-01-02"),
 		}
 		mtx.Unlock()
@@ -720,7 +720,7 @@ func main() {
 			}
 
 			dailyUpdated = time.Now()
-			hijriDate := HijriDate()
+			hijriDate := hijri.Date().Date
 			message := "In the Name of Allah—the Most Beneficent, Most Merciful"
 			today := time.Now().Format("2006-01-02")
 
@@ -812,33 +812,4 @@ func main() {
 
 	// wait for index
 	<-indexed
-}
-
-func HijriDate() string {
-	now := time.Now()
-	h, err := hijri.CreateUmmAlQuraDate(now)
-	if err != nil {
-		return ""
-	}
-	ordinal := func(n int64) string {
-		if n == 1 {
-			return "st"
-		} else if n == 2 {
-			return "nd"
-		} else if n == 3 {
-			return "rd"
-		} else if n%10 == 1 && n%100 != 11 {
-			return "st"
-		} else if n%10 == 2 && n%100 != 12 {
-			return "nd"
-		} else if n%10 == 3 && n%100 != 13 {
-			return "rd"
-		}
-		return "th"
-	}
-	months := []string{"Muharram", "Safar", "Rabiʿ al-awwal", "Rabiʿ al-thani", "Jumada al-awwal", "Jumada al-thani", "Rajab", "Shaʿban", "Ramadan", "Shawwal", "Dhu al-Qiʿdah", "Dhu al-Hijjah"}
-	display := fmt.Sprintf("%d", h.Day) +
-		ordinal(h.Day) +
-		" of " + months[int(h.Month)-1] + ", " + fmt.Sprintf("%d", h.Year)
-	return display
 }

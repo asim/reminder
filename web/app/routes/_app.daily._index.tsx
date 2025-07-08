@@ -127,12 +127,10 @@ export default function DailyIndex() {
           <p className='text-sm sm:text-base text-gray-600'>
             Select a daily reminder from the menu which encompasses a verse of the Quran, 
             hadith from sahih al-bukhari and a name of Allah. Read, reflect and reset. 
-            If you need further reading, see the hourly updates below.
-
+            If you need further reminders, see hourly updates in the latest tab.
             Once you have read a few, continue strengthening your faith by reading more 
             of the Quran, hadith or names of Allah in our app and making it a daily habit.
-
-            Subscribe to daily notifications using the Subscribe button in the top right.
+            Subscribe to daily notifications using the Subscribe button at the top.
           </p>
         </section>
     </div>
