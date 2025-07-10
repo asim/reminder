@@ -30,7 +30,7 @@ are a new form of useful indexing for search.
 - Index & Search using GPT 4o
 - RAG contextual referencing
 - API to query LLM or Quran
-- Daily reminders notifications
+- Daily web push notifications
 
 ## Install
 
