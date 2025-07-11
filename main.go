@@ -417,7 +417,7 @@ func main() {
 			"links":   links,
 			"updated": dailyUpdated.Format(time.RFC850),
 			"message": message,
-			"hijri":   hijri.Date().Date,
+			"hijri":   hijri.Date().Display,
 			"date":    dailyUpdated.Format("2006-01-02"),
 		}
 		mtx.RUnlock()
@@ -478,7 +478,7 @@ func main() {
 			"links":   links,
 			"updated": dailyUpdated.Format(time.RFC850),
 			"message": message,
-			"hijri":   hijri.Date().Date,
+			"hijri":   hijri.Date().Display,
 			"date":    dailyUpdated.Format("2006-01-02"),
 		}
 		mtx.Unlock()
@@ -720,7 +720,7 @@ func main() {
 			}
 
 			dailyUpdated = time.Now()
-			hijriDate := hijri.Date().Date
+			hijriDate := hijri.Date().Display
 			message := "In the Name of Allah—the Most Beneficent, Most Merciful"
 			today := time.Now().Format("2006-01-02")
 
