@@ -82,7 +82,6 @@ export default function DailyIndex() {
         </h1>
         <div className="ml-4"><NotificationButton /></div>
       </div>
-      <div>In the name of Allah, the most beneficent, the most merciful</div>
       <section>
         <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">What is the Reminder?</h2>
         <div className="text-sm sm:text-base text-gray-700 mb-2">
@@ -93,7 +92,7 @@ export default function DailyIndex() {
         </div>
       </section>
       <section>
-        <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">Why are we here?</h2>
+        <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">Our Purpose</h2>
         <div className="text-sm sm:text-base text-gray-700 mb-2">
           This life is a test. We were put here by God to know him and to worship him. To do good deeds and uphold 
           the obligatory acts of faith, prayer, charity, fasting and hajj as demonstrated by our prophet Muhammad (pbuh).
@@ -103,7 +102,7 @@ export default function DailyIndex() {
         </div>
       </section>
       <section>
-        <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">Who is Allah?</h2>
+        <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">Our Creator</h2>
         <div className="text-sm sm:text-base text-gray-700 mb-2">
           Allah is the creator of everything. He is the one and only God.
 

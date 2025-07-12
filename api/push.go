@@ -137,7 +137,7 @@ func ListPushSubscriptions() []PushSubscription {
 	return result
 }
 
-func RegisterPushRoutes(mux *http.ServeMux) {
+func RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/api/push/subscribe", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			w.WriteHeader(http.StatusMethodNotAllowed)

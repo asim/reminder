@@ -16,8 +16,8 @@ import (
 
 	"github.com/asim/reminder/api"
 	"github.com/asim/reminder/app"
+	"github.com/asim/reminder/daily"
 	"github.com/asim/reminder/hadith"
-	"github.com/asim/reminder/hijri"
 	"github.com/asim/reminder/names"
 	"github.com/asim/reminder/quran"
 	"github.com/asim/reminder/search"
@@ -417,7 +417,7 @@ func main() {
 			"links":   links,
 			"updated": dailyUpdated.Format(time.RFC850),
 			"message": message,
-			"hijri":   hijri.Date().Display,
+			"hijri":   daily.Date().Display,
 			"date":    dailyUpdated.Format("2006-01-02"),
 		}
 		mtx.RUnlock()
@@ -478,7 +478,7 @@ func main() {
 			"links":   links,
 			"updated": dailyUpdated.Format(time.RFC850),
 			"message": message,
-			"hijri":   hijri.Date().Display,
+			"hijri":   daily.Date().Display,
 			"date":    dailyUpdated.Format("2006-01-02"),
 		}
 		mtx.Unlock()
@@ -679,9 +679,8 @@ func main() {
 	})
 
 	fmt.Println("Registering routes")
-	api.RegisterRoutes(http.DefaultServeMux)
 	httpMux := http.DefaultServeMux
-	api.RegisterPushRoutes(httpMux)
+	api.RegisterRoutes(httpMux)
 
 	daily := func() {
 		for {
@@ -720,7 +719,7 @@ func main() {
 			}
 
 			dailyUpdated = time.Now()
-			hijriDate := hijri.Date().Display
+			hijriDate := daily.Date().Display
 			message := "In the Name of Allah—the Most Beneficent, Most Merciful"
 			today := time.Now().Format("2006-01-02")
 

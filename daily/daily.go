@@ -1,4 +1,4 @@
-package hijri
+package daily
 
 import (
 	"fmt"
@@ -9,6 +9,7 @@ import (
 
 type Today struct {
 	Date    string `json:"date"`
+	Hijri   string `json:"hijri"`
 	Display string `json:"display"`
 }
 
@@ -36,14 +37,15 @@ func Date() *Today {
 	}
 	months := []string{"Muharram", "Safar", "Rabiʿ al-awwal", "Rabiʿ al-thani", "Jumada al-awwal", "Jumada al-thani", "Rajab", "Shaʿban", "Ramadan", "Shawwal", "Dhu al-Qiʿdah", "Dhu al-Hijjah"}
 
-	dateStr := fmt.Sprintf("%02d-%02d-%04d", h.Day, h.Month, h.Year)
+	dateStr := fmt.Sprintf("%04d-%02d-%02d", h.Year, h.Month, h.Day)
 
 	display := fmt.Sprintf("%d", h.Day) +
 		ordinal(h.Day) +
 		" of " + months[int(h.Month)-1] + ", " + fmt.Sprintf("%d", h.Year)
 
 	return &Today{
-		Date:    dateStr,
+		Date:    now.Format("2006-01-02"),
+		Hijri:   dateStr,
 		Display: display,
 	}
 }

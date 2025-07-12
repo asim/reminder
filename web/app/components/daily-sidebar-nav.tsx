@@ -51,7 +51,7 @@ export default function DailySidebarNav() {
   return (
     <SearchableSidebar
       items={sidebarItems}
-      searchPlaceholder='Search daily reminders'
+      searchPlaceholder='Search reminders'
     />
   );
 }
