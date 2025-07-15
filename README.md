@@ -20,7 +20,7 @@ are a new form of useful indexing for search.
 - [Web](#web)
 - [Notes](#notes)
 - [Sources](#sources)
-- [Development](#development)
+- [Discord](#discord)
 
 ## Features
 
@@ -117,7 +117,7 @@ We have been requested to verify the sources of data
 
 Summarisation is provided by OpenAI but all sources of truth are authentic
 
-## Development
+## Discord
 
 Come chat on [Discord](https://discord.gg/F3xXRGbp9d) about feature development
 
