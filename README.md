@@ -44,6 +44,8 @@ go get github.com.com/asim/reminder@latest
 
 ## OpenAI Usage
 
+OpenAI is used for search summarisation.
+
 Set the `OPENAI_API_KEY` value
 
 ```
