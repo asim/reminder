@@ -269,11 +269,15 @@ func main() {
 	fmt.Println("Generating index")
 	idx := search.New("reminder", false)
 
-	// Load the pre-existing data
-	fmt.Println("Loading index")
-	if err := idx.Load(); err != nil {
-		fmt.Println(err)
-	}
+	// async load the index
+	go func() {
+		// Load the pre-existing data
+		fmt.Println("Loading index")
+		if err := idx.Load(); err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println("Loaded index")
+	}()
 
 	// load data
 	fmt.Println("Initialising data")

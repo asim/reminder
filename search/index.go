@@ -4,6 +4,8 @@ import (
 	"context"
 	"embed"
 	"fmt"
+	"os"
+	"io"
 	"os/user"
 	"path/filepath"
 	"runtime"
@@ -34,6 +36,35 @@ func (i *Index) Load() error {
 	if err != nil {
 		return err
 	}
+	defer f.Close()
+
+	path := filepath.Join(i.Home, ".reminder", "data")
+	fpath := filepath.Join(path, i.Name + ".idx.gob.gz")
+
+	// write the file
+	os.MkdirAll(path, 0755)
+
+	// check exists otherwise write it
+	if _, err := os.Stat(fpath); os.IsNotExist(err) {
+		f2, err := os.OpenFile(fpath, os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			return err
+		}
+		defer f2.Close()
+
+		// copy contents
+		_, err = io.Copy(f2, f)
+		if err != nil {
+			return err
+		}
+	}
+
+	// read from file
+	if err := i.DB.ImportFromFile(fpath, ""); err != nil {
+		return err
+	}
+
+	/*
 	sk, err := NewReadSeekerWrapper(f)
 	if err != nil {
 		return err
@@ -41,10 +72,13 @@ func (i *Index) Load() error {
 	if err := i.DB.ImportFromReader(sk, ""); err != nil {
 		return err
 	}
+	*/
+
 	c, err := i.DB.GetOrCreateCollection(i.Name, nil, nil)
 	if err != nil {
 		return err
 	}
+
 	// set the Collection
 	i.Col = c
 	return nil
