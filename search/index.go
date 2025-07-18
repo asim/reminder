@@ -4,8 +4,8 @@ import (
 	"context"
 	"embed"
 	"fmt"
-	"os"
 	"io"
+	"os"
 	"os/user"
 	"path/filepath"
 	"runtime"
@@ -39,7 +39,7 @@ func (i *Index) Load() error {
 	defer f.Close()
 
 	path := filepath.Join(i.Home, ".reminder", "data")
-	fpath := filepath.Join(path, i.Name + ".idx.gob.gz")
+	fpath := filepath.Join(path, i.Name+".idx.gob.gz")
 
 	// write the file
 	os.MkdirAll(path, 0755)
@@ -65,13 +65,13 @@ func (i *Index) Load() error {
 	}
 
 	/*
-	sk, err := NewReadSeekerWrapper(f)
-	if err != nil {
-		return err
-	}
-	if err := i.DB.ImportFromReader(sk, ""); err != nil {
-		return err
-	}
+		sk, err := NewReadSeekerWrapper(f)
+		if err != nil {
+			return err
+		}
+		if err := i.DB.ImportFromReader(sk, ""); err != nil {
+			return err
+		}
 	*/
 
 	c, err := i.DB.GetOrCreateCollection(i.Name, nil, nil)

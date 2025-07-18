@@ -452,45 +452,6 @@ func main() {
 		json.NewEncoder(w).Encode(resp)
 	})
 
-	http.HandleFunc("/api/daily/reset", func(w http.ResponseWriter, r *http.Request) {
-		nam := (*n)[rnd.Int()%len((*n))]
-		book := b.Books[rnd.Int()%len(b.Books)]
-		chap := q.Chapters[rnd.Int()%len(q.Chapters)]
-		ver := chap.Verses[rnd.Int()%len(chap.Verses)]
-		had := book.Hadiths[rnd.Int()%len(book.Hadiths)]
-
-		mtx.Lock()
-
-		dailyName = fmt.Sprintf("%s - %s - %s\n\n%s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
-		dailyVerse = fmt.Sprintf("%s - %s - %d:%d\n\n%s", chap.Name, chap.English, ver.Chapter, ver.Number, ver.Text)
-		dailyHadith = fmt.Sprintf("%s - %s - %s\n\n%s", book.Name, had.By, strings.Split(had.Info, ":")[0], had.Text)
-
-		num := strings.TrimSpace(strings.Split(strings.Split(had.Info, "Number")[1], ":")[0])
-
-		links = map[string]string{
-			"verse":  fmt.Sprintf("/quran/%d#%d", ver.Chapter, ver.Number),
-			"hadith": fmt.Sprintf("/hadith/%d#%s", book.Number, num),
-			"name":   fmt.Sprintf("/names/%d", nam.Number),
-		}
-
-		dailyUpdated = time.Now()
-		message := "In the Name of Allah—the Most Beneficent, Most Merciful"
-		day := map[string]interface{}{
-			"name":    dailyName,
-			"hadith":  dailyHadith,
-			"verse":   dailyVerse,
-			"links":   links,
-			"updated": dailyUpdated.Format(time.RFC850),
-			"message": message,
-			"hijri":   daily.Date().Display,
-			"date":    dailyUpdated.Format("2006-01-02"),
-		}
-		mtx.Unlock()
-
-		b, _ := json.Marshal(day)
-		w.Write(b)
-	})
-
 	// Add daily index API endpoint
 	http.HandleFunc("/api/daily/index", func(w http.ResponseWriter, r *http.Request) {
 		mtx.RLock()
@@ -686,6 +647,43 @@ func main() {
 	httpMux := http.DefaultServeMux
 	api.RegisterRoutes(httpMux)
 
+	getVerse := func(ch *quran.Chapter, ve *quran.Verse) string {
+		verseText := ve.Text
+		verseStart := ve.Number
+		verseEnd := ve.Number
+
+		for i := 0; i < 10; i++ {
+			// done
+			if x := verseText[len(verseText)-1]; x == '.' || x == '!' || x == '"' {
+				break
+			}
+
+			idx := ve.Number + 1
+
+			if ch.Number == 1 || ch.Number == 9 {
+				idx = ve.Number
+			}
+
+			// bail out
+			if idx >= len(ch.Verses) {
+				break
+			}
+
+			// increment
+			ve = ch.Verses[idx]
+			verseText += "\n\n" + ve.Text
+			verseEnd = ve.Number
+		}
+
+		verseNumber := fmt.Sprintf("%d", verseStart)
+
+		if verseStart != verseEnd {
+			verseNumber += fmt.Sprintf("-%d", verseEnd)
+		}
+
+		return fmt.Sprintf("%s - %s - %d:%s\n\n%s", ch.Name, ch.English, ch.Number, verseNumber, verseText)
+	}
+
 	daily := func() {
 		for {
 			fmt.Println("Running daily")
@@ -711,7 +709,7 @@ func main() {
 			}
 
 			dailyName = fmt.Sprintf("%s - %s - %s\n\n%s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
-			dailyVerse = fmt.Sprintf("%s - %s - %d:%d\n\n%s", chap.Name, chap.English, ver.Chapter, ver.Number, ver.Text)
+			dailyVerse = getVerse(chap, ver)
 			dailyHadith = fmt.Sprintf("%s - %s - %s\n\n%s", book.Name, had.By, strings.Split(had.Info, ":")[0], had.Text)
 
 			num := strings.TrimSpace(strings.Split(strings.Split(had.Info, "Number")[1], ":")[0])
