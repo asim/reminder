@@ -119,7 +119,3 @@ We have been requested to verify the sources of data
 
 Summarisation is provided by OpenAI but all sources of truth are authentic
 
-## Discord
-
-Come chat on [Discord](https://discord.gg/F3xXRGbp9d) about feature development
-
