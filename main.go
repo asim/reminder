@@ -671,7 +671,12 @@ func main() {
 
 			// increment
 			ve = ch.Verses[idx]
-			verseText += "\n\n" + ve.Text
+
+			if v := verseText[len(verseText)-1]; v == ',' || string(v) == "—" || unicode.IsLetter(rune(v)) {
+				verseText += " " + ve.Text
+			} else {
+				verseText += "\n\n" + ve.Text
+			}
 			verseEnd = ve.Number
 		}
 
