@@ -309,6 +309,7 @@ func main() {
 			indexQuran(sidx, q)
 			indexNames(sidx, n)
 			indexHadith(sidx, b)
+			indexTafsir(sidx, q)
 			// done
 			close(indexed)
 		}()

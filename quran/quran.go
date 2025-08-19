@@ -24,11 +24,12 @@ type Chapter struct {
 }
 
 type Verse struct {
-	Chapter int     `json:"chapter"`
-	Number  int     `json:"number"`
-	Text    string  `json:"text"`
-	Arabic  string  `json:"arabic"`
-	Words   []*Word `json:"words"`
+	Chapter  int     `json:"chapter"`
+	Number   int     `json:"number"`
+	Text     string  `json:"text"`
+	Arabic   string  `json:"arabic"`
+	Words    []*Word `json:"words"`
+	Comments string  `json:"comments"`
 }
 
 type Word struct {
@@ -37,8 +38,15 @@ type Word struct {
 	Transliteration string `json:"transliteration"`
 }
 
+type Comment struct {
+	Chapter int    `json:"chapter"`
+	Verse   int    `json:"verse"`
+	Text    string `json:"text"`
+}
+
 type Quran struct {
-	Chapters []*Chapter `json:"chapters"`
+	Chapters   []*Chapter `json:"chapters"`
+	Commentary []*Comment `json:"commentary"`
 }
 
 func (ch *Chapter) JSON() []byte {
@@ -180,6 +188,14 @@ func Load() *Quran {
 	var arabic map[string]interface{}
 	json.Unmarshal(f, &arabic)
 
+	// load tafsir
+	fx, err := files.ReadFile("data/tafsir.json")
+	if err != nil {
+		panic(err.Error())
+	}
+	var tafsir map[string]interface{}
+	json.Unmarshal(fx, &tafsir)
+
 	// Set local
 	for i := 0; i < 114; i++ {
 		chapter := i + 1
@@ -244,14 +260,32 @@ func Load() *Quran {
 				})
 			}
 
-			verses = append(verses, &Verse{
+			var text string
+			key := fmt.Sprintf("%d:%d", chapter, num)
+			comment, ok := tafsir[key].(map[string]interface{})
+
+			if ok {
+				text = comment["text"].(string)
+			} else {
+				v := tafsir[key].(string)
+				comment = tafsir[v].(map[string]interface{})
+				text = comment["text"].(string)
+			}
+
+			q.Commentary = append(q.Commentary, &Comment{
 				Chapter: chapter,
-				Number:  num,
-				Text:    ayah.([]interface{})[1].(string),
-				Arabic:  ar,
-				Words:   wbw,
+				Verse:   num,
+				Text:    text,
 			})
 
+			verses = append(verses, &Verse{
+				Chapter:  chapter,
+				Number:   num,
+				Text:     ayah.([]interface{})[1].(string),
+				Arabic:   ar,
+				Words:    wbw,
+				Comments: text,
+			})
 		}
 
 		// set the name

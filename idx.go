@@ -50,6 +50,18 @@ func indexNames(idx *search.Index, n *names.Names) {
 	}
 }
 
+func indexTafsir(idx *search.Index, q *quran.Quran) {
+	fmt.Println("Indexing Tafsir")
+
+	for _, comment := range q.Commentary {
+		indexContent(idx, map[string]string{
+			"source":  "tafsir",
+			"chapter": fmt.Sprintf("%v", comment.Chapter),
+			"verse":   fmt.Sprintf("%v", comment.Verse),
+		}, comment.Text)
+	}
+}
+
 func indexHadith(idx *search.Index, b *hadith.Volumes) {
 	fmt.Println("Indexing Hadith")
 
