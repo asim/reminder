@@ -93,7 +93,17 @@ func (i *Index) Export() error {
 func (i *Index) Import() error {
 	path := filepath.Join(i.Home, i.Name+".idx.gob.gz")
 
-	return i.DB.ImportFromFile(path, "")
+	if err := i.DB.ImportFromFile(path, ""); err != nil {
+		return err
+	}
+
+	c, err := i.DB.GetOrCreateCollection(i.Name, nil, nil)
+	if err != nil {
+		return err
+	}
+
+	i.Col = c
+	return nil
 }
 
 func (i *Index) Store(md map[string]string, content ...string) error {
