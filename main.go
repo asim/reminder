@@ -604,15 +604,21 @@ func main() {
 				return
 			}
 
+			var tokens int
 			var contexts []string
 
 			for _, r := range res {
+				if tokens >= 8000 {
+					break
+				}
+
 				for k, v := range r.Metadata {
 					delete(r.Metadata, k)
 					r.Metadata[strings.ToLower(k)] = v
 				}
 
 				b, _ := json.Marshal(r)
+				tokens += len(b)
 				// TODO: maybe just provide text
 				contexts = append(contexts, string(b))
 			}

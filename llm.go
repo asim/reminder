@@ -37,6 +37,7 @@ Don't mention the knowledge base, context or search results in your answer.
 
 func askLLM(ctx context.Context, contexts []string, question string) string {
 	var apiKey string
+	var model string
 	var config openai.ClientConfig
 
 	fanarKey := os.Getenv("FANAR_API_KEY")
@@ -44,9 +45,11 @@ func askLLM(ctx context.Context, contexts []string, question string) string {
 		apiKey = fanarKey
 		config = openai.DefaultConfig(apiKey)
 		config.BaseURL = "https://api.fanar.qa/v1"
+		model = "Fanar"
 	} else {
 		apiKey = os.Getenv("OPENAI_API_KEY")
 		config = openai.DefaultConfig(apiKey)
+		model = openai.GPT4oMini
 	}
 
 	openAIClient := openai.NewClientWithConfig(config)
@@ -65,8 +68,9 @@ func askLLM(ctx context.Context, contexts []string, question string) string {
 		},
 	}
 	res, err := openAIClient.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
-		Model:    openai.GPT4oMini,
-		Messages: messages,
+		Model:               model,
+		Messages:            messages,
+		MaxCompletionTokens: 8192,
 	})
 	if err != nil {
 		panic(err)
