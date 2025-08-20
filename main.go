@@ -21,6 +21,7 @@ import (
 	"github.com/asim/reminder/names"
 	"github.com/asim/reminder/quran"
 	"github.com/asim/reminder/search"
+	"github.com/google/uuid"
 )
 
 var (
@@ -809,6 +810,21 @@ func main() {
 					w.WriteHeader(http.StatusOK)
 					return
 				}
+			}
+
+			// check cookies
+			if c, err := r.Cookie("session"); err != nil || c == nil || len(c.Value) == 0 {
+				var secure bool
+
+				if h := r.Header.Get("X-Forwarded-Proto"); h == "https" {
+					secure = true
+				}
+
+				http.SetCookie(w, &http.Cookie{
+					Name:   "session",
+					Value:  uuid.New().String(),
+					Secure: secure,
+				})
 			}
 
 			http.DefaultServeMux.ServeHTTP(w, r)

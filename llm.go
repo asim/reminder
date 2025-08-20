@@ -36,7 +36,20 @@ Don't mention the knowledge base, context or search results in your answer.
 `))
 
 func askLLM(ctx context.Context, contexts []string, question string) string {
-	openAIClient := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+	var apiKey string
+	var config openai.ClientConfig
+
+	fanarKey := os.Getenv("FANAR_API_KEY")
+	if len(fanarKey) > 0 {
+		apiKey = fanarKey
+		config = openai.DefaultConfig(apiKey)
+		config.BaseURL = "https://api.fanar.qa/v1"
+	} else {
+		apiKey = os.Getenv("OPENAI_API_KEY")
+		config = openai.DefaultConfig(apiKey)
+	}
+
+	openAIClient := openai.NewClientWithConfig(config)
 	sb := &strings.Builder{}
 	err := systemPromptTpl.Execute(sb, contexts)
 	if err != nil {
