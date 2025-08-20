@@ -52,6 +52,14 @@ Set the `OPENAI_API_KEY` value
 export OPENAI_API_KEY=xxx
 ```
 
+Alternatively use [Fanar](https://fanar.qa/)
+
+```
+export FANAR_API_KEY=xxx
+```
+
+Where the Fanar key is seen it will be preferred.
+
 ## Server
 
 Run the http server 
