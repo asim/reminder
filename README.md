@@ -48,7 +48,7 @@ Set the `OPENAI_API_KEY` value
 export OPENAI_API_KEY=xxx
 ```
 
-To use [Fanar](https://fanar.qa/)
+To use [Fanar](https://fanar.qa/) instead
 
 ```
 export FANAR_API_KEY=xxx
