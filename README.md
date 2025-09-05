@@ -14,8 +14,7 @@ are a new form of useful indexing for search.
 
 - [Features](#features)
 - [Install](#install)
-- [LLM Usage](#llm-usage)
-- [Server](#server)
+- [Usage](#usage)
 - [API](#api)
 - [Web](#web)
 - [Notes](#notes)
@@ -41,9 +40,7 @@ Or Go install
 go get github.com.com/asim/reminder@latest
 ```
 
-## LLM Usage
-
-OpenAI is used for search summarisation.
+## Usage
 
 Set the `OPENAI_API_KEY` value
 
@@ -59,9 +56,7 @@ export FANAR_API_KEY=xxx
 
 Where the Fanar key is seen it will be preferred.
 
-## Server
-
-Run the http server 
+Run the server 
 
 ```
 reminder --serve
