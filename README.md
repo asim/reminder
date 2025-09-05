@@ -14,13 +14,12 @@ are a new form of useful indexing for search.
 
 - [Features](#features)
 - [Install](#install)
-- [OpenAI Usage](#openai-usage)
+- [LLM Usage](#llm-usage)
 - [Server](#server)
 - [API](#api)
 - [Web](#web)
 - [Notes](#notes)
 - [Sources](#sources)
-- [Discord](#discord)
 
 ## Features
 
@@ -42,7 +41,7 @@ Or Go install
 go get github.com.com/asim/reminder@latest
 ```
 
-## OpenAI Usage
+## LLM Usage
 
 OpenAI is used for search summarisation.
 
@@ -52,7 +51,7 @@ Set the `OPENAI_API_KEY` value
 export OPENAI_API_KEY=xxx
 ```
 
-Alternatively use [Fanar](https://fanar.qa/)
+To use [Fanar](https://fanar.qa/)
 
 ```
 export FANAR_API_KEY=xxx
