@@ -54,8 +54,6 @@ To use [Fanar](https://fanar.qa/) instead
 export FANAR_API_KEY=xxx
 ```
 
-Where the Fanar key is seen it will be preferred.
-
 Run the server 
 
 ```
