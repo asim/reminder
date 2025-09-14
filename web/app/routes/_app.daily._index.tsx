@@ -88,7 +88,7 @@ export default function DailyIndex() {
           The reminder (a word often used to describe the Quran) is an app and API for the Quran, 
           hadith and names of Allah. It is a way to share the message of Islam with everyone in need.
           A resource by which we can renew our intention and work towards the best result in the afterlife 
-          inshallah.
+          God willing.
         </div>
       </section>
       <section>
@@ -125,7 +125,7 @@ export default function DailyIndex() {
           </h2>
           <p className='text-sm sm:text-base text-gray-600'>
             Select a daily reminder from the menu which encompasses a verse of the Quran, 
-            hadith from sahih al-bukhari and a name of Allah. Read, reflect and reset. 
+            hadith from sahih al-bukhari and a name of Allah. Read, reflect and reset your intention. 
             If you need further reminders, see hourly updates in the latest tab.
             Once you have read a few, continue strengthening your faith by reading more 
             of the Quran, hadith or names of Allah in our app and making it a daily habit.
