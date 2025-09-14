@@ -770,7 +770,7 @@ func main() {
 				saveDaily(today, dailyData)
 
 				payload := map[string]interface{}{
-					"title": "Daily Reminder",
+					"title": "Reminder",
 					"body":  notifyVerse,
 					"data": map[string]interface{}{
 						"url": "/daily/" + today,
