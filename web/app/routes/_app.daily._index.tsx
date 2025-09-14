@@ -78,7 +78,7 @@ export default function DailyIndex() {
     <div className="max-w-4xl mx-auto w-full mb-8 sm:mb-12 flex-grow p-0 lg:p-8 space-y-8">
       <div className="flex items-center justify-between mb-4 sm:mb-6">
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-left">
-          Daily Reminder
+          Reminder
         </h1>
         <div className="ml-4"><NotificationButton /></div>
       </div>
