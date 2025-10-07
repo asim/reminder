@@ -9,8 +9,8 @@ import { ChapterHeader } from '~/components/quran/chapter-header';
 import { ViewMode } from '~/components/quran/view-mode';
 import { useQuranViewMode } from '~/hooks/use-quran-view-mode';
 import { getChapterOptions } from '~/queries/quran';
-import { queryClient } from '~/utils/query-client';
 import { useWordByWordToggle } from '~/use-word-by-word-toggle';
+import { queryClient } from '~/utils/query-client';
 
 function toArabicNumber(num: number) {
   return num
@@ -105,27 +105,27 @@ export default function QuranChapter(props: Route.ComponentProps) {
             <Fragment key={verse.number}>
               {verse.words && verse.words.length > 0
                 ? verse.words.map((word, idx, arr) => (
-                    <span key={idx} className='verse-arabic-word'>
-                      {word.arabic}
-                      {idx === arr.length - 1 && (
-                        <span className='mx-2 font-arabic'>
-                          {toArabicNumber(verse.number)}
-                        </span>
-                      )}
-                      &nbsp;
-                    </span>
-                  ))
+                  <span key={idx} className='verse-arabic-word'>
+                    {word.arabic}
+                    {idx === arr.length - 1 && (
+                      <span className='mx-2 font-arabic'>
+                        {toArabicNumber(verse.number)}
+                      </span>
+                    )}
+                    &nbsp;
+                  </span>
+                ))
                 : verse.arabic.split(' ').map((word, idx, arr) => (
-                    <span key={idx} className='verse-arabic-word'>
-                      {word}
-                      {idx === arr.length - 1 && (
-                        <span className='mx-2 font-arabic'>
-                          {toArabicNumber(verse.number)}
-                        </span>
-                      )}
-                      &nbsp;
-                    </span>
-                  ))}
+                  <span key={idx} className='verse-arabic-word'>
+                    {word}
+                    {idx === arr.length - 1 && (
+                      <span className='mx-2 font-arabic'>
+                        {toArabicNumber(verse.number)}
+                      </span>
+                    )}
+                    &nbsp;
+                  </span>
+                ))}
             </Fragment>
           ))}
         </div>
@@ -149,25 +149,25 @@ export default function QuranChapter(props: Route.ComponentProps) {
               <div className='flex flex-row-reverse flex-wrap text-xl sm:text-2xl md:text-3xl mb-3 sm:mb-4 text-right leading-loose font-arabic items-end'>
                 {wordByWord && verse.words && verse.words.length > 0
                   ? verse.words.map((word, idx, arr) => {
-                      if (idx === arr.length - 1) {
-                        return (
-                          <span key={idx} className='verse-arabic-word text-3xl flex flex-col items-center mr-2 mb-2'>
-                            <span className='flex flex-row items-center' dir="rtl">
-                              <span>{word.arabic}</span>
-                              <span className='mx-2 font-arabic'>{toArabicNumber(verse.number)}</span>
-                            </span>
-                            <span className='text-xs sm:text-sm mt-1 px-1 rounded bg-gray-100 text-gray-700'>{word.english}</span>
-                          </span>
-                        );
-                      } else {
-                        return (
-                          <span key={idx} className='verse-arabic-word text-3xl flex flex-col items-center mr-2 mb-2'>
+                    if (idx === arr.length - 1) {
+                      return (
+                        <span key={idx} className='verse-arabic-word text-3xl flex flex-col items-center mr-2 mb-2'>
+                          <span className='flex flex-row items-center' dir="rtl">
                             <span>{word.arabic}</span>
-                            <span className='text-xs sm:text-sm mt-1 px-1 rounded bg-gray-100 text-gray-700'>{word.english}</span>
+                            <span className='mx-2 font-arabic'>{toArabicNumber(verse.number)}</span>
                           </span>
-                        );
-                      }
-                    })
+                          <span className='text-xs sm:text-sm mt-1 px-1 rounded bg-gray-100 text-gray-700'>{word.english}</span>
+                        </span>
+                      );
+                    } else {
+                      return (
+                        <span key={idx} className='verse-arabic-word text-3xl flex flex-col items-center mr-2 mb-2'>
+                          <span>{word.arabic}</span>
+                          <span className='text-xs sm:text-sm mt-1 px-1 rounded bg-gray-100 text-gray-700'>{word.english}</span>
+                        </span>
+                      );
+                    }
+                  })
                   : (
                     <span className='verse-arabic-word text-3xl flex flex-row items-center mr-2 mb-2' dir="rtl">
                       {verse.arabic}
