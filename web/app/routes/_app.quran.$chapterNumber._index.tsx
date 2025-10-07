@@ -1,7 +1,8 @@
+import React from 'react';
 import type { Route } from '.react-router/types/app/routes/+types/_app.quran.$chapterNumber._index';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { CircleChevronLeft, CircleChevronRight } from 'lucide-react';
-import React, { Fragment, useEffect } from 'react';
+import { Fragment, useEffect } from 'react';
 import { Link } from 'react-router';
 import { PageError } from '~/components/interface/page-error';
 import { PrimaryButton } from '~/components/interface/primary-button';
