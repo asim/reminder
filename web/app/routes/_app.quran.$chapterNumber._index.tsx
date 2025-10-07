@@ -43,6 +43,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
   const { data } = useSuspenseQuery(getChapterOptions(Number(chapterNumber)));
   const [mode, setMode] = useQuranViewMode();
   const [wordByWord, setWordByWord] = useWordByWordToggle();
+  const [showCommentary, setShowCommentary] = React.useState(false);
 
   useEffect(() => {
     if (!data || !window.location.hash) {
@@ -74,7 +75,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
         subtitle={`Chapter ${data.number}`}
       />
       {mode === 'translation' && (
-        <div className='mb-4 flex items-center'>
+        <div className='mb-4 flex items-center gap-6'>
           <label className='flex items-center gap-2 cursor-pointer'>
             <input
               type='checkbox'
@@ -83,6 +84,15 @@ export default function QuranChapter(props: Route.ComponentProps) {
               className='accent-black h-4 w-4 rounded'
             />
             <span className='text-sm'>Show word-by-word translation</span>
+          </label>
+          <label className='flex items-center gap-2 cursor-pointer'>
+            <input
+              type='checkbox'
+              checked={showCommentary}
+              onChange={e => setShowCommentary(e.target.checked)}
+              className='accent-black h-4 w-4 rounded'
+            />
+            <span className='text-sm'>Show commentary</span>
           </label>
         </div>
       )}
@@ -168,6 +178,11 @@ export default function QuranChapter(props: Route.ComponentProps) {
               <div className='text-base sm:text-lg md:text-xl leading-relaxed'>
                 {verse.text}
               </div>
+              {showCommentary && verse.comments && (
+                <div className='mt-2 p-2 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-900 rounded text-sm'>
+                  <strong>Commentary:</strong> {verse.comments}
+                </div>
+              )}
               <a
                 href={verse.number !== 0 ? `/quran/${data.number}/${verse.number}` : undefined}
                 className={`text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2${verse.number === 0 ? ' hidden' : ''}`}
