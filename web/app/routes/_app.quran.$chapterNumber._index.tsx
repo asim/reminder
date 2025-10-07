@@ -1,3 +1,4 @@
+import React from 'react';
 import type { Route } from '.react-router/types/app/routes/+types/_app.quran.$chapterNumber._index';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { CircleChevronLeft, CircleChevronRight } from 'lucide-react';
