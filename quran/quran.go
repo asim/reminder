@@ -66,8 +66,13 @@ func (ch *Chapter) HTML() string {
 
 	// max 286 ayahs
 	for _, verse := range ch.Verses {
+		verseKey := fmt.Sprintf("%d:%d", ch.Number, verse.Number)
+		verseLabel := fmt.Sprintf("Quran %d:%d", ch.Number, verse.Number)
+		verseURL := fmt.Sprintf("/quran/%d#%d", ch.Number, verse.Number)
+
 		data += fmt.Sprintln()
-		data += fmt.Sprintf(`<h4 id="%d">%d:%d</h4>`, verse.Number, ch.Number, verse.Number)
+		data += fmt.Sprintf(`<h4 id="%d">%d:%d <button class="bookmark-btn" data-type="quran" data-key="%s" data-label="%s" data-url="%s">☆</button></h4>`,
+			verse.Number, ch.Number, verse.Number, verseKey, verseLabel, verseURL)
 		data += fmt.Sprintln()
 		data += fmt.Sprintln(`<div class="arabic right">` + verse.Arabic + `</div>`)
 		data += fmt.Sprintln()
@@ -83,10 +88,15 @@ func (ch *Chapter) HTML() string {
 func (v *Verse) HTML() string {
 	var data string
 
+	verseKey := fmt.Sprintf("%d:%d", v.Chapter, v.Number)
+	verseLabel := fmt.Sprintf("Quran %d:%d", v.Chapter, v.Number)
+	verseURL := fmt.Sprintf("/quran/%d#%d", v.Chapter, v.Number)
+
 	data += fmt.Sprintln()
 	data += fmt.Sprintln()
 	data += fmt.Sprintln()
-	data += fmt.Sprintf(`<h4>%d:%d</h4>`, v.Chapter, v.Number)
+	data += fmt.Sprintf(`<h4>%d:%d <button class="bookmark-btn" data-type="quran" data-key="%s" data-label="%s" data-url="%s">☆</button></h4>`,
+		v.Chapter, v.Number, verseKey, verseLabel, verseURL)
 	data += fmt.Sprintln()
 	data += fmt.Sprintln(`<div class="arabic right">` + v.Arabic + `</div>`)
 	data += fmt.Sprintln()

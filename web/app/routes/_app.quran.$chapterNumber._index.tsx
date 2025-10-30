@@ -4,6 +4,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { CircleChevronLeft, CircleChevronRight } from 'lucide-react';
 import { Fragment, useEffect } from 'react';
 import { Link } from 'react-router';
+import { BookmarkButton } from '~/components/interface/bookmark-button';
 import { PageError } from '~/components/interface/page-error';
 import { PrimaryButton } from '~/components/interface/primary-button';
 import { ChapterHeader } from '~/components/quran/chapter-header';
@@ -184,13 +185,23 @@ export default function QuranChapter(props: Route.ComponentProps) {
                   <strong>Commentary:</strong> {verse.comments}
                 </div>
               )}
-              <a
-                href={verse.number !== 0 ? `/quran/${data.number}/${verse.number}` : undefined}
-                className={`text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2${verse.number === 0 ? ' hidden' : ''}`}
-                style={verse.number === 0 ? { display: 'none' } : {}}
-              >
-                {verse.number !== 0 ? `${data.number}:${verse.number}` : ''}
-              </a>
+              <div className='flex items-center justify-between mt-1 sm:mt-2'>
+                <a
+                  href={verse.number !== 0 ? `/quran/${data.number}/${verse.number}` : undefined}
+                  className={`text-xs sm:text-sm text-gray-500${verse.number === 0 ? ' hidden' : ''}`}
+                  style={verse.number === 0 ? { display: 'none' } : {}}
+                >
+                  {verse.number !== 0 ? `${data.number}:${verse.number}` : ''}
+                </a>
+                {verse.number !== 0 && (
+                  <BookmarkButton
+                    type='quran'
+                    itemKey={`${data.number}:${verse.number}`}
+                    label={`Quran ${data.number}:${verse.number}`}
+                    url={`/quran/${data.number}#${verse.number}`}
+                  />
+                )}
+              </div>
             </div>
           ))}
         </div>

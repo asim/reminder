@@ -84,6 +84,21 @@ code {
     padding: 10px;
     display: block;
 }
+.bookmark-btn {
+  background: none;
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+  padding: 0 5px;
+  color: #ffd700;
+  transition: transform 0.2s;
+}
+.bookmark-btn:hover {
+  transform: scale(1.2);
+}
+.bookmark-btn.bookmarked {
+  color: #ffa500;
+}
 @media only screen and (max-width: 600px) {
   #head a { margin-right: 5px; }
 }
@@ -108,11 +123,7 @@ code {
         <a href="/">&nbsp;R&nbsp;</a>
       </div>
       <div id="nav">
-        <a href="/daily">Daily</a>
-        <a href="/quran">Quran</a>
-        <a href="/names">Names</a>
-        <a href="/hadith">Hadith</a>
-        <a href="/search">Search</a>
+        <a href="/home">Home</a>
       </div>
       <button id="install" hidden>Install PWA</button>
     </div>
@@ -123,6 +134,7 @@ code {
     </div>
     </div>
 
+  <script src="/bookmarks.js"></script>
   <script>
       if (navigator.serviceWorker) {
         navigator.serviceWorker.register (
@@ -282,11 +294,13 @@ var Index = `
 </style>
 
 <div id="app">
-        <a href="/daily">Daily Reminder</a>
-        <a href="/quran">Read the Quran</a>
-        <a href="/names">Names of Allah</a>
-        <a href="/hadith">Hadith (Bukhari)</a>
-        <a href="/search">Ask a Question</a>
+        <a href="/daily">Daily</a>
+        <a href="/quran">Quran</a>
+        <a href="/names">Names</a>
+        <a href="/hadith">Hadith</a>
+        <a href="/search">Search</a>
+        <a href="/bookmarks">Bookmarks</a>
+        <a href="/api">API</a>
 </div>
 `
 

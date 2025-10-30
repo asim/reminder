@@ -1,4 +1,4 @@
-import { Code, Search } from 'lucide-react';
+import { Code, Search, Bookmark } from 'lucide-react';
 import { Outlet, NavLink } from 'react-router';
 import { cn } from '~/utils/classname';
 
@@ -14,10 +14,12 @@ export default function AppLayout() {
   return (
     <div className='flex flex-col h-screen overflow-hidden'>
       <div className='w-full text-sm py-2 px-2 bg-black text-white flex flex-row items-center gap-1'>
-        {/* Left-aligned reminder link */}
-        <span className="hidden md:inline-block font-bold px-2 ml-8 mr-8 order-1">
-          <a href="/">reminder</a>
-        </span>
+        {/* Left-aligned reminder link with R logo */}
+        <div className="inline-block order-1">
+          <a href="/" className="border border-gray-600 rounded px-2 py-1 hover:border-gray-400 transition-colors">
+            &nbsp;R&nbsp;
+          </a>
+        </div>
         {/* Centered nav links */}
         <div className="flex-1 flex flex-row justify-center gap-1 order-2">
           <NavLink className={buttonClass} to='/daily'>
@@ -32,12 +34,13 @@ export default function AppLayout() {
           <NavLink className={buttonClass} to='/names'>
             Names
           </NavLink>
-          <NavLink className={buttonClass} to='/islam'>
-            Islam
-          </NavLink>
         </div>
         {/* Right-aligned search/api links */}
         <div className='hidden lg:flex items-center gap-2 order-3'>
+          <NavLink className={buttonClass} to='/bookmarks'>
+            <Bookmark className='size-3' />
+            Bookmarks
+          </NavLink>
           <NavLink className={buttonClass} to='/search'>
             <Search className='size-3' />
             Search
@@ -48,6 +51,9 @@ export default function AppLayout() {
           </NavLink>
         </div>
         <div className='lg:hidden flex items-center gap-1 ml-auto order-4'>
+          <NavLink to='/bookmarks' className={buttonClass}>
+            <Bookmark className='size-3' />
+          </NavLink>
           <NavLink to='/search' className={buttonClass}>
             <Search className='size-3' />
             Ask
