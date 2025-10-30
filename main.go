@@ -62,9 +62,9 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 	// generate api doc
 	apiHtml := app.RenderTemplate("API", "", a.Markdown())
 
-	appHtml := app.RenderHTML("App", "The reminder web app", app.Index)
+	appHtml := app.RenderHTML("Home", "Quran, hadith, and more as an app and API", app.Index)
 
-	http.HandleFunc("/app", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/home", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(appHtml))
 	})
 
@@ -197,6 +197,12 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 	http.HandleFunc("/search", func(w http.ResponseWriter, r *http.Request) {
 		shtml := app.RenderHTML("Search", "", app.SearchTemplate)
 		w.Write([]byte(shtml))
+	})
+
+	http.HandleFunc("/bookmarks", func(w http.ResponseWriter, r *http.Request) {
+		html := app.Get("bookmarks.html")
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write([]byte(html))
 	})
 
 	http.HandleFunc("/islam", func(w http.ResponseWriter, r *http.Request) {

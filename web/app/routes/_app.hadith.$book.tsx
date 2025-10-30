@@ -1,6 +1,7 @@
 import type { Route } from '.react-router/types/app/routes/+types/_app.hadith.$book';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router';
+import { BookmarkButton } from '~/components/interface/bookmark-button';
 import { getBookOptions } from '~/queries/hadith';
 import { queryClient } from '~/utils/query-client';
 import { useState, useMemo, useEffect } from 'react';
@@ -39,6 +40,21 @@ export default function HadithBook() {
   useEffect(() => {
     setSearchQuery('');
   }, [bookNumber]);
+
+  // Scroll to hash if present
+  useEffect(() => {
+    if (!book || !window.location.hash) {
+      return;
+    }
+
+    const hadithId = window.location.hash.substring(1);
+    const element = document.getElementById(hadithId);
+    if (element) {
+      setTimeout(() => {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  }, [book]);
 
   if (!book) {
     return <div>Book not found</div>;
@@ -95,18 +111,27 @@ export default function HadithBook() {
       </div>
 
       <div className='space-y-3 sm:space-y-4'>
-        {filteredHadiths.map((hadith) => (
+        {filteredHadiths.map((hadith, idx) => (
           <div
             key={`${hadith.info}-${hadith.by}-${bookNumber}`}
+            id={`${idx + 1}`}
             className='p-3 sm:p-4 md:p-6 border border-gray-200 rounded-lg space-y-2 sm:space-y-4 hover:border-gray-300 transition-colors'
           >
             <div className='flex gap-2 lg:mb-0 mb-4 lg:gap-0 lg:flex-row flex-col justify-start lg:justify-between items-start lg:items-center'>
               <span className='text-sm sm:text-base font-medium text-gray-700'>
                 {hadith.info.trim().replace(/:$/, '')}
               </span>
-              <span className='text-sm text-balance sm:text-base font-medium text-gray-700'>
-                {hadith.by}
-              </span>
+              <div className='flex items-center gap-2'>
+                <span className='text-sm text-balance sm:text-base font-medium text-gray-700'>
+                  {hadith.by}
+                </span>
+                <BookmarkButton
+                  type='hadith'
+                  itemKey={`${bookNumber}:${idx + 1}`}
+                  label={`Hadith ${bookNumber}:${idx + 1} - ${hadith.info}`}
+                  url={`/hadith/${bookNumber}#${idx + 1}`}
+                />
+              </div>
             </div>
 
             <p className='text-gray-800 text-base sm:text-lg leading-relaxed'>

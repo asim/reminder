@@ -26,9 +26,15 @@ type Names []*Name
 
 func (name *Name) HTML() string {
 	var data string
+
+	nameKey := fmt.Sprintf("%d", name.Number)
+	nameLabel := fmt.Sprintf("Name %d: %s", name.Number, name.Meaning)
+	nameURL := fmt.Sprintf("/names/%d", name.Number)
+
 	data += fmt.Sprintln()
 	data += fmt.Sprintln()
-	data += fmt.Sprintf(`<h2>%s</h2>`, name.Meaning)
+	data += fmt.Sprintf(`<h2>%s <button class="bookmark-btn" data-type="names" data-key="%s" data-label="%s" data-url="%s">☆</button></h2>`,
+		name.Meaning, nameKey, nameLabel, nameURL)
 	data += fmt.Sprintln()
 
 	data += fmt.Sprintln()

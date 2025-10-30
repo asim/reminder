@@ -48,8 +48,13 @@ func (b *Book) HTML() string {
 	data += fmt.Sprintln()
 	data += fmt.Sprintln()
 
-	for _, hadith := range b.Hadiths {
-		data += fmt.Sprintf(`<h3>%s</h3>`, hadith.Info)
+	for idx, hadith := range b.Hadiths {
+		hadithKey := fmt.Sprintf("%d:%d", b.Number, idx+1)
+		hadithLabel := fmt.Sprintf("Hadith %d:%d - %s", b.Number, idx+1, hadith.Info)
+		hadithURL := fmt.Sprintf("/hadith/%d#%d", b.Number, idx+1)
+
+		data += fmt.Sprintf(`<h3 id="%d">%s <button class="bookmark-btn" data-type="hadith" data-key="%s" data-label="%s" data-url="%s">☆</button></h3>`,
+			idx+1, hadith.Info, hadithKey, hadithLabel, hadithURL)
 		data += fmt.Sprintln()
 		data += fmt.Sprintf(`<h4>%s</h4>`, hadith.By)
 		data += fmt.Sprintln()

@@ -1,5 +1,6 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router';
+import { BookmarkButton } from '~/components/interface/bookmark-button';
 import { getNameOptions } from '~/queries/names';
 
 export function meta() {
@@ -34,9 +35,17 @@ export default function NameDetail() {
       <div className='space-y-3 sm:space-y-6'>
         <div className='p-5 sm:p-4 md:p-6 border border-gray-200 rounded-lg space-y-2 sm:space-y-4'>
           <div className='flex flex-col text-left'>
-            <h1 className='text-xl sm:text-2xl font-semibold text-gray-800'>
-              {name.meaning}
-            </h1>
+            <div className='flex items-start justify-between'>
+              <h1 className='text-xl sm:text-2xl font-semibold text-gray-800'>
+                {name.meaning}
+              </h1>
+              <BookmarkButton
+                type='names'
+                itemKey={`${name.number}`}
+                label={`Name ${name.number}: ${name.meaning}`}
+                url={`/names/${name.number}`}
+              />
+            </div>
             <div className='text-3xl sm:text-4xl md:text-5xl my-4 sm:my-7 font-arabic font-medium text-black'>
               {name.arabic}
             </div>
