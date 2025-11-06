@@ -133,9 +133,35 @@ export default function QuranChapter(props: Route.ComponentProps) {
         </div>
       )}
       {mode === 'english' && (
-        <div className='flex flex-grow flex-wrap text-left text-base sm:text-lg md:text-xl leading-loose'>
+        <div className='space-y-3 sm:space-y-8'>
           {data.verses.map((verse) => (
-            <Fragment key={verse.number}>{verse.text}&nbsp;</Fragment>
+            <div
+              id={`${verse.number}`}
+              data-chapter-verse={`${data.number}:${verse.number}`}
+              key={verse.number}
+              className='border-b border-gray-100 pb-3 sm:pb-8'
+            >
+              <div className='text-base sm:text-lg md:text-xl leading-loose'>
+                {verse.text}
+              </div>
+              <div className='flex items-center justify-between mt-1 sm:mt-2'>
+                <a
+                  href={verse.number !== 0 ? `/quran/${data.number}/${verse.number}` : undefined}
+                  className={`text-xs sm:text-sm text-gray-500${verse.number === 0 ? ' hidden' : ''}`}
+                  style={verse.number === 0 ? { display: 'none' } : {}}
+                >
+                  {verse.number !== 0 ? `${data.number}:${verse.number}` : ''}
+                </a>
+                {verse.number !== 0 && (
+                  <BookmarkButton
+                    type='quran'
+                    itemKey={`${data.number}:${verse.number}`}
+                    label={`Quran ${data.number}:${verse.number}`}
+                    url={`/quran/${data.number}#${verse.number}`}
+                  />
+                )}
+              </div>
+            </div>
           ))}
         </div>
       )}
