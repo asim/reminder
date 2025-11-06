@@ -141,7 +141,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
               key={verse.number}
               className='border-b border-gray-100 pb-3 sm:pb-8'
             >
-              <div className='text-base sm:text-lg md:text-xl leading-relaxed'>
+              <div className='text-base sm:text-lg md:text-xl leading-loose'>
                 {verse.text}
               </div>
               <div className='flex items-center justify-between mt-1 sm:mt-2'>
