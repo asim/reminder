@@ -246,7 +246,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
 
         <PrimaryButton
           asChild
-          disabled={nextChapter >= 114}
+          disabled={nextChapter > 114}
           className='text-sm sm:text-base py-2 sm:py-2 px-3 sm:px-4'
         >
           <Link to={`/quran/${nextChapter}`}>
