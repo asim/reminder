@@ -1,13 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getSearchHistoryOptions, searchOptions, type SearchResponseType } from '~/queries/search';
-import { cn } from '~/utils/classname';
-import { 
-  cacheSearchResult, 
-  getAllCachedSearches, 
-  getCachedSearchResult,
-  type CachedSearch 
+import {
+  cacheSearchResult,
+  getAllCachedSearches,
+  type CachedSearch
 } from '~/utils/search-cache';
 
 export function meta() {
@@ -94,12 +92,12 @@ export default function SearchIndex() {
     for (let i = 0; i < historyData.history.length; i += 2) {
       const question = historyData.history[i];
       const answer = historyData.history[i + 1];
-      
+
       if (!question || !answer) continue;
 
       // Try to find cached version with references
       const cached = cachedMap.get(question.toLowerCase());
-      
+
       if (cached) {
         merged.push({
           type: 'cached',
@@ -247,69 +245,69 @@ export default function SearchIndex() {
         )}
 
         {mergedHistory && mergedHistory.length > 0 && (
-            <div>
-              <h2 className='text-lg sm:text-xl font-medium mb-2 sm:mb-3'>
-                Recent Searches
-              </h2>
-              <div className='space-y-6'>
-                {mergedHistory.map((item, idx) => {
-                  // Handle cached search objects
-                  if (item.type === 'cached' && item.result) {
-                    const result = item.result;
-                    return (
-                      <div key={idx} className='border border-gray-200 rounded-md p-3 sm:p-4'>
-                        <div className='mb-2 font-semibold bg-yellow-100 px-2 py-1 sm:py-2'>
-                          {result.q}
-                        </div>
-                        <div
-                          className='mb-3 text-sm sm:text-base prose prose-sm sm:prose-base max-w-none'
-                          dangerouslySetInnerHTML={{ __html: result.answer }}
-                        />
-                        {result.references && result.references.length > 0 && (
-                          <div className='mt-3 border-t pt-3'>
-                            <div className='text-xs sm:text-sm font-medium text-gray-600 mb-2'>
-                              References ({result.references.length})
-                            </div>
-                            <div className='space-y-2'>
-                              {result.references.slice(0, 3).map((ref, refIdx) => (
-                                <div key={refIdx} className='text-xs text-gray-600 border-l-2 border-gray-300 pl-2'>
-                                  {ref.metadata.type || 'Reference'} {ref.metadata.chapter && `- Chapter ${ref.metadata.chapter}`}
-                                  {ref.metadata.verse && `:${ref.metadata.verse}`}
-                                  {ref.metadata.hadith && `- Hadith ${ref.metadata.hadith}`}
-                                </div>
-                              ))}
-                              {result.references.length > 3 && (
-                                <div className='text-xs text-gray-500 pl-2'>
-                                  +{result.references.length - 3} more references
-                                </div>
-                              )}
-                            </div>
+          <div>
+            <h2 className='text-lg sm:text-xl font-medium mb-2 sm:mb-3'>
+              Recent Searches
+            </h2>
+            <div className='space-y-6'>
+              {mergedHistory.map((item, idx) => {
+                // Handle cached search objects
+                if (item.type === 'cached' && item.result) {
+                  const result = item.result;
+                  return (
+                    <div key={idx} className='border border-gray-200 rounded-md p-3 sm:p-4'>
+                      <div className='mb-2 font-semibold bg-yellow-100 px-2 py-1 sm:py-2'>
+                        {result.q}
+                      </div>
+                      <div
+                        className='mb-3 text-sm sm:text-base prose prose-sm sm:prose-base max-w-none'
+                        dangerouslySetInnerHTML={{ __html: result.answer }}
+                      />
+                      {result.references && result.references.length > 0 && (
+                        <div className='mt-3 border-t pt-3'>
+                          <div className='text-xs sm:text-sm font-medium text-gray-600 mb-2'>
+                            References ({result.references.length})
                           </div>
-                        )}
-                      </div>
-                    );
-                  }
-
-                  // Handle server history without cached references
-                  if (item.type === 'server' && item.query && item.answer) {
-                    return (
-                      <div key={idx} className='border border-gray-200 rounded-md p-3 sm:p-4'>
-                        <div className='mb-2 font-semibold bg-yellow-100 px-2 py-1 sm:py-2'>
-                          {item.query}
+                          <div className='space-y-2'>
+                            {result.references.slice(0, 3).map((ref, refIdx) => (
+                              <div key={refIdx} className='text-xs text-gray-600 border-l-2 border-gray-300 pl-2'>
+                                {ref.metadata.type || 'Reference'} {ref.metadata.chapter && `- Chapter ${ref.metadata.chapter}`}
+                                {ref.metadata.verse && `:${ref.metadata.verse}`}
+                                {ref.metadata.hadith && `- Hadith ${ref.metadata.hadith}`}
+                              </div>
+                            ))}
+                            {result.references.length > 3 && (
+                              <div className='text-xs text-gray-500 pl-2'>
+                                +{result.references.length - 3} more references
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <div
-                          className='text-sm sm:text-base prose prose-sm sm:prose-base max-w-none'
-                          dangerouslySetInnerHTML={{ __html: item.answer }}
-                        />
-                      </div>
-                    );
-                  }
+                      )}
+                    </div>
+                  );
+                }
 
-                  return null;
-                })}
-              </div>
+                // Handle server history without cached references
+                if (item.type === 'server' && item.query && item.answer) {
+                  return (
+                    <div key={idx} className='border border-gray-200 rounded-md p-3 sm:p-4'>
+                      <div className='mb-2 font-semibold bg-yellow-100 px-2 py-1 sm:py-2'>
+                        {item.query}
+                      </div>
+                      <div
+                        className='text-sm sm:text-base prose prose-sm sm:prose-base max-w-none'
+                        dangerouslySetInnerHTML={{ __html: item.answer }}
+                      />
+                    </div>
+                  );
+                }
+
+                return null;
+              })}
             </div>
-          )}
+          </div>
+        )}
       </div>
     </div>
   );
