@@ -1,8 +1,8 @@
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { searchOptions, getSearchHistoryOptions } from '~/queries/search';
-import { cn } from '~/utils/classname';
 import { Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { getSearchHistoryOptions, searchOptions } from '~/queries/search';
+import { cn } from '~/utils/classname';
 
 export function meta() {
   return [
@@ -110,31 +110,62 @@ export default function SearchIndex() {
               dangerouslySetInnerHTML={{ __html: searchResults.answer }}
             />
 
-            <div className='mt-3 sm:mt-4'>
+            <div className='mt-3 sm:mt-4 border-t pt-3'>
               <button
                 onClick={toggleReferencesSection}
-                className='text-xs sm:text-sm underline cursor-pointer mb-1'
+                className='text-xs sm:text-sm font-medium text-gray-700 hover:text-black flex items-center gap-1'
               >
-                {showReferences ? 'Hide References' : 'Show References'}
+                <span>{showReferences ? '▼' : '▶'}</span>
+                <span>References ({searchResults.references.length})</span>
               </button>
 
               {showReferences && (
-                <div className='mt-1 sm:mt-2'>
+                <div className='mt-3 space-y-3'>
                   {searchResults.references.map((ref, index) => (
-                    <div key={index} className='mb-3 sm:mb-4'>
+                    <div key={index} className='border border-gray-200 rounded-lg overflow-hidden'>
                       <div
-                        className='text-xs sm:text-sm underline cursor-pointer'
+                        className='bg-gray-50 px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-start justify-between gap-2'
                         onClick={() => toggleReference(index)}
                       >
-                        {ref.text.substring(0, 50)}... (Score:{' '}
-                        {ref.score.toFixed(2)})
+                        <div className='flex-1 min-w-0'>
+                          <div className='text-xs sm:text-sm font-medium text-gray-900 truncate'>
+                            {ref.metadata.type || 'Reference'} {ref.metadata.chapter && `- Chapter ${ref.metadata.chapter}`}
+                            {ref.metadata.verse && `:${ref.metadata.verse}`}
+                            {ref.metadata.hadith && `- Hadith ${ref.metadata.hadith}`}
+                          </div>
+                          <div className='text-xs text-gray-500 mt-1'>
+                            {ref.text.substring(0, 80)}...
+                          </div>
+                        </div>
+                        <div className='flex items-center gap-2 flex-shrink-0'>
+                          <span className='text-xs text-gray-500'>
+                            {(ref.score * 100).toFixed(0)}%
+                          </span>
+                          <span className='text-gray-400'>
+                            {expandedRefs[index] ? '▼' : '▶'}
+                          </span>
+                        </div>
                       </div>
 
                       {expandedRefs[index] && (
-                        <div className='mt-1 ml-2 sm:ml-4 text-xs sm:text-sm'>
-                          <div>Text: {ref.text}</div>
-                          <div>Metadata: {JSON.stringify(ref.metadata)}</div>
-                          <div>Score: {ref.score}</div>
+                        <div className='px-3 py-3 bg-white space-y-2'>
+                          <div className='text-xs sm:text-sm text-gray-800 leading-relaxed'>
+                            {ref.text}
+                          </div>
+                          
+                          {Object.keys(ref.metadata).length > 0 && (
+                            <div className='pt-2 border-t border-gray-100'>
+                              <div className='text-xs font-medium text-gray-600 mb-1'>Source Information:</div>
+                              <div className='grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-gray-600'>
+                                {Object.entries(ref.metadata).map(([key, value]) => (
+                                  <div key={key} className='flex gap-1'>
+                                    <span className='font-medium capitalize'>{key}:</span>
+                                    <span>{value}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
