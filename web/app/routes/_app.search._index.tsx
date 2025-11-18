@@ -29,6 +29,8 @@ export default function SearchIndex() {
   const [expandedRefs, setExpandedRefs] = useState<Record<number, boolean>>({});
   const [showReferences, setShowReferences] = useState(false);
   const [cachedSearches, setCachedSearches] = useState<CachedSearch[]>([]);
+  const [expandedHistoryRefs, setExpandedHistoryRefs] = useState<Record<string, boolean>>({});
+  const [expandedHistoryRefItems, setExpandedHistoryRefItems] = useState<Record<string, boolean>>({});
 
   // Load cached searches on mount
   useEffect(() => {
@@ -124,6 +126,21 @@ export default function SearchIndex() {
 
   const toggleReferencesSection = () => {
     setShowReferences(!showReferences);
+  };
+
+  const toggleHistoryReferences = (historyKey: string) => {
+    setExpandedHistoryRefs((prev) => ({
+      ...prev,
+      [historyKey]: !prev[historyKey],
+    }));
+  };
+
+  const toggleHistoryReference = (historyKey: string, refIndex: number) => {
+    const key = `${historyKey}-${refIndex}`;
+    setExpandedHistoryRefItems((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
   };
 
   return (
@@ -254,6 +271,7 @@ export default function SearchIndex() {
                 // Handle cached search objects
                 if (item.type === 'cached' && item.result) {
                   const result = item.result;
+                  const historyKey = `history-${idx}`;
                   return (
                     <div key={idx} className='border border-gray-200 rounded-md p-3 sm:p-4'>
                       <div className='mb-2 font-semibold bg-yellow-100 px-2 py-1 sm:py-2'>
@@ -265,23 +283,70 @@ export default function SearchIndex() {
                       />
                       {result.references && result.references.length > 0 && (
                         <div className='mt-3 border-t pt-3'>
-                          <div className='text-xs sm:text-sm font-medium text-gray-600 mb-2'>
-                            References ({result.references.length})
-                          </div>
-                          <div className='space-y-2'>
-                            {result.references.slice(0, 3).map((ref, refIdx) => (
-                              <div key={refIdx} className='text-xs text-gray-600 border-l-2 border-gray-300 pl-2'>
-                                {ref.metadata.type || 'Reference'} {ref.metadata.chapter && `- Chapter ${ref.metadata.chapter}`}
-                                {ref.metadata.verse && `:${ref.metadata.verse}`}
-                                {ref.metadata.hadith && `- Hadith ${ref.metadata.hadith}`}
-                              </div>
-                            ))}
-                            {result.references.length > 3 && (
-                              <div className='text-xs text-gray-500 pl-2'>
-                                +{result.references.length - 3} more references
-                              </div>
-                            )}
-                          </div>
+                          <button
+                            onClick={() => toggleHistoryReferences(historyKey)}
+                            className='text-xs sm:text-sm font-medium text-gray-700 hover:text-black flex items-center gap-1'
+                          >
+                            <span>{expandedHistoryRefs[historyKey] ? '▼' : '▶'}</span>
+                            <span>References ({result.references.length})</span>
+                          </button>
+                          
+                          {expandedHistoryRefs[historyKey] && (
+                            <div className='mt-3 space-y-3'>
+                              {result.references.map((ref, refIdx) => {
+                                const refKey = `${historyKey}-${refIdx}`;
+                                return (
+                                  <div key={refIdx} className='border border-gray-200 rounded-lg overflow-hidden'>
+                                    <div
+                                      className='bg-gray-50 px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-start justify-between gap-2'
+                                      onClick={() => toggleHistoryReference(historyKey, refIdx)}
+                                    >
+                                      <div className='flex-1 min-w-0'>
+                                        <div className='text-xs sm:text-sm font-medium text-gray-900 truncate'>
+                                          {ref.metadata.type || 'Reference'} {ref.metadata.chapter && `- Chapter ${ref.metadata.chapter}`}
+                                          {ref.metadata.verse && `:${ref.metadata.verse}`}
+                                          {ref.metadata.hadith && `- Hadith ${ref.metadata.hadith}`}
+                                        </div>
+                                        <div className='text-xs text-gray-500 mt-1'>
+                                          {ref.text.substring(0, 80)}...
+                                        </div>
+                                      </div>
+                                      <div className='flex items-center gap-2 flex-shrink-0'>
+                                        <span className='text-xs text-gray-500'>
+                                          {(ref.score * 100).toFixed(0)}%
+                                        </span>
+                                        <span className='text-gray-400'>
+                                          {expandedHistoryRefItems[refKey] ? '▼' : '▶'}
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    {expandedHistoryRefItems[refKey] && (
+                                      <div className='px-3 py-3 bg-white space-y-2'>
+                                        <div className='text-xs sm:text-sm text-gray-800 leading-relaxed'>
+                                          {ref.text}
+                                        </div>
+
+                                        {Object.keys(ref.metadata).length > 0 && (
+                                          <div className='pt-2 border-t border-gray-100'>
+                                            <div className='text-xs font-medium text-gray-600 mb-1'>Source Information:</div>
+                                            <div className='grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-gray-600'>
+                                              {Object.entries(ref.metadata).map(([key, value]) => (
+                                                <div key={key} className='flex gap-1'>
+                                                  <span className='font-medium capitalize'>{key}:</span>
+                                                  <span>{value}</span>
+                                                </div>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
