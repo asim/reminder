@@ -106,7 +106,7 @@ export default function SearchIndex() {
               {searchResults.q}
             </div>
             <div
-              className='mb-3 sm:mb-4 text-sm sm:text-base'
+              className='mb-3 sm:mb-4 text-sm sm:text-base prose prose-sm sm:prose-base max-w-none'
               dangerouslySetInnerHTML={{ __html: searchResults.answer }}
             />
 
@@ -152,7 +152,7 @@ export default function SearchIndex() {
               <h2 className='text-lg sm:text-xl font-medium mb-2 sm:mb-3'>
                 Recent Searches
               </h2>
-              <div className='text-sm sm:text-base'>
+              <div className='text-sm sm:text-base prose prose-sm sm:prose-base max-w-none'>
                 {historyData.history.map((item, idx) => {
                   const isQuestion = !item.startsWith('<p>');
                   const isAnswer = item.startsWith('<p>');

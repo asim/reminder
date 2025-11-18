@@ -1,19 +1,18 @@
 import {
-  isRouteErrorResponse,
   Links,
   Meta,
   Outlet,
   Scripts,
-  ScrollRestoration,
+  ScrollRestoration
 } from 'react-router';
 
-import type { Route } from './+types/root';
-import './app.css';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from '~/utils/query-client';
 import { Loader2Icon } from 'lucide-react';
 import { NavigationProgress } from '~/components/interface/navigation-progress';
 import { PageError } from '~/components/interface/page-error';
+import { queryClient } from '~/utils/query-client';
+import type { Route } from './+types/root';
+import './app.css';
 
 export const links: Route.LinksFunction = () => [
   {
