@@ -290,7 +290,7 @@ export default function SearchIndex() {
                             <span>{expandedHistoryRefs[historyKey] ? '▼' : '▶'}</span>
                             <span>References ({result.references.length})</span>
                           </button>
-                          
+
                           {expandedHistoryRefs[historyKey] && (
                             <div className='mt-3 space-y-3'>
                               {result.references.map((ref, refIdx) => {
