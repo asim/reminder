@@ -475,13 +475,18 @@ func main() {
 		defer mtx.RUnlock()
 
 		w.Header().Set("Content-Type", "application/rss+xml; charset=utf-8")
-		
+
 		// Get all dates and sort them
 		var dates []string
+		var hasLatest bool
 		for date := range dailyIndex {
+			if date == "latest" {
+				hasLatest = true
+				continue
+			}
 			dates = append(dates, date)
 		}
-		
+
 		// Sort dates in descending order (newest first)
 		for i := 0; i < len(dates); i++ {
 			for j := i + 1; j < len(dates); j++ {
@@ -490,37 +495,95 @@ func main() {
 				}
 			}
 		}
-		
+
 		// Start RSS feed
 		fmt.Fprintf(w, `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Daily Reminder</title>
     <link>https://reminder.dev</link>
-    <description>Daily reminders from the Quran, Hadith, and Names of Allah</description>
+    <description>Daily and hourly reminders from the Quran, Hadith, and Names of Allah</description>
     <language>en-us</language>
     <lastBuildDate>%s</lastBuildDate>
     <atom:link href="https://reminder.dev/rss" rel="self" type="application/rss+xml" />
 `, time.Now().Format(time.RFC1123Z))
-		
+
+		// Add the latest hourly reminder first
+		if hasLatest {
+			if entry, ok := dailyIndex["latest"]; ok {
+				if entryMap, ok := entry.(map[string]interface{}); ok {
+					verse := ""
+					hadith := ""
+					name := ""
+					verseLink := ""
+					hadithLink := ""
+					nameLink := ""
+					updated := time.Now().Format(time.RFC1123Z)
+
+					if v, ok := entryMap["verse"].(string); ok {
+						verse = v
+					}
+					if h, ok := entryMap["hadith"].(string); ok {
+						hadith = h
+					}
+					if n, ok := entryMap["name"].(string); ok {
+						name = n
+					}
+					if links, ok := entryMap["links"].(map[string]interface{}); ok {
+						if vl, ok := links["verse"].(string); ok {
+							verseLink = vl
+						}
+						if hl, ok := links["hadith"].(string); ok {
+							hadithLink = hl
+						}
+						if nl, ok := links["name"].(string); ok {
+							nameLink = nl
+						}
+					}
+					if upd, ok := entryMap["updated"].(string); ok {
+						if t, err := time.Parse(time.RFC850, upd); err == nil {
+							updated = t.Format(time.RFC1123Z)
+						}
+					}
+
+					description := fmt.Sprintf(`<h3>Verse</h3><p><a href="https://reminder.dev%s">%s</a></p>`,
+						verseLink, verse)
+					description += fmt.Sprintf(`<h3>Hadith</h3><p><a href="https://reminder.dev%s">%s</a></p>`,
+						hadithLink, hadith)
+					description += fmt.Sprintf(`<h3>Name</h3><p><a href="https://reminder.dev%s">%s</a></p>`,
+						nameLink, name)
+					description += `<p><em>Updated hourly</em></p>`
+
+					fmt.Fprintf(w, `    <item>
+      <title>Hourly Reminder - Latest</title>
+      <link>https://reminder.dev/api/daily/latest</link>
+      <guid>https://reminder.dev/api/daily/latest?updated=%s</guid>
+      <pubDate>%s</pubDate>
+      <description><![CDATA[%s]]></description>
+    </item>
+`, updated, updated, description)
+				}
+			}
+		}
+
 		// Add items for each date (limit to most recent 30 days)
 		maxItems := 30
 		if len(dates) < maxItems {
 			maxItems = len(dates)
 		}
-		
+
 		for i := 0; i < maxItems; i++ {
 			date := dates[i]
 			entry, ok := dailyIndex[date]
 			if !ok {
 				continue
 			}
-			
+
 			entryMap, ok := entry.(map[string]interface{})
 			if !ok {
 				continue
 			}
-			
+
 			verse := ""
 			hadith := ""
 			name := ""
@@ -528,7 +591,7 @@ func main() {
 			hadithLink := ""
 			nameLink := ""
 			hijri := ""
-			
+
 			if v, ok := entryMap["verse"].(string); ok {
 				verse = v
 			}
@@ -552,29 +615,29 @@ func main() {
 			if hj, ok := entryMap["hijri"].(string); ok {
 				hijri = hj
 			}
-			
+
 			// Parse date for pubDate
 			pubDate := date
 			if t, err := time.Parse("2006-01-02", date); err == nil {
 				pubDate = t.Format(time.RFC1123Z)
 			}
-			
+
 			// Create item content
-			description := fmt.Sprintf(`<h3>Verse</h3><p><a href="https://reminder.dev%s">%s</a></p>`, 
+			description := fmt.Sprintf(`<h3>Verse</h3><p><a href="https://reminder.dev%s">%s</a></p>`,
 				verseLink, verse)
-			description += fmt.Sprintf(`<h3>Hadith</h3><p><a href="https://reminder.dev%s">%s</a></p>`, 
+			description += fmt.Sprintf(`<h3>Hadith</h3><p><a href="https://reminder.dev%s">%s</a></p>`,
 				hadithLink, hadith)
-			description += fmt.Sprintf(`<h3>Name</h3><p><a href="https://reminder.dev%s">%s</a></p>`, 
+			description += fmt.Sprintf(`<h3>Name</h3><p><a href="https://reminder.dev%s">%s</a></p>`,
 				nameLink, name)
 			if hijri != "" {
 				description += fmt.Sprintf(`<p><em>%s</em></p>`, hijri)
 			}
-			
+
 			title := fmt.Sprintf("Daily Reminder - %s", date)
 			if hijri != "" {
 				title = fmt.Sprintf("Daily Reminder - %s (%s)", date, hijri)
 			}
-			
+
 			fmt.Fprintf(w, `    <item>
       <title>%s</title>
       <link>https://reminder.dev/api/daily/%s</link>
@@ -584,7 +647,7 @@ func main() {
     </item>
 `, title, date, date, pubDate, description)
 		}
-		
+
 		fmt.Fprintf(w, `  </channel>
 </rss>`)
 	})
