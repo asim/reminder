@@ -556,8 +556,8 @@ func main() {
 
 					fmt.Fprintf(w, `    <item>
       <title>Hourly Reminder - Latest</title>
-      <link>https://reminder.dev/daily</link>
-      <guid>https://reminder.dev/daily?updated=%s</guid>
+      <link>https://reminder.dev/daily/latest</link>
+      <guid>https://reminder.dev/daily/latest#%s</guid>
       <pubDate>%s</pubDate>
       <description><![CDATA[%s]]></description>
     </item>
@@ -640,12 +640,12 @@ func main() {
 
 			fmt.Fprintf(w, `    <item>
       <title>%s</title>
-      <link>https://reminder.dev/daily</link>
+      <link>https://reminder.dev/daily/%s</link>
       <guid>https://reminder.dev/daily/%s</guid>
       <pubDate>%s</pubDate>
       <description><![CDATA[%s]]></description>
     </item>
-`, title, date, pubDate, description)
+`, title, date, date, pubDate, description)
 		}
 
 		fmt.Fprintf(w, `  </channel>
