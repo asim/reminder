@@ -513,46 +513,16 @@ func main() {
 			if entry, ok := dailyIndex["latest"]; ok {
 				if entryMap, ok := entry.(map[string]interface{}); ok {
 					verse := ""
-					hadith := ""
-					name := ""
-					verseLink := ""
-					hadithLink := ""
-					nameLink := ""
 					updated := time.Now().Format(time.RFC1123Z)
 
 					if v, ok := entryMap["verse"].(string); ok {
 						verse = v
-					}
-					if h, ok := entryMap["hadith"].(string); ok {
-						hadith = h
-					}
-					if n, ok := entryMap["name"].(string); ok {
-						name = n
-					}
-					if links, ok := entryMap["links"].(map[string]interface{}); ok {
-						if vl, ok := links["verse"].(string); ok {
-							verseLink = vl
-						}
-						if hl, ok := links["hadith"].(string); ok {
-							hadithLink = hl
-						}
-						if nl, ok := links["name"].(string); ok {
-							nameLink = nl
-						}
 					}
 					if upd, ok := entryMap["updated"].(string); ok {
 						if t, err := time.Parse(time.RFC850, upd); err == nil {
 							updated = t.Format(time.RFC1123Z)
 						}
 					}
-
-					description := fmt.Sprintf(`<h3>Verse</h3><p><a href="https://reminder.dev%s">%s</a></p>`,
-						verseLink, verse)
-					description += fmt.Sprintf(`<h3>Hadith</h3><p><a href="https://reminder.dev%s">%s</a></p>`,
-						hadithLink, hadith)
-					description += fmt.Sprintf(`<h3>Name</h3><p><a href="https://reminder.dev%s">%s</a></p>`,
-						nameLink, name)
-					description += `<p><em>Updated hourly</em></p>`
 
 					fmt.Fprintf(w, `    <item>
       <title>Hourly Reminder - Latest</title>
@@ -561,7 +531,7 @@ func main() {
       <pubDate>%s</pubDate>
       <description><![CDATA[%s]]></description>
     </item>
-`, updated, updated, description)
+`, updated, updated, verse)
 				}
 			}
 		}
@@ -585,32 +555,10 @@ func main() {
 			}
 
 			verse := ""
-			hadith := ""
-			name := ""
-			verseLink := ""
-			hadithLink := ""
-			nameLink := ""
 			hijri := ""
 
 			if v, ok := entryMap["verse"].(string); ok {
 				verse = v
-			}
-			if h, ok := entryMap["hadith"].(string); ok {
-				hadith = h
-			}
-			if n, ok := entryMap["name"].(string); ok {
-				name = n
-			}
-			if links, ok := entryMap["links"].(map[string]interface{}); ok {
-				if vl, ok := links["verse"].(string); ok {
-					verseLink = vl
-				}
-				if hl, ok := links["hadith"].(string); ok {
-					hadithLink = hl
-				}
-				if nl, ok := links["name"].(string); ok {
-					nameLink = nl
-				}
 			}
 			if hj, ok := entryMap["hijri"].(string); ok {
 				hijri = hj
@@ -620,17 +568,6 @@ func main() {
 			pubDate := date
 			if t, err := time.Parse("2006-01-02", date); err == nil {
 				pubDate = t.Format(time.RFC1123Z)
-			}
-
-			// Create item content
-			description := fmt.Sprintf(`<h3>Verse</h3><p><a href="https://reminder.dev%s">%s</a></p>`,
-				verseLink, verse)
-			description += fmt.Sprintf(`<h3>Hadith</h3><p><a href="https://reminder.dev%s">%s</a></p>`,
-				hadithLink, hadith)
-			description += fmt.Sprintf(`<h3>Name</h3><p><a href="https://reminder.dev%s">%s</a></p>`,
-				nameLink, name)
-			if hijri != "" {
-				description += fmt.Sprintf(`<p><em>%s</em></p>`, hijri)
 			}
 
 			title := fmt.Sprintf("Daily Reminder - %s", date)
@@ -645,7 +582,7 @@ func main() {
       <pubDate>%s</pubDate>
       <description><![CDATA[%s]]></description>
     </item>
-`, title, date, date, pubDate, description)
+`, title, date, date, pubDate, verse)
 		}
 
 		fmt.Fprintf(w, `  </channel>
