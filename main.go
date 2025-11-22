@@ -476,13 +476,19 @@ func main() {
 
 		w.Header().Set("Content-Type", "application/rss+xml; charset=utf-8")
 
-		// Get all dates and sort them (exclude "latest" since it changes hourly)
+		// Get all dates and sort them (separate hourly from daily)
 		var dates []string
+		var hourlyKeys []string
 		for date := range dailyIndex {
 			if date == "latest" {
 				continue
 			}
-			dates = append(dates, date)
+			// Hourly format: 2025-11-22T14
+			if len(date) > 10 && date[10] == 'T' {
+				hourlyKeys = append(hourlyKeys, date)
+			} else {
+				dates = append(dates, date)
+			}
 		}
 
 		// Sort dates in descending order (newest first)
@@ -490,6 +496,15 @@ func main() {
 			for j := i + 1; j < len(dates); j++ {
 				if dates[i] < dates[j] {
 					dates[i], dates[j] = dates[j], dates[i]
+				}
+			}
+		}
+
+		// Sort hourly keys in descending order (newest first)
+		for i := 0; i < len(hourlyKeys); i++ {
+			for j := i + 1; j < len(hourlyKeys); j++ {
+				if hourlyKeys[i] < hourlyKeys[j] {
+					hourlyKeys[i], hourlyKeys[j] = hourlyKeys[j], hourlyKeys[i]
 				}
 			}
 		}
@@ -505,6 +520,45 @@ func main() {
     <lastBuildDate>%s</lastBuildDate>
     <atom:link href="https://reminder.dev/rss" rel="self" type="application/rss+xml" />
 `, time.Now().Format(time.RFC1123Z))
+
+		// Add hourly reminders (last 24 hours)
+		maxHourly := 24
+		if len(hourlyKeys) < maxHourly {
+			maxHourly = len(hourlyKeys)
+		}
+
+		for i := 0; i < maxHourly; i++ {
+			hourlyKey := hourlyKeys[i]
+			entry, ok := dailyIndex[hourlyKey]
+			if !ok {
+				continue
+			}
+
+			entryMap, ok := entry.(map[string]interface{})
+			if !ok {
+				continue
+			}
+
+			verse := ""
+			if v, ok := entryMap["verse"].(string); ok {
+				verse = v
+			}
+
+			// Parse hourly key for pubDate
+			pubDate := hourlyKey
+			if t, err := time.Parse("2006-01-02T15", hourlyKey); err == nil {
+				pubDate = t.Format(time.RFC1123Z)
+			}
+
+			fmt.Fprintf(w, `    <item>
+      <title>Hourly Reminder - %s</title>
+      <link>https://reminder.dev/daily/%s</link>
+      <guid>https://reminder.dev/daily/%s</guid>
+      <pubDate>%s</pubDate>
+      <description><![CDATA[%s]]></description>
+    </item>
+`, hourlyKey, hourlyKey, hourlyKey, pubDate, verse)
+		}
 
 		// Add items for each date (limit to most recent 30 days)
 		maxItems := 30
@@ -833,18 +887,23 @@ func main() {
 			hijriDate := daily.Date().Display
 			message := "In the Name of Allah—the Most Beneficent, Most Merciful"
 			today := time.Now().Format("2006-01-02")
+			hourlyKey := dailyUpdated.Format("2006-01-02T15") // Hour-based permalink
 
 			dailyData := map[string]interface{}{
 				"verse":   dailyVerse,
 				"hadith":  dailyHadith,
 				"name":    dailyName,
 				"hijri":   "Updated hourly",
-				"date":    "latest",
+				"date":    hourlyKey,
 				"links":   links,
 				"updated": dailyUpdated.Format(time.RFC850),
 				"message": message,
 			}
 
+			// Save with hourly permalink
+			saveDaily(hourlyKey, dailyData)
+			// Also save as "latest" for easy access
+			dailyData["date"] = "latest"
 			saveDaily("latest", dailyData)
 
 			mtx.Unlock()
