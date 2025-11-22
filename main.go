@@ -476,12 +476,10 @@ func main() {
 
 		w.Header().Set("Content-Type", "application/rss+xml; charset=utf-8")
 
-		// Get all dates and sort them
+		// Get all dates and sort them (exclude "latest" since it changes hourly)
 		var dates []string
-		var hasLatest bool
 		for date := range dailyIndex {
 			if date == "latest" {
-				hasLatest = true
 				continue
 			}
 			dates = append(dates, date)
@@ -507,34 +505,6 @@ func main() {
     <lastBuildDate>%s</lastBuildDate>
     <atom:link href="https://reminder.dev/rss" rel="self" type="application/rss+xml" />
 `, time.Now().Format(time.RFC1123Z))
-
-		// Add the latest hourly reminder first
-		if hasLatest {
-			if entry, ok := dailyIndex["latest"]; ok {
-				if entryMap, ok := entry.(map[string]interface{}); ok {
-					verse := ""
-					updated := time.Now().Format(time.RFC1123Z)
-
-					if v, ok := entryMap["verse"].(string); ok {
-						verse = v
-					}
-					if upd, ok := entryMap["updated"].(string); ok {
-						if t, err := time.Parse(time.RFC850, upd); err == nil {
-							updated = t.Format(time.RFC1123Z)
-						}
-					}
-
-					fmt.Fprintf(w, `    <item>
-      <title>Hourly Reminder - Latest</title>
-      <link>https://reminder.dev/daily/latest</link>
-      <guid>https://reminder.dev/daily/latest#%s</guid>
-      <pubDate>%s</pubDate>
-      <description><![CDATA[%s]]></description>
-    </item>
-`, updated, updated, verse)
-				}
-			}
-		}
 
 		// Add items for each date (limit to most recent 30 days)
 		maxItems := 30
