@@ -4,7 +4,7 @@ Quran, hadith and names of Allah all in one app and API.
 
 ## Overview
 
-The Reminder is an API and app for the Quran, Hadith (Bukhari) and Names of Allah. It provides search and question answering using **local Ollama by default** for both embeddings and LLM responses, with optional Fanar or OpenAI integration. RAG (Retrieval Augmented Generation) ensures answers are grounded in authentic Islamic texts. The goal is to consolidate these texts and 
+The Reminder is an API and app for the Quran, Hadith (Bukhari) and Names of Allah. It provides search and question answering with **flexible embedding backends** (OpenAI for speed, Ollama for privacy) and **local-first LLM** (Ollama by default, with optional Fanar/OpenAI). RAG (Retrieval Augmented Generation) ensures answers are grounded in authentic Islamic texts. The goal is to consolidate these texts and 
 information into a single API and app and 
 leverage LLMs as a tool for searching. We
 do not offload reasoning to LLMs but they 
