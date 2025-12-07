@@ -13,7 +13,7 @@ export default function AppLayout() {
 
   return (
     <div className='flex flex-col h-screen overflow-hidden'>
-      <div className='w-full text-sm py-2 px-2 bg-black text-white flex flex-row items-center gap-1'>
+      <div className='w-full text-sm py-2 px-2 bg-black text-white flex flex-row items-center gap-1 flex-shrink-0'>
         {/* Left-aligned reminder link with R logo */}
         <div className="inline-block order-1">
           <a href="/" className="border border-gray-600 rounded px-2 py-1 hover:border-gray-400 transition-colors">
@@ -64,7 +64,9 @@ export default function AppLayout() {
           </NavLink>
         </div>
       </div>
-      <Outlet />
+      <div className='flex-1 overflow-hidden'>
+        <Outlet />
+      </div>
     </div>
   );
 }

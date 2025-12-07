@@ -56,7 +56,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
     const element = document.getElementById(verseId);
     if (element) {
       setTimeout(() => {
-        element.scrollIntoView({ behavior: 'instant' });
+        element.scrollIntoView({ behavior: 'instant', block: 'center', inline: 'nearest' });
       }, 100);
     }
   }, [data, mode]);
