@@ -4,7 +4,7 @@ Quran, hadith and names of Allah all in one app and API.
 
 ## Overview
 
-The Reminder is an API and app for the Quran, Hadith (Bukhari) and Names of Allah. It provides search summarisation using OpenAI and RAG context referencing. The goal is to consolidate these texts and 
+The Reminder is an API and app for the Quran, Hadith (Bukhari) and Names of Allah. It provides search and question answering using **local Ollama by default** for both embeddings and LLM responses, with optional Fanar or OpenAI integration. RAG (Retrieval Augmented Generation) ensures answers are grounded in authentic Islamic texts. The goal is to consolidate these texts and 
 information into a single API and app and 
 leverage LLMs as a tool for searching. We
 do not offload reasoning to LLMs but they 
@@ -25,8 +25,8 @@ are a new form of useful indexing for search.
 - Quran in English & Arabic
 - Names of Allah & Meaning
 - Hadith (Bukhari) in English
-- Index & Search using GPT 4o
-- RAG contextual referencing
+- Index & Search with RAG using embeddings
+- Optional Fanar or OpenAI integration
 - API to query LLM or Quran
 - Daily web push notifications
 
@@ -42,16 +42,38 @@ go get github.com.com/asim/reminder@latest
 
 ## Usage
 
-Set the `OPENAI_API_KEY` value
+First, install and start [Ollama](https://ollama.ai/):
 
+```bash
+# Install Ollama (see https://ollama.ai/ for your platform)
+# Then pull the required models
+ollama pull nomic-embed-text  # For embeddings
+ollama pull llama3.2           # For LLM responses (or any model you prefer)
 ```
+
+**LLM Configuration** (optional - defaults to local Ollama):
+
+The app now uses **local Ollama by default** for LLM responses. You can override with:
+
+```bash
+# Use Fanar API (takes priority over Ollama/OpenAI)
+export FANAR_API_KEY=xxx
+
+# Use a specific Ollama model (default: llama3.2)
+export OLLAMA_LLM_MODEL=llama3.1
+
+# Use OpenAI as fallback (only if no Fanar key and OLLAMA_LLM_MODEL not set)
 export OPENAI_API_KEY=xxx
 ```
 
-To use [Fanar](https://fanar.qa/) instead
+**Embedding Configuration** (optional - defaults to local Ollama):
 
-```
-export FANAR_API_KEY=xxx
+```bash
+# Use a different Ollama model for embeddings (default: nomic-embed-text)
+export OLLAMA_EMBED_MODEL=mxbai-embed-large
+
+# Use a different Ollama instance (default: http://localhost:11434/api)
+export OLLAMA_BASE_URL=http://your-ollama-server:11434/api
 ```
 
 Run the server 
@@ -117,5 +139,5 @@ We have been requested to verify the sources of data
 - [Sahih Bukhari](https://github.com/asim/bukhari)
 - [Word by word](https://github.com/asim/quranwbw)
 
-Summarisation is provided by OpenAI but all sources of truth are authentic
+By default, all LLM operations (embeddings and text generation) run locally via Ollama. Optional cloud LLM providers (Fanar/OpenAI) can be configured. All sources of truth are authentic.
 

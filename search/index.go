@@ -30,6 +30,23 @@ type Result struct {
 	Metadata map[string]string `json:"metadata"`
 }
 
+// getEmbeddingFunc returns an embedding function based on environment configuration.
+// Defaults to Ollama with nomic-embed-text model.
+// Set OLLAMA_BASE_URL to use a different Ollama instance (default: http://localhost:11434/api)
+// Set OLLAMA_EMBED_MODEL to use a different model (default: nomic-embed-text)
+func getEmbeddingFunc() chromem.EmbeddingFunc {
+	model := os.Getenv("OLLAMA_EMBED_MODEL")
+	if model == "" {
+		model = "nomic-embed-text"
+	}
+	
+	baseURL := os.Getenv("OLLAMA_BASE_URL")
+	// baseURL can be empty - chromem-go will use http://localhost:11434/api by default
+	
+	return chromem.NewEmbeddingFuncOllama(model, baseURL)
+}
+
+
 // Load the embedded index
 func (i *Index) Load() error {
 	f, err := files.Open("data/" + i.Name + ".idx.gob.gz")
@@ -74,7 +91,9 @@ func (i *Index) Load() error {
 		}
 	*/
 
-	c, err := i.DB.GetOrCreateCollection(i.Name, nil, nil)
+	// Use Ollama with nomic-embed-text for embeddings
+	embeddingFunc := getEmbeddingFunc()
+	c, err := i.DB.GetOrCreateCollection(i.Name, nil, embeddingFunc)
 	if err != nil {
 		return err
 	}
@@ -97,7 +116,9 @@ func (i *Index) Import() error {
 		return err
 	}
 
-	c, err := i.DB.GetOrCreateCollection(i.Name, nil, nil)
+	// Use Ollama with nomic-embed-text for embeddings
+	embeddingFunc := getEmbeddingFunc()
+	c, err := i.DB.GetOrCreateCollection(i.Name, nil, embeddingFunc)
 	if err != nil {
 		return err
 	}
@@ -153,6 +174,9 @@ func New(name string, persist bool) *Index {
 	var db *chromem.DB
 	var c *chromem.Collection
 
+	// Use Ollama with nomic-embed-text for embeddings
+	embeddingFunc := getEmbeddingFunc()
+
 	if persist {
 		path := filepath.Join(u.HomeDir, name+".idx")
 
@@ -162,13 +186,13 @@ func New(name string, persist bool) *Index {
 			panic(err)
 		}
 
-		c, err = db.GetOrCreateCollection(name, nil, nil)
+		c, err = db.GetOrCreateCollection(name, nil, embeddingFunc)
 		if err != nil {
 			panic(err)
 		}
 	} else {
 		db = chromem.NewDB()
-		c, _ = db.CreateCollection(name, nil, nil)
+		c, _ = db.CreateCollection(name, nil, embeddingFunc)
 	}
 
 	return &Index{

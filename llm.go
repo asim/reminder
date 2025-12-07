@@ -40,14 +40,32 @@ func askLLM(ctx context.Context, contexts []string, question string) string {
 	var model string
 	var config openai.ClientConfig
 
+	// Priority: 1. Fanar, 2. Ollama (local), 3. OpenAI (fallback)
 	fanarKey := os.Getenv("FANAR_API_KEY")
+	ollamaModel := os.Getenv("OLLAMA_LLM_MODEL")
+	openaiKey := os.Getenv("OPENAI_API_KEY")
+
 	if len(fanarKey) > 0 {
+		// Use Fanar API
 		apiKey = fanarKey
 		config = openai.DefaultConfig(apiKey)
 		config.BaseURL = "https://api.fanar.qa/v1"
 		model = "Fanar"
+	} else if len(ollamaModel) > 0 || (len(openaiKey) == 0) {
+		// Use local Ollama (default if no API keys set)
+		if ollamaModel == "" {
+			ollamaModel = "llama3.2" // Default Ollama model
+		}
+		baseURL := os.Getenv("OLLAMA_BASE_URL")
+		if baseURL == "" {
+			baseURL = "http://localhost:11434/v1"
+		}
+		config = openai.DefaultConfig("ollama") // API key not needed for Ollama
+		config.BaseURL = baseURL
+		model = ollamaModel
 	} else {
-		apiKey = os.Getenv("OPENAI_API_KEY")
+		// Fallback to OpenAI
+		apiKey = openaiKey
 		config = openai.DefaultConfig(apiKey)
 		model = openai.GPT4oMini
 	}
