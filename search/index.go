@@ -39,13 +39,12 @@ func getEmbeddingFunc() chromem.EmbeddingFunc {
 	if model == "" {
 		model = "nomic-embed-text"
 	}
-	
+
 	baseURL := os.Getenv("OLLAMA_BASE_URL")
 	// baseURL can be empty - chromem-go will use http://localhost:11434/api by default
-	
+
 	return chromem.NewEmbeddingFuncOllama(model, baseURL)
 }
-
 
 // Load the embedded index
 func (i *Index) Load() error {
