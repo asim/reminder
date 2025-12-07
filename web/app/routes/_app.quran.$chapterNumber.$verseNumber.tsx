@@ -1,7 +1,7 @@
-import React from 'react';
 import type { Route } from '.react-router/types/app/routes/+types/_app.quran.$chapterNumber.$verseNumber';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { CircleChevronLeft, CircleChevronRight } from 'lucide-react';
+import React from 'react';
 import { Link } from 'react-router';
 import { PageError } from '~/components/interface/page-error';
 import { PrimaryButton } from '~/components/interface/primary-button';
@@ -73,10 +73,10 @@ export default function QuranVerse(props: Route.ComponentProps) {
           </label>
         </div>
       )}
-      
+
       {mode === 'arabic' && (
         <div className='flex flex-col flex-grow'>
-          <div 
+          <div
             dir='rtl'
             className='text-2xl sm:text-2xl md:text-3xl text-right leading-loose font-arabic'
           >
