@@ -42,13 +42,22 @@ go get github.com.com/asim/reminder@latest
 
 ## Usage
 
-First, install and start [Ollama](https://ollama.ai/):
+**Quick Start** (requires OpenAI API key for fast embeddings):
 
 ```bash
-# Install Ollama (see https://ollama.ai/ for your platform)
-# Then pull the required models
+export OPENAI_API_KEY=xxx
+reminder --serve
+```
+
+**Alternative: Fully Local** (slower, requires Ollama):
+
+```bash
+# Install and start Ollama (https://ollama.ai/)
 ollama pull nomic-embed-text  # For embeddings
-ollama pull llama3.2           # For LLM responses (or any model you prefer)
+ollama pull llama3.2           # For LLM responses
+
+# Don't set OPENAI_API_KEY - will use Ollama for both
+reminder --serve
 ```
 
 **LLM Configuration** (optional - defaults to local Ollama):
@@ -66,14 +75,29 @@ export OLLAMA_LLM_MODEL=llama3.1
 export OPENAI_API_KEY=xxx
 ```
 
-**Embedding Configuration** (optional - defaults to local Ollama):
+**Embedding Configuration**:
+
+For **best performance**, use OpenAI embeddings (fast & cheap - $0.02/1M tokens):
 
 ```bash
-# Use a different Ollama model for embeddings (default: nomic-embed-text)
-export OLLAMA_EMBED_MODEL=mxbai-embed-large
+export OPENAI_API_KEY=xxx  # Uses text-embedding-3-small (fast, 1536 dims)
+```
 
-# Use a different Ollama instance (default: http://localhost:11434/api)
-export OLLAMA_BASE_URL=http://your-ollama-server:11434/api
+For **local/offline** (slower, but no API costs):
+
+```bash
+# Install Ollama first: https://ollama.ai/
+ollama pull nomic-embed-text
+
+# Optional: use different model or instance
+export OLLAMA_EMBED_MODEL=nomic-embed-text  # default
+export OLLAMA_BASE_URL=http://localhost:11434/api  # default
+```
+
+**Migration Note**: If switching embedding providers, delete the old index cache:
+
+```bash
+rm -rf ~/.reminder/data/reminder.idx.gob.gz
 ```
 
 Run the server 

@@ -31,10 +31,19 @@ type Result struct {
 }
 
 // getEmbeddingFunc returns an embedding function based on environment configuration.
-// Defaults to Ollama with nomic-embed-text model.
+// Priority: 1. OpenAI (fast, requires API key), 2. Ollama (local, slower)
+// Set OPENAI_API_KEY to use OpenAI embeddings (text-embedding-3-small, fast & cheap)
+// Set OLLAMA_EMBED_MODEL to use a different Ollama model (default: nomic-embed-text)
 // Set OLLAMA_BASE_URL to use a different Ollama instance (default: http://localhost:11434/api)
-// Set OLLAMA_EMBED_MODEL to use a different model (default: nomic-embed-text)
 func getEmbeddingFunc() chromem.EmbeddingFunc {
+	// Check for OpenAI API key first - much faster for embeddings
+	openaiKey := os.Getenv("OPENAI_API_KEY")
+	if openaiKey != "" {
+		// Use OpenAI's text-embedding-3-small - fast, cheap ($0.02/1M tokens), good quality
+		return chromem.NewEmbeddingFuncOpenAI(openaiKey, chromem.EmbeddingModelOpenAI3Small)
+	}
+
+	// Fall back to local Ollama
 	model := os.Getenv("OLLAMA_EMBED_MODEL")
 	if model == "" {
 		model = "nomic-embed-text"
@@ -77,7 +86,9 @@ func (i *Index) Load() error {
 
 	// read from file
 	if err := i.DB.ImportFromFile(fpath, ""); err != nil {
-		return err
+		// If import fails, the index might be incompatible (different embedding dimensions)
+		// Return error so caller can handle (e.g., rebuild index)
+		return fmt.Errorf("failed to import index (may need rebuild): %w", err)
 	}
 
 	/*
