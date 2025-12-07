@@ -29,7 +29,7 @@ export default function BookmarksPage() {
     namesEntries.length > 0;
 
   return (
-    <div className='max-w-4xl mx-auto w-full p-4 lg:p-8 mb-8 sm:mb-12 flex-grow'>
+    <div className='max-w-4xl mx-auto w-full p-4 lg:p-8 mb-8 sm:mb-12 flex-grow overflow-y-auto'>
       <div className='text-center mt-0 sm:mt-6 md:mt-8 mb-4 sm:mb-8 md:mb-12'>
         <h1 className='text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2'>
           Bookmarks

@@ -144,8 +144,8 @@ export default function SearchIndex() {
   };
 
   return (
-    <div className='w-full flex flex-col flex-1 overflow-y-auto'>
-      <div className='flex flex-col flex-1 w-full p-4 sm:p-6 lg:p-8 max-w-3xl mx-auto'>
+    <div className='w-full h-full flex flex-col overflow-y-auto'>
+      <div className='flex flex-col w-full p-4 sm:p-6 lg:p-8 max-w-3xl mx-auto'>
         <h1 className='text-2xl sm:text-3xl md:text-4xl font-semibold mb-4 sm:mb-6 text-left'>
           Search
         </h1>
