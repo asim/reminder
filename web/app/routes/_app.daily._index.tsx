@@ -85,8 +85,7 @@ export default function DailyIndex() {
       </div>
       <section>
         <div className="text-sm sm:text-base text-gray-700 mb-2">
-          Browse daily reminders from the Quran, hadith and names of Allah. Subscribe to notifications
-          using the Enable Notifications button above.
+          Browse daily reminders from the Quran, hadith and names of Allah. Click the Enable Notifications button to subscribe.
         </div>
       </section>
       <section>
