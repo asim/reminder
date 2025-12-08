@@ -36,8 +36,9 @@ export default function HomePage() {
     if (error || !data) return <div className="p-4 text-red-500">Failed to load latest reminder.</div>;
 
     return (
-        <div className="max-w-4xl mx-auto w-full p-4 lg:p-8 mb-8 sm:mb-12 space-y-6 sm:space-y-8 overflow-y-auto">
-            <div className="text-center">
+        <div className="h-full w-full overflow-y-auto">
+            <div className="max-w-4xl mx-auto w-full p-4 lg:p-8 mb-8 sm:mb-12 space-y-6 sm:space-y-8">
+                <div className="text-center">
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3">
                     Latest Reminder
                 </h1>
@@ -124,6 +125,7 @@ export default function HomePage() {
                     </Link>
                 </div>
             </div>
+        </div>
         </div>
     );
 }
