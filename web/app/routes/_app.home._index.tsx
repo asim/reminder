@@ -109,7 +109,7 @@ export default function HomePage() {
                             to="/daily"
                             className="inline-block px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors text-center text-sm sm:text-base"
                         >
-                            View Daily Archive
+                            View Daily Reminders
                         </Link>
                         <Link
                             to="/quran"

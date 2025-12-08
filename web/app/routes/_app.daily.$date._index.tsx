@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router';
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { httpPost } from '~/utils/http';
 
 interface DailyResponse {
@@ -32,7 +32,7 @@ function formatDate(dateString: string) {
 
 export default function DailyByDate() {
   const { date } = useParams<{ date: string }>();
-  const { data } = useSuspenseQuery<DailyResponse>({
+  const { data, isLoading, error } = useQuery<DailyResponse>({
     queryKey: ['daily-by-date', date],
     queryFn: async () => {
       if (!date) throw new Error('No date provided');
@@ -40,7 +40,11 @@ export default function DailyByDate() {
     },
     enabled: !!date,
   });
+
   if (!date) return <div className="p-4 text-red-500">No date provided</div>;
+  if (isLoading) return <div className="p-4">Loading...</div>;
+  if (error || !data) return <div className="p-4 text-red-500">Failed to load daily reminder. Please check if the server is running.</div>;
+
   // Defensive: extract fields, but render whatever is present
   const { verse, hadith, name, links: rawLinks, updated, message, hijri: hijriDate } = data;
   const links = rawLinks || {};
