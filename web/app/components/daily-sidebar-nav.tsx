@@ -31,9 +31,10 @@ export default function DailySidebarNav() {
   });
   if (!data) return null;
 
-  // Sort by date descending
-
-  const entries = Object.entries(data).sort((a, b) => b[0].localeCompare(a[0])) as [string, DailyIndexEntry][];
+  // Filter out 'latest' entry and sort by date descending
+  const entries = Object.entries(data)
+    .filter(([date]) => date !== 'latest')
+    .sort((a, b) => b[0].localeCompare(a[0])) as [string, DailyIndexEntry][];
 
   const sidebarItems: SidebarItem[] = entries.map(([date, entry], index) => ({
     key: date,
