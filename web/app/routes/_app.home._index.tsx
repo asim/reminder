@@ -44,7 +44,7 @@ export default function HomePage() {
                         <div className="w-16 h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 rounded-full mb-4 mx-auto"></div>
                     </div>
                     <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-3 sm:mb-4">
-                        Daily Reminder
+                        The Reminder
                     </h1>
                     <p className="text-sm sm:text-base text-gray-600 mb-2 italic">
                         "And remind, for indeed, the reminder benefits the believers" — Quran 51:55
