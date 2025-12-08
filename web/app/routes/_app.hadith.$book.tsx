@@ -54,8 +54,14 @@ export default function HadithBook() {
         // Find the scrollable parent container
         const scrollContainer = element.closest('.overflow-y-auto');
         if (scrollContainer) {
-          const elementTop = element.offsetTop;
-          scrollContainer.scrollTo({ top: elementTop - 100, behavior: 'smooth' });
+          // Get the element's position relative to the scroll container
+          const containerRect = scrollContainer.getBoundingClientRect();
+          const elementRect = element.getBoundingClientRect();
+          const relativeTop = elementRect.top - containerRect.top;
+          const currentScrollTop = scrollContainer.scrollTop;
+          const targetScrollTop = currentScrollTop + relativeTop - 100;
+          
+          scrollContainer.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
         } else {
           element.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
@@ -118,29 +124,35 @@ export default function HadithBook() {
       </div>
 
       <div className='space-y-3 sm:space-y-4'>
-        {filteredHadiths.map((hadith, idx) => (
-          <div
-            key={`${hadith.info}-${hadith.by}-${bookNumber}`}
-            id={`${idx + 1}`}
-            className='p-3 sm:p-4 md:p-6 border border-gray-200 rounded-lg space-y-2 sm:space-y-4 hover:border-gray-300 transition-colors'
-          >
+        {filteredHadiths.map((hadith, idx) => {
+          // Extract hadith number from info field (e.g., "Volume 9, Book 93, Number 473 :")
+          const hadithNumber = hadith.info.includes('Number')
+            ? hadith.info.split('Number')[1].split(':')[0].trim()
+            : `${idx + 1}`;
+          
+          return (
+            <div
+              key={`${hadith.info}-${hadith.by}-${bookNumber}`}
+              id={hadithNumber}
+              className='p-3 sm:p-4 md:p-6 border border-gray-200 rounded-lg space-y-2 sm:space-y-4 hover:border-gray-300 transition-colors'
+            >
             <div className='flex gap-2 lg:mb-0 mb-4 lg:gap-0 lg:flex-row flex-col justify-start lg:justify-between items-start lg:items-center'>
               <span className='text-sm sm:text-base font-medium text-gray-700'>
-                {hadith.info.trim().replace(/:$/, '')}
-              </span>
-              <div className='flex items-center gap-2'>
-                <span className='text-sm text-balance sm:text-base font-medium text-gray-700'>
-                  {hadith.by}
-                </span>
                 <BookmarkButton
                   type='hadith'
-                  itemKey={`${bookNumber}:${idx + 1}`}
-                  label={`Hadith ${bookNumber}:${idx + 1} - ${hadith.info}`}
-                  url={`/hadith/${bookNumber}#${idx + 1}`}
+                  itemKey={`${bookNumber}:${hadithNumber}`}
+                  label={`Hadith ${bookNumber}:${hadithNumber} - ${hadith.info}`}
+                  url={`/hadith/${bookNumber}#${hadithNumber}`}
                 />
               </div>
             </div>
 
+            <p className='text-gray-800 text-base sm:text-lg leading-relaxed'>
+              {hadith.text}
+            </p>
+          </div>
+        )})}
+      </div>
             <p className='text-gray-800 text-base sm:text-lg leading-relaxed'>
               {hadith.text}
             </p>
