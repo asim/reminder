@@ -419,20 +419,29 @@ func main() {
 	})
 
 	http.HandleFunc("/api/daily", func(w http.ResponseWriter, r *http.Request) {
-		// GET: default current day
+		// GET: today's archived daily (saved at midnight UTC)
+		today := time.Now().UTC().Format("2006-01-02")
+		
 		mtx.RLock()
-		message := "In the Name of Allah—the Most Beneficent, Most Merciful"
-		resp := map[string]interface{}{
-			"name":    dailyName,
-			"hadith":  dailyHadith,
-			"verse":   dailyVerse,
-			"links":   links,
-			"updated": dailyUpdated.Format(time.RFC850),
-			"message": message,
-			"hijri":   daily.Date().Display,
-			"date":    dailyUpdated.Format("2006-01-02"),
+		var resp interface{}
+		if entry, ok := dailyIndex[today]; ok {
+			resp = entry
+		} else {
+			// If today's archived daily doesn't exist yet, return the hourly updated content
+			message := "In the Name of Allah—the Most Beneficent, Most Merciful"
+			resp = map[string]interface{}{
+				"name":    dailyName,
+				"hadith":  dailyHadith,
+				"verse":   dailyVerse,
+				"links":   links,
+				"updated": dailyUpdated.Format(time.RFC850),
+				"message": message,
+				"hijri":   daily.Date().Display,
+				"date":    today,
+			}
 		}
 		mtx.RUnlock()
+		
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(resp)
 	})
@@ -811,6 +820,15 @@ func main() {
 	}
 
 	daily := func() {
+		// Check if we're within the first 5 minutes after midnight UTC
+		// This handles server restarts that happen right at midnight
+		isWithinGracePeriod := func() bool {
+			now := time.Now().UTC()
+			midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+			sinceMidnight := now.Sub(midnight)
+			return sinceMidnight >= 0 && sinceMidnight < 5*time.Minute
+		}
+
 		for {
 			fmt.Println("Running daily")
 
@@ -848,14 +866,15 @@ func main() {
 
 			dailyUpdated = time.Now()
 			hijriDate := daily.Date().Display
-			today := time.Now().Format("2006-01-02")
+			today := time.Now().UTC().Format("2006-01-02")
 
 			// Don't save 'latest' to the daily archive anymore
 			// The hourly reminder is now served via /api/latest and /home
 
 			mtx.Unlock()
 
-			if lastPushDate != today {
+			// Check if we should send push notification (new day or within grace period after midnight)
+			if lastPushDate != today || (lastPushDate == today && isWithinGracePeriod()) {
 				mtx.Lock()
 
 				// Compose a user-friendly notification message
@@ -890,23 +909,28 @@ func main() {
 
 				b, _ := json.Marshal(payload)
 
-				fmt.Println("Sending push notification")
+				// Only send if we haven't already sent today
+				if lastPushDate != today {
+					fmt.Println("Sending push notification at midnight UTC")
 
-				errors := api.SendPushToAll(string(b))
-				if len(errors) > 0 {
-					fmt.Println("Push notification errors:")
-					for _, err := range errors {
-						fmt.Println(err)
+					errors := api.SendPushToAll(string(b))
+					if len(errors) > 0 {
+						fmt.Println("Push notification errors:")
+						for _, err := range errors {
+							fmt.Println(err)
+						}
 					}
-				}
 
-				lastPushDate = today
-				saveLastPushDate(today)
+					lastPushDate = today
+					saveLastPushDate(today)
+				} else {
+					fmt.Println("Push notification already sent today, skipping")
+				}
 
 				mtx.Unlock()
 			}
 
-			// check every hour
+			// Update hourly for /api/latest
 			time.Sleep(time.Hour)
 		}
 	}
