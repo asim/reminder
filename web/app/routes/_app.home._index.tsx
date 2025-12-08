@@ -78,7 +78,7 @@ export default function HomePage() {
                                 </Link>
                             </div>
                             <div className="prose prose-lg max-w-none">
-                                <p className="whitespace-pre-wrap leading-relaxed text-gray-700 text-base sm:text-lg font-serif italic">
+                                <p className="whitespace-pre-wrap leading-relaxed text-gray-700 text-base sm:text-lg font-serif">
                                     {data.verse}
                                 </p>
                             </div>
@@ -107,7 +107,7 @@ export default function HomePage() {
                                 </Link>
                             </div>
                             <div className="prose prose-lg max-w-none">
-                                <p className="whitespace-pre-wrap leading-relaxed text-gray-700 text-base sm:text-lg">
+                                <p className="whitespace-pre-wrap leading-relaxed text-gray-700 text-base sm:text-lg font-serif">
                                     {data.hadith}
                                 </p>
                             </div>
@@ -136,7 +136,7 @@ export default function HomePage() {
                                 </Link>
                             </div>
                             <div className="prose prose-lg max-w-none">
-                                <p className="whitespace-pre-wrap leading-relaxed text-gray-700 text-base sm:text-lg">
+                                <p className="whitespace-pre-wrap leading-relaxed text-gray-700 text-base sm:text-lg font-serif">
                                     {data.name}
                                 </p>
                             </div>
