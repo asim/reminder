@@ -84,10 +84,8 @@ export default function DailyIndex() {
         <div className="ml-4"><NotificationButton /></div>
       </div>
       <section>
-        <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">Daily Reminders</h2>
         <div className="text-sm sm:text-base text-gray-700 mb-2">
-          Browse daily reminders from the Quran, hadith and names of Allah. Each day at midnight
-          a new reminder is generated and saved here. You can subscribe to receive daily notifications
+          Browse daily reminders from the Quran, hadith and names of Allah. Subscribe to notifications
           using the Enable Notifications button above.
         </div>
       </section>

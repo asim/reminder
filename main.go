@@ -851,18 +851,8 @@ func main() {
 			message := "In the Name of Allah—the Most Beneficent, Most Merciful"
 			today := time.Now().Format("2006-01-02")
 
-			dailyData := map[string]interface{}{
-				"verse":   dailyVerse,
-				"hadith":  dailyHadith,
-				"name":    dailyName,
-				"hijri":   "Updated hourly",
-				"date":    "latest",
-				"links":   links,
-				"updated": dailyUpdated.Format(time.RFC850),
-				"message": message,
-			}
-
-			saveDaily("latest", dailyData)
+			// Don't save 'latest' to the daily archive anymore
+			// The hourly reminder is now served via /api/latest and /home
 
 			mtx.Unlock()
 
