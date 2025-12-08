@@ -421,7 +421,7 @@ func main() {
 	http.HandleFunc("/api/daily", func(w http.ResponseWriter, r *http.Request) {
 		// GET: today's archived daily (saved at midnight UTC)
 		today := time.Now().UTC().Format("2006-01-02")
-		
+
 		mtx.RLock()
 		var resp interface{}
 		if entry, ok := dailyIndex[today]; ok {
@@ -441,7 +441,7 @@ func main() {
 			}
 		}
 		mtx.RUnlock()
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(resp)
 	})
