@@ -65,7 +65,7 @@ function NotificationButton() {
           onClick={handleSubscribe}
           disabled={loading}
         >
-          Enable Notifications</Not>
+          Enable Notifications
         </button>
   )
 }
