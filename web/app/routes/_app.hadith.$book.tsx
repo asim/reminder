@@ -60,7 +60,7 @@ export default function HadithBook() {
           const relativeTop = elementRect.top - containerRect.top;
           const currentScrollTop = scrollContainer.scrollTop;
           const targetScrollTop = currentScrollTop + relativeTop - 100;
-          
+
           scrollContainer.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
         } else {
           element.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -156,9 +156,10 @@ export default function HadithBook() {
             <p className='text-gray-800 text-base sm:text-lg leading-relaxed'>
               {hadith.text}
             </p>
-          </div>
-        ))}
-      </div>
-    </div>
+          </div >
+        ))
+}
+      </div >
+    </div >
   );
 }
