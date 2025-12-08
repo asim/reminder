@@ -129,7 +129,7 @@ export default function HadithBook() {
           const hadithNumber = hadith.info.includes('Number')
             ? hadith.info.split('Number')[1].split(':')[0].trim()
             : `${idx + 1}`;
-          
+
           return (
             <div
               key={`${hadith.info}-${hadith.by}-${bookNumber}`}
