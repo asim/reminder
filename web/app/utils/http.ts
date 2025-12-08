@@ -72,7 +72,7 @@ export async function httpCall<ResponseType = AppResponse>(
 
 export async function httpPost<ResponseType = AppResponse>(
   url: string,
-  body: Record<string, any>,
+  body?: Record<string, any>,
   options?: HttpOptionsType
 ): Promise<ApiReturn<ResponseType>> {
   return httpCall<ResponseType>(url, {
