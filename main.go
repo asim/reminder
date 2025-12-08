@@ -848,7 +848,6 @@ func main() {
 
 			dailyUpdated = time.Now()
 			hijriDate := daily.Date().Display
-			message := "In the Name of Allah—the Most Beneficent, Most Merciful"
 			today := time.Now().Format("2006-01-02")
 
 			// Don't save 'latest' to the daily archive anymore
@@ -866,8 +865,17 @@ func main() {
 					notifyVerse = notifyVerse[:250] + "..."
 				}
 
-				dailyData["hijri"] = hijriDate
-				dailyData["date"] = today
+				message := "In the Name of Allah—the Most Beneficent, Most Merciful"
+				dailyData := map[string]interface{}{
+					"verse":   dailyVerse,
+					"hadith":  dailyHadith,
+					"name":    dailyName,
+					"hijri":   hijriDate,
+					"date":    today,
+					"links":   links,
+					"updated": dailyUpdated.Format(time.RFC850),
+					"message": message,
+				}
 
 				// Save to daily.json
 				saveDaily(today, dailyData)
