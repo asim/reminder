@@ -1,6 +1,5 @@
-import React from 'react';
-import { useParams } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
+import { useParams } from 'react-router';
 import { httpPost } from '~/utils/http';
 
 interface DailyResponse {
