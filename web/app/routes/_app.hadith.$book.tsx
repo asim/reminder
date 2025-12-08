@@ -136,30 +136,30 @@ export default function HadithBook() {
               id={hadithNumber}
               className='p-3 sm:p-4 md:p-6 border border-gray-200 rounded-lg space-y-2 sm:space-y-4 hover:border-gray-300 transition-colors'
             >
-            <div className='flex gap-2 lg:mb-0 mb-4 lg:gap-0 lg:flex-row flex-col justify-start lg:justify-between items-start lg:items-center'>
-              <span className='text-sm sm:text-base font-medium text-gray-700'>
-                <BookmarkButton
-                  type='hadith'
-                  itemKey={`${bookNumber}:${hadithNumber}`}
-                  label={`Hadith ${bookNumber}:${hadithNumber} - ${hadith.info}`}
-                  url={`/hadith/${bookNumber}#${hadithNumber}`}
-                />
+              <div className='flex gap-2 lg:mb-0 mb-4 lg:gap-0 lg:flex-row flex-col justify-start lg:justify-between items-start lg:items-center'>
+                <span className='text-sm sm:text-base font-medium text-gray-700'>
+                  {hadith.info.trim().replace(/:$/, '')}
+                </span>
+                <div className='flex items-center gap-2'>
+                  <span className='text-sm text-balance sm:text-base font-medium text-gray-700'>
+                    {hadith.by}
+                  </span>
+                  <BookmarkButton
+                    type='hadith'
+                    itemKey={`${bookNumber}:${hadithNumber}`}
+                    label={`Hadith ${bookNumber}:${hadithNumber} - ${hadith.info}`}
+                    url={`/hadith/${bookNumber}#${hadithNumber}`}
+                  />
+                </div>
               </div>
-            </div>
 
-            <p className='text-gray-800 text-base sm:text-lg leading-relaxed'>
-              {hadith.text}
-            </p>
-          </div>
-        )})}
+              <p className='text-gray-800 text-base sm:text-lg leading-relaxed'>
+                {hadith.text}
+              </p>
+            </div>
+          );
+        })}
       </div>
-            <p className='text-gray-800 text-base sm:text-lg leading-relaxed'>
-              {hadith.text}
-            </p>
-          </div >
-        ))
-}
-      </div >
-    </div >
+    </div>
   );
 }
