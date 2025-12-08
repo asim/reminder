@@ -148,7 +148,7 @@ export default function HomePage() {
                 <div className="mt-12 sm:mt-16 text-center">
                     <div className="inline-block bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-100">
                         <h3 className="text-lg sm:text-xl font-serif font-semibold mb-3 text-gray-900">
-                            Explore the Collection
+                            Explore The Reminder
                         </h3>
                         <p className="text-sm sm:text-base text-gray-600 mb-6 max-w-md mx-auto">
                             Dive deeper into the Quran, Hadith collections, and the beautiful names of Allah
