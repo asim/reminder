@@ -1,7 +1,6 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { httpGet } from '~/utils/http';
 import { SearchableSidebar, type SidebarItem } from '~/components/interface/searchable-sidebar';
-import React from 'react';
+import { httpGet } from '~/utils/http';
 
 interface DailyIndexEntry {
   verse: string;
