@@ -67,9 +67,10 @@ function NotificationButton() {
         >
           Enable Notifications</Not>
         </button>
-      )}
-      {error && <div className="text-red-500 mt-2 text-sm">{error}</div>}
-    </div>
+  )
+}
+{ error && <div className="text-red-500 mt-2 text-sm">{error}</div> }
+    </div >
   );
 }
 
@@ -93,16 +94,16 @@ export default function DailyIndex() {
       <section>
         <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">What is the Reminder?</h2>
         <div className="text-sm sm:text-base text-gray-700 mb-2">
-          The reminder (a word often used to describe the Quran) is an app and API for the Quran, 
+          The reminder (a word often used to describe the Quran) is an app and API for the Quran,
           hadith and names of Allah. It is a way to share the message of Islam with everyone in need.
-          A resource by which we can renew our intention and work towards the best result in the afterlife 
+          A resource by which we can renew our intention and work towards the best result in the afterlife
           God willing.
         </div>
       </section>
       <section>
         <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">Our Purpose</h2>
         <div className="text-sm sm:text-base text-gray-700 mb-2">
-          This life is a test. We were put here by God to know him and to worship him. To do good deeds and uphold 
+          This life is a test. We were put here by God to know him and to worship him. To do good deeds and uphold
           the obligatory acts of faith, prayer, charity, fasting and hajj as demonstrated by our prophet Muhammad (pbuh).
           We are in constant need of this Reminder. Let us internalise the purpose of our creation.
           Read a verse, hadith and name of Allah to reflect, reset and strengthen your intention.
@@ -120,24 +121,24 @@ export default function DailyIndex() {
             He is Allah, the One.<br />
             The eternal, the Absolute.<br />
             He did not beget, nor was he begotten.<br />
-            And there is none like him. 
+            And there is none like him.
             <br /><br />
 
             <a href="/quran/112" className="text-sm">Quran 112</a>
           </p>
         </div>
       </section>
-        <section className='mt-4 sm:mt-4 mb-8 sm:mb-8 bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-200'>
-          <h2 className='text-base sm:text-lg font-medium mb-1 sm:mb-2 text-gray-800'>
-            Navigating the Archive
-          </h2>
-          <p className='text-sm sm:text-base text-gray-600'>
-            Select a daily reminder from the menu to read a verse of the Quran, 
-            hadith from sahih al-bukhari and a name of Allah from that specific day.
-            Each reminder is generated once per day at midnight and saved here for you to revisit.
-            For the latest hourly-updated reminder, visit the <a href="/home" className="underline font-medium">Home page</a>.
-          </p>
-        </section>
+      <section className='mt-4 sm:mt-4 mb-8 sm:mb-8 bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-200'>
+        <h2 className='text-base sm:text-lg font-medium mb-1 sm:mb-2 text-gray-800'>
+          Navigating the Archive
+        </h2>
+        <p className='text-sm sm:text-base text-gray-600'>
+          Select a daily reminder from the menu to read a verse of the Quran,
+          hadith from sahih al-bukhari and a name of Allah from that specific day.
+          Each reminder is generated once per day at midnight and saved here for you to revisit.
+          For the latest hourly-updated reminder, visit the <a href="/home" className="underline font-medium">Home page</a>.
+        </p>
+      </section>
     </div>
   );
 }

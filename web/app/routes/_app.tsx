@@ -1,5 +1,5 @@
-import { Code, Search, Bookmark } from 'lucide-react';
-import { Outlet, NavLink } from 'react-router';
+import { Bookmark, Code, Search } from 'lucide-react';
+import { NavLink, Outlet } from 'react-router';
 import { cn } from '~/utils/classname';
 
 export default function AppLayout() {
