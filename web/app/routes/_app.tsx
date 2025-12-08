@@ -59,7 +59,7 @@ export default function AppLayout() {
           </NavLink>
         </div>
       </div>
-      <div className='flex-1 overflow-hidden'>
+      <div className='flex-1 overflow-y-auto'>
         <Outlet />
       </div>
     </div>
