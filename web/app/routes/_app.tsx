@@ -57,10 +57,6 @@ export default function AppLayout() {
             <Search className='size-3' />
             Ask
           </NavLink>
-          <NavLink to='/api' className={buttonClass}>
-            <Code className='size-3' />
-            API
-          </NavLink>
         </div>
       </div>
       <div className='flex-1 overflow-hidden'>
