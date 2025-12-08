@@ -56,7 +56,17 @@ export default function QuranChapter(props: Route.ComponentProps) {
     const element = document.getElementById(verseId);
     if (element) {
       setTimeout(() => {
-        element.scrollIntoView({ behavior: 'instant', block: 'center', inline: 'nearest' });
+        // Find the scrollable parent container
+        const scrollContainer = element.closest('.overflow-y-auto');
+        if (scrollContainer) {
+          const elementTop = element.offsetTop;
+          const containerHeight = scrollContainer.clientHeight;
+          const elementHeight = element.clientHeight;
+          const scrollTop = elementTop - (containerHeight / 2) + (elementHeight / 2);
+          scrollContainer.scrollTo({ top: scrollTop, behavior: 'instant' });
+        } else {
+          element.scrollIntoView({ behavior: 'instant', block: 'center', inline: 'nearest' });
+        }
       }, 100);
     }
   }, [data, mode]);

@@ -51,7 +51,14 @@ export default function HadithBook() {
     const element = document.getElementById(hadithId);
     if (element) {
       setTimeout(() => {
-        element.scrollIntoView({ behavior: 'smooth' });
+        // Find the scrollable parent container
+        const scrollContainer = element.closest('.overflow-y-auto');
+        if (scrollContainer) {
+          const elementTop = element.offsetTop;
+          scrollContainer.scrollTo({ top: elementTop - 100, behavior: 'smooth' });
+        } else {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       }, 100);
     }
   }, [book]);
