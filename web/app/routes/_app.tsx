@@ -1,4 +1,4 @@
-import { Bookmark, Code, Search } from 'lucide-react';
+import { Bookmark, Search } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router';
 import { cn } from '~/utils/classname';
 
