@@ -57,7 +57,7 @@ function NotificationButton() {
           onClick={handleUnsubscribe}
           disabled={loading}
         >
-          Unsubscribe
+          Disable Notifications
         </button>
       ) : (
         <button
@@ -65,7 +65,7 @@ function NotificationButton() {
           onClick={handleSubscribe}
           disabled={loading}
         >
-          Subscribe
+          Enable Notifications</Not>
         </button>
       )}
       {error && <div className="text-red-500 mt-2 text-sm">{error}</div>}
@@ -78,10 +78,18 @@ export default function DailyIndex() {
     <div className="max-w-4xl mx-auto w-full mb-8 sm:mb-12 flex-grow p-0 lg:p-8 space-y-8">
       <div className="flex items-center justify-between mb-4 sm:mb-6">
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-left">
-          Reminder
+          Daily Reminder
         </h1>
         <div className="ml-4"><NotificationButton /></div>
       </div>
+      <section>
+        <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">Daily Reminders</h2>
+        <div className="text-sm sm:text-base text-gray-700 mb-2">
+          Browse daily reminders from the Quran, hadith and names of Allah. Each day at midnight
+          a new reminder is generated and saved here. You can subscribe to receive daily notifications
+          using the Enable Notifications button above.
+        </div>
+      </section>
       <section>
         <h2 className="text-lg sm:text-xl font-medium mb-1 sm:mb-2">What is the Reminder?</h2>
         <div className="text-sm sm:text-base text-gray-700 mb-2">
@@ -121,15 +129,13 @@ export default function DailyIndex() {
       </section>
         <section className='mt-4 sm:mt-4 mb-8 sm:mb-8 bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-200'>
           <h2 className='text-base sm:text-lg font-medium mb-1 sm:mb-2 text-gray-800'>
-            Navigating the Reminder
+            Navigating the Archive
           </h2>
           <p className='text-sm sm:text-base text-gray-600'>
-            Select a daily reminder from the menu which encompasses a verse of the Quran, 
-            hadith from sahih al-bukhari and a name of Allah. Read, reflect and reset your intention. 
-            If you need further reminders, see hourly updates in the latest tab.
-            Once you have read a few, continue strengthening your faith by reading more 
-            of the Quran, hadith or names of Allah in our app and making it a daily habit.
-            Subscribe to daily notifications using the Subscribe button at the top.
+            Select a daily reminder from the menu to read a verse of the Quran, 
+            hadith from sahih al-bukhari and a name of Allah from that specific day.
+            Each reminder is generated once per day at midnight and saved here for you to revisit.
+            For the latest hourly-updated reminder, visit the <a href="/home" className="underline font-medium">Home page</a>.
           </p>
         </section>
     </div>

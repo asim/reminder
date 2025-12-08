@@ -31,8 +31,23 @@ export function meta() {
 
 const endpoints: Endpoint[] = [
   {
+    title: 'Latest Reminder',
+    description: 'Returns the latest verse, hadith, and name of Allah (updated hourly)',
+    url: '/api/latest',
+    method: 'GET',
+    responseFormat: 'JSON',
+    responseFields: [
+      { name: 'name', type: 'string', description: 'Name of Allah' },
+      { name: 'hadith', type: 'string', description: 'Hadith from Sahih Bukhari' },
+      { name: 'verse', type: 'string', description: 'A verse of the Quran' },
+      { name: 'links', type: 'map', description: 'Links to the sources' },
+      { name: 'updated', type: 'string', description: 'Timestamp of last update' },
+      { name: 'message', type: 'string', description: 'Bismillah message' },
+    ],
+  },
+  {
     title: 'Daily Reminder',
-    description: 'Returns a verse of the Quran, a hadith, and a name of Allah for the day',
+    description: 'Returns today\'s daily reminder (updated once per day at midnight)',
     url: '/api/daily',
     method: 'GET',
     responseFormat: 'JSON',
@@ -43,6 +58,8 @@ const endpoints: Endpoint[] = [
       { name: 'links', type: 'map', description: 'Links to the sources' },
       { name: 'updated', type: 'string', description: 'Timestamp of update' },
       { name: 'message', type: 'string', description: 'Salam, today is ... (Hijri date)' },
+      { name: 'hijri', type: 'string', description: 'Hijri date (display format)' },
+      { name: 'date', type: 'string', description: 'Gregorian date (YYYY-MM-DD)' },
     ],
   },
   {

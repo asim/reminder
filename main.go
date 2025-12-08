@@ -437,6 +437,23 @@ func main() {
 		json.NewEncoder(w).Encode(resp)
 	})
 
+	// Add /api/latest endpoint for the hourly updated reminder
+	http.HandleFunc("/api/latest", func(w http.ResponseWriter, r *http.Request) {
+		mtx.RLock()
+		message := "In the Name of Allah—the Most Beneficent, Most Merciful"
+		resp := map[string]interface{}{
+			"name":    dailyName,
+			"hadith":  dailyHadith,
+			"verse":   dailyVerse,
+			"links":   links,
+			"updated": dailyUpdated.Format(time.RFC850),
+			"message": message,
+		}
+		mtx.RUnlock()
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(resp)
+	})
+
 	http.HandleFunc("/api/daily/{date}", func(w http.ResponseWriter, r *http.Request) {
 		date := r.PathValue("date")
 		if len(date) == 0 {

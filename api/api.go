@@ -29,10 +29,27 @@ type Value struct {
 
 var Endpoints = []*Endpoint{
 	{
+		Name:        "Latest reminder (updated hourly)",
+		Path:        "/api/latest",
+		Params:      nil,
+		Description: "Returns the latest verse, hadith and name of Allah (updated every hour)",
+		Response: []*Value{{
+			Type: "JSON",
+			Params: []*Param{
+				{Name: "name", Value: "string", Description: "Name of Allah"},
+				{Name: "hadith", Value: "string", Description: "Hadith from Sahih Bukhari"},
+				{Name: "verse", Value: "string", Description: "A verse of the Quran"},
+				{Name: "links", Value: "map", Description: "Links to relevant content"},
+				{Name: "updated", Value: "string", Description: "Time of last update"},
+				{Name: "message", Value: "string", Description: "Bismillah message"},
+			},
+		}},
+	},
+	{
 		Name:        "Daily verse, hadith and name of Allah",
 		Path:        "/api/daily",
 		Params:      nil,
-		Description: "Returns a verse of the quran, hadith and name of Allah",
+		Description: "Returns today's daily reminder (updated once per day at midnight)",
 		Response: []*Value{{
 			Type: "JSON",
 			Params: []*Param{
@@ -42,6 +59,8 @@ var Endpoints = []*Endpoint{
 				{Name: "links", Value: "map", Description: "Links to relevant content"},
 				{Name: "updated", Value: "string", Description: "Time of last update"},
 				{Name: "message", Value: "string", Description: "Salam, today is ... (Hijri date)"},
+				{Name: "hijri", Value: "string", Description: "Hijri date"},
+				{Name: "date", Value: "string", Description: "Gregorian date (YYYY-MM-DD)"},
 			},
 		}},
 	},

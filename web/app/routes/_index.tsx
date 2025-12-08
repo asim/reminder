@@ -23,7 +23,7 @@ export default function Home() {
 
         <div className='flex flex-row lg:flex-col gap-2 w-full max-w-xs sm:max-w-sm md:max-w-md'>
           <Link
-            to='/daily'
+            to='/home'
             className='flex flex-row gap-2 sm:gap-3 items-center justify-start py-2.5 sm:py-3 px-4 sm:px-5 w-full rounded-lg border border-black bg-black text-white hover:opacity-70 transition-all duration-200 cursor-pointer'
           >
             <Globe2 className='size-4' />

@@ -22,6 +22,9 @@ export default function AppLayout() {
         </div>
         {/* Centered nav links */}
         <div className="flex-1 flex flex-row justify-center gap-1 order-2">
+          <NavLink className={buttonClass} to='/home'>
+            Home
+          </NavLink>
           <NavLink className={buttonClass} to='/daily'>
             Daily
           </NavLink>
