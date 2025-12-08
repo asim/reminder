@@ -48,10 +48,6 @@ export default function AppLayout() {
             <Search className='size-3' />
             Search
           </NavLink>
-          <NavLink className={buttonClass} to='/api'>
-            <Code className='size-3' />
-            API Usage
-          </NavLink>
         </div>
         <div className='lg:hidden flex items-center gap-1 ml-auto order-4'>
           <NavLink to='/bookmarks' className={buttonClass}>
