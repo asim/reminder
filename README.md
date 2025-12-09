@@ -23,7 +23,7 @@ into a single app and API, leveraging AI as a tool for search.
 - Quran in English & Arabic
 - Names of Allah & Meaning
 - Hadith (Bukhari) in English
-- Index & Search with RAG using embeddings
+- Index & Search with RAG and LLMs
 - Optional Fanar or OpenAI integration
 - API to query LLM or Quran
 - Daily web push notifications
