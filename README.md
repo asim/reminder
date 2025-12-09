@@ -27,7 +27,7 @@ into a single app and API, providing helpful reminders via web push notification
 - Hadith (Bukhari) in English
 - Index & Search with RAG and LLMs
 - Optional Fanar or OpenAI integration
-- API to query LLM or Quran
+- API to query Quran, hadith, names
 - Daily reminder web notifications
 
 ## Install
