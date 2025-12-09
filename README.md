@@ -155,13 +155,11 @@ it is a reminder to the whole world.”
 
 ## Sources
 
-We have been requested to verify the sources of data
+The sources used for data
 
 - [Arabic Quran](https://github.com/asim/quran-json-arabic)
 - [English Quran](https://github.com/asim/quran-json)
 - [Names of Allah](https://github.com/asim/99-Names-Of-Allah)
 - [Sahih Bukhari](https://github.com/asim/bukhari)
 - [Word by word](https://github.com/asim/quranwbw)
-
-By default, all LLM operations (embeddings and text generation) run locally via Ollama. Optional cloud LLM providers (Fanar/OpenAI) can be configured. All sources of truth are authentic.
 
