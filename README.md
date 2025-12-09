@@ -8,7 +8,7 @@ The Reminder is an app and API for the Quran, Hadith and Names of Allah. It prov
 RAG (Retrieval Augmented Generation) and references ensures answers are grounded in authentic Islamic texts. 
 
 The goal is to consolidate these texts
-into a single app and API, providing helpful reminders via web push notifications and leveraging AI as a tool for search summaries.
+into a single app and API, providing helpful daily reminders using web push notifications and leveraging AI as a tool for search summarisation.
 
 ## Contents
 
