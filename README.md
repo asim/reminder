@@ -124,7 +124,7 @@ See [`/api`](https://reminder.dev/api) for more details
 
 ## App
 
-The reminder bakes in a "lite" app by default. This can be replaced by a more featureful react app.
+The reminder bakes in a "lite" app by default. This can be replaced by a featureful react app.
 
 To build the react app
 
