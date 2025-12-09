@@ -28,7 +28,7 @@ into a single app and API, providing helpful reminders via web push notification
 - Index & Search with RAG and LLMs
 - Optional Fanar or OpenAI integration
 - API to query LLM or Quran
-- Daily web push notifications
+- Daily reminder web notifications
 
 ## Install
 
