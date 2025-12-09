@@ -138,7 +138,7 @@ Build the app
 make build
 ```
 
-Pass the additional `--web` flag which replaces the lite app with the react app
+Pass the `--web` flag to replace the lite app
 ```
 reminder --web --serve
 ```
