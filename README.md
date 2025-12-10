@@ -1,6 +1,6 @@
 # Reminder
 
-Quran, hadith and names of Allah all in one app and API.
+Quran, hadith and names of Allah in one app and API.
 
 ## Overview
 
