@@ -573,14 +573,67 @@ func main() {
 		for i := 0; i < maxDays; i++ {
 			date := dates[i]
 			
-			// Load hourly reminders for this date
-			hourlyReminders := loadHourlyReminders(date)
-			
 			// Parse date for pubDate base
 			basePubDate := date
 			if t, err := time.Parse("2006-01-02", date); err == nil {
 				basePubDate = t.Format(time.RFC1123Z)
 			}
+			
+			// First, add daily summary if it exists (for single daily consumption)
+			entry, hasDaily := dailyIndex[date]
+			if hasDaily {
+				entryMap, ok := entry.(map[string]interface{})
+				if ok {
+					verse := ""
+					hadith := ""
+					name := ""
+					hijri := ""
+
+					if v, ok := entryMap["verse"].(string); ok {
+						verse = v
+					}
+					if h, ok := entryMap["hadith"].(string); ok {
+						hadith = h
+					}
+					if n, ok := entryMap["name"].(string); ok {
+						name = n
+					}
+					if hj, ok := entryMap["hijri"].(string); ok {
+						hijri = hj
+					}
+
+					title := fmt.Sprintf("Daily Reminder - %s", date)
+					if hijri != "" {
+						title = fmt.Sprintf("Daily Reminder - %s (%s)", date, hijri)
+					}
+
+					// Combine all three into one item description
+					description := ""
+					if verse != "" {
+						description += "<h3>Verse</h3>\n" + verse + "\n\n"
+					}
+					if hadith != "" {
+						description += "<h3>Hadith</h3>\n" + hadith + "\n\n"
+					}
+					if name != "" {
+						description += "<h3>Name</h3>\n" + name
+					}
+
+					if description != "" {
+						fmt.Fprintf(w, `    <item>
+      <title>%s</title>
+      <link>https://reminder.dev/daily/%s</link>
+      <guid>https://reminder.dev/daily/%s</guid>
+      <pubDate>%s</pubDate>
+      <description><![CDATA[%s]]></description>
+    </item>
+`, title, date, date, basePubDate, description)
+					}
+				}
+			}
+			
+			// Then, add hourly reminders for this date (for hourly consumption)
+			hourlyReminders := loadHourlyReminders(date)
 			
 			// Process each hourly reminder
 			for idx, reminderData := range hourlyReminders {
