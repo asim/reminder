@@ -85,7 +85,7 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 
 	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
 		if isHtmxRequest(r) {
-			w.Write([]byte(app.RenderContent("API", "", a.Markdown())))
+			w.Write([]byte(app.RenderContent("API", "", app.RenderString(a.Markdown()))))
 		} else {
 			w.Write([]byte(apiHtml))
 		}
@@ -94,11 +94,11 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 	http.HandleFunc("/daily", func(w http.ResponseWriter, r *http.Request) {
 		template := `
 <h3>Verse</h3>
-<a href="%s" class="block">%s</a>
+<a href="%s" class="block" hx-get="%s" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">%s</a>
 <h3>Hadith</h3>
-<a href="%s" class="block">%s</a>
+<a href="%s" class="block" hx-get="%s" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">%s</a>
 <h3>Name</h3>
-<a href="%s" class="block">%s</a>
+<a href="%s" class="block" hx-get="%s" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">%s</a>
 <p>Updated %s</p>
 `
 		mtx.RLock()
@@ -106,7 +106,7 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 		hadithLink := links["hadith"]
 		nameLink := links["name"]
 
-		data := fmt.Sprintf(template, verseLink, dailyVerse, hadithLink, dailyHadith, nameLink, dailyName, dailyUpdated.Format(time.RFC850))
+		data := fmt.Sprintf(template, verseLink, verseLink, dailyVerse, hadithLink, hadithLink, dailyHadith, nameLink, nameLink, dailyName, dailyUpdated.Format(time.RFC850))
 		mtx.RUnlock()
 
 		if isHtmxRequest(r) {

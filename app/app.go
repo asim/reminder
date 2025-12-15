@@ -47,6 +47,8 @@ var Template = `
     li { margin-bottom: 5px; }
     .htmx-swapping { opacity: 0; transition: opacity 200ms ease-out; }
     .htmx-settling { opacity: 1; }
+    .htmx-request #container { opacity: 0.5; }
+    #container { transition: opacity 200ms ease-in-out; }
 @font-face {
     font-family: 'arabic';
     src: url('/arabic.otf') format('opentype');
