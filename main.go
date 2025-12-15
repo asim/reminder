@@ -375,7 +375,7 @@ func main() {
 	isAPIClient := func(r *http.Request) bool {
 		userAgent := r.Header.Get("User-Agent")
 		accept := r.Header.Get("Accept")
-		
+
 		return strings.Contains(userAgent, "Wget") ||
 			strings.Contains(userAgent, "curl") ||
 			strings.Contains(userAgent, "Go-http-client") ||
@@ -385,7 +385,7 @@ func main() {
 
 	if *WebFlag {
 		fmt.Println("Registering web handler")
-		
+
 		// Create smart handlers that serve lite content for API clients, SPA for browsers
 		http.HandleFunc("/quran/{id}", func(w http.ResponseWriter, r *http.Request) {
 			if isAPIClient(r) {
