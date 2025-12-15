@@ -166,17 +166,6 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 		}
 	})
 
-	http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
-		content := q.TOC()
-		if isHtmxRequest(r) {
-			qhtml := app.RenderContent("Quran", quran.Description, content)
-			w.Write([]byte(qhtml))
-		} else {
-			qhtml := app.RenderHTML("Quran", quran.Description, content)
-			w.Write([]byte(qhtml))
-		}
-	})
-
 	http.HandleFunc("/quran/{id}", func(w http.ResponseWriter, r *http.Request) {
 		id := r.PathValue("id")
 		if len(id) == 0 {
