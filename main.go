@@ -462,13 +462,6 @@ func main() {
 		fmt.Println("Registering web handler")
 
 		// Create smart handlers that serve lite content for API clients, SPA for browsers
-		http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
-			// For TOC page
-			content := q.TOC()
-			qhtml := app.RenderHTML("Quran", quran.Description, content)
-			w.Write([]byte(qhtml))
-		})
-
 		http.HandleFunc("/quran/{id}", func(w http.ResponseWriter, r *http.Request) {
 			if isAPIClient(r) {
 				// Serve server-rendered HTML
@@ -489,13 +482,6 @@ func main() {
 			}
 		})
 
-		http.HandleFunc("/hadith", func(w http.ResponseWriter, r *http.Request) {
-			// For TOC page
-			content := b.TOC()
-			qhtml := app.RenderHTML("Hadith", hadith.Description, content)
-			w.Write([]byte(qhtml))
-		})
-
 		http.HandleFunc("/hadith/{book}", func(w http.ResponseWriter, r *http.Request) {
 			if isAPIClient(r) {
 				book := r.PathValue("book")
@@ -512,13 +498,6 @@ func main() {
 			} else {
 				app.ServeWeb().ServeHTTP(w, r)
 			}
-		})
-
-		http.HandleFunc("/names", func(w http.ResponseWriter, r *http.Request) {
-			// For TOC page
-			content := n.TOC()
-			qhtml := app.RenderHTML("Names", names.Description, content)
-			w.Write([]byte(qhtml))
 		})
 
 		http.HandleFunc("/names/{id}", func(w http.ResponseWriter, r *http.Request) {
