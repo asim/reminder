@@ -73,6 +73,34 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 	// generate api doc
 	apiHtml := app.RenderTemplate("API", "", a.Markdown())
 
+	// Root route - serve home page
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// Only handle exact "/" path
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+
+		mtx.RLock()
+		verseLink := links["verse"]
+		hadithLink := links["hadith"]
+		nameLink := links["name"]
+		verse := dailyVerse
+		hadith := dailyHadith
+		name := dailyName
+		mtx.RUnlock()
+
+		// Populate Index template with actual data
+		indexContent := strings.ReplaceAll(app.Index, "{verse_link}", verseLink)
+		indexContent = strings.ReplaceAll(indexContent, "{verse_text}", verse)
+		indexContent = strings.ReplaceAll(indexContent, "{hadith_link}", hadithLink)
+		indexContent = strings.ReplaceAll(indexContent, "{hadith_text}", hadith)
+		indexContent = strings.ReplaceAll(indexContent, "{name_link}", nameLink)
+		indexContent = strings.ReplaceAll(indexContent, "{name_text}", name)
+
+		w.Write([]byte(app.RenderHTML("Home", "Quran, hadith, and more as an app and API", indexContent)))
+	})
+
 	http.HandleFunc("/home", func(w http.ResponseWriter, r *http.Request) {
 		mtx.RLock()
 		verseLink := links["verse"]
@@ -95,6 +123,87 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 			w.Write([]byte(app.RenderContent("", "", indexContent)))
 		} else {
 			w.Write([]byte(app.RenderHTML("Home", "Quran, hadith, and more as an app and API", indexContent)))
+		}
+	})
+
+	http.HandleFunc("/bookmarks", func(w http.ResponseWriter, r *http.Request) {
+		bookmarksContent := `
+<h1 class="text-3xl font-bold mb-6">Bookmarks</h1>
+
+<div id="quran-bookmarks" class="mb-8">
+  <h2 class="text-2xl font-semibold mb-4">Quran</h2>
+  <div id="quran-list" class="space-y-3"></div>
+</div>
+
+<div id="hadith-bookmarks" class="mb-8">
+  <h2 class="text-2xl font-semibold mb-4">Hadith</h2>
+  <div id="hadith-list" class="space-y-3"></div>
+</div>
+
+<div id="names-bookmarks" class="mb-8">
+  <h2 class="text-2xl font-semibold mb-4">Names</h2>
+  <div id="names-list" class="space-y-3"></div>
+</div>
+
+<script>
+  function loadBookmarks() {
+    const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '{"quran":[],"hadith":[],"names":[]}');
+    
+    // Quran bookmarks
+    const quranList = document.getElementById('quran-list');
+    if (bookmarks.quran && bookmarks.quran.length > 0) {
+      quranList.innerHTML = bookmarks.quran.map(id => ` + "`" + `
+        <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">
+          <a href="/quran/${id}" class="flex-grow text-blue-600 hover:text-blue-800" hx-get="/quran/${id}" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">Chapter ${id}</a>
+          <button onclick="removeBookmark('quran', ${id})" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm">Remove</button>
+        </div>
+      ` + "`" + `).join('');
+    } else {
+      quranList.innerHTML = '<p class="text-gray-500">No bookmarks yet</p>';
+    }
+    
+    // Hadith bookmarks
+    const hadithList = document.getElementById('hadith-list');
+    if (bookmarks.hadith && bookmarks.hadith.length > 0) {
+      hadithList.innerHTML = bookmarks.hadith.map(id => ` + "`" + `
+        <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">
+          <a href="/hadith/${id}" class="flex-grow text-blue-600 hover:text-blue-800" hx-get="/hadith/${id}" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">Book ${id}</a>
+          <button onclick="removeBookmark('hadith', ${id})" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm">Remove</button>
+        </div>
+      ` + "`" + `).join('');
+    } else {
+      hadithList.innerHTML = '<p class="text-gray-500">No bookmarks yet</p>';
+    }
+    
+    // Names bookmarks
+    const namesList = document.getElementById('names-list');
+    if (bookmarks.names && bookmarks.names.length > 0) {
+      namesList.innerHTML = bookmarks.names.map(id => ` + "`" + `
+        <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">
+          <a href="/names/${id}" class="flex-grow text-blue-600 hover:text-blue-800" hx-get="/names/${id}" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">Name ${id}</a>
+          <button onclick="removeBookmark('names', ${id})" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm">Remove</button>
+        </div>
+      ` + "`" + `).join('');
+    } else {
+      namesList.innerHTML = '<p class="text-gray-500">No bookmarks yet</p>';
+    }
+  }
+  
+  function removeBookmark(type, id) {
+    const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '{"quran":[],"hadith":[],"names":[]}');
+    bookmarks[type] = bookmarks[type].filter(b => b !== id);
+    localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+    loadBookmarks();
+  }
+  
+  loadBookmarks();
+</script>
+`
+
+		if isHtmxRequest(r) {
+			w.Write([]byte(app.RenderContent("Bookmarks", "", bookmarksContent)))
+		} else {
+			w.Write([]byte(app.RenderHTML("Bookmarks", "", bookmarksContent)))
 		}
 	})
 
@@ -281,18 +390,29 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 		}
 	})
 
-	http.HandleFunc("/bookmarks", func(w http.ResponseWriter, r *http.Request) {
-		html := app.Get("bookmarks.html")
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Write([]byte(html))
-	})
-
 	http.HandleFunc("/islam", func(w http.ResponseWriter, r *http.Request) {
 		html := app.Get("islam.html")
 		page := app.RenderHTML("Islam", "An overview of Islam", html)
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Write([]byte(page))
 	})
+
+	// Serve static files (bookmarks.js, manifest, etc.)
+	staticFiles := []string{"bookmarks.js", "reminder.js", "manifest.webmanifest", "arabic.otf"}
+	for _, file := range staticFiles {
+		fileName := file
+		http.HandleFunc("/"+fileName, func(w http.ResponseWriter, r *http.Request) {
+			content := app.Get(fileName)
+			if strings.HasSuffix(fileName, ".js") {
+				w.Header().Set("Content-Type", "application/javascript")
+			} else if strings.HasSuffix(fileName, ".json") || strings.HasSuffix(fileName, ".webmanifest") {
+				w.Header().Set("Content-Type", "application/json")
+			} else if strings.HasSuffix(fileName, ".otf") {
+				w.Header().Set("Content-Type", "font/otf")
+			}
+			w.Write([]byte(content))
+		})
+	}
 }
 
 func loadLastPushDate() string {
@@ -562,19 +682,6 @@ func main() {
 		http.Handle("/", app.ServeWeb())
 	} else {
 		fmt.Println("Registering lite handler")
-		http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Strip trailing slash globally (except for "/") for lite app only
-			if r.URL.Path != "/" && len(r.URL.Path) > 1 && strings.HasSuffix(r.URL.Path, "/") {
-				newReq := new(http.Request)
-				*newReq = *r
-				urlCopy := *r.URL
-				urlCopy.Path = strings.TrimSuffix(r.URL.Path, "/")
-				newReq.URL = &urlCopy
-				app.ServeLite().ServeHTTP(w, newReq)
-				return
-			}
-			app.ServeLite().ServeHTTP(w, r)
-		}))
 		registerLiteRoutes(q, n, b, a)
 	}
 

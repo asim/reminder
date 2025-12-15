@@ -3,163 +3,112 @@
     <title>Bookmarks | Reminder</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="manifest" href="/manifest.webmanifest">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-    html, body { height: 100%; width: 100%; margin: 0; padding: 0; font-family: "Nunito Sans", serif; }
-    footer { padding-top: 50px; padding-bottom: 50px; }
-    footer a { text-decoration: none; font-weight: bold; color: #333333 }
-    a { color: #333333; }
-    a:visited { color: #333333;}
-    #head {
-      position: fixed;
-      background: white;
-      top: 0;
-      width: 100%
-    }
-    #head a { margin-right: 10px; color: black; font-weight: bold; text-decoration: none; }
-    #container { height: 100%; max-width: 1024px; margin: 0 auto; padding: 25px;}
-    #content { padding-bottom: 100px; }
-    #content p { padding: 0 0 25px 0; margin: 0; }
-    #desc { margin-bottom: 10px; }
-    #title { margin-top: 50px; font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
-    li { margin-bottom: 5px; }
-    .bookmark-section { margin-bottom: 30px; }
-    .bookmark-item {
-      margin-bottom: 10px;
-      border: 1px solid grey;
-      border-radius: 5px;
-      padding: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .bookmark-item a {
-      text-decoration: none;
-      flex-grow: 1;
-    }
-    .delete-btn {
-      background: #dc3545;
-      color: white;
-      border: none;
-      border-radius: 3px;
-      padding: 5px 10px;
-      cursor: pointer;
-      font-size: 0.9em;
-    }
-    .delete-btn:hover {
-      background: #c82333;
-    }
-    .empty-state {
-      text-align: center;
-      padding: 50px;
-      color: #666;
-    }
-    @media only screen and (max-width: 600px) {
-      #head a { margin-right: 5px; }
-    }
-    #brand {
-      display: inline-block;
-      padding: 20px;
-    }
-    #nav {
-      float: right;
-      padding: 20px;
-    }
+@font-face {
+    font-family: 'arabic';
+    src: url('/arabic.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+.arabic {
+  font-family: 'arabic';
+  font-size: 1.5em;
+}
+.bookmarked::after {
+  content: " ★";
+  color: gold;
+}
     </style>
   </head>
-  <body>
-    <div id="head">
-      <div id="brand">
-        <a href="/">Reminder</a>
+  <body class="min-h-screen flex flex-col bg-gray-50">
+    <header class="bg-black text-white py-4 sticky top-0 z-50 shadow-md">
+      <div class="max-w-6xl mx-auto px-4">
+        <nav class="flex justify-center items-center space-x-6">
+          <a href="/home" class="px-4 py-2 bg-white text-black rounded hover:bg-gray-100 transition-colors" hx-get="/home" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">Home</a>
+          <a href="/quran" class="px-4 py-2 bg-white text-black rounded hover:bg-gray-100 transition-colors" hx-get="/quran" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">Quran</a>
+          <a href="/hadith" class="px-4 py-2 bg-white text-black rounded hover:bg-gray-100 transition-colors" hx-get="/hadith" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">Hadith</a>
+          <a href="/names" class="px-4 py-2 bg-white text-black rounded hover:bg-gray-100 transition-colors" hx-get="/names" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">Names</a>
+          <a href="/bookmarks" class="px-4 py-2 bg-white text-black rounded hover:bg-gray-100 transition-colors">Bookmarks</a>
+          <a href="/search" class="px-4 py-2 bg-white text-black rounded hover:bg-gray-100 transition-colors">Search</a>
+          <a href="/daily" class="px-4 py-2 bg-white text-black rounded hover:bg-gray-100 transition-colors" hx-get="/daily" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">Daily</a>
+          <a href="/api" class="px-4 py-2 bg-white text-black rounded hover:bg-gray-100 transition-colors" hx-get="/api" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">API</a>
+        </nav>
       </div>
-      <div id="nav">
-        <a href="/home">Home</a>
+    </header>
+    <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-8">
+      <h1 class="text-3xl font-bold mb-6">Bookmarks</h1>
+      
+      <div id="quran-bookmarks" class="mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Quran</h2>
+        <div id="quran-list" class="space-y-3"></div>
       </div>
-    </div>
-    <div id="container">
-      <div id="title">Bookmarks</div>
-      <div id="desc">Your saved verses, hadiths, and names of Allah.</div>
-      <div id="content">
-        <div id="bookmarks-list">
-          <div class="empty-state">No bookmarks yet. Start saving verses, hadiths, and names!</div>
-        </div>
+      
+      <div id="hadith-bookmarks" class="mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Hadith</h2>
+        <div id="hadith-list" class="space-y-3"></div>
       </div>
-    </div>
+      
+      <div id="names-bookmarks" class="mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Names</h2>
+        <div id="names-list" class="space-y-3"></div>
+      </div>
+    </main>
+
     <script src="/bookmarks.js"></script>
     <script>
-      if (navigator.serviceWorker) {
-        navigator.serviceWorker.register (
-          '/reminder.js',
-          {scope: '/'}
-        )
+      function loadBookmarks() {
+        const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '{"quran":[],"hadith":[],"names":[]}');
+        
+        // Quran bookmarks
+        const quranList = document.getElementById('quran-list');
+        if (bookmarks.quran && bookmarks.quran.length > 0) {
+          quranList.innerHTML = bookmarks.quran.map(id => `
+            <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">
+              <a href="/quran/${id}" class="flex-grow text-blue-600 hover:text-blue-800" hx-get="/quran/${id}" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">Chapter ${id}</a>
+              <button onclick="removeBookmark('quran', ${id})" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm">Remove</button>
+            </div>
+          `).join('');
+        } else {
+          quranList.innerHTML = '<p class="text-gray-500">No bookmarks yet</p>';
+        }
+        
+        // Hadith bookmarks
+        const hadithList = document.getElementById('hadith-list');
+        if (bookmarks.hadith && bookmarks.hadith.length > 0) {
+          hadithList.innerHTML = bookmarks.hadith.map(id => `
+            <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">
+              <a href="/hadith/${id}" class="flex-grow text-blue-600 hover:text-blue-800" hx-get="/hadith/${id}" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">Book ${id}</a>
+              <button onclick="removeBookmark('hadith', ${id})" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm">Remove</button>
+            </div>
+          `).join('');
+        } else {
+          hadithList.innerHTML = '<p class="text-gray-500">No bookmarks yet</p>';
+        }
+        
+        // Names bookmarks
+        const namesList = document.getElementById('names-list');
+        if (bookmarks.names && bookmarks.names.length > 0) {
+          namesList.innerHTML = bookmarks.names.map(id => `
+            <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">
+              <a href="/names/${id}" class="flex-grow text-blue-600 hover:text-blue-800" hx-get="/names/${id}" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">Name ${id}</a>
+              <button onclick="removeBookmark('names', ${id})" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm">Remove</button>
+            </div>
+          `).join('');
+        } else {
+          namesList.innerHTML = '<p class="text-gray-500">No bookmarks yet</p>';
+        }
       }
-
-      // Load and display bookmarks when page loads
-      document.addEventListener('DOMContentLoaded', function() {
-        displayBookmarks();
-      });
-
-      function displayBookmarks() {
-        const bookmarks = getBookmarks();
-        const bookmarksList = document.getElementById('bookmarks-list');
-
-        if (Object.keys(bookmarks.quran).length === 0 && 
-            Object.keys(bookmarks.hadith).length === 0 && 
-            Object.keys(bookmarks.names).length === 0) {
-          bookmarksList.innerHTML = '<div class="empty-state">No bookmarks yet. Start saving verses, hadiths, and names!</div>';
-          return;
-        }
-
-        let html = '';
-
-        // Display Quran bookmarks
-        if (Object.keys(bookmarks.quran).length > 0) {
-          html += '<div class="bookmark-section">';
-          html += '<h2>Quran</h2>';
-          for (const [key, bookmark] of Object.entries(bookmarks.quran)) {
-            html += `<div class="bookmark-item">
-              <a href="${bookmark.url}">${bookmark.label}</a>
-              <button class="delete-btn" onclick="removeBookmark('quran', '${key}')">Delete</button>
-            </div>`;
-          }
-          html += '</div>';
-        }
-
-        // Display Hadith bookmarks
-        if (Object.keys(bookmarks.hadith).length > 0) {
-          html += '<div class="bookmark-section">';
-          html += '<h2>Hadith</h2>';
-          for (const [key, bookmark] of Object.entries(bookmarks.hadith)) {
-            html += `<div class="bookmark-item">
-              <a href="${bookmark.url}">${bookmark.label}</a>
-              <button class="delete-btn" onclick="removeBookmark('hadith', '${key}')">Delete</button>
-            </div>`;
-          }
-          html += '</div>';
-        }
-
-        // Display Names bookmarks
-        if (Object.keys(bookmarks.names).length > 0) {
-          html += '<div class="bookmark-section">';
-          html += '<h2>Names of Allah</h2>';
-          for (const [key, bookmark] of Object.entries(bookmarks.names)) {
-            html += `<div class="bookmark-item">
-              <a href="${bookmark.url}">${bookmark.label}</a>
-              <button class="delete-btn" onclick="removeBookmark('names', '${key}')">Delete</button>
-            </div>`;
-          }
-          html += '</div>';
-        }
-
-        bookmarksList.innerHTML = html;
+      
+      function removeBookmark(type, id) {
+        const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '{"quran":[],"hadith":[],"names":[]}');
+        bookmarks[type] = bookmarks[type].filter(b => b !== id);
+        localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+        loadBookmarks();
       }
-
-      function removeBookmark(type, key) {
-        deleteBookmark(type, key);
-        displayBookmarks();
-      }
+      
+      loadBookmarks();
     </script>
   </body>
 </html>
