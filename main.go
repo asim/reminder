@@ -371,38 +371,104 @@ func main() {
 		}
 	}
 
+	// Helper to check if request is from API client (wget, curl, http.Get, etc.)
+	isAPIClient := func(r *http.Request) bool {
+		userAgent := r.Header.Get("User-Agent")
+		accept := r.Header.Get("Accept")
+		
+		return strings.Contains(userAgent, "Wget") ||
+			strings.Contains(userAgent, "curl") ||
+			strings.Contains(userAgent, "Go-http-client") ||
+			strings.Contains(userAgent, "python-requests") ||
+			(accept != "" && !strings.Contains(accept, "text/html") && !strings.Contains(accept, "*/*"))
+	}
+
 	if *WebFlag {
 		fmt.Println("Registering web handler")
-		// Always register lite routes first for server-side rendering
-		registerLiteRoutes(q, n, b, a)
-
-		// Wrap the web handler to serve SPA only for browser requests
-		webHandler := app.ServeWeb()
-		http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Check if this looks like a wget/curl/API request (not a browser)
-			userAgent := r.Header.Get("User-Agent")
-			accept := r.Header.Get("Accept")
-
-			// If User-Agent suggests it's wget, curl, Go http client, or other non-browser
-			// OR if Accept header doesn't include text/html (API clients)
-			// Then let the registered lite handlers take over by returning (404 will trigger them)
-			isAPIClient := strings.Contains(userAgent, "Wget") ||
-				strings.Contains(userAgent, "curl") ||
-				strings.Contains(userAgent, "Go-http-client") ||
-				strings.Contains(userAgent, "python") ||
-				(accept != "" && !strings.Contains(accept, "text/html"))
-
-			// For API clients on content routes, return 404 to let lite handlers take over
-			if isAPIClient && (strings.HasPrefix(r.URL.Path, "/quran/") ||
-				strings.HasPrefix(r.URL.Path, "/hadith/") ||
-				strings.HasPrefix(r.URL.Path, "/names/") ||
-				r.URL.Path == "/daily") {
-				http.NotFound(w, r)
-				return
+		
+		// Create smart handlers that serve lite content for API clients, SPA for browsers
+		http.HandleFunc("/quran/{id}", func(w http.ResponseWriter, r *http.Request) {
+			if isAPIClient(r) {
+				// Serve server-rendered HTML
+				id := r.PathValue("id")
+				if len(id) == 0 {
+					return
+				}
+				ch, _ := strconv.Atoi(id)
+				if ch < 1 || ch > 114 {
+					return
+				}
+				head := fmt.Sprintf("%d | Quran", ch)
+				qhtml := app.RenderHTML(head, "", q.Get(ch).HTML())
+				w.Write([]byte(qhtml))
+			} else {
+				// Serve SPA
+				app.ServeWeb().ServeHTTP(w, r)
 			}
+		})
 
-			webHandler.ServeHTTP(w, r)
-		}))
+		http.HandleFunc("/hadith/{book}", func(w http.ResponseWriter, r *http.Request) {
+			if isAPIClient(r) {
+				book := r.PathValue("book")
+				if len(book) == 0 {
+					return
+				}
+				ch, _ := strconv.Atoi(book)
+				if ch < 1 || ch > len(b.Books) {
+					return
+				}
+				head := fmt.Sprintf("%d | Hadith", ch)
+				qhtml := app.RenderHTML(head, "", b.Get(ch).HTML())
+				w.Write([]byte(qhtml))
+			} else {
+				app.ServeWeb().ServeHTTP(w, r)
+			}
+		})
+
+		http.HandleFunc("/names/{id}", func(w http.ResponseWriter, r *http.Request) {
+			if isAPIClient(r) {
+				id := r.PathValue("id")
+				if len(id) == 0 {
+					return
+				}
+				name, _ := strconv.Atoi(id)
+				if name < 1 || name > len(*n) {
+					return
+				}
+				head := fmt.Sprintf("%d | Names", name)
+				qhtml := app.RenderHTML(head, "", n.Get(name).HTML())
+				w.Write([]byte(qhtml))
+			} else {
+				app.ServeWeb().ServeHTTP(w, r)
+			}
+		})
+
+		http.HandleFunc("/daily", func(w http.ResponseWriter, r *http.Request) {
+			if isAPIClient(r) {
+				template := `
+<h3>Verse</h3>
+<a href="%s" class="block">%s</a>
+<h3>Hadith</h3>
+<a href="%s" class="block">%s</a>
+<h3>Name</h3>
+<a href="%s" class="block">%s</a>
+<p>Updated %s</p>
+`
+				mtx.RLock()
+				verseLink := links["verse"]
+				hadithLink := links["hadith"]
+				nameLink := links["name"]
+				data := fmt.Sprintf(template, verseLink, dailyVerse, hadithLink, dailyHadith, nameLink, dailyName, dailyUpdated.Format(time.RFC850))
+				mtx.RUnlock()
+				html := app.RenderHTML("Daily Reminder", "Daily reminder from the quran, hadith and names of Allah", data)
+				w.Write([]byte(html))
+			} else {
+				app.ServeWeb().ServeHTTP(w, r)
+			}
+		})
+
+		// Everything else goes to SPA
+		http.Handle("/", app.ServeWeb())
 	} else {
 		fmt.Println("Registering lite handler")
 		http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
