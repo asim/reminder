@@ -631,7 +631,7 @@ func main() {
 					book, _ := hadithMeta["book"].(float64)
 					info, _ := hadithMeta["info"].(string)
 					text, _ := hadithMeta["text"].(string)
-					
+
 					// Get index - check both "index" (new) and fallback to 1 if missing
 					index := 1.0
 					if idx, ok := hadithMeta["index"].(float64); ok {
