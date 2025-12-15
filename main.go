@@ -70,9 +70,6 @@ func isHtmxRequest(r *http.Request) bool {
 }
 
 func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *api.Api) {
-	// generate api doc
-	apiHtml := app.RenderTemplate("API", "", a.Markdown())
-
 	// Root route - serve home page
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// Only handle exact "/" path
