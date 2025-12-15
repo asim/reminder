@@ -572,23 +572,23 @@ func main() {
 
 		for i := 0; i < maxDays; i++ {
 			date := dates[i]
-			
+
 			// Parse date for pubDate base
 			basePubDate := date
 			if t, err := time.Parse("2006-01-02", date); err == nil {
 				basePubDate = t.Format(time.RFC1123Z)
 			}
-			
+
 			// First, add hourly reminders for this date (most recent first)
 			hourlyReminders := loadHourlyReminders(date)
-			
+
 			// Process each hourly reminder
 			for idx, reminderData := range hourlyReminders {
 				reminder, ok := reminderData.(map[string]interface{})
 				if !ok {
 					continue
 				}
-				
+
 				// Get timestamp for pubDate
 				pubDate := basePubDate
 				if ts, ok := reminder["timestamp"].(string); ok {
@@ -596,7 +596,7 @@ func main() {
 						pubDate = t.Format(time.RFC1123Z)
 					}
 				}
-				
+
 				// Extract verse metadata
 				if verseMeta, ok := reminder["verse_meta"].(map[string]interface{}); ok {
 					chapterName, _ := verseMeta["chapter_name"].(string)
@@ -604,62 +604,68 @@ func main() {
 					verseStart, _ := verseMeta["verse_start"].(float64)
 					verseEnd, _ := verseMeta["verse_end"].(float64)
 					text, _ := verseMeta["text"].(string)
-					
+
 					verseTitle := ""
 					if verseStart == verseEnd {
 						verseTitle = fmt.Sprintf("%s %d:%d", chapterName, int(chapter), int(verseStart))
 					} else {
 						verseTitle = fmt.Sprintf("%s %d:%d-%d", chapterName, int(chapter), int(verseStart), int(verseEnd))
 					}
-					
+
+					verseLink := fmt.Sprintf("https://reminder.dev/quran/%d#%d", int(chapter), int(verseStart))
+
 					fmt.Fprintf(w, `    <item>
       <title>%s</title>
-      <link>https://reminder.dev/daily/%s</link>
+      <link>%s</link>
       <guid>https://reminder.dev/daily/%s#verse-%d</guid>
       <pubDate>%s</pubDate>
       <description><![CDATA[%s]]></description>
     </item>
-`, verseTitle, date, date, idx, pubDate, text)
+`, verseTitle, verseLink, date, idx, pubDate, text)
 				}
-				
+
 				// Extract hadith metadata
 				if hadithMeta, ok := reminder["hadith_meta"].(map[string]interface{}); ok {
 					bookName, _ := hadithMeta["book_name"].(string)
+					book, _ := hadithMeta["book"].(float64)
 					info, _ := hadithMeta["info"].(string)
 					text, _ := hadithMeta["text"].(string)
-					
+
 					hadithTitle := fmt.Sprintf("%s - %s", bookName, info)
-					
+					hadithLink := fmt.Sprintf("https://reminder.dev/hadith/%d", int(book))
+
 					fmt.Fprintf(w, `    <item>
       <title>%s</title>
-      <link>https://reminder.dev/daily/%s</link>
+      <link>%s</link>
       <guid>https://reminder.dev/daily/%s#hadith-%d</guid>
       <pubDate>%s</pubDate>
       <description><![CDATA[%s]]></description>
     </item>
-`, hadithTitle, date, date, idx, pubDate, text)
+`, hadithTitle, hadithLink, date, idx, pubDate, text)
 				}
-				
+
 				// Extract name metadata
 				if nameMeta, ok := reminder["name_meta"].(map[string]interface{}); ok {
+					number, _ := nameMeta["number"].(float64)
 					english, _ := nameMeta["english"].(string)
 					arabic, _ := nameMeta["arabic"].(string)
 					meaning, _ := nameMeta["meaning"].(string)
 					summary, _ := nameMeta["summary"].(string)
-					
+
 					nameTitle := fmt.Sprintf("%s - %s - %s", english, arabic, meaning)
-					
+					nameLink := fmt.Sprintf("https://reminder.dev/names/%d", int(number))
+
 					fmt.Fprintf(w, `    <item>
       <title>%s</title>
-      <link>https://reminder.dev/daily/%s</link>
+      <link>%s</link>
       <guid>https://reminder.dev/daily/%s#name-%d</guid>
       <pubDate>%s</pubDate>
       <description><![CDATA[%s]]></description>
     </item>
-`, nameTitle, date, date, idx, pubDate, summary)
+`, nameTitle, nameLink, date, idx, pubDate, summary)
 				}
 			}
-			
+
 			// Then, add daily summary at the end (for single daily consumption)
 			entry, hasDaily := dailyIndex[date]
 			if hasDaily {
@@ -1015,7 +1021,7 @@ func main() {
 					"text":         verseText,
 				},
 				"hadith_meta": map[string]interface{}{
-					"book":     book.Number,
+					"book":      book.Number,
 					"book_name": book.Name,
 					"narrator":  had.By,
 					"info":      had.Info,
@@ -1045,7 +1051,7 @@ func main() {
 				}
 
 				message := "In the Name of Allah—the Most Beneficent, Most Merciful"
-				
+
 				dailyData := map[string]interface{}{
 					"verse":   dailyVerse,
 					"hadith":  dailyHadith,
