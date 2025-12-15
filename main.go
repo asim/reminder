@@ -461,6 +461,22 @@ func main() {
 	if *WebFlag {
 		fmt.Println("Registering web handler")
 
+		// Register TOC handlers
+		http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
+			qhtml := app.RenderHTML("Quran", quran.Description, q.TOC())
+			w.Write([]byte(qhtml))
+		})
+
+		http.HandleFunc("/hadith", func(w http.ResponseWriter, r *http.Request) {
+			hhtml := app.RenderHTML("Hadith", hadith.Description, b.TOC())
+			w.Write([]byte(hhtml))
+		})
+
+		http.HandleFunc("/names", func(w http.ResponseWriter, r *http.Request) {
+			nhtml := app.RenderHTML("Names", names.Description, n.TOC())
+			w.Write([]byte(nhtml))
+		})
+
 		// Create smart handlers that serve lite content for API clients, SPA for browsers
 		http.HandleFunc("/quran/{id}", func(w http.ResponseWriter, r *http.Request) {
 			if isAPIClient(r) {
