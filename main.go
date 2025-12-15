@@ -108,7 +108,7 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 
 		data := fmt.Sprintf(template, verseLink, dailyVerse, hadithLink, dailyHadith, nameLink, dailyName, dailyUpdated.Format(time.RFC850))
 		mtx.RUnlock()
-		
+
 		if isHtmxRequest(r) {
 			html := app.RenderContent("Daily Reminder", "Daily reminder from the quran, hadith and names of Allah", data)
 			w.Write([]byte(html))
@@ -143,7 +143,7 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 
 		head := fmt.Sprintf("%d | Quran", ch)
 		content := q.Get(ch).HTML()
-		
+
 		if isHtmxRequest(r) {
 			qhtml := app.RenderContent(head, "", content)
 			w.Write([]byte(qhtml))
@@ -210,7 +210,7 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 
 		head := fmt.Sprintf("%d | Names", name)
 		content := n.Get(name).HTML()
-		
+
 		if isHtmxRequest(r) {
 			qhtml := app.RenderContent(head, "", content)
 			w.Write([]byte(qhtml))
@@ -245,7 +245,7 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 
 		head := fmt.Sprintf("%d | Hadith", ch)
 		content := b.Get(ch).HTML()
-		
+
 		if isHtmxRequest(r) {
 			qhtml := app.RenderContent(head, "", content)
 			w.Write([]byte(qhtml))
