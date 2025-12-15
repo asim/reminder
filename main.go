@@ -630,8 +630,13 @@ func main() {
 					bookName, _ := hadithMeta["book_name"].(string)
 					book, _ := hadithMeta["book"].(float64)
 					info, _ := hadithMeta["info"].(string)
-					index, _ := hadithMeta["index"].(float64)
 					text, _ := hadithMeta["text"].(string)
+					
+					// Get index - check both "index" (new) and fallback to 1 if missing
+					index := 1.0
+					if idx, ok := hadithMeta["index"].(float64); ok {
+						index = idx
+					}
 
 					hadithTitle := fmt.Sprintf("%s - %s", bookName, info)
 					hadithLink := fmt.Sprintf("https://reminder.dev/hadith/%d#%d", int(book), int(index))
