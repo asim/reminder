@@ -147,20 +147,15 @@ code {
 `
 
 var SearchTemplate = `
-<style>
-#content p { padding: 0 0 10px 0; }
-#resp { padding-bottom: 10px;}
-#expand { text-decoration: underline; }
-#expand:hover { cursor: pointer; }
-.ref { font-size: small; }
-#search { margin-top: 10px; }
-#q { padding: 10px; width: 100%; }
-</style>
-<div id="search">
-  <form id="question" action="/search" method="post"><input id="q" name=q placeholder="Ask a question" autocomplete="off" autofocus></form>
+<div class="mb-6">
+  <form id="question" action="/search" method="post">
+    <input id="q" name="q" placeholder="Ask a question about Islam, Quran, Hadith..." 
+           autocomplete="off" autofocus 
+           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent">
+  </form>
 </div>
-<div id="resp"></div>
-<div id="answer"></div>
+<div id="resp" class="text-gray-600 mb-4"></div>
+<div id="answer" class="space-y-6"></div>
 <script>
 function expand(el) {
       var ref = el.nextSibling;
@@ -173,7 +168,7 @@ function expand(el) {
 }
 
 function reference(el) {
-	return "<div>Text: " + el.text + "<br>Metadata: " + JSON.stringify(el.metadata) + "<br>Score: " + el.score + "</div>";
+	return "<div class='p-3 bg-gray-50 rounded text-sm'><strong>Text:</strong> " + el.text + "<br><strong>Metadata:</strong> " + JSON.stringify(el.metadata) + "<br><strong>Score:</strong> " + el.score + "</div>";
 }
 
 function getCookie(name) {
@@ -209,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function(){
 	  var ans = document.getElementById("answer");
 	  var json = JSON.parse(xhr.responseText);
 	  json.history.forEach(function(el) {
-		ans.innerHTML += "<p>" + el + "</p>";
+		ans.innerHTML += "<div class='p-4 bg-gray-50 rounded mb-4'>" + el + "</div>";
 	  });
         }
     };
@@ -228,13 +223,15 @@ document.addEventListener('DOMContentLoaded', function(){
 	xhr.onreadystatechange = function () {
 	    if (xhr.readyState === 4 && xhr.status === 200) {
 		var json = JSON.parse(xhr.responseText);
-		var text = "<p>" + json.q + "</p><p>" + json.answer + "</p>";
-		text += "<div id=expand onclick='expand(this); return false;'>References<br><br></div>";
-		text += "<div class=ref style='display: none;'>";
+		var text = "<div class='p-6 bg-white border border-gray-200 rounded-lg shadow-sm mb-6'>";
+		text += "<div class='font-semibold text-gray-900 mb-3'>" + json.q + "</div>";
+		text += "<div class='prose max-w-none text-gray-700 mb-4'>" + json.answer + "</div>";
+		text += "<div class='cursor-pointer text-sm text-blue-600 hover:text-blue-800 font-medium' id='expand' onclick='expand(this); return false;'>Show References ▼</div>";
+		text += "<div class='mt-4 space-y-2' style='display: none;'>";
 		for (i = 0; i < json.references.length; i++) {
-                    text += reference(json.references[i]) + "<br><br>";
+                    text += reference(json.references[i]);
 		}
-		text += "</div>";
+		text += "</div></div>";
 		ans.innerHTML = text + ans.innerHTML; 
 		resp.innerText = "";
 	    }

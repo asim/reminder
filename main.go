@@ -133,7 +133,8 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 
 	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
 		if isHtmxRequest(r) {
-			w.Write([]byte(app.RenderContent("API", "", app.RenderString(a.Markdown()))))
+			content := fmt.Sprintf(`<div class="prose prose-slate max-w-none">%s</div>`, app.RenderString(a.Markdown()))
+			w.Write([]byte(app.RenderContent("API", "", content)))
 		} else {
 			w.Write([]byte(apiHtml))
 		}
@@ -464,12 +465,8 @@ func main() {
 		http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
 			// For TOC page
 			content := q.TOC()
-			if isAPIClient(r) {
-				qhtml := app.RenderHTML("Quran", quran.Description, content)
-				w.Write([]byte(qhtml))
-			} else {
-				app.ServeWeb().ServeHTTP(w, r)
-			}
+			qhtml := app.RenderHTML("Quran", quran.Description, content)
+			w.Write([]byte(qhtml))
 		})
 
 		http.HandleFunc("/quran/{id}", func(w http.ResponseWriter, r *http.Request) {
@@ -495,12 +492,8 @@ func main() {
 		http.HandleFunc("/hadith", func(w http.ResponseWriter, r *http.Request) {
 			// For TOC page
 			content := b.TOC()
-			if isAPIClient(r) {
-				qhtml := app.RenderHTML("Hadith", hadith.Description, content)
-				w.Write([]byte(qhtml))
-			} else {
-				app.ServeWeb().ServeHTTP(w, r)
-			}
+			qhtml := app.RenderHTML("Hadith", hadith.Description, content)
+			w.Write([]byte(qhtml))
 		})
 
 		http.HandleFunc("/hadith/{book}", func(w http.ResponseWriter, r *http.Request) {
@@ -524,12 +517,8 @@ func main() {
 		http.HandleFunc("/names", func(w http.ResponseWriter, r *http.Request) {
 			// For TOC page
 			content := n.TOC()
-			if isAPIClient(r) {
-				qhtml := app.RenderHTML("Names", names.Description, content)
-				w.Write([]byte(qhtml))
-			} else {
-				app.ServeWeb().ServeHTTP(w, r)
-			}
+			qhtml := app.RenderHTML("Names", names.Description, content)
+			w.Write([]byte(qhtml))
 		})
 
 		http.HandleFunc("/names/{id}", func(w http.ResponseWriter, r *http.Request) {
