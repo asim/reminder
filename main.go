@@ -582,8 +582,9 @@ func main() {
 			// First, add hourly reminders for this date (most recent first)
 			hourlyReminders := loadHourlyReminders(date)
 
-			// Process each hourly reminder
-			for _, reminderData := range hourlyReminders {
+			// Process each hourly reminder in reverse order (newest first)
+			for i := len(hourlyReminders) - 1; i >= 0; i-- {
+				reminderData := hourlyReminders[i]
 				reminder, ok := reminderData.(map[string]interface{})
 				if !ok {
 					continue
