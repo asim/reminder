@@ -324,7 +324,7 @@ func RenderContent(title, desc, html string) string {
 	if desc != "" {
 		descSection = fmt.Sprintf(`<p class="text-gray-600">%s</p>`, desc)
 	}
-	
+
 	if titleSection != "" || descSection != "" {
 		return fmt.Sprintf(`<div class="max-w-4xl mx-auto p-6">
   <div class="mb-4">
@@ -334,7 +334,7 @@ func RenderContent(title, desc, html string) string {
   <div>%s</div>
 </div>`, titleSection, descSection, html)
 	}
-	
+
 	return fmt.Sprintf(`<div class="max-w-4xl mx-auto p-6">%s</div>`, html)
 }
 
