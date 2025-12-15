@@ -583,7 +583,7 @@ func main() {
 			hourlyReminders := loadHourlyReminders(date)
 
 			// Process each hourly reminder
-			for idx, reminderData := range hourlyReminders {
+			for _, reminderData := range hourlyReminders {
 				reminder, ok := reminderData.(map[string]interface{})
 				if !ok {
 					continue
