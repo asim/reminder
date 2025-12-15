@@ -579,60 +579,7 @@ func main() {
 				basePubDate = t.Format(time.RFC1123Z)
 			}
 			
-			// First, add daily summary if it exists (for single daily consumption)
-			entry, hasDaily := dailyIndex[date]
-			if hasDaily {
-				entryMap, ok := entry.(map[string]interface{})
-				if ok {
-					verse := ""
-					hadith := ""
-					name := ""
-					hijri := ""
-
-					if v, ok := entryMap["verse"].(string); ok {
-						verse = v
-					}
-					if h, ok := entryMap["hadith"].(string); ok {
-						hadith = h
-					}
-					if n, ok := entryMap["name"].(string); ok {
-						name = n
-					}
-					if hj, ok := entryMap["hijri"].(string); ok {
-						hijri = hj
-					}
-
-					title := fmt.Sprintf("Daily Reminder - %s", date)
-					if hijri != "" {
-						title = fmt.Sprintf("Daily Reminder - %s (%s)", date, hijri)
-					}
-
-					// Combine all three into one item description
-					description := ""
-					if verse != "" {
-						description += "<h3>Verse</h3>\n" + verse + "\n\n"
-					}
-					if hadith != "" {
-						description += "<h3>Hadith</h3>\n" + hadith + "\n\n"
-					}
-					if name != "" {
-						description += "<h3>Name</h3>\n" + name
-					}
-
-					if description != "" {
-						fmt.Fprintf(w, `    <item>
-      <title>%s</title>
-      <link>https://reminder.dev/daily/%s</link>
-      <guid>https://reminder.dev/daily/%s</guid>
-      <pubDate>%s</pubDate>
-      <description><![CDATA[%s]]></description>
-    </item>
-`, title, date, date, basePubDate, description)
-					}
-				}
-			}
-			
-			// Then, add hourly reminders for this date (for hourly consumption)
+			// First, add hourly reminders for this date (most recent first)
 			hourlyReminders := loadHourlyReminders(date)
 			
 			// Process each hourly reminder
@@ -710,6 +657,59 @@ func main() {
       <description><![CDATA[%s]]></description>
     </item>
 `, nameTitle, date, date, idx, pubDate, summary)
+				}
+			}
+			
+			// Then, add daily summary at the end (for single daily consumption)
+			entry, hasDaily := dailyIndex[date]
+			if hasDaily {
+				entryMap, ok := entry.(map[string]interface{})
+				if ok {
+					verse := ""
+					hadith := ""
+					name := ""
+					hijri := ""
+
+					if v, ok := entryMap["verse"].(string); ok {
+						verse = v
+					}
+					if h, ok := entryMap["hadith"].(string); ok {
+						hadith = h
+					}
+					if n, ok := entryMap["name"].(string); ok {
+						name = n
+					}
+					if hj, ok := entryMap["hijri"].(string); ok {
+						hijri = hj
+					}
+
+					title := fmt.Sprintf("Daily Reminder - %s", date)
+					if hijri != "" {
+						title = fmt.Sprintf("Daily Reminder - %s (%s)", date, hijri)
+					}
+
+					// Combine all three into one item description
+					description := ""
+					if verse != "" {
+						description += "<h3>Verse</h3>\n" + verse + "\n\n"
+					}
+					if hadith != "" {
+						description += "<h3>Hadith</h3>\n" + hadith + "\n\n"
+					}
+					if name != "" {
+						description += "<h3>Name</h3>\n" + name
+					}
+
+					if description != "" {
+						fmt.Fprintf(w, `    <item>
+      <title>%s</title>
+      <link>https://reminder.dev/daily/%s</link>
+      <guid>https://reminder.dev/daily/%s</guid>
+      <pubDate>%s</pubDate>
+      <description><![CDATA[%s]]></description>
+    </item>
+`, title, date, date, basePubDate, description)
+					}
 				}
 			}
 		}
