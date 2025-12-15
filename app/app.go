@@ -129,7 +129,7 @@ code {
           <h1 class="text-2xl font-bold">%s</h1>
           <p class="text-gray-600">%s</p>
         </div>
-        <div class="prose max-w-none">%s</div>
+        <div>%s</div>
       </div>
     </div>
 
@@ -317,13 +317,25 @@ func RenderHTML(title, desc, html string) string {
 }
 
 func RenderContent(title, desc, html string) string {
-	return fmt.Sprintf(`<div class="max-w-4xl mx-auto p-6">
+	var titleSection, descSection string
+	if title != "" {
+		titleSection = fmt.Sprintf(`<h1 class="text-2xl font-bold">%s</h1>`, title)
+	}
+	if desc != "" {
+		descSection = fmt.Sprintf(`<p class="text-gray-600">%s</p>`, desc)
+	}
+	
+	if titleSection != "" || descSection != "" {
+		return fmt.Sprintf(`<div class="max-w-4xl mx-auto p-6">
   <div class="mb-4">
-    <h1 class="text-2xl font-bold">%s</h1>
-    <p class="text-gray-600">%s</p>
+    %s
+    %s
   </div>
-  <div class="prose max-w-none">%s</div>
-</div>`, title, desc, html)
+  <div>%s</div>
+</div>`, titleSection, descSection, html)
+	}
+	
+	return fmt.Sprintf(`<div class="max-w-4xl mx-auto p-6">%s</div>`, html)
 }
 
 func RenderString(v string) string {

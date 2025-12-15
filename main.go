@@ -92,9 +92,42 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 		indexContent = strings.ReplaceAll(indexContent, "{name_text}", name)
 
 		if isHtmxRequest(r) {
-			w.Write([]byte(app.RenderContent("Home", "Quran, hadith, and more as an app and API", indexContent)))
+			w.Write([]byte(app.RenderContent("", "", indexContent)))
 		} else {
 			w.Write([]byte(app.RenderHTML("Home", "Quran, hadith, and more as an app and API", indexContent)))
+		}
+	})
+
+	http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
+		content := q.TOC()
+		if isHtmxRequest(r) {
+			qhtml := app.RenderContent("Quran", quran.Description, content)
+			w.Write([]byte(qhtml))
+		} else {
+			qhtml := app.RenderHTML("Quran", quran.Description, content)
+			w.Write([]byte(qhtml))
+		}
+	})
+
+	http.HandleFunc("/hadith", func(w http.ResponseWriter, r *http.Request) {
+		content := b.TOC()
+		if isHtmxRequest(r) {
+			qhtml := app.RenderContent("Hadith", hadith.Description, content)
+			w.Write([]byte(qhtml))
+		} else {
+			qhtml := app.RenderHTML("Hadith", hadith.Description, content)
+			w.Write([]byte(qhtml))
+		}
+	})
+
+	http.HandleFunc("/names", func(w http.ResponseWriter, r *http.Request) {
+		content := n.TOC()
+		if isHtmxRequest(r) {
+			qhtml := app.RenderContent("Names", names.Description, content)
+			w.Write([]byte(qhtml))
+		} else {
+			qhtml := app.RenderHTML("Names", names.Description, content)
+			w.Write([]byte(qhtml))
 		}
 	})
 
@@ -200,17 +233,6 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 		w.Write([]byte(vhtml))
 	})
 
-	http.HandleFunc("/names", func(w http.ResponseWriter, r *http.Request) {
-		content := n.TOC()
-		if isHtmxRequest(r) {
-			qhtml := app.RenderContent("Names", names.Description, content)
-			w.Write([]byte(qhtml))
-		} else {
-			qhtml := app.RenderHTML("Names", names.Description, content)
-			w.Write([]byte(qhtml))
-		}
-	})
-
 	http.HandleFunc("/names/{id}", func(w http.ResponseWriter, r *http.Request) {
 		id := r.PathValue("id")
 		if len(id) == 0 {
@@ -231,17 +253,6 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 			w.Write([]byte(qhtml))
 		} else {
 			qhtml := app.RenderHTML(head, "", content)
-			w.Write([]byte(qhtml))
-		}
-	})
-
-	http.HandleFunc("/hadith", func(w http.ResponseWriter, r *http.Request) {
-		content := b.TOC()
-		if isHtmxRequest(r) {
-			qhtml := app.RenderContent("Hadith", hadith.Description, content)
-			w.Write([]byte(qhtml))
-		} else {
-			qhtml := app.RenderHTML("Hadith", hadith.Description, content)
 			w.Write([]byte(qhtml))
 		}
 	})
