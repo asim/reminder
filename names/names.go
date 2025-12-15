@@ -73,9 +73,9 @@ func (n *Names) Get(id int) *Name {
 func (n *Names) TOC() string {
 	var data string
 
-	data += `<div id="contents">`
+	data += `<div id="contents" class="space-y-2">`
 	for _, name := range *n {
-		data += fmt.Sprintf(`<div class="chapter"><a href="/names/%d" hx-get="/names/%d" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">%d: %s</a></div>`, name.Number, name.Number, name.Number, name.Meaning)
+		data += fmt.Sprintf(`<a href="/names/%d" hx-get="/names/%d" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="block p-3 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">%d: %s</a>`, name.Number, name.Number, name.Number, name.Meaning)
 	}
 	data += `</div>`
 

@@ -70,9 +70,11 @@ func (b *Book) HTML() string {
 func (v *Volumes) TOC() string {
 	var data string
 
+	data += `<div class="space-y-2">`
 	for id, book := range v.Books {
-		data += fmt.Sprintf(`<div class="chapter"><a href="/hadith/%d" hx-get="/hadith/%d" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">%d: %s</a></div>`, id+1, id+1, id+1, book.Name)
+		data += fmt.Sprintf(`<a href="/hadith/%d" hx-get="/hadith/%d" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="block p-3 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">%d: %s</a>`, id+1, id+1, id+1, book.Name)
 	}
+	data += `</div>`
 
 	return data
 }

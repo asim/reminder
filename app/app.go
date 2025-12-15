@@ -28,25 +28,9 @@ var Template = `
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
     html, body { height: 100%%; width: 100%%; margin: 0; padding: 0; font-family: "Nunito Sans", serif; }
-    a { color: #333333; }
-    a:visited { color: #333333;}
-    #head {
-      position: fixed;
-      background: white;
-      top: 0;
-      width: 100%%;
-    }
-    #head a { margin-right: 10px; color: black; font-weight: bold; text-decoration: none; }
-    #container { height: 100%%; max-width: 1024px; margin: 0 auto; padding: 25px;}
-    #content { padding-bottom: 100px; }
-    #content p { padding: 0 0 25px 0; margin: 0; }
-    #desc { margin-bottom: 10px; }
-    #title { margin-top: 50px; font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
-    li { margin-bottom: 5px; }
-    .htmx-swapping { opacity: 0; transition: opacity 200ms ease-out; }
-    .htmx-settling { opacity: 1; }
     .htmx-request #container { opacity: 0.5; }
     #container { transition: opacity 200ms ease-in-out; }
 @font-face {
@@ -122,21 +106,31 @@ code {
 }
     </style>
   </head>
-  <body>
-    <div id="head">
-      <div id="brand">
-        <a href="/" hx-get="/home" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">&nbsp;R&nbsp;</a>
+  <body class="bg-gray-50">
+    <div class="w-full text-sm py-2 px-2 bg-black text-white flex flex-row items-center gap-1 flex-shrink-0">
+      <div class="inline-block order-1">
+        <a href="/" hx-get="/home" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="border border-gray-600 rounded px-2 py-1 hover:border-gray-400 transition-colors">&nbsp;R&nbsp;</a>
       </div>
-      <div id="nav">
-        <a href="/home" hx-get="/home" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">Home</a>
+      <div class="flex-1 flex flex-row justify-center gap-1 order-2">
+        <a href="/home" hx-get="/home" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="bg-white hover:opacity-100 flex items-center gap-1 text-black px-2 py-0.5 rounded-md transition-colors">Home</a>
+        <a href="/daily" hx-get="/daily" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="bg-white hover:opacity-100 flex items-center gap-1 text-black px-2 py-0.5 rounded-md transition-colors">Daily</a>
+        <a href="/quran" hx-get="/quran" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="bg-white hover:opacity-100 flex items-center gap-1 text-black px-2 py-0.5 rounded-md transition-colors">Quran</a>
+        <a href="/hadith" hx-get="/hadith" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="bg-white hover:opacity-100 flex items-center gap-1 text-black px-2 py-0.5 rounded-md transition-colors">Hadith</a>
+        <a href="/names" hx-get="/names" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="bg-white hover:opacity-100 flex items-center gap-1 text-black px-2 py-0.5 rounded-md transition-colors">Names</a>
       </div>
-      <button id="install" hidden>Install PWA</button>
+      <div class="hidden lg:flex items-center gap-2 order-3">
+        <a href="/bookmarks" class="bg-white hover:opacity-100 flex items-center gap-1 text-black px-2 py-0.5 rounded-md transition-colors">Bookmarks</a>
+        <a href="/search" hx-get="/search" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="bg-white hover:opacity-100 flex items-center gap-1 text-black px-2 py-0.5 rounded-md transition-colors">Search</a>
+      </div>
     </div>
-    <div id="container">
-      <div id="title">%s</div>
-      <div id="desc">%s</div>
-      <div id="content">%s</div>
-    </div>
+    <div id="main" class="h-screen overflow-y-auto">
+      <div class="max-w-4xl mx-auto p-6">
+        <div class="mb-4">
+          <h1 class="text-2xl font-bold">%s</h1>
+          <p class="text-gray-600">%s</p>
+        </div>
+        <div class="prose max-w-none">%s</div>
+      </div>
     </div>
 
   <script src="/bookmarks.js"></script>
@@ -287,25 +281,14 @@ document.addEventListener('DOMContentLoaded', function(){
 `
 
 var Index = `
-<style>
-#app a {
-    text-decoration: none;
-    margin-bottom: 10px;
-    border: 1px solid grey;
-    border-radius: 5px;
-    padding: 10px;
-    display: block;
-}
-</style>
-
-<div id="app">
-        <a href="/daily" hx-get="/daily" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">Daily</a>
-        <a href="/quran" hx-get="/quran" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">Quran</a>
-        <a href="/names" hx-get="/names" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">Names</a>
-        <a href="/hadith" hx-get="/hadith" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">Hadith</a>
-        <a href="/search" hx-get="/search" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">Search</a>
-        <a href="/bookmarks">Bookmarks</a>
-        <a href="/api" hx-get="/api" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">API</a>
+<div class="space-y-3">
+  <a href="/daily" hx-get="/daily" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">Daily</a>
+  <a href="/quran" hx-get="/quran" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">Quran</a>
+  <a href="/names" hx-get="/names" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">Names</a>
+  <a href="/hadith" hx-get="/hadith" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">Hadith</a>
+  <a href="/search" hx-get="/search" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">Search</a>
+  <a href="/bookmarks" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">Bookmarks</a>
+  <a href="/api" hx-get="/api" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">API</a>
 </div>
 `
 
@@ -337,9 +320,13 @@ func RenderHTML(title, desc, html string) string {
 }
 
 func RenderContent(title, desc, html string) string {
-	return fmt.Sprintf(`<div id="title">%s</div>
-<div id="desc">%s</div>
-<div id="content">%s</div>`, title, desc, html)
+	return fmt.Sprintf(`<div class="max-w-4xl mx-auto p-6">
+  <div class="mb-4">
+    <h1 class="text-2xl font-bold">%s</h1>
+    <p class="text-gray-600">%s</p>
+  </div>
+  <div class="prose max-w-none">%s</div>
+</div>`, title, desc, html)
 }
 
 func RenderString(v string) string {

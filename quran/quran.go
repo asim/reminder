@@ -137,9 +137,9 @@ func (q *Quran) JSON() []byte {
 func (q *Quran) TOC() string {
 	var data string
 
-	data += `<div id="contents">`
+	data += `<div id="contents" class="space-y-2">`
 	for _, ch := range q.Chapters {
-		data += fmt.Sprintf(`<div class="chapter"><a href="/quran/%d" hx-get="/quran/%d" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">%d: %s</a></div>`, ch.Number, ch.Number, ch.Number, ch.English)
+		data += fmt.Sprintf(`<a href="/quran/%d" hx-get="/quran/%d" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="block p-3 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">%d: %s</a>`, ch.Number, ch.Number, ch.Number, ch.English)
 	}
 	data += `</div>`
 

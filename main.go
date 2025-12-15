@@ -93,13 +93,13 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 
 	http.HandleFunc("/daily", func(w http.ResponseWriter, r *http.Request) {
 		template := `
-<h3>Verse</h3>
-<a href="%s" class="block" hx-get="%s" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">%s</a>
-<h3>Hadith</h3>
-<a href="%s" class="block" hx-get="%s" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">%s</a>
-<h3>Name</h3>
-<a href="%s" class="block" hx-get="%s" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">%s</a>
-<p>Updated %s</p>
+<h3 class="text-lg font-semibold mt-6 mb-2">Verse</h3>
+<a href="%s" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors mb-4" hx-get="%s" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">%s</a>
+<h3 class="text-lg font-semibold mt-6 mb-2">Hadith</h3>
+<a href="%s" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors mb-4" hx-get="%s" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">%s</a>
+<h3 class="text-lg font-semibold mt-6 mb-2">Name</h3>
+<a href="%s" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors mb-4" hx-get="%s" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">%s</a>
+<p class="text-sm text-gray-500 mt-4">Updated %s</p>
 `
 		mtx.RLock()
 		verseLink := links["verse"]
