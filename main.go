@@ -373,7 +373,36 @@ func main() {
 
 	if *WebFlag {
 		fmt.Println("Registering web handler")
-		http.Handle("/", app.ServeWeb())
+		// Always register lite routes first for server-side rendering
+		registerLiteRoutes(q, n, b, a)
+		
+		// Wrap the web handler to serve SPA only for browser requests
+		webHandler := app.ServeWeb()
+		http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Check if this looks like a wget/curl/API request (not a browser)
+			userAgent := r.Header.Get("User-Agent")
+			accept := r.Header.Get("Accept")
+			
+			// If User-Agent suggests it's wget, curl, Go http client, or other non-browser
+			// OR if Accept header doesn't include text/html (API clients)
+			// Then let the registered lite handlers take over by returning (404 will trigger them)
+			isAPIClient := strings.Contains(userAgent, "Wget") ||
+				strings.Contains(userAgent, "curl") ||
+				strings.Contains(userAgent, "Go-http-client") ||
+				strings.Contains(userAgent, "python") ||
+				(accept != "" && !strings.Contains(accept, "text/html"))
+			
+			// For API clients on content routes, return 404 to let lite handlers take over
+			if isAPIClient && (strings.HasPrefix(r.URL.Path, "/quran/") || 
+				strings.HasPrefix(r.URL.Path, "/hadith/") || 
+				strings.HasPrefix(r.URL.Path, "/names/") ||
+				r.URL.Path == "/daily") {
+				http.NotFound(w, r)
+				return
+			}
+			
+			webHandler.ServeHTTP(w, r)
+		}))
 	} else {
 		fmt.Println("Registering lite handler")
 		http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -640,22 +669,29 @@ func main() {
 
 					hadithTitle := fmt.Sprintf("%s - %s", bookName, info)
 					hadithLink := fmt.Sprintf("https://reminder.dev/hadith/%d#%s", int(book), number)
+
+				fmt.Fprintf(w, `    <item>
+      <title>%s</title>
+      <link>%s</link>
+      <guid>%s</guid>
+      <pubDate>%s</pubDate>
+      <description><![CDATA[%s]]></description>
     </item>
 `, hadithTitle, hadithLink, hadithLink, pubDate, text)
-				}
+			}
 
-				// Extract name metadata
-				if nameMeta, ok := reminder["name_meta"].(map[string]interface{}); ok {
-					number, _ := nameMeta["number"].(float64)
-					english, _ := nameMeta["english"].(string)
-					arabic, _ := nameMeta["arabic"].(string)
-					meaning, _ := nameMeta["meaning"].(string)
-					summary, _ := nameMeta["summary"].(string)
+			// Extract name metadata
+			if nameMeta, ok := reminder["name_meta"].(map[string]interface{}); ok {
+				number, _ := nameMeta["number"].(float64)
+				english, _ := nameMeta["english"].(string)
+				arabic, _ := nameMeta["arabic"].(string)
+				meaning, _ := nameMeta["meaning"].(string)
+				summary, _ := nameMeta["summary"].(string)
 
-					nameTitle := fmt.Sprintf("%s - %s - %s", english, arabic, meaning)
-					nameLink := fmt.Sprintf("https://reminder.dev/names/%d", int(number))
+				nameTitle := fmt.Sprintf("%s - %s - %s", english, arabic, meaning)
+				nameLink := fmt.Sprintf("https://reminder.dev/names/%d", int(number))
 
-					fmt.Fprintf(w, `    <item>
+				fmt.Fprintf(w, `    <item>
       <title>%s</title>
       <link>%s</link>
       <guid>%s</guid>
@@ -663,8 +699,8 @@ func main() {
       <description><![CDATA[%s]]></description>
     </item>
 `, nameTitle, nameLink, nameLink, pubDate, summary)
-				}
 			}
+		}
 
 			// Then, add daily summary at the end (for single daily consumption)
 			entry, hasDaily := dailyIndex[date]
