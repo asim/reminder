@@ -73,13 +73,28 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 	// generate api doc
 	apiHtml := app.RenderTemplate("API", "", a.Markdown())
 
-	appHtml := app.RenderHTML("Home", "Quran, hadith, and more as an app and API", app.Index)
-
 	http.HandleFunc("/home", func(w http.ResponseWriter, r *http.Request) {
+		mtx.RLock()
+		verseLink := links["verse"]
+		hadithLink := links["hadith"]
+		nameLink := links["name"]
+		verse := dailyVerse
+		hadith := dailyHadith
+		name := dailyName
+		mtx.RUnlock()
+
+		// Populate Index template with actual data
+		indexContent := strings.ReplaceAll(app.Index, "{verse_link}", verseLink)
+		indexContent = strings.ReplaceAll(indexContent, "{verse_text}", verse)
+		indexContent = strings.ReplaceAll(indexContent, "{hadith_link}", hadithLink)
+		indexContent = strings.ReplaceAll(indexContent, "{hadith_text}", hadith)
+		indexContent = strings.ReplaceAll(indexContent, "{name_link}", nameLink)
+		indexContent = strings.ReplaceAll(indexContent, "{name_text}", name)
+
 		if isHtmxRequest(r) {
-			w.Write([]byte(app.RenderContent("Home", "Quran, hadith, and more as an app and API", app.Index)))
+			w.Write([]byte(app.RenderContent("Home", "Quran, hadith, and more as an app and API", indexContent)))
 		} else {
-			w.Write([]byte(appHtml))
+			w.Write([]byte(app.RenderHTML("Home", "Quran, hadith, and more as an app and API", indexContent)))
 		}
 	})
 

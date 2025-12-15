@@ -142,38 +142,6 @@ code {
         )
       }
   </script>
-  <script>
-        let installPrompt = null;
-        const installButton = document.querySelector("#install");
-
-        window.addEventListener("beforeinstallprompt", (event) => {
-          event.preventDefault();
-          installPrompt = event;
-          installButton.removeAttribute("hidden");
-        });
-
-        installButton.addEventListener("click", async () => {
-          if (!installPrompt) {
-            return;
-          }
-          const result = await installPrompt.prompt();
-          disableInAppInstallPrompt();
-        });
-
-        function disableInAppInstallPrompt() {
-          installPrompt = null;
-          installButton.setAttribute("hidden", "");
-        }
-
-        window.addEventListener("appinstalled", () => {
-          disableInAppInstallPrompt();
-        });
-
-        function disableInAppInstallPrompt() {
-          installPrompt = null;
-          installButton.setAttribute("hidden", "");
-        }
-  </script>
   </body>
 </html>
 `
@@ -281,14 +249,43 @@ document.addEventListener('DOMContentLoaded', function(){
 `
 
 var Index = `
-<div class="space-y-3">
-  <a href="/daily" hx-get="/daily" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">Daily</a>
-  <a href="/quran" hx-get="/quran" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">Quran</a>
-  <a href="/names" hx-get="/names" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">Names</a>
-  <a href="/hadith" hx-get="/hadith" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">Hadith</a>
-  <a href="/search" hx-get="/search" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">Search</a>
-  <a href="/bookmarks" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">Bookmarks</a>
-  <a href="/api" hx-get="/api" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">API</a>
+<div class="text-center mb-8">
+  <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3">Latest Reminder</h1>
+  <p class="text-sm sm:text-base text-gray-600 mb-1">Updated hourly with a new verse, hadith, and name</p>
+</div>
+
+<section class="mb-8">
+  <h2 class="text-lg font-semibold mb-2">Verse</h2>
+  <div class="text-sm sm:text-base text-gray-700 mb-2">A verse from the Quran</div>
+  <div class="whitespace-pre-wrap leading-snug bg-blue-50 rounded p-4 text-base shadow">
+    <a href="{verse_link}" hx-get="{verse_link}" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="hover:underline">{verse_text}</a>
+  </div>
+</section>
+
+<section class="mb-8">
+  <h2 class="text-lg font-semibold mb-2">Hadith</h2>
+  <div class="text-sm sm:text-base text-gray-700 mb-2">A hadith from sahih bukhari</div>
+  <div class="whitespace-pre-wrap leading-snug bg-green-50 rounded p-4 text-base shadow">
+    <a href="{hadith_link}" hx-get="{hadith_link}" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="hover:underline">{hadith_text}</a>
+  </div>
+</section>
+
+<section class="mb-8">
+  <h2 class="text-lg font-semibold mb-2">Name of Allah</h2>
+  <div class="text-sm sm:text-base text-gray-700 mb-2">A beautiful name from the 99 names of Allah</div>
+  <div class="whitespace-pre-wrap leading-snug bg-yellow-50 rounded p-4 text-base shadow">
+    <a href="{name_link}" hx-get="{name_link}" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="hover:underline">{name_text}</a>
+  </div>
+</section>
+
+<div class="pt-4 border-t border-gray-200">
+  <h3 class="text-base sm:text-lg font-medium mb-2 text-gray-800">Explore More</h3>
+  <p class="text-sm sm:text-base text-gray-600 mb-4">Browse our full collection or view past daily reminders</p>
+  <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
+    <a href="/daily" hx-get="/daily" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="inline-block px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors text-center text-sm sm:text-base">Daily Reminder</a>
+    <a href="/quran" hx-get="/quran" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="inline-block px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors text-center text-sm sm:text-base">Read Quran</a>
+    <a href="/hadith" hx-get="/hadith" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="inline-block px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors text-center text-sm sm:text-base">Read Hadith</a>
+  </div>
 </div>
 `
 
