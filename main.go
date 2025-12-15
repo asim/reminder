@@ -629,10 +629,11 @@ func main() {
 					bookName, _ := hadithMeta["book_name"].(string)
 					book, _ := hadithMeta["book"].(float64)
 					info, _ := hadithMeta["info"].(string)
+					number, _ := hadithMeta["number"].(string)
 					text, _ := hadithMeta["text"].(string)
 
 					hadithTitle := fmt.Sprintf("%s - %s", bookName, info)
-					hadithLink := fmt.Sprintf("https://reminder.dev/hadith/%d", int(book))
+					hadithLink := fmt.Sprintf("https://reminder.dev/hadith/%d#%s", int(book), number)
 
 					fmt.Fprintf(w, `    <item>
       <title>%s</title>
@@ -1025,6 +1026,7 @@ func main() {
 					"book_name": book.Name,
 					"narrator":  had.By,
 					"info":      had.Info,
+					"number":    num,
 					"text":      had.Text,
 				},
 				"name_meta": map[string]interface{}{
