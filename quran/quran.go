@@ -139,7 +139,7 @@ func (q *Quran) TOC() string {
 
 	data += `<div id="contents">`
 	for _, ch := range q.Chapters {
-		data += fmt.Sprintf(`<div class="chapter"><a href="/quran/%d">%d: %s</a></div>`, ch.Number, ch.Number, ch.English)
+		data += fmt.Sprintf(`<div class="chapter"><a href="/quran/%d" hx-get="/quran/%d" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">%d: %s</a></div>`, ch.Number, ch.Number, ch.Number, ch.English)
 	}
 	data += `</div>`
 

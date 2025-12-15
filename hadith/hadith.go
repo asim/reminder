@@ -71,7 +71,7 @@ func (v *Volumes) TOC() string {
 	var data string
 
 	for id, book := range v.Books {
-		data += fmt.Sprintf(`<div class="chapter"><a href="/hadith/%d">%d: %s</a></div>`, id+1, id+1, book.Name)
+		data += fmt.Sprintf(`<div class="chapter"><a href="/hadith/%d" hx-get="/hadith/%d" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">%d: %s</a></div>`, id+1, id+1, id+1, book.Name)
 	}
 
 	return data

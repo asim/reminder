@@ -27,6 +27,7 @@ var Template = `
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <style>
     html, body { height: 100%%; width: 100%%; margin: 0; padding: 0; font-family: "Nunito Sans", serif; }
     a { color: #333333; }
@@ -44,6 +45,8 @@ var Template = `
     #desc { margin-bottom: 10px; }
     #title { margin-top: 50px; font-size: 1.2em; font-weight: bold; margin-bottom: 10px; }
     li { margin-bottom: 5px; }
+    .htmx-swapping { opacity: 0; transition: opacity 200ms ease-out; }
+    .htmx-settling { opacity: 1; }
 @font-face {
     font-family: 'arabic';
     src: url('/arabic.otf') format('opentype');
@@ -120,10 +123,10 @@ code {
   <body>
     <div id="head">
       <div id="brand">
-        <a href="/">&nbsp;R&nbsp;</a>
+        <a href="/" hx-get="/home" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">&nbsp;R&nbsp;</a>
       </div>
       <div id="nav">
-        <a href="/home">Home</a>
+        <a href="/home" hx-get="/home" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">Home</a>
       </div>
       <button id="install" hidden>Install PWA</button>
     </div>
@@ -294,13 +297,13 @@ var Index = `
 </style>
 
 <div id="app">
-        <a href="/daily">Daily</a>
-        <a href="/quran">Quran</a>
-        <a href="/names">Names</a>
-        <a href="/hadith">Hadith</a>
-        <a href="/search">Search</a>
+        <a href="/daily" hx-get="/daily" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">Daily</a>
+        <a href="/quran" hx-get="/quran" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">Quran</a>
+        <a href="/names" hx-get="/names" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">Names</a>
+        <a href="/hadith" hx-get="/hadith" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">Hadith</a>
+        <a href="/search" hx-get="/search" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">Search</a>
         <a href="/bookmarks">Bookmarks</a>
-        <a href="/api">API</a>
+        <a href="/api" hx-get="/api" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">API</a>
 </div>
 `
 
@@ -329,6 +332,12 @@ func Render(md []byte) []byte {
 
 func RenderHTML(title, desc, html string) string {
 	return fmt.Sprintf(Template, title, title, desc, html)
+}
+
+func RenderContent(title, desc, html string) string {
+	return fmt.Sprintf(`<div id="title">%s</div>
+<div id="desc">%s</div>
+<div id="content">%s</div>`, title, desc, html)
 }
 
 func RenderString(v string) string {

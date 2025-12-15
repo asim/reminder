@@ -75,7 +75,7 @@ func (n *Names) TOC() string {
 
 	data += `<div id="contents">`
 	for _, name := range *n {
-		data += fmt.Sprintf(`<div class="chapter"><a href="/names/%d">%d: %s</a></div>`, name.Number, name.Number, name.Meaning)
+		data += fmt.Sprintf(`<div class="chapter"><a href="/names/%d" hx-get="/names/%d" hx-target="#container" hx-swap="innerHTML" hx-push-url="true">%d: %s</a></div>`, name.Number, name.Number, name.Number, name.Meaning)
 	}
 	data += `</div>`
 
