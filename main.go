@@ -617,11 +617,11 @@ func main() {
 					fmt.Fprintf(w, `    <item>
       <title>%s</title>
       <link>%s</link>
-      <guid>https://reminder.dev/daily/%s#verse-%d</guid>
+      <guid>%s</guid>
       <pubDate>%s</pubDate>
       <description><![CDATA[%s]]></description>
     </item>
-`, verseTitle, verseLink, date, idx, pubDate, text)
+`, verseTitle, verseLink, verseLink, pubDate, text)
 				}
 
 				// Extract hadith metadata
@@ -637,11 +637,11 @@ func main() {
 					fmt.Fprintf(w, `    <item>
       <title>%s</title>
       <link>%s</link>
-      <guid>https://reminder.dev/daily/%s#hadith-%d</guid>
+      <guid>%s</guid>
       <pubDate>%s</pubDate>
       <description><![CDATA[%s]]></description>
     </item>
-`, hadithTitle, hadithLink, date, idx, pubDate, text)
+`, hadithTitle, hadithLink, hadithLink, pubDate, text)
 				}
 
 				// Extract name metadata
@@ -658,11 +658,11 @@ func main() {
 					fmt.Fprintf(w, `    <item>
       <title>%s</title>
       <link>%s</link>
-      <guid>https://reminder.dev/daily/%s#name-%d</guid>
+      <guid>%s</guid>
       <pubDate>%s</pubDate>
       <description><![CDATA[%s]]></description>
     </item>
-`, nameTitle, nameLink, date, idx, pubDate, summary)
+`, nameTitle, nameLink, nameLink, pubDate, summary)
 				}
 			}
 
