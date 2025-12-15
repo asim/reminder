@@ -43,6 +43,13 @@ var lastPushDateFile = api.ReminderPath("last_push_date.txt")
 var lastPushDate = loadLastPushDate()
 var dailyIndex = loadDailyIndex()
 
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
 func isCapital(s string) bool {
 	if len(s) == 0 {
 		return false // An empty string doesn't have a capitalized first letter
@@ -256,6 +263,31 @@ func saveDaily(date string, data map[string]interface{}) {
 	_ = os.MkdirAll(api.ReminderDir, 0700)
 	_ = os.WriteFile(dailyFile, b, 0644)
 	dailyIndex = allDaily // update in-memory index
+}
+
+func saveHourlyReminder(date, timestamp string, data map[string]interface{}) {
+	// Save to hourly reminders file
+	hourlyFile := api.ReminderPath(fmt.Sprintf("hourly_%s.json", date))
+	var hourlyReminders []interface{}
+	if b, err := os.ReadFile(hourlyFile); err == nil {
+		json.Unmarshal(b, &hourlyReminders)
+	}
+	if hourlyReminders == nil {
+		hourlyReminders = make([]interface{}, 0)
+	}
+	hourlyReminders = append(hourlyReminders, data)
+	b, _ := json.MarshalIndent(hourlyReminders, "", "  ")
+	_ = os.MkdirAll(api.ReminderDir, 0700)
+	_ = os.WriteFile(hourlyFile, b, 0644)
+}
+
+func loadHourlyReminders(date string) []interface{} {
+	hourlyFile := api.ReminderPath(fmt.Sprintf("hourly_%s.json", date))
+	var hourlyReminders []interface{}
+	if b, err := os.ReadFile(hourlyFile); err == nil {
+		json.Unmarshal(b, &hourlyReminders)
+	}
+	return hourlyReminders
 }
 
 func main() {
@@ -533,52 +565,100 @@ func main() {
 `, time.Now().Format(time.RFC1123Z))
 
 		// Add items for each date (limit to most recent 30 days)
-		maxItems := 30
-		if len(dates) < maxItems {
-			maxItems = len(dates)
+		maxDays := 30
+		if len(dates) < maxDays {
+			maxDays = len(dates)
 		}
 
-		for i := 0; i < maxItems; i++ {
+		for i := 0; i < maxDays; i++ {
 			date := dates[i]
-			entry, ok := dailyIndex[date]
-			if !ok {
-				continue
-			}
-
-			entryMap, ok := entry.(map[string]interface{})
-			if !ok {
-				continue
-			}
-
-			verse := ""
-			hijri := ""
-
-			if v, ok := entryMap["verse"].(string); ok {
-				verse = v
-			}
-			if hj, ok := entryMap["hijri"].(string); ok {
-				hijri = hj
-			}
-
-			// Parse date for pubDate
-			pubDate := date
+			
+			// Load hourly reminders for this date
+			hourlyReminders := loadHourlyReminders(date)
+			
+			// Parse date for pubDate base
+			basePubDate := date
 			if t, err := time.Parse("2006-01-02", date); err == nil {
-				pubDate = t.Format(time.RFC1123Z)
+				basePubDate = t.Format(time.RFC1123Z)
 			}
-
-			title := fmt.Sprintf("Daily Reminder - %s", date)
-			if hijri != "" {
-				title = fmt.Sprintf("Daily Reminder - %s (%s)", date, hijri)
-			}
-
-			fmt.Fprintf(w, `    <item>
+			
+			// Process each hourly reminder
+			for idx, reminderData := range hourlyReminders {
+				reminder, ok := reminderData.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				
+				// Get timestamp for pubDate
+				pubDate := basePubDate
+				if ts, ok := reminder["timestamp"].(string); ok {
+					if t, err := time.Parse(time.RFC3339, ts); err == nil {
+						pubDate = t.Format(time.RFC1123Z)
+					}
+				}
+				
+				// Extract verse metadata
+				if verseMeta, ok := reminder["verse_meta"].(map[string]interface{}); ok {
+					chapterName, _ := verseMeta["chapter_name"].(string)
+					chapter, _ := verseMeta["chapter"].(float64)
+					verseStart, _ := verseMeta["verse_start"].(float64)
+					verseEnd, _ := verseMeta["verse_end"].(float64)
+					text, _ := verseMeta["text"].(string)
+					
+					verseTitle := ""
+					if verseStart == verseEnd {
+						verseTitle = fmt.Sprintf("%s %d:%d", chapterName, int(chapter), int(verseStart))
+					} else {
+						verseTitle = fmt.Sprintf("%s %d:%d-%d", chapterName, int(chapter), int(verseStart), int(verseEnd))
+					}
+					
+					fmt.Fprintf(w, `    <item>
       <title>%s</title>
       <link>https://reminder.dev/daily/%s</link>
-      <guid>https://reminder.dev/daily/%s</guid>
+      <guid>https://reminder.dev/daily/%s#verse-%d</guid>
       <pubDate>%s</pubDate>
       <description><![CDATA[%s]]></description>
     </item>
-`, title, date, date, pubDate, verse)
+`, verseTitle, date, date, idx, pubDate, text)
+				}
+				
+				// Extract hadith metadata
+				if hadithMeta, ok := reminder["hadith_meta"].(map[string]interface{}); ok {
+					bookName, _ := hadithMeta["book_name"].(string)
+					info, _ := hadithMeta["info"].(string)
+					text, _ := hadithMeta["text"].(string)
+					
+					hadithTitle := fmt.Sprintf("%s - %s", bookName, info)
+					
+					fmt.Fprintf(w, `    <item>
+      <title>%s</title>
+      <link>https://reminder.dev/daily/%s</link>
+      <guid>https://reminder.dev/daily/%s#hadith-%d</guid>
+      <pubDate>%s</pubDate>
+      <description><![CDATA[%s]]></description>
+    </item>
+`, hadithTitle, date, date, idx, pubDate, text)
+				}
+				
+				// Extract name metadata
+				if nameMeta, ok := reminder["name_meta"].(map[string]interface{}); ok {
+					english, _ := nameMeta["english"].(string)
+					arabic, _ := nameMeta["arabic"].(string)
+					meaning, _ := nameMeta["meaning"].(string)
+					summary, _ := nameMeta["summary"].(string)
+					
+					nameTitle := fmt.Sprintf("%s - %s - %s", english, arabic, meaning)
+					
+					fmt.Fprintf(w, `    <item>
+      <title>%s</title>
+      <link>https://reminder.dev/daily/%s</link>
+      <guid>https://reminder.dev/daily/%s#name-%d</guid>
+      <pubDate>%s</pubDate>
+      <description><![CDATA[%s]]></description>
+    </item>
+`, nameTitle, date, date, idx, pubDate, summary)
+				}
+			}
 		}
 
 		fmt.Fprintf(w, `  </channel>
@@ -777,7 +857,7 @@ func main() {
 	httpMux := http.DefaultServeMux
 	api.RegisterRoutes(httpMux)
 
-	getVerse := func(ch *quran.Chapter, ve *quran.Verse) string {
+	getVerse := func(ch *quran.Chapter, ve *quran.Verse) (string, int, int, string) {
 		verseText := ve.Text
 		verseStart := ve.Number
 		verseEnd := ve.Number
@@ -816,7 +896,8 @@ func main() {
 			verseNumber += fmt.Sprintf("-%d", verseEnd)
 		}
 
-		return fmt.Sprintf("%s - %s - %d:%s\n\n%s", ch.Name, ch.English, ch.Number, verseNumber, verseText)
+		formatted := fmt.Sprintf("%s - %s - %d:%s\n\n%s", ch.Name, ch.English, ch.Number, verseNumber, verseText)
+		return formatted, verseStart, verseEnd, verseText
 	}
 
 	daily := func() {
@@ -853,7 +934,8 @@ func main() {
 			}
 
 			dailyName = fmt.Sprintf("%s - %s - %s\n\n%s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
-			dailyVerse = getVerse(chap, ver)
+			verseFormatted, verseStart, verseEnd, verseText := getVerse(chap, ver)
+			dailyVerse = verseFormatted
 			dailyHadith = fmt.Sprintf("%s - %s - %s\n\n%s", book.Name, had.By, strings.Split(had.Info, ":")[0], had.Text)
 
 			num := strings.TrimSpace(strings.Split(strings.Split(had.Info, "Number")[1], ":")[0])
@@ -867,9 +949,34 @@ func main() {
 			dailyUpdated = time.Now()
 			hijriDate := daily.Date().Display
 			today := time.Now().UTC().Format("2006-01-02")
+			timestamp := time.Now().UTC().Format(time.RFC3339)
 
-			// Don't save 'latest' to the daily archive anymore
-			// The hourly reminder is now served via /api/latest and /home
+			// Save hourly reminder with metadata
+			hourlyData := map[string]interface{}{
+				"timestamp": timestamp,
+				"verse_meta": map[string]interface{}{
+					"chapter":      chap.Number,
+					"chapter_name": chap.English,
+					"verse_start":  verseStart,
+					"verse_end":    verseEnd,
+					"text":         verseText,
+				},
+				"hadith_meta": map[string]interface{}{
+					"book":     book.Number,
+					"book_name": book.Name,
+					"narrator":  had.By,
+					"info":      had.Info,
+					"text":      had.Text,
+				},
+				"name_meta": map[string]interface{}{
+					"number":  nam.Number,
+					"english": nam.English,
+					"arabic":  nam.Arabic,
+					"meaning": nam.Meaning,
+					"summary": nam.Summary,
+				},
+			}
+			saveHourlyReminder(today, timestamp, hourlyData)
 
 			mtx.Unlock()
 
@@ -885,6 +992,7 @@ func main() {
 				}
 
 				message := "In the Name of Allah—the Most Beneficent, Most Merciful"
+				
 				dailyData := map[string]interface{}{
 					"verse":   dailyVerse,
 					"hadith":  dailyHadith,
