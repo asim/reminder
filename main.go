@@ -632,21 +632,14 @@ func main() {
 					info, _ := hadithMeta["info"].(string)
 					text, _ := hadithMeta["text"].(string)
 
-					// Get index - check both "index" (new) and fallback to 1 if missing
-					index := 1.0
-					if idx, ok := hadithMeta["index"].(float64); ok {
-						index = idx
+					// Get number as string
+					number := "1"
+					if num, ok := hadithMeta["number"].(string); ok {
+						number = num
 					}
 
 					hadithTitle := fmt.Sprintf("%s - %s", bookName, info)
-					hadithLink := fmt.Sprintf("https://reminder.dev/hadith/%d#%d", int(book), int(index))
-
-					fmt.Fprintf(w, `    <item>
-      <title>%s</title>
-      <link>%s</link>
-      <guid>%s</guid>
-      <pubDate>%s</pubDate>
-      <description><![CDATA[%s]]></description>
+					hadithLink := fmt.Sprintf("https://reminder.dev/hadith/%d#%s", int(book), number)
     </item>
 `, hadithTitle, hadithLink, hadithLink, pubDate, text)
 				}
@@ -1005,9 +998,12 @@ func main() {
 			dailyVerse = verseFormatted
 			dailyHadith = fmt.Sprintf("%s - %s - %s\n\n%s", book.Name, had.By, strings.Split(had.Info, ":")[0], had.Text)
 
+			// Extract hadith number from the Info field for the anchor
+			num := strings.TrimSpace(strings.Split(strings.Split(had.Info, "Number")[1], ":")[0])
+
 			links = map[string]string{
-				"verse":  fmt.Sprintf("/quran/%d#%d", ver.Chapter, ver.Number),
-				"hadith": fmt.Sprintf("/hadith/%d#%d", book.Number, hadithIdx+1),
+				"verse":  fmt.Sprintf("/quran/%d#%d", chap.Number, verseStart),
+				"hadith": fmt.Sprintf("/hadith/%d#%s", book.Number, num),
 				"name":   fmt.Sprintf("/names/%d", nam.Number),
 			}
 
@@ -1031,7 +1027,7 @@ func main() {
 					"book_name": book.Name,
 					"narrator":  had.By,
 					"info":      had.Info,
-					"index":     hadithIdx + 1,
+					"number":    num,
 					"text":      had.Text,
 				},
 				"name_meta": map[string]interface{}{
