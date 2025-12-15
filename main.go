@@ -629,11 +629,11 @@ func main() {
 					bookName, _ := hadithMeta["book_name"].(string)
 					book, _ := hadithMeta["book"].(float64)
 					info, _ := hadithMeta["info"].(string)
-					number, _ := hadithMeta["number"].(string)
+					index, _ := hadithMeta["index"].(float64)
 					text, _ := hadithMeta["text"].(string)
 
 					hadithTitle := fmt.Sprintf("%s - %s", bookName, info)
-					hadithLink := fmt.Sprintf("https://reminder.dev/hadith/%d#%s", int(book), number)
+					hadithLink := fmt.Sprintf("https://reminder.dev/hadith/%d#%d", int(book), int(index))
 
 					fmt.Fprintf(w, `    <item>
       <title>%s</title>
@@ -979,7 +979,8 @@ func main() {
 			book := b.Books[rnd.Int()%len(b.Books)]
 			chap := q.Chapters[rnd.Int()%len(q.Chapters)]
 			ver := chap.Verses[rnd.Int()%len(chap.Verses)]
-			had := book.Hadiths[rnd.Int()%len(book.Hadiths)]
+			hadithIdx := rnd.Int() % len(book.Hadiths)
+			had := book.Hadiths[hadithIdx]
 
 			// make sure we're starting from the begining of a verse
 			if !isCapital(ver.Text) {
@@ -998,11 +999,9 @@ func main() {
 			dailyVerse = verseFormatted
 			dailyHadith = fmt.Sprintf("%s - %s - %s\n\n%s", book.Name, had.By, strings.Split(had.Info, ":")[0], had.Text)
 
-			num := strings.TrimSpace(strings.Split(strings.Split(had.Info, "Number")[1], ":")[0])
-
 			links = map[string]string{
 				"verse":  fmt.Sprintf("/quran/%d#%d", ver.Chapter, ver.Number),
-				"hadith": fmt.Sprintf("/hadith/%d#%s", book.Number, num),
+				"hadith": fmt.Sprintf("/hadith/%d#%d", book.Number, hadithIdx+1),
 				"name":   fmt.Sprintf("/names/%d", nam.Number),
 			}
 
@@ -1026,7 +1025,7 @@ func main() {
 					"book_name": book.Name,
 					"narrator":  had.By,
 					"info":      had.Info,
-					"number":    num,
+					"index":     hadithIdx + 1,
 					"text":      had.Text,
 				},
 				"name_meta": map[string]interface{}{
