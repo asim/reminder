@@ -282,6 +282,7 @@ var Index = `
     <a href="/daily" hx-get="/daily" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="inline-block px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors text-center text-sm sm:text-base">Daily Reminder</a>
     <a href="/quran" hx-get="/quran" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="inline-block px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors text-center text-sm sm:text-base">Read Quran</a>
     <a href="/hadith" hx-get="/hadith" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="inline-block px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors text-center text-sm sm:text-base">Read Hadith</a>
+    <a href="/api" hx-get="/api" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="inline-block px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors text-center text-sm sm:text-base">API Docs</a>
   </div>
 </div>
 `

@@ -87,18 +87,12 @@ func (v *Verse) HTML() string {
 	verseLabel := fmt.Sprintf("Quran %d:%d", v.Chapter, v.Number)
 	verseURL := fmt.Sprintf("/quran/%d#%d", v.Chapter, v.Number)
 
-	data += fmt.Sprintln()
-	data += fmt.Sprintln()
-	data += fmt.Sprintln()
-	data += fmt.Sprintf(`<h4>%d:%d <button class="bookmark-btn" data-type="quran" data-key="%s" data-label="%s" data-url="%s">☆</button></h4>`,
+	data += `<div class="mb-6 p-6 bg-white border border-gray-200 rounded-lg shadow-sm">`
+	data += fmt.Sprintf(`<div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold text-gray-700">%d:%d</h3><button class="bookmark-btn" data-type="quran" data-key="%s" data-label="%s" data-url="%s">☆</button></div>`,
 		v.Chapter, v.Number, verseKey, verseLabel, verseURL)
-	data += fmt.Sprintln()
-	data += fmt.Sprintln(`<div class="arabic right">` + v.Arabic + `</div>`)
-	data += fmt.Sprintln()
-	data += fmt.Sprintln(`<div class="english">` + v.Text + `</div>`)
-	data += fmt.Sprintln()
-	data += fmt.Sprintln(`<div class="dots">...</div>`)
-	data += fmt.Sprintln()
+	data += `<div class="arabic text-right text-2xl mb-4 leading-relaxed">` + v.Arabic + `</div>`
+	data += `<div class="text-gray-700">` + v.Text + `</div>`
+	data += `</div>`
 
 	return data
 }

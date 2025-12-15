@@ -70,7 +70,7 @@ func isHtmxRequest(r *http.Request) bool {
 }
 
 func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *api.Api) {
-	// Root route - serve home page
+	// Root route - redirect to /home or serve 404 for other paths
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// Only handle exact "/" path
 		if r.URL.Path != "/" {
@@ -78,24 +78,8 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 			return
 		}
 
-		mtx.RLock()
-		verseLink := links["verse"]
-		hadithLink := links["hadith"]
-		nameLink := links["name"]
-		verse := dailyVerse
-		hadith := dailyHadith
-		name := dailyName
-		mtx.RUnlock()
-
-		// Populate Index template with actual data
-		indexContent := strings.ReplaceAll(app.Index, "{verse_link}", verseLink)
-		indexContent = strings.ReplaceAll(indexContent, "{verse_text}", verse)
-		indexContent = strings.ReplaceAll(indexContent, "{hadith_link}", hadithLink)
-		indexContent = strings.ReplaceAll(indexContent, "{hadith_text}", hadith)
-		indexContent = strings.ReplaceAll(indexContent, "{name_link}", nameLink)
-		indexContent = strings.ReplaceAll(indexContent, "{name_text}", name)
-
-		w.Write([]byte(app.RenderHTML("Home", "Quran, hadith, and more as an app and API", indexContent)))
+		// Redirect to /home
+		http.Redirect(w, r, "/home", http.StatusFound)
 	})
 
 	http.HandleFunc("/home", func(w http.ResponseWriter, r *http.Request) {
