@@ -57,29 +57,24 @@ func (ch *Chapter) JSON() []byte {
 func (ch *Chapter) HTML() string {
 	var data string
 
-	data += fmt.Sprintln()
-	data += fmt.Sprintln()
-	data += fmt.Sprintf(`<h2>%s</h2>`, ch.English)
-	data += fmt.Sprintln()
-	data += fmt.Sprintf(`<h3>%s</h3>`, ch.Name)
-	data += fmt.Sprintln()
+	// Chapter header
+	data += `<div class="mb-6">`
+	data += fmt.Sprintf(`<h1 class="text-3xl font-bold mb-2">%s</h1>`, ch.English)
+	data += fmt.Sprintf(`<h2 class="text-xl arabic text-gray-600">%s</h2>`, ch.Name)
+	data += `</div>`
 
-	// max 286 ayahs
+	// Verses
 	for _, verse := range ch.Verses {
 		verseKey := fmt.Sprintf("%d:%d", ch.Number, verse.Number)
 		verseLabel := fmt.Sprintf("Quran %d:%d", ch.Number, verse.Number)
 		verseURL := fmt.Sprintf("/quran/%d#%d", ch.Number, verse.Number)
 
-		data += fmt.Sprintln()
-		data += fmt.Sprintf(`<h4 id="%d">%d:%d <button class="bookmark-btn" data-type="quran" data-key="%s" data-label="%s" data-url="%s">☆</button></h4>`,
-			verse.Number, ch.Number, verse.Number, verseKey, verseLabel, verseURL)
-		data += fmt.Sprintln()
-		data += fmt.Sprintln(`<div class="arabic right">` + verse.Arabic + `</div>`)
-		data += fmt.Sprintln()
-		data += fmt.Sprintln(`<div class="english">` + verse.Text + `</div>`)
-		data += fmt.Sprintln()
-		data += fmt.Sprintln(`<div class="dots">...</div>`)
-		data += fmt.Sprintln()
+		data += `<div class="mb-6 p-6 bg-white border border-gray-200 rounded-lg shadow-sm" id="` + fmt.Sprintf("%d", verse.Number) + `">`
+		data += fmt.Sprintf(`<div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold text-gray-700">%d:%d</h3><button class="bookmark-btn" data-type="quran" data-key="%s" data-label="%s" data-url="%s">☆</button></div>`,
+			ch.Number, verse.Number, verseKey, verseLabel, verseURL)
+		data += `<div class="arabic text-right text-2xl mb-4 leading-relaxed">` + verse.Arabic + `</div>`
+		data += `<div class="text-gray-700">` + verse.Text + `</div>`
+		data += `</div>`
 	}
 
 	return data

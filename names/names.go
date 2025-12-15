@@ -31,38 +31,42 @@ func (name *Name) HTML() string {
 	nameLabel := fmt.Sprintf("Name %d: %s", name.Number, name.Meaning)
 	nameURL := fmt.Sprintf("/names/%d", name.Number)
 
-	data += fmt.Sprintln()
-	data += fmt.Sprintln()
-	data += fmt.Sprintf(`<h2>%s <button class="bookmark-btn" data-type="names" data-key="%s" data-label="%s" data-url="%s">☆</button></h2>`,
+	// Header with bookmark
+	data += `<div class="mb-6">`
+	data += fmt.Sprintf(`<h1 class="text-3xl font-bold mb-2">%s <button class="bookmark-btn" data-type="names" data-key="%s" data-label="%s" data-url="%s">☆</button></h1>`,
 		name.Meaning, nameKey, nameLabel, nameURL)
-	data += fmt.Sprintln()
+	data += `</div>`
 
-	data += fmt.Sprintln()
-	data += fmt.Sprintln(`<div class="arabic">` + name.Arabic + `</div>`)
-	data += fmt.Sprintln()
-	data += fmt.Sprintln(`<h4 class="english">` + name.English + `</h4>`)
-	data += fmt.Sprintln()
-	data += fmt.Sprintln(`<div class="english">` + name.Description + `</div>`)
-	data += fmt.Sprintln()
-	data += fmt.Sprintln(`<h4 class="english">Summary</h4>`)
-	data += fmt.Sprintln()
-	data += fmt.Sprintln(`<div class="english">` + name.Summary + `</div>`)
-	data += fmt.Sprintln()
-	data += fmt.Sprintln(`<h4 class="english">Location</h4>`)
-	data += fmt.Sprintln()
+	// Arabic name card
+	data += `<div class="mb-6 p-6 bg-white border border-gray-200 rounded-lg shadow-sm">`
+	data += `<div class="arabic text-center text-4xl mb-4">` + name.Arabic + `</div>`
+	data += `<h3 class="text-xl font-semibold text-center text-gray-700">` + name.English + `</h3>`
+	data += `</div>`
 
-	var locations string
+	// Description card
+	data += `<div class="mb-6 p-6 bg-white border border-gray-200 rounded-lg shadow-sm">`
+	data += `<h3 class="text-lg font-semibold mb-3">Description</h3>`
+	data += `<p class="text-gray-700">` + name.Description + `</p>`
+	data += `</div>`
+
+	// Summary card
+	data += `<div class="mb-6 p-6 bg-white border border-gray-200 rounded-lg shadow-sm">`
+	data += `<h3 class="text-lg font-semibold mb-3">Summary</h3>`
+	data += `<p class="text-gray-700">` + name.Summary + `</p>`
+	data += `</div>`
+
+	// Location card
+	data += `<div class="mb-6 p-6 bg-white border border-gray-200 rounded-lg shadow-sm">`
+	data += `<h3 class="text-lg font-semibold mb-3">Quran References</h3>`
+	data += `<div class="flex flex-wrap gap-2">`
 
 	for _, loc := range name.Location {
 		uri := fmt.Sprintf("/quran/%s", strings.Replace(loc, ":", "/", -1))
-		locations += fmt.Sprintf(`<a href="%s">%s</a>&nbsp;`, uri, loc)
+		data += fmt.Sprintf(`<a href="%s" class="px-3 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition-colors" hx-get="%s" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">%s</a>`, uri, uri, loc)
 	}
-	data += fmt.Sprintf(`<div>%s</div>`, locations)
+	data += `</div>`
+	data += `</div>`
 
-	data += fmt.Sprintln()
-	data += fmt.Sprintln()
-	data += fmt.Sprintln(`<div class="dots">...</div>`)
-	data += fmt.Sprintln()
 	return data
 }
 

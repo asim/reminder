@@ -44,24 +44,23 @@ func (b *Book) JSON() []byte {
 func (b *Book) HTML() string {
 	var data string
 
-	data += fmt.Sprintf(`<h2>%s</h2>`, b.Name)
-	data += fmt.Sprintln()
-	data += fmt.Sprintln()
+	// Book header
+	data += `<div class="mb-6">`
+	data += fmt.Sprintf(`<h1 class="text-3xl font-bold mb-2">%s</h1>`, b.Name)
+	data += `</div>`
 
+	// Hadith entries
 	for idx, hadith := range b.Hadiths {
 		hadithKey := fmt.Sprintf("%d:%d", b.Number, idx+1)
 		hadithLabel := fmt.Sprintf("Hadith %d:%d - %s", b.Number, idx+1, hadith.Info)
 		hadithURL := fmt.Sprintf("/hadith/%d#%d", b.Number, idx+1)
 
-		data += fmt.Sprintf(`<h3 id="%d">%s <button class="bookmark-btn" data-type="hadith" data-key="%s" data-label="%s" data-url="%s">☆</button></h3>`,
-			idx+1, hadith.Info, hadithKey, hadithLabel, hadithURL)
-		data += fmt.Sprintln()
-		data += fmt.Sprintf(`<h4>%s</h4>`, hadith.By)
-		data += fmt.Sprintln()
-		data += fmt.Sprintf(`<div>%s</div>`, hadith.Text)
-		data += fmt.Sprintln()
-		data += fmt.Sprintln(`<div class="dots">...</div>`)
-		data += fmt.Sprintln()
+		data += `<div class="mb-6 p-6 bg-white border border-gray-200 rounded-lg shadow-sm" id="` + fmt.Sprintf("%d", idx+1) + `">`
+		data += fmt.Sprintf(`<div class="flex items-center justify-between mb-3"><h3 class="text-lg font-semibold text-gray-700">%s</h3><button class="bookmark-btn" data-type="hadith" data-key="%s" data-label="%s" data-url="%s">☆</button></div>`,
+			hadith.Info, hadithKey, hadithLabel, hadithURL)
+		data += fmt.Sprintf(`<p class="text-sm text-gray-500 mb-4">%s</p>`, hadith.By)
+		data += fmt.Sprintf(`<div class="text-gray-700">%s</div>`, hadith.Text)
+		data += `</div>`
 	}
 
 	return data
