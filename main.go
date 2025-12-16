@@ -221,7 +221,7 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 
 	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
 		content := a.HTML(app.RenderString)
-		
+
 		if isHtmxRequest(r) {
 			w.Write([]byte(app.RenderContent("API", "", content)))
 		} else {
