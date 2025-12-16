@@ -69,6 +69,17 @@ func isHtmxRequest(r *http.Request) bool {
 	return r.Header.Get("HX-Request") == "true"
 }
 
+func isAPIClient(r *http.Request) bool {
+	userAgent := r.Header.Get("User-Agent")
+	accept := r.Header.Get("Accept")
+
+	return strings.Contains(userAgent, "Wget") ||
+		strings.Contains(userAgent, "curl") ||
+		strings.Contains(userAgent, "Go-http-client") ||
+		strings.Contains(userAgent, "python-requests") ||
+		(accept != "" && !strings.Contains(accept, "text/html") && !strings.Contains(accept, "*/*"))
+}
+
 func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *api.Api) {
 	// Root route - redirect to /home or serve 404 for other paths
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -102,6 +113,8 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 
 		if isHtmxRequest(r) {
 			w.Write([]byte(app.RenderContent("", "", indexContent)))
+		} else if isAPIClient(r) {
+			w.Write([]byte(app.RenderSimpleHTML("Home", "Quran, hadith, and more as an app and API", indexContent)))
 		} else {
 			w.Write([]byte(app.RenderHTML("Home", "Quran, hadith, and more as an app and API", indexContent)))
 		}
@@ -191,6 +204,9 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 		if isHtmxRequest(r) {
 			qhtml := app.RenderContent("Quran", quran.Description, content)
 			w.Write([]byte(qhtml))
+		} else if isAPIClient(r) {
+			qhtml := app.RenderSimpleHTML("Quran", quran.Description, content)
+			w.Write([]byte(qhtml))
 		} else {
 			qhtml := app.RenderHTML("Quran", quran.Description, content)
 			w.Write([]byte(qhtml))
@@ -202,6 +218,9 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 		if isHtmxRequest(r) {
 			qhtml := app.RenderContent("Hadith", hadith.Description, content)
 			w.Write([]byte(qhtml))
+		} else if isAPIClient(r) {
+			qhtml := app.RenderSimpleHTML("Hadith", hadith.Description, content)
+			w.Write([]byte(qhtml))
 		} else {
 			qhtml := app.RenderHTML("Hadith", hadith.Description, content)
 			w.Write([]byte(qhtml))
@@ -212,6 +231,9 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 		content := n.TOC()
 		if isHtmxRequest(r) {
 			qhtml := app.RenderContent("Names", names.Description, content)
+			w.Write([]byte(qhtml))
+		} else if isAPIClient(r) {
+			qhtml := app.RenderSimpleHTML("Names", names.Description, content)
 			w.Write([]byte(qhtml))
 		} else {
 			qhtml := app.RenderHTML("Names", names.Description, content)
@@ -546,35 +568,41 @@ func main() {
 		}
 	}
 
-	// Helper to check if request is from API client (wget, curl, http.Get, etc.)
-	isAPIClient := func(r *http.Request) bool {
-		userAgent := r.Header.Get("User-Agent")
-		accept := r.Header.Get("Accept")
-
-		return strings.Contains(userAgent, "Wget") ||
-			strings.Contains(userAgent, "curl") ||
-			strings.Contains(userAgent, "Go-http-client") ||
-			strings.Contains(userAgent, "python-requests") ||
-			(accept != "" && !strings.Contains(accept, "text/html") && !strings.Contains(accept, "*/*"))
-	}
-
 	if *WebFlag {
 		fmt.Println("Registering web handler")
 
 		// Register TOC handlers
 		http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
-			qhtml := app.RenderHTML("Quran", quran.Description, q.TOC())
-			w.Write([]byte(qhtml))
+			content := q.TOC()
+			if isAPIClient(r) {
+				qhtml := app.RenderSimpleHTML("Quran", quran.Description, content)
+				w.Write([]byte(qhtml))
+			} else {
+				qhtml := app.RenderHTML("Quran", quran.Description, content)
+				w.Write([]byte(qhtml))
+			}
 		})
 
 		http.HandleFunc("/hadith", func(w http.ResponseWriter, r *http.Request) {
-			hhtml := app.RenderHTML("Hadith", hadith.Description, b.TOC())
-			w.Write([]byte(hhtml))
+			content := b.TOC()
+			if isAPIClient(r) {
+				hhtml := app.RenderSimpleHTML("Hadith", hadith.Description, content)
+				w.Write([]byte(hhtml))
+			} else {
+				hhtml := app.RenderHTML("Hadith", hadith.Description, content)
+				w.Write([]byte(hhtml))
+			}
 		})
 
 		http.HandleFunc("/names", func(w http.ResponseWriter, r *http.Request) {
-			nhtml := app.RenderHTML("Names", names.Description, n.TOC())
-			w.Write([]byte(nhtml))
+			content := n.TOC()
+			if isAPIClient(r) {
+				nhtml := app.RenderSimpleHTML("Names", names.Description, content)
+				w.Write([]byte(nhtml))
+			} else {
+				nhtml := app.RenderHTML("Names", names.Description, content)
+				w.Write([]byte(nhtml))
+			}
 		})
 
 		// Create smart handlers that serve lite content for API clients, SPA for browsers
@@ -590,7 +618,7 @@ func main() {
 					return
 				}
 				head := fmt.Sprintf("%d | Quran", ch)
-				qhtml := app.RenderHTML(head, "", q.Get(ch).HTML())
+				qhtml := app.RenderSimpleHTML(head, "", q.Get(ch).HTML())
 				w.Write([]byte(qhtml))
 			} else {
 				// Serve SPA
@@ -609,7 +637,7 @@ func main() {
 					return
 				}
 				head := fmt.Sprintf("%d | Hadith", ch)
-				qhtml := app.RenderHTML(head, "", b.Get(ch).HTML())
+				qhtml := app.RenderSimpleHTML(head, "", b.Get(ch).HTML())
 				w.Write([]byte(qhtml))
 			} else {
 				app.ServeWeb().ServeHTTP(w, r)
@@ -627,18 +655,7 @@ func main() {
 					return
 				}
 				head := fmt.Sprintf("%d | Names", name)
-				qhtml := app.RenderHTML(head, "", n.Get(name).HTML())
-				w.Write([]byte(qhtml))
-			} else {
-				app.ServeWeb().ServeHTTP(w, r)
-			}
-		})
-
-		http.HandleFunc("/daily", func(w http.ResponseWriter, r *http.Request) {
-			if isAPIClient(r) {
-				template := `
-<h3>Verse</h3>
-<a href="%s" class="block">%s</a>
+			qhtml := app.RenderSimpleHTML(head, "", n.Get(name).HTML())
 <h3>Hadith</h3>
 <a href="%s" class="block">%s</a>
 <h3>Name</h3>

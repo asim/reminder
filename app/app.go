@@ -314,6 +314,26 @@ func RenderHTML(title, desc, html string) string {
 	return fmt.Sprintf(Template, title, title, desc, html)
 }
 
+// Simple HTML for API clients (wget, curl, etc)
+func RenderSimpleHTML(title, desc, html string) string {
+	simpleTemplate := `<html>
+  <head>
+    <title>%s | Reminder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <div id="head">
+      <h1>%s</h1>
+      <p>%s</p>
+    </div>
+    <div id="content">
+%s
+    </div>
+  </body>
+</html>`
+	return fmt.Sprintf(simpleTemplate, title, title, desc, html)
+}
+
 func RenderContent(title, desc, html string) string {
 	var titleSection, descSection string
 	if title != "" {
