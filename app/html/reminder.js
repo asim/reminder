@@ -1,6 +1,6 @@
 var APP_PREFIX = 'reminder_';
 var VERSION = 'v2';
-var URLS = [    
+var URLS = [
   `/`,
   `/index.html`,
   `/reminder.png`,
@@ -46,7 +46,7 @@ self.addEventListener('activate', function (e) {
       cacheWhitelist.push(CACHE_NAME);
       return Promise.all(keyList.map(function (key, i) {
         if (cacheWhitelist.indexOf(key) === -1) {
-          console.log('Deleting cache : ' + keyList[i] );
+          console.log('Deleting cache : ' + keyList[i]);
           return caches.delete(keyList[i])
         }
       }))
