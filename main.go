@@ -109,8 +109,6 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 
 	http.HandleFunc("/bookmarks", func(w http.ResponseWriter, r *http.Request) {
 		bookmarksContent := `
-<h1 class="text-3xl font-bold mb-6">Bookmarks</h1>
-
 <div id="quran-bookmarks" class="mb-8">
   <h2 class="text-2xl font-semibold mb-4">Quran</h2>
   <div id="quran-list" class="space-y-3"></div>
