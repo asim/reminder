@@ -1,11 +1,6 @@
 var APP_PREFIX = 'reminder_';
 var VERSION = 'v2';
 var URLS = [
-  `/`,
-  `/index.html`,
-  `/reminder.png`,
-  `/reminder.js`
-]
 
 var CACHE_NAME = APP_PREFIX + VERSION
 
