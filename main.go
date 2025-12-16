@@ -203,39 +203,6 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 		w.Write([]byte(app.RenderHTML("Bookmarks", "", bookmarksContent)))
 	})
 
-	http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
-		content := q.TOC()
-		if isAPIClient(r) {
-			qhtml := app.RenderSimpleHTML("Quran", quran.Description, content)
-			w.Write([]byte(qhtml))
-		} else {
-			qhtml := app.RenderHTML("Quran", quran.Description, content)
-			w.Write([]byte(qhtml))
-		}
-	})
-
-	http.HandleFunc("/hadith", func(w http.ResponseWriter, r *http.Request) {
-		content := b.TOC()
-		if isAPIClient(r) {
-			qhtml := app.RenderSimpleHTML("Hadith", hadith.Description, content)
-			w.Write([]byte(qhtml))
-		} else {
-			qhtml := app.RenderHTML("Hadith", hadith.Description, content)
-			w.Write([]byte(qhtml))
-		}
-	})
-
-	http.HandleFunc("/names", func(w http.ResponseWriter, r *http.Request) {
-		content := n.TOC()
-		if isAPIClient(r) {
-			qhtml := app.RenderSimpleHTML("Names", names.Description, content)
-			w.Write([]byte(qhtml))
-		} else {
-			qhtml := app.RenderHTML("Names", names.Description, content)
-			w.Write([]byte(qhtml))
-		}
-	})
-
 	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
 		content := a.HTML(app.RenderString)
 		w.Write([]byte(app.RenderHTML("API", "", content)))
