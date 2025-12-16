@@ -112,6 +112,7 @@ Go to [localhost:8080](https://localhost:8080)
 
 All queries are returned as JSON
 
+- `/api/latest` - for the latest reminder
 - `/api/quran` - to get the entire quran
 - `/api/names` - to get the list of names
 - `/api/hadith` - to get the entire hadith
