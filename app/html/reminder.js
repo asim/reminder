@@ -1,5 +1,5 @@
 var APP_PREFIX = 'reminder_';
-var VERSION = 'v1';
+var VERSION = 'v2';
 var URLS = [    
   `/`,
   `/index.html`,

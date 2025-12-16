@@ -360,26 +360,27 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 			content := app.Get(fileName)
 			if strings.HasSuffix(fileName, ".js") {
 				w.Header().Set("Content-Type", "application/javascript")
+				w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 			} else if strings.HasSuffix(fileName, ".json") || strings.HasSuffix(fileName, ".webmanifest") {
 				w.Header().Set("Content-Type", "application/json")
+				w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 			} else if strings.HasSuffix(fileName, ".otf") {
 				w.Header().Set("Content-Type", "font/otf")
+				w.Header().Set("Cache-Control", "public, max-age=31536000")
 			}
 			w.Write([]byte(content))
 		})
 	}
 
-	// Root route - redirect to /home or serve 404 for other paths
-	// MUST be registered LAST to not override other routes
+	// Root route - redirect to /home
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		// Only handle exact "/" path
-		if r.URL.Path != "/" {
-			http.NotFound(w, r)
+		// Only handle exact "/" path, let other routes handle themselves
+		if r.URL.Path == "/" {
+			http.Redirect(w, r, "/home", http.StatusFound)
 			return
 		}
-
-		// Redirect to /home
-		http.Redirect(w, r, "/home", http.StatusFound)
+		// For other paths, return 404 (no other handler matched)
+		http.NotFound(w, r)
 	})
 }
 
