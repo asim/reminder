@@ -77,18 +77,6 @@ func isAPIClient(r *http.Request) bool {
 }
 
 func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *api.Api) {
-	// Root route - redirect to /home or serve 404 for other paths
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		// Only handle exact "/" path
-		if r.URL.Path != "/" {
-			http.NotFound(w, r)
-			return
-		}
-
-		// Redirect to /home
-		http.Redirect(w, r, "/home", http.StatusFound)
-	})
-
 	http.HandleFunc("/home", func(w http.ResponseWriter, r *http.Request) {
 		mtx.RLock()
 		verseLink := links["verse"]
@@ -201,6 +189,39 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 `
 
 		w.Write([]byte(app.RenderHTML("Bookmarks", "", bookmarksContent)))
+	})
+
+	http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
+		content := q.TOC()
+		if isAPIClient(r) {
+			qhtml := app.RenderSimpleHTML("Quran", quran.Description, content)
+			w.Write([]byte(qhtml))
+		} else {
+			qhtml := app.RenderHTML("Quran", quran.Description, content)
+			w.Write([]byte(qhtml))
+		}
+	})
+
+	http.HandleFunc("/hadith", func(w http.ResponseWriter, r *http.Request) {
+		content := b.TOC()
+		if isAPIClient(r) {
+			qhtml := app.RenderSimpleHTML("Hadith", hadith.Description, content)
+			w.Write([]byte(qhtml))
+		} else {
+			qhtml := app.RenderHTML("Hadith", hadith.Description, content)
+			w.Write([]byte(qhtml))
+		}
+	})
+
+	http.HandleFunc("/names", func(w http.ResponseWriter, r *http.Request) {
+		content := n.TOC()
+		if isAPIClient(r) {
+			qhtml := app.RenderSimpleHTML("Names", names.Description, content)
+			w.Write([]byte(qhtml))
+		} else {
+			qhtml := app.RenderHTML("Names", names.Description, content)
+			w.Write([]byte(qhtml))
+		}
 	})
 
 	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
@@ -347,6 +368,19 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 			w.Write([]byte(content))
 		})
 	}
+
+	// Root route - redirect to /home or serve 404 for other paths
+	// MUST be registered LAST to not override other routes
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// Only handle exact "/" path
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+
+		// Redirect to /home
+		http.Redirect(w, r, "/home", http.StatusFound)
+	})
 }
 
 func loadLastPushDate() string {
