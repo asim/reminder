@@ -220,11 +220,21 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 	})
 
 	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
+		// Render markdown and add custom styling
+		markdown := app.RenderString(a.Markdown())
+		// Wrap in div with custom styles for headings
+		content := `<div class="api-content">` + markdown + `</div>`
+		content += `<style>
+.api-content h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; }
+.api-content h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+.api-content p { margin-bottom: 1rem; }
+.api-content ul { margin-bottom: 1rem; }
+.api-content code { background-color: #f3f4f6; padding: 0.125rem 0.25rem; border-radius: 0.25rem; }
+</style>`
+		
 		if isHtmxRequest(r) {
-			content := fmt.Sprintf(`<div class="prose prose-lg prose-slate max-w-none prose-headings:font-bold prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3">%s</div>`, app.RenderString(a.Markdown()))
 			w.Write([]byte(app.RenderContent("API", "", content)))
 		} else {
-			content := fmt.Sprintf(`<div class="prose prose-lg prose-slate max-w-none prose-headings:font-bold prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3">%s</div>`, app.RenderString(a.Markdown()))
 			w.Write([]byte(app.RenderHTML("API", "", content)))
 		}
 	})
