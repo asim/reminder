@@ -656,21 +656,7 @@ func main() {
 				}
 				head := fmt.Sprintf("%d | Names", name)
 			qhtml := app.RenderSimpleHTML(head, "", n.Get(name).HTML())
-<h3>Hadith</h3>
-<a href="%s" class="block">%s</a>
-<h3>Name</h3>
-<a href="%s" class="block">%s</a>
-<p>Updated %s</p>
-`
-				mtx.RLock()
-				verseLink := links["verse"]
-				hadithLink := links["hadith"]
-				nameLink := links["name"]
-				data := fmt.Sprintf(template, verseLink, dailyVerse, hadithLink, dailyHadith, nameLink, dailyName, dailyUpdated.Format(time.RFC850))
-				mtx.RUnlock()
-				html := app.RenderHTML("Daily Reminder", "Daily reminder from the quran, hadith and names of Allah", data)
-				w.Write([]byte(html))
-			} else {
+			w.Write([]byte(qhtml))
 				app.ServeWeb().ServeHTTP(w, r)
 			}
 		})
