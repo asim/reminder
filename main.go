@@ -655,8 +655,8 @@ func main() {
 					return
 				}
 				head := fmt.Sprintf("%d | Names", name)
-			qhtml := app.RenderSimpleHTML(head, "", n.Get(name).HTML())
-			w.Write([]byte(qhtml))
+				qhtml := app.RenderSimpleHTML(head, "", n.Get(name).HTML())
+				w.Write([]byte(qhtml))
 				app.ServeWeb().ServeHTTP(w, r)
 			}
 		})
