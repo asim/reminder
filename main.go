@@ -65,10 +65,6 @@ func isCapital(s string) bool {
 	return unicode.IsUpper(firstChar)
 }
 
-func isHtmxRequest(r *http.Request) bool {
-	return r.Header.Get("HX-Request") == "true"
-}
-
 func isAPIClient(r *http.Request) bool {
 	userAgent := r.Header.Get("User-Agent")
 	accept := r.Header.Get("Accept")
@@ -111,9 +107,7 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 		indexContent = strings.ReplaceAll(indexContent, "{name_link}", nameLink)
 		indexContent = strings.ReplaceAll(indexContent, "{name_text}", name)
 
-		if isHtmxRequest(r) {
-			w.Write([]byte(app.RenderContent("", "", indexContent)))
-		} else if isAPIClient(r) {
+		if isAPIClient(r) {
 			w.Write([]byte(app.RenderSimpleHTML("Home", "Quran, hadith, and more as an app and API", indexContent)))
 		} else {
 			w.Write([]byte(app.RenderHTML("Home", "Quran, hadith, and more as an app and API", indexContent)))
@@ -139,72 +133,79 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 
 <script>
   function loadBookmarks() {
-    const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '{"quran":[],"hadith":[],"names":[]}');
+    const bookmarks = JSON.parse(localStorage.getItem('reminder_bookmarks') || '{"quran":{},"hadith":{},"names":{}}');
     
     // Quran bookmarks
     const quranList = document.getElementById('quran-list');
-    if (bookmarks.quran && bookmarks.quran.length > 0) {
-      quranList.innerHTML = bookmarks.quran.map(id => ` + "`" + `
+    const quranKeys = Object.keys(bookmarks.quran || {});
+    if (quranKeys.length > 0) {
+      quranList.innerHTML = quranKeys.map(key => {
+        const bookmark = bookmarks.quran[key];
+        return ` + "`" + `
         <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">
-          <a href="/quran/${id}" class="flex-grow text-blue-600 hover:text-blue-800" hx-get="/quran/${id}" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">Chapter ${id}</a>
-          <button onclick="removeBookmark('quran', ${id})" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm">Remove</button>
+          <a href="${bookmark.url}" class="flex-grow text-blue-600 hover:text-blue-800">${bookmark.label}</a>
+          <button onclick="removeBookmark('quran', '${key}')" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm">Remove</button>
         </div>
-      ` + "`" + `).join('');
+      ` + "`" + `;
+      }).join('');
     } else {
       quranList.innerHTML = '<p class="text-gray-500">No bookmarks yet</p>';
     }
     
     // Hadith bookmarks
     const hadithList = document.getElementById('hadith-list');
-    if (bookmarks.hadith && bookmarks.hadith.length > 0) {
-      hadithList.innerHTML = bookmarks.hadith.map(id => ` + "`" + `
+    const hadithKeys = Object.keys(bookmarks.hadith || {});
+    if (hadithKeys.length > 0) {
+      hadithList.innerHTML = hadithKeys.map(key => {
+        const bookmark = bookmarks.hadith[key];
+        return ` + "`" + `
         <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">
-          <a href="/hadith/${id}" class="flex-grow text-blue-600 hover:text-blue-800" hx-get="/hadith/${id}" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">Book ${id}</a>
-          <button onclick="removeBookmark('hadith', ${id})" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm">Remove</button>
+          <a href="${bookmark.url}" class="flex-grow text-blue-600 hover:text-blue-800">${bookmark.label}</a>
+          <button onclick="removeBookmark('hadith', '${key}')" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm">Remove</button>
         </div>
-      ` + "`" + `).join('');
+      ` + "`" + `;
+      }).join('');
     } else {
       hadithList.innerHTML = '<p class="text-gray-500">No bookmarks yet</p>';
     }
     
     // Names bookmarks
     const namesList = document.getElementById('names-list');
-    if (bookmarks.names && bookmarks.names.length > 0) {
-      namesList.innerHTML = bookmarks.names.map(id => ` + "`" + `
+    const namesKeys = Object.keys(bookmarks.names || {});
+    if (namesKeys.length > 0) {
+      namesList.innerHTML = namesKeys.map(key => {
+        const bookmark = bookmarks.names[key];
+        return ` + "`" + `
         <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">
-          <a href="/names/${id}" class="flex-grow text-blue-600 hover:text-blue-800" hx-get="/names/${id}" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">Name ${id}</a>
-          <button onclick="removeBookmark('names', ${id})" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm">Remove</button>
+          <a href="${bookmark.url}" class="flex-grow text-blue-600 hover:text-blue-800">${bookmark.label}</a>
+          <button onclick="removeBookmark('names', '${key}')" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm">Remove</button>
         </div>
-      ` + "`" + `).join('');
+      ` + "`" + `;
+      }).join('');
     } else {
       namesList.innerHTML = '<p class="text-gray-500">No bookmarks yet</p>';
     }
   }
   
-  function removeBookmark(type, id) {
-    const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '{"quran":[],"hadith":[],"names":[]}');
-    bookmarks[type] = bookmarks[type].filter(b => b !== id);
-    localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
-    loadBookmarks();
+  function removeBookmark(type, key) {
+    const bookmarks = JSON.parse(localStorage.getItem('reminder_bookmarks') || '{"quran":{},"hadith":{},"names":{}}');
+    if (bookmarks[type] && bookmarks[type][key]) {
+      delete bookmarks[type][key];
+      localStorage.setItem('reminder_bookmarks', JSON.stringify(bookmarks));
+      loadBookmarks();
+    }
   }
   
   loadBookmarks();
 </script>
 `
 
-		if isHtmxRequest(r) {
-			w.Write([]byte(app.RenderContent("Bookmarks", "", bookmarksContent)))
-		} else {
-			w.Write([]byte(app.RenderHTML("Bookmarks", "", bookmarksContent)))
-		}
+		w.Write([]byte(app.RenderHTML("Bookmarks", "", bookmarksContent)))
 	})
 
 	http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
 		content := q.TOC()
-		if isHtmxRequest(r) {
-			qhtml := app.RenderContent("Quran", quran.Description, content)
-			w.Write([]byte(qhtml))
-		} else if isAPIClient(r) {
+		if isAPIClient(r) {
 			qhtml := app.RenderSimpleHTML("Quran", quran.Description, content)
 			w.Write([]byte(qhtml))
 		} else {
@@ -215,10 +216,7 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 
 	http.HandleFunc("/hadith", func(w http.ResponseWriter, r *http.Request) {
 		content := b.TOC()
-		if isHtmxRequest(r) {
-			qhtml := app.RenderContent("Hadith", hadith.Description, content)
-			w.Write([]byte(qhtml))
-		} else if isAPIClient(r) {
+		if isAPIClient(r) {
 			qhtml := app.RenderSimpleHTML("Hadith", hadith.Description, content)
 			w.Write([]byte(qhtml))
 		} else {
@@ -229,10 +227,7 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 
 	http.HandleFunc("/names", func(w http.ResponseWriter, r *http.Request) {
 		content := n.TOC()
-		if isHtmxRequest(r) {
-			qhtml := app.RenderContent("Names", names.Description, content)
-			w.Write([]byte(qhtml))
-		} else if isAPIClient(r) {
+		if isAPIClient(r) {
 			qhtml := app.RenderSimpleHTML("Names", names.Description, content)
 			w.Write([]byte(qhtml))
 		} else {
@@ -243,22 +238,17 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 
 	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
 		content := a.HTML(app.RenderString)
-
-		if isHtmxRequest(r) {
-			w.Write([]byte(app.RenderContent("API", "", content)))
-		} else {
-			w.Write([]byte(app.RenderHTML("API", "", content)))
-		}
+		w.Write([]byte(app.RenderHTML("API", "", content)))
 	})
 
 	http.HandleFunc("/daily", func(w http.ResponseWriter, r *http.Request) {
 		template := `
 <h3 class="text-lg font-semibold mt-6 mb-2">Verse</h3>
-<a href="%s" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors mb-4" hx-get="%s" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">%s</a>
+<a href="%s" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors mb-4">%s</a>
 <h3 class="text-lg font-semibold mt-6 mb-2">Hadith</h3>
-<a href="%s" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors mb-4" hx-get="%s" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">%s</a>
+<a href="%s" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors mb-4">%s</a>
 <h3 class="text-lg font-semibold mt-6 mb-2">Name</h3>
-<a href="%s" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors mb-4" hx-get="%s" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">%s</a>
+<a href="%s" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors mb-4">%s</a>
 <p class="text-sm text-gray-500 mt-4">Updated %s</p>
 `
 		mtx.RLock()
@@ -266,16 +256,11 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 		hadithLink := links["hadith"]
 		nameLink := links["name"]
 
-		data := fmt.Sprintf(template, verseLink, verseLink, dailyVerse, hadithLink, hadithLink, dailyHadith, nameLink, nameLink, dailyName, dailyUpdated.Format(time.RFC850))
+		data := fmt.Sprintf(template, verseLink, dailyVerse, hadithLink, dailyHadith, nameLink, dailyName, dailyUpdated.Format(time.RFC850))
 		mtx.RUnlock()
 
-		if isHtmxRequest(r) {
-			html := app.RenderContent("Daily Reminder", "Daily reminder from the quran, hadith and names of Allah", data)
-			w.Write([]byte(html))
-		} else {
-			html := app.RenderHTML("Daily Reminder", "Daily reminder from the quran, hadith and names of Allah", data)
-			w.Write([]byte(html))
-		}
+		html := app.RenderHTML("Daily Reminder", "Daily reminder from the quran, hadith and names of Allah", data)
+		w.Write([]byte(html))
 	})
 
 	http.HandleFunc("/quran/{id}", func(w http.ResponseWriter, r *http.Request) {
@@ -293,13 +278,8 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 		head := fmt.Sprintf("%d | Quran", ch)
 		content := q.Get(ch).HTML()
 
-		if isHtmxRequest(r) {
-			qhtml := app.RenderContent(head, "", content)
-			w.Write([]byte(qhtml))
-		} else {
-			qhtml := app.RenderHTML(head, "", content)
-			w.Write([]byte(qhtml))
-		}
+		qhtml := app.RenderHTML(head, "", content)
+		w.Write([]byte(qhtml))
 	})
 
 	http.HandleFunc("/quran/{id}/{ver}", func(w http.ResponseWriter, r *http.Request) {
@@ -349,13 +329,8 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 		head := fmt.Sprintf("%d | Names", name)
 		content := n.Get(name).HTML()
 
-		if isHtmxRequest(r) {
-			qhtml := app.RenderContent(head, "", content)
-			w.Write([]byte(qhtml))
-		} else {
-			qhtml := app.RenderHTML(head, "", content)
-			w.Write([]byte(qhtml))
-		}
+		qhtml := app.RenderHTML(head, "", content)
+		w.Write([]byte(qhtml))
 	})
 
 	http.HandleFunc("/hadith/{book}", func(w http.ResponseWriter, r *http.Request) {
@@ -373,23 +348,13 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 		head := fmt.Sprintf("%d | Hadith", ch)
 		content := b.Get(ch).HTML()
 
-		if isHtmxRequest(r) {
-			qhtml := app.RenderContent(head, "", content)
-			w.Write([]byte(qhtml))
-		} else {
-			qhtml := app.RenderHTML(head, "", content)
-			w.Write([]byte(qhtml))
-		}
+		qhtml := app.RenderHTML(head, "", content)
+		w.Write([]byte(qhtml))
 	})
 
 	http.HandleFunc("/search", func(w http.ResponseWriter, r *http.Request) {
-		if isHtmxRequest(r) {
-			shtml := app.RenderContent("Search", "", app.SearchTemplate)
-			w.Write([]byte(shtml))
-		} else {
-			shtml := app.RenderHTML("Search", "", app.SearchTemplate)
-			w.Write([]byte(shtml))
-		}
+		shtml := app.RenderHTML("Search", "", app.SearchTemplate)
+		w.Write([]byte(shtml))
 	})
 
 	http.HandleFunc("/islam", func(w http.ResponseWriter, r *http.Request) {

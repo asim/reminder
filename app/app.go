@@ -27,12 +27,9 @@ var Template = `
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
     html, body { height: 100%%; width: 100%%; margin: 0; padding: 0; font-family: "Nunito Sans", serif; }
-    .htmx-request #container { opacity: 0.5; }
-    #container { transition: opacity 200ms ease-in-out; }
 @font-face {
     font-family: 'arabic';
     src: url('/arabic.otf') format('opentype');
@@ -109,28 +106,26 @@ code {
   <body class="bg-gray-50">
     <div class="w-full text-sm py-2 px-2 bg-black text-white flex flex-row items-center gap-1 flex-shrink-0">
       <div class="inline-block order-1">
-        <a href="/" hx-get="/home" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="border border-gray-600 rounded px-2 py-1 hover:border-gray-400 transition-colors">&nbsp;R&nbsp;</a>
+        <a href="/" class="border border-gray-600 rounded px-2 py-1 hover:border-gray-400 transition-colors">&nbsp;R&nbsp;</a>
       </div>
       <div class="flex-1 flex flex-row justify-center gap-1 order-2">
-        <a href="/home" hx-get="/home" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="bg-white hover:opacity-100 flex items-center gap-1 text-black px-2 py-0.5 rounded-md transition-colors">Home</a>
-        <a href="/daily" hx-get="/daily" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="bg-white hover:opacity-100 flex items-center gap-1 text-black px-2 py-0.5 rounded-md transition-colors">Daily</a>
-        <a href="/quran" hx-get="/quran" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="bg-white hover:opacity-100 flex items-center gap-1 text-black px-2 py-0.5 rounded-md transition-colors">Quran</a>
-        <a href="/hadith" hx-get="/hadith" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="bg-white hover:opacity-100 flex items-center gap-1 text-black px-2 py-0.5 rounded-md transition-colors">Hadith</a>
-        <a href="/names" hx-get="/names" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="bg-white hover:opacity-100 flex items-center gap-1 text-black px-2 py-0.5 rounded-md transition-colors">Names</a>
+        <a href="/home" class="bg-white hover:opacity-100 flex items-center gap-1 text-black px-2 py-0.5 rounded-md transition-colors">Home</a>
+        <a href="/daily" class="bg-white hover:opacity-100 flex items-center gap-1 text-black px-2 py-0.5 rounded-md transition-colors">Daily</a>
+        <a href="/quran" class="bg-white hover:opacity-100 flex items-center gap-1 text-black px-2 py-0.5 rounded-md transition-colors">Quran</a>
+        <a href="/hadith" class="bg-white hover:opacity-100 flex items-center gap-1 text-black px-2 py-0.5 rounded-md transition-colors">Hadith</a>
+        <a href="/names" class="bg-white hover:opacity-100 flex items-center gap-1 text-black px-2 py-0.5 rounded-md transition-colors">Names</a>
       </div>
       <div class="hidden lg:flex items-center gap-2 order-3">
         <a href="/bookmarks" class="bg-white hover:opacity-100 flex items-center gap-1 text-black px-2 py-0.5 rounded-md transition-colors">Bookmarks</a>
-        <a href="/search" hx-get="/search" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="bg-white hover:opacity-100 flex items-center gap-1 text-black px-2 py-0.5 rounded-md transition-colors">Search</a>
+        <a href="/search" class="bg-white hover:opacity-100 flex items-center gap-1 text-black px-2 py-0.5 rounded-md transition-colors">Search</a>
       </div>
     </div>
-    <div id="main" class="h-screen overflow-y-auto">
-      <div class="max-w-4xl mx-auto p-6">
-        <div class="mb-4">
-          <h1 class="text-2xl font-bold">%s</h1>
-          <p class="text-gray-600">%s</p>
-        </div>
-        <div>%s</div>
+    <div class="max-w-4xl mx-auto p-6">
+      <div class="mb-4">
+        <h1 class="text-2xl font-bold">%s</h1>
+        <p class="text-gray-600">%s</p>
       </div>
+      <div>%s</div>
     </div>
 
   <script src="/bookmarks.js"></script>
@@ -332,28 +327,6 @@ func RenderSimpleHTML(title, desc, html string) string {
   </body>
 </html>`
 	return fmt.Sprintf(simpleTemplate, title, title, desc, html)
-}
-
-func RenderContent(title, desc, html string) string {
-	var titleSection, descSection string
-	if title != "" {
-		titleSection = fmt.Sprintf(`<h1 class="text-2xl font-bold">%s</h1>`, title)
-	}
-	if desc != "" {
-		descSection = fmt.Sprintf(`<p class="text-gray-600">%s</p>`, desc)
-	}
-
-	if titleSection != "" || descSection != "" {
-		return fmt.Sprintf(`<div class="max-w-4xl mx-auto p-6">
-  <div class="mb-4">
-    %s
-    %s
-  </div>
-  <div>%s</div>
-</div>`, titleSection, descSection, html)
-	}
-
-	return fmt.Sprintf(`<div class="max-w-4xl mx-auto p-6">%s</div>`, html)
 }
 
 func RenderString(v string) string {
