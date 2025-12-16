@@ -221,10 +221,10 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *ap
 
 	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
 		if isHtmxRequest(r) {
-			content := fmt.Sprintf(`<div class="prose prose-slate max-w-none"><div class="space-y-6">%s</div></div>`, app.RenderString(a.Markdown()))
+			content := fmt.Sprintf(`<div class="prose prose-lg prose-slate max-w-none prose-headings:font-bold prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3">%s</div>`, app.RenderString(a.Markdown()))
 			w.Write([]byte(app.RenderContent("API", "", content)))
 		} else {
-			content := fmt.Sprintf(`<div class="prose prose-slate max-w-none"><div class="space-y-6">%s</div></div>`, app.RenderString(a.Markdown()))
+			content := fmt.Sprintf(`<div class="prose prose-lg prose-slate max-w-none prose-headings:font-bold prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3">%s</div>`, app.RenderString(a.Markdown()))
 			w.Write([]byte(app.RenderHTML("API", "", content)))
 		}
 	})
