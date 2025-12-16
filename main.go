@@ -536,37 +536,37 @@ func main() {
 	if *WebFlag {
 		fmt.Println("Registering web handler")
 
-		// Register TOC handlers
+		// Register TOC handlers for API clients only
 		http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
-			content := q.TOC()
 			if isAPIClient(r) {
+				content := q.TOC()
 				qhtml := app.RenderSimpleHTML("Quran", quran.Description, content)
 				w.Write([]byte(qhtml))
 			} else {
-				qhtml := app.RenderHTML("Quran", quran.Description, content)
-				w.Write([]byte(qhtml))
+				// Let SPA handle it
+				app.ServeWeb().ServeHTTP(w, r)
 			}
 		})
 
 		http.HandleFunc("/hadith", func(w http.ResponseWriter, r *http.Request) {
-			content := b.TOC()
 			if isAPIClient(r) {
+				content := b.TOC()
 				hhtml := app.RenderSimpleHTML("Hadith", hadith.Description, content)
 				w.Write([]byte(hhtml))
 			} else {
-				hhtml := app.RenderHTML("Hadith", hadith.Description, content)
-				w.Write([]byte(hhtml))
+				// Let SPA handle it
+				app.ServeWeb().ServeHTTP(w, r)
 			}
 		})
 
 		http.HandleFunc("/names", func(w http.ResponseWriter, r *http.Request) {
-			content := n.TOC()
 			if isAPIClient(r) {
+				content := n.TOC()
 				nhtml := app.RenderSimpleHTML("Names", names.Description, content)
 				w.Write([]byte(nhtml))
 			} else {
-				nhtml := app.RenderHTML("Names", names.Description, content)
-				w.Write([]byte(nhtml))
+				// Let SPA handle it
+				app.ServeWeb().ServeHTTP(w, r)
 			}
 		})
 
@@ -622,6 +622,8 @@ func main() {
 				head := fmt.Sprintf("%d | Names", name)
 				qhtml := app.RenderSimpleHTML(head, "", n.Get(name).HTML())
 				w.Write([]byte(qhtml))
+			} else {
+				// Serve SPA
 				app.ServeWeb().ServeHTTP(w, r)
 			}
 		})
