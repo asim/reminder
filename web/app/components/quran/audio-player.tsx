@@ -31,6 +31,14 @@ export function AudioPlayer({
     setProgress(0);
   }, [arabicUrl, englishUrl]);
 
+  // Update audio element volume and muted state
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+      audioRef.current.muted = isMuted;
+    }
+  }, [volume, isMuted]);
+
   // Handle playback sequence: Arabic first, then English
   const playSequence = async () => {
     if (!arabicUrl && !englishUrl) return;
@@ -243,8 +251,6 @@ export function AudioPlayer({
           onLoadedMetadata={handleLoadedMetadata}
           onEnded={handleEnded}
           autoPlay={isPlaying}
-          volume={volume}
-          muted={isMuted}
         />
       )}
     </div>
