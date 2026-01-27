@@ -1,6 +1,8 @@
 import { Trash2 } from 'lucide-react';
+import { useEffect } from 'react';
 import { Link } from 'react-router';
 import { useBookmarks } from '~/hooks/use-bookmarks';
+import { httpGet } from '~/utils/http';
 
 export function meta() {
   return [
@@ -17,7 +19,53 @@ export function meta() {
 }
 
 export default function BookmarksPage() {
-  const { bookmarks, removeBookmark } = useBookmarks();
+  const { bookmarks, removeBookmark, updateExcerpt } = useBookmarks();
+
+  // Migrate existing bookmarks by fetching excerpts
+  useEffect(() => {
+    const migrateQuranExcerpts = async () => {
+      for (const [key, bookmark] of Object.entries(bookmarks.quran)) {
+        if (bookmark.excerpt) continue; // Already has excerpt
+        
+        const [chapter, verse] = key.split(':').map(Number);
+        if (!chapter || !verse) continue;
+        
+        try {
+          const data = await httpGet<{ verses: { number: number; text: string }[] }>(`/api/quran/${chapter}`);
+          const verseData = data.verses.find(v => v.number === verse);
+          if (verseData) {
+            const excerpt = verseData.text.length > 80 ? verseData.text.slice(0, 80) + '...' : verseData.text;
+            updateExcerpt('quran', key, excerpt);
+          }
+        } catch (e) {
+          console.error('Failed to fetch excerpt for', key, e);
+        }
+      }
+    };
+
+    const migrateHadithExcerpts = async () => {
+      for (const [key, bookmark] of Object.entries(bookmarks.hadith)) {
+        if (bookmark.excerpt) continue;
+        
+        const [book, hadithNum] = key.split(':').map(Number);
+        if (!book || !hadithNum) continue;
+        
+        try {
+          const data = await httpGet<{ hadiths: { number: number; text: string }[] }>(`/api/hadith/${book}`);
+          const hadith = data.hadiths.find(h => h.number === hadithNum);
+          if (hadith) {
+            const excerpt = hadith.text.length > 80 ? hadith.text.slice(0, 80) + '...' : hadith.text;
+            updateExcerpt('hadith', key, excerpt);
+          }
+        } catch (e) {
+          console.error('Failed to fetch excerpt for', key, e);
+        }
+      }
+    };
+
+    migrateQuranExcerpts();
+    migrateHadithExcerpts();
+  }, []); // Run once on mount
 
   const quranEntries = Object.entries(bookmarks.quran);
   const hadithEntries = Object.entries(bookmarks.hadith);

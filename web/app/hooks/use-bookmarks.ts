@@ -108,6 +108,23 @@ export function useBookmarks() {
     return bookmarks;
   };
 
+  // Update excerpt for an existing bookmark (for migration)
+  const updateExcerpt = (
+    type: BookmarkType,
+    key: string,
+    excerpt: string
+  ) => {
+    if (!bookmarks[type][key]) return;
+    
+    const newBookmarks = { ...bookmarks };
+    newBookmarks[type][key] = {
+      ...newBookmarks[type][key],
+      excerpt,
+    };
+    setBookmarks(newBookmarks);
+    saveBookmarks(newBookmarks);
+  };
+
   return {
     bookmarks,
     addBookmark,
@@ -115,5 +132,6 @@ export function useBookmarks() {
     hasBookmark,
     toggleBookmark,
     getAllBookmarks,
+    updateExcerpt,
   };
 }
