@@ -6,6 +6,8 @@ type AudioPlayerProps = {
   englishUrl?: string;
   verseLabel: string;
   onPlayComplete?: () => void;
+  onPlayStart?: () => void;
+  autoPlay?: boolean;
 };
 
 export function AudioPlayer({
@@ -13,6 +15,8 @@ export function AudioPlayer({
   englishUrl,
   verseLabel,
   onPlayComplete,
+  onPlayStart,
+  autoPlay = false,
 }: AudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrack, setCurrentTrack] = useState<'arabic' | 'english' | null>(null);
@@ -23,13 +27,32 @@ export function AudioPlayer({
   const arabicAudioRef = useRef<HTMLAudioElement>(null);
   const englishAudioRef = useRef<HTMLAudioElement>(null);
 
-  // Reset player when URLs change
+  // Reset player when URLs change, and auto-play if enabled
   useEffect(() => {
-    setIsPlaying(false);
     setCurrentTrack(null);
     setProgress(0);
     setDuration(0);
-  }, [arabicUrl, englishUrl]);
+    
+    if (autoPlay && (arabicUrl || englishUrl)) {
+      // Small delay to ensure audio elements are ready
+      const timer = setTimeout(() => {
+        if (arabicUrl && arabicAudioRef.current) {
+          setCurrentTrack('arabic');
+          arabicAudioRef.current.currentTime = 0;
+          arabicAudioRef.current.play().catch(console.error);
+          setIsPlaying(true);
+        } else if (englishUrl && englishAudioRef.current) {
+          setCurrentTrack('english');
+          englishAudioRef.current.currentTime = 0;
+          englishAudioRef.current.play().catch(console.error);
+          setIsPlaying(true);
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    } else {
+      setIsPlaying(false);
+    }
+  }, [arabicUrl, englishUrl, autoPlay]);
 
   // Update audio element volume and muted state
   useEffect(() => {
@@ -61,6 +84,11 @@ export function AudioPlayer({
   // Handle playback sequence: Arabic first, then English
   const playSequence = async () => {
     if (!arabicUrl && !englishUrl) return;
+
+    // Notify parent that playback started
+    if (onPlayStart) {
+      onPlayStart();
+    }
 
     // Start with Arabic if available
     if (arabicUrl && arabicAudioRef.current) {

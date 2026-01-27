@@ -47,6 +47,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
   const [wordByWord, setWordByWord] = useWordByWordToggle();
   const [showCommentary, setShowCommentary] = React.useState(false);
   const [currentVerseIndex, setCurrentVerseIndex] = React.useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = React.useState(false);
 
   // Filter out verse 0 (Bismillah) for playback
   const playableVerses = data.verses.filter(v => v.number !== 0);
@@ -85,11 +86,17 @@ export default function QuranChapter(props: Route.ComponentProps) {
   const handleVersePlayComplete = () => {
     // Move to next verse when current verse audio completes
     if (currentVerseIndex < playableVerses.length - 1) {
+      setIsAutoPlaying(true);
       setCurrentVerseIndex(currentVerseIndex + 1);
     } else {
       // Reset to first verse when chapter completes
+      setIsAutoPlaying(false);
       setCurrentVerseIndex(0);
     }
+  };
+
+  const handlePlayStart = () => {
+    setIsAutoPlaying(true);
   };
 
   const currentVerse = playableVerses[currentVerseIndex];
@@ -110,6 +117,8 @@ export default function QuranChapter(props: Route.ComponentProps) {
           englishUrl={currentVerse.audio_english}
           verseLabel={`Quran ${data.number}:${currentVerse.number}`}
           onPlayComplete={handleVersePlayComplete}
+          onPlayStart={handlePlayStart}
+          autoPlay={isAutoPlaying}
         />
       )}
       
