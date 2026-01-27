@@ -24,12 +24,14 @@ type Chapter struct {
 }
 
 type Verse struct {
-	Chapter  int     `json:"chapter"`
-	Number   int     `json:"number"`
-	Text     string  `json:"text"`
-	Arabic   string  `json:"arabic"`
-	Words    []*Word `json:"words"`
-	Comments string  `json:"comments"`
+	Chapter     int     `json:"chapter"`
+	Number      int     `json:"number"`
+	Text        string  `json:"text"`
+	Arabic      string  `json:"arabic"`
+	Words       []*Word `json:"words"`
+	Comments    string  `json:"comments"`
+	AudioArabic string  `json:"audio_arabic,omitempty"`
+	AudioEnglish string  `json:"audio_english,omitempty"`
 }
 
 type Word struct {
@@ -47,6 +49,22 @@ type Comment struct {
 type Quran struct {
 	Chapters   []*Chapter `json:"chapters"`
 	Commentary []*Comment `json:"commentary"`
+}
+
+// GetAudioURL returns the audio URL for a verse
+// Using EveryAyah.com API for Arabic recitation (Mishary Alafasy)
+// and archive.org for English translation
+func GetAudioURL(chapter, verse int, language string) string {
+	if language == "arabic" {
+		// Using Mishary Alafasy recitation (high quality, 128kbps)
+		// Format: https://everyayah.com/data/Alafasy_128kbps/001001.mp3
+		return fmt.Sprintf("https://everyayah.com/data/Alafasy_128kbps/%03d%03d.mp3", chapter, verse)
+	} else if language == "english" {
+		// Using Clear Quran translation audio
+		// Format: https://archive.org/download/CLEAR_QURAN_AUDIO/001001.mp3
+		return fmt.Sprintf("https://archive.org/download/CLEAR_QURAN_AUDIO/%03d%03d.mp3", chapter, verse)
+	}
+	return ""
 }
 
 func (ch *Chapter) JSON() []byte {
@@ -278,12 +296,14 @@ func Load() *Quran {
 			})
 
 			verses = append(verses, &Verse{
-				Chapter:  chapter,
-				Number:   num,
-				Text:     ayah.([]interface{})[1].(string),
-				Arabic:   ar,
-				Words:    wbw,
-				Comments: text,
+				Chapter:      chapter,
+				Number:       num,
+				Text:         ayah.([]interface{})[1].(string),
+				Arabic:       ar,
+				Words:        wbw,
+				Comments:     text,
+				AudioArabic:  GetAudioURL(chapter, num, "arabic"),
+				AudioEnglish: GetAudioURL(chapter, num, "english"),
 			})
 		}
 
