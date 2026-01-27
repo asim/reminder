@@ -208,7 +208,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
                   <BookmarkButton
                     type='quran'
                     itemKey={`${data.number}:${verse.number}`}
-                    label={`Quran ${data.number}:${verse.number}`}
+                    label={`${data.english} ${data.number}:${verse.number}`}
                     url={`/quran/${data.number}#${verse.number}`}
                     excerpt={verse.text.length > 80 ? verse.text.slice(0, 80) + '...' : verse.text}
                   />
@@ -276,7 +276,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
                   <BookmarkButton
                     type='quran'
                     itemKey={`${data.number}:${verse.number}`}
-                    label={`Quran ${data.number}:${verse.number}`}
+                    label={`${data.english} ${data.number}:${verse.number}`}
                     url={`/quran/${data.number}#${verse.number}`}
                     excerpt={verse.text.length > 80 ? verse.text.slice(0, 80) + '...' : verse.text}
                   />

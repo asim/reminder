@@ -19,31 +19,41 @@ export function meta() {
 }
 
 export default function BookmarksPage() {
-  const { bookmarks, removeBookmark, updateExcerpt } = useBookmarks();
+  const { bookmarks, removeBookmark, updateBookmark } = useBookmarks();
 
-  // Migrate existing bookmarks by fetching excerpts
+  // Migrate existing bookmarks by fetching excerpts and updating labels
   useEffect(() => {
-    const migrateQuranExcerpts = async () => {
+    const migrateQuranBookmarks = async () => {
       for (const [key, bookmark] of Object.entries(bookmarks.quran)) {
-        if (bookmark.excerpt) continue; // Already has excerpt
+        // Check if needs migration (no excerpt or old label format)
+        const needsExcerpt = !bookmark.excerpt;
+        const needsLabel = bookmark.label.startsWith('Quran ');
+        
+        if (!needsExcerpt && !needsLabel) continue;
         
         const [chapter, verse] = key.split(':').map(Number);
         if (!chapter || !verse) continue;
         
         try {
-          const data = await httpGet<{ verses: { number: number; text: string }[] }>(`/api/quran/${chapter}`);
+          const data = await httpGet<{ english: string; verses: { number: number; text: string }[] }>(`/api/quran/${chapter}`);
           const verseData = data.verses.find(v => v.number === verse);
           if (verseData) {
-            const excerpt = verseData.text.length > 80 ? verseData.text.slice(0, 80) + '...' : verseData.text;
-            updateExcerpt('quran', key, excerpt);
+            const updates: { excerpt?: string; label?: string } = {};
+            if (needsExcerpt) {
+              updates.excerpt = verseData.text.length > 80 ? verseData.text.slice(0, 80) + '...' : verseData.text;
+            }
+            if (needsLabel) {
+              updates.label = `${data.english} ${chapter}:${verse}`;
+            }
+            updateBookmark('quran', key, updates);
           }
         } catch (e) {
-          console.error('Failed to fetch excerpt for', key, e);
+          console.error('Failed to migrate bookmark', key, e);
         }
       }
     };
 
-    const migrateHadithExcerpts = async () => {
+    const migrateHadithBookmarks = async () => {
       for (const [key, bookmark] of Object.entries(bookmarks.hadith)) {
         if (bookmark.excerpt) continue;
         
@@ -55,16 +65,16 @@ export default function BookmarksPage() {
           const hadith = data.hadiths.find(h => h.number === hadithNum);
           if (hadith) {
             const excerpt = hadith.text.length > 80 ? hadith.text.slice(0, 80) + '...' : hadith.text;
-            updateExcerpt('hadith', key, excerpt);
+            updateBookmark('hadith', key, { excerpt });
           }
         } catch (e) {
-          console.error('Failed to fetch excerpt for', key, e);
+          console.error('Failed to migrate bookmark', key, e);
         }
       }
     };
 
-    migrateQuranExcerpts();
-    migrateHadithExcerpts();
+    migrateQuranBookmarks();
+    migrateHadithBookmarks();
   }, []); // Run once on mount
 
   const quranEntries = Object.entries(bookmarks.quran);
