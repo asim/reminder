@@ -4,8 +4,6 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
-	"strconv"
-	"strings"
 )
 
 //go:embed data/*.json
@@ -13,9 +11,11 @@ var files embed.FS
 
 var Description = `A collection of the Prophet Muhammad's sayings and actions, providing essential context and practical guidance for Islamic practice and belief alongside the Quran.`
 
-type Volume struct {
-	Name  string  `json:"name"`
-	Books []*Book `json:"books"`
+// Collection represents a hadith collection like Bukhari or Muslim
+type Collection struct {
+	Name    string  `json:"name"`
+	Arabic  string  `json:"arabic"`
+	Books   []*Book `json:"books"`
 }
 
 type Book struct {
@@ -26,19 +26,94 @@ type Book struct {
 }
 
 type Hadith struct {
-	Info string `json:"info"`
-	By   string `json:"by"`
-	Text string `json:"text"`
-}
-
-type Volumes struct {
-	Contents []*Volume `json:"contents,omitempty"`
-	Books    []*Book   `json:"books,omitempty"`
+	Number   int    `json:"number"`
+	Narrator string `json:"narrator"`
+	English  string `json:"english"`
+	Arabic   string `json:"arabic"`
+	Chain    string `json:"chain,omitempty"`
+	// Legacy fields for API compatibility
+	Info string `json:"info,omitempty"`
+	By   string `json:"by,omitempty"`
+	Text string `json:"text,omitempty"`
 }
 
 func (b *Book) JSON() []byte {
 	by, _ := json.Marshal(b)
 	return by
+}
+
+func (c *Collection) TOC() string {
+	var data string
+
+	data += `<div class="space-y-2">`
+	for _, book := range c.Books {
+		data += fmt.Sprintf(`<a href="/hadith/%d" class="block p-3 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">%d: %s</a>`, book.Number, book.Number, book.Name)
+	}
+	data += `</div>`
+
+	return data
+}
+
+func (c *Collection) Get(book int) *Book {
+	if book < 1 || book > len(c.Books) {
+		return nil
+	}
+	return c.Books[book-1]
+}
+
+func (c *Collection) Index() *Collection {
+	cc := &Collection{
+		Name:   c.Name,
+		Arabic: c.Arabic,
+	}
+
+	for _, book := range c.Books {
+		cc.Books = append(cc.Books, &Book{
+			Name:        book.Name,
+			Number:      book.Number,
+			HadithCount: len(book.Hadiths),
+		})
+	}
+
+	return cc
+}
+
+func (c *Collection) JSON() []byte {
+	b, _ := json.Marshal(c)
+	return b
+}
+
+func Load() *Collection {
+	collection := &Collection{}
+
+	f, err := files.ReadFile("data/bukhari.json")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	if err := json.Unmarshal(f, collection); err != nil {
+		panic(err.Error())
+	}
+
+	// Set book numbers if not set
+	for i, book := range collection.Books {
+		if book.Number == 0 {
+			book.Number = i + 1
+		}
+		book.HadithCount = len(book.Hadiths)
+		
+		// Set legacy fields for API compatibility
+		for j, h := range book.Hadiths {
+			if h.Number == 0 {
+				h.Number = j + 1
+			}
+			h.Info = fmt.Sprintf("Hadith %d", h.Number)
+			h.By = h.Narrator
+			h.Text = h.English
+		}
+	}
+
+	return collection
 }
 
 func (b *Book) HTML() string {
@@ -50,138 +125,25 @@ func (b *Book) HTML() string {
 	data += `</div>`
 
 	// Hadith entries
-	for idx, hadith := range b.Hadiths {
-		hadithKey := fmt.Sprintf("%d:%d", b.Number, idx+1)
-		hadithLabel := fmt.Sprintf("Hadith %d:%d - %s", b.Number, idx+1, hadith.Info)
-		hadithURL := fmt.Sprintf("/hadith/%d#%d", b.Number, idx+1)
+	for _, hadith := range b.Hadiths {
+		hadithKey := fmt.Sprintf("%d:%d", b.Number, hadith.Number)
+		hadithLabel := fmt.Sprintf("%s - Hadith %d", b.Name, hadith.Number)
+		hadithURL := fmt.Sprintf("/hadith/%d#%d", b.Number, hadith.Number)
 
-		data += `<div class="mb-6 p-6 bg-white border border-gray-200 rounded-lg shadow-sm" id="` + fmt.Sprintf("%d", idx+1) + `">`
-		data += fmt.Sprintf(`<div class="flex items-center justify-between mb-3"><h3 class="text-lg font-semibold text-gray-700">%s</h3><button class="bookmark-btn" data-type="hadith" data-key="%s" data-label="%s" data-url="%s">☆</button></div>`,
-			hadith.Info, hadithKey, hadithLabel, hadithURL)
-		data += fmt.Sprintf(`<p class="text-sm text-gray-500 mb-4">%s</p>`, hadith.By)
-		data += fmt.Sprintf(`<div class="text-gray-700">%s</div>`, hadith.Text)
+		data += `<div class="mb-6 p-6 bg-white border border-gray-200 rounded-lg shadow-sm" id="` + fmt.Sprintf("%d", hadith.Number) + `">`
+		data += fmt.Sprintf(`<div class="flex items-center justify-between mb-3"><h3 class="text-lg font-semibold text-gray-700">Hadith %d</h3><button class="bookmark-btn" data-type="hadith" data-key="%s" data-label="%s" data-url="%s">☆</button></div>`,
+			hadith.Number, hadithKey, hadithLabel, hadithURL)
+		data += fmt.Sprintf(`<p class="text-sm text-gray-500 mb-4">%s</p>`, hadith.Narrator)
+		
+		// Arabic text
+		if hadith.Arabic != "" {
+			data += fmt.Sprintf(`<div dir="rtl" class="text-xl leading-loose font-arabic text-right mb-4 pb-4 border-b border-gray-100">%s</div>`, hadith.Arabic)
+		}
+		
+		// English translation
+		data += fmt.Sprintf(`<div class="text-gray-700">%s</div>`, hadith.English)
 		data += `</div>`
 	}
 
 	return data
-}
-
-func (v *Volumes) TOC() string {
-	var data string
-
-	data += `<div class="space-y-2">`
-	for id, book := range v.Books {
-		data += fmt.Sprintf(`<a href="/hadith/%d" hx-get="/hadith/%d" hx-target="#main" hx-swap="innerHTML" hx-push-url="true" class="block p-3 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">%d: %s</a>`, id+1, id+1, id+1, book.Name)
-	}
-	data += `</div>`
-
-	return data
-}
-
-func (v *Volumes) Get(book int) *Book {
-	return v.Books[book-1]
-}
-
-func (v *Volumes) Index() *Volumes {
-	vv := new(Volumes)
-
-	for _, book := range v.Books {
-		vv.Books = append(vv.Books, &Book{
-			Name:        book.Name,
-			Number:      book.Number,
-			HadithCount: len(book.Hadiths),
-		})
-	}
-
-	return vv
-}
-
-func (v *Volumes) JSON() []byte {
-	b, _ := json.Marshal(v)
-	return b
-}
-
-func (v *Volumes) Markdown() string {
-	var data string
-
-	for _, volume := range v.Contents {
-		data += fmt.Sprintln()
-		data += fmt.Sprintf(`# %s`, volume.Name)
-		data += fmt.Sprintln()
-		data += fmt.Sprintln()
-
-		for _, book := range volume.Books {
-			data += fmt.Sprintf(`## %s`, book.Name)
-			data += fmt.Sprintln()
-			data += fmt.Sprintln()
-
-			for _, hadith := range book.Hadiths {
-				data += fmt.Sprintf(`### %s`, hadith.Info)
-				data += fmt.Sprintln()
-				data += fmt.Sprintf(`#### By %s`, hadith.By)
-				data += fmt.Sprintln()
-				data += fmt.Sprintf(`%s`, hadith.Text)
-				data += fmt.Sprintln()
-				data += fmt.Sprintln()
-			}
-		}
-	}
-
-	return data
-}
-
-func Load() *Volumes {
-	volumes := &Volumes{}
-
-	f, err := files.ReadFile("data/bukhari.json")
-	if err != nil {
-		panic(err.Error())
-	}
-	var data []interface{}
-	json.Unmarshal(f, &data)
-
-	// per volume
-	for _, entry := range data {
-		d := entry.(map[string]interface{})
-		volume := &Volume{
-			Name: d["name"].(string),
-		}
-
-		for _, b := range d["books"].([]interface{}) {
-			bk := b.(map[string]interface{})
-
-			parts := strings.Split(bk["name"].(string), ". ")
-			num, name := parts[0], parts[1]
-			n, _ := strconv.Atoi(num)
-
-			book := &Book{
-				Name:   name,
-				Number: n,
-			}
-
-			for _, h := range bk["hadiths"].([]interface{}) {
-				hd := h.(map[string]interface{})
-
-				hadith := &Hadith{
-					Info: hd["info"].(string),
-					By:   hd["by"].(string),
-					Text: hd["text"].(string),
-				}
-
-				book.Hadiths = append(book.Hadiths, hadith)
-				book.HadithCount = len(book.Hadiths)
-			}
-
-			volume.Books = append(volume.Books, book)
-			volumes.Books = append(volumes.Books, book)
-		}
-
-		volumes.Contents = append(volumes.Contents, volume)
-	}
-
-	return volumes
-}
-
-func Markdown() string {
-	return Load().Markdown()
 }

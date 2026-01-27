@@ -76,7 +76,7 @@ func isAPIClient(r *http.Request) bool {
 		(accept != "" && !strings.Contains(accept, "text/html") && !strings.Contains(accept, "*/*"))
 }
 
-func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Volumes, a *api.Api) {
+func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Collection, a *api.Api) {
 	http.HandleFunc("/home", func(w http.ResponseWriter, r *http.Request) {
 		mtx.RLock()
 		verseLink := links["verse"]
@@ -1188,8 +1188,8 @@ func main() {
 				idx = ve.Number
 			}
 
-			// bail out
-			if idx >= len(ch.Verses) {
+			// bail out - check bounds
+			if idx < 0 || idx >= len(ch.Verses) {
 				break
 			}
 
@@ -1230,11 +1230,30 @@ func main() {
 			mtx.Lock()
 
 			nam := (*n)[rnd.Int()%len((*n))]
-			book := b.Books[rnd.Int()%len(b.Books)]
+			bookIdx := rnd.Int() % len(b.Books)
+			book := b.Books[bookIdx]
+			
+			// Safety check for books with no hadiths
+			if len(book.Hadiths) == 0 {
+				fmt.Printf("Book %d (%s) has no hadiths, skipping\n", bookIdx, book.Name)
+				mtx.Unlock()
+				continue
+			}
+			
 			chap := q.Chapters[rnd.Int()%len(q.Chapters)]
+			
+			// Safety check for chapters with no verses
+			if len(chap.Verses) == 0 {
+				fmt.Printf("Chapter %d has no verses, skipping\n", chap.Number)
+				mtx.Unlock()
+				continue
+			}
+			
 			ver := chap.Verses[rnd.Int()%len(chap.Verses)]
 			hadithIdx := rnd.Int() % len(book.Hadiths)
 			had := book.Hadiths[hadithIdx]
+			
+			fmt.Printf("Selected: Book %d (%s), Hadith %d, Chapter %d, Verse %d\n", bookIdx, book.Name, hadithIdx, chap.Number, ver.Number)
 
 			// make sure we're starting from the begining of a verse
 			if !isCapital(ver.Text) {
@@ -1251,14 +1270,24 @@ func main() {
 			dailyName = fmt.Sprintf("%s - %s - %s\n\n%s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
 			verseFormatted, verseStart, verseEnd, verseText := getVerse(chap, ver)
 			dailyVerse = verseFormatted
-			dailyHadith = fmt.Sprintf("%s - %s - %s\n\n%s", book.Name, had.By, strings.Split(had.Info, ":")[0], had.Text)
-
-			// Extract hadith number from the Info field for the anchor
-			num := strings.TrimSpace(strings.Split(strings.Split(had.Info, "Number")[1], ":")[0])
+			// Use new hadith format fields with fallback to legacy
+			hadithNarrator := had.Narrator
+			if hadithNarrator == "" {
+				hadithNarrator = had.By
+			}
+			hadithText := had.English
+			if hadithText == "" {
+				hadithText = had.Text
+			}
+			hadithNum := had.Number
+			if hadithNum == 0 {
+				hadithNum = 1
+			}
+			dailyHadith = fmt.Sprintf("%s - %s\n\n%s", book.Name, hadithNarrator, hadithText)
 
 			links = map[string]string{
 				"verse":  fmt.Sprintf("/quran/%d#%d", chap.Number, verseStart),
-				"hadith": fmt.Sprintf("/hadith/%d#%s", book.Number, num),
+				"hadith": fmt.Sprintf("/hadith/%d#%d", book.Number, hadithNum),
 				"name":   fmt.Sprintf("/names/%d", nam.Number),
 			}
 
@@ -1280,10 +1309,9 @@ func main() {
 				"hadith_meta": map[string]interface{}{
 					"book":      book.Number,
 					"book_name": book.Name,
-					"narrator":  had.By,
-					"info":      had.Info,
-					"number":    num,
-					"text":      had.Text,
+					"narrator":  hadithNarrator,
+					"number":    hadithNum,
+					"text":      hadithText,
 				},
 				"name_meta": map[string]interface{}{
 					"number":  nam.Number,

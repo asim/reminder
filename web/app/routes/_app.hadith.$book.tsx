@@ -82,9 +82,9 @@ export default function HadithBook() {
     const query = searchQuery.toLowerCase();
     return book.hadiths.filter(
       (hadith) =>
-        hadith.text.toLowerCase().includes(query) ||
-        hadith.by.toLowerCase().includes(query) ||
-        hadith.info.toLowerCase().includes(query)
+        (hadith.english || hadith.text || '').toLowerCase().includes(query) ||
+        (hadith.narrator || hadith.by || '').toLowerCase().includes(query) ||
+        (hadith.arabic || '').includes(query)
     );
   }, [book.hadiths, searchQuery]);
 
@@ -125,37 +125,48 @@ export default function HadithBook() {
 
       <div className='space-y-3 sm:space-y-4'>
         {filteredHadiths.map((hadith, idx) => {
-          // Extract hadith number from info field (e.g., "Volume 9, Book 93, Number 473 :")
-          const hadithNumber = hadith.info.includes('Number')
-            ? hadith.info.split('Number')[1].split(':')[0].trim()
-            : `${idx + 1}`;
+          const hadithNumber = hadith.number || idx + 1;
+          const narrator = hadith.narrator || hadith.by || '';
+          const englishText = hadith.english || hadith.text || '';
+          const arabicText = hadith.arabic || '';
 
           return (
             <div
-              key={`${hadith.info}-${hadith.by}-${bookNumber}`}
-              id={hadithNumber}
+              key={`${bookNumber}-${hadithNumber}`}
+              id={String(hadithNumber)}
               className='p-3 sm:p-4 md:p-6 border border-gray-200 rounded-lg space-y-2 sm:space-y-4 hover:border-gray-300 transition-colors'
             >
               <div className='flex gap-2 lg:mb-0 mb-4 lg:gap-0 lg:flex-row flex-col justify-start lg:justify-between items-start lg:items-center'>
                 <span className='text-sm sm:text-base font-medium text-gray-700'>
-                  {hadith.info.trim().replace(/:$/, '')}
+                  Hadith {hadithNumber}
                 </span>
                 <div className='flex items-center gap-2'>
                   <span className='text-sm text-balance sm:text-base font-medium text-gray-700'>
-                    {hadith.by}
+                    {narrator}
                   </span>
                   <BookmarkButton
                     type='hadith'
                     itemKey={`${bookNumber}:${hadithNumber}`}
-                    label={`Hadith ${bookNumber}:${hadithNumber} - ${hadith.info}`}
+                    label={`${book.name} - Hadith ${hadithNumber}`}
                     url={`/hadith/${bookNumber}#${hadithNumber}`}
-                    excerpt={hadith.text.length > 80 ? hadith.text.slice(0, 80) + '...' : hadith.text}
+                    excerpt={englishText.length > 80 ? englishText.slice(0, 80) + '...' : englishText}
                   />
                 </div>
               </div>
 
+              {/* Arabic text */}
+              {arabicText && (
+                <div
+                  dir='rtl'
+                  className='text-xl sm:text-2xl leading-loose font-arabic text-right text-gray-800 border-b border-gray-100 pb-4'
+                >
+                  {arabicText}
+                </div>
+              )}
+
+              {/* English translation */}
               <p className='text-gray-800 text-base sm:text-lg leading-relaxed'>
-                {hadith.text}
+                {englishText}
               </p>
             </div>
           );

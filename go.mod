@@ -1,6 +1,6 @@
 module github.com/asim/reminder
 
-go 1.23
+go 1.22
 
 require (
 	github.com/SherClockHolmes/webpush-go v1.4.0

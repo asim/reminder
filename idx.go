@@ -62,21 +62,17 @@ func indexTafsir(idx *search.Index, q *quran.Quran) {
 	}
 }
 
-func indexHadith(idx *search.Index, b *hadith.Volumes) {
+func indexHadith(idx *search.Index, b *hadith.Collection) {
 	fmt.Println("Indexing Hadith")
 
-	for _, volume := range b.Contents {
-		for _, book := range volume.Books {
-			for _, hadith := range book.Hadiths {
-
-				indexContent(idx, map[string]string{
-					"source": "bukhari",
-					"volume": volume.Name,
-					"book":   book.Name,
-					"by":     hadith.By,
-					"info":   hadith.Info,
-				}, hadith.Text)
-			}
+	for _, book := range b.Books {
+		for _, h := range book.Hadiths {
+			indexContent(idx, map[string]string{
+				"source":   "bukhari",
+				"book":     book.Name,
+				"narrator": h.Narrator,
+				"number":   fmt.Sprintf("%d", h.Number),
+			}, h.English)
 		}
 	}
 }

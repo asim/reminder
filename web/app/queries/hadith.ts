@@ -17,6 +17,12 @@ export const listBooksOptions = () => ({
 });
 
 type HadithType = {
+  number: number;
+  narrator: string;
+  english: string;
+  arabic: string;
+  chain?: string;
+  // Legacy fields
   by: string;
   info: string;
   text: string;
