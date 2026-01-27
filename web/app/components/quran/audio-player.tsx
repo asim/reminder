@@ -5,7 +5,6 @@ type AudioPlayerProps = {
   arabicUrl?: string;
   englishUrl?: string;
   verseLabel: string;
-  autoPlay?: boolean;
   onPlayComplete?: () => void;
 };
 
@@ -13,7 +12,6 @@ export function AudioPlayer({
   arabicUrl,
   englishUrl,
   verseLabel,
-  autoPlay = false,
   onPlayComplete,
 }: AudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -75,6 +73,8 @@ export function AudioPlayer({
       }
       setCurrentTrack('english');
       setIsPlaying(true);
+      setProgress(0);
+      setDuration(0);
     }
   };
 
@@ -85,27 +85,20 @@ export function AudioPlayer({
       }
       setCurrentTrack('arabic');
       setIsPlaying(true);
+      setProgress(0);
+      setDuration(0);
     }
   };
 
   const toggleMute = () => {
-    if (audioRef.current) {
-      audioRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
+    setIsMuted(!isMuted);
   };
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseFloat(e.target.value);
     setVolume(newVolume);
-    if (audioRef.current) {
-      audioRef.current.volume = newVolume;
-    }
     if (newVolume > 0 && isMuted) {
       setIsMuted(false);
-      if (audioRef.current) {
-        audioRef.current.muted = false;
-      }
     }
   };
 
@@ -172,10 +165,15 @@ export function AudioPlayer({
       <input
         type="range"
         min="0"
-        max={duration || 100}
+        max={duration || 0}
         value={progress}
         onChange={handleSeek}
-        className="w-full h-1 mb-3 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-black"
+        disabled={!duration}
+        className="w-full h-1 mb-3 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-black disabled:opacity-50"
+        aria-label="Seek audio position"
+        aria-valuemin={0}
+        aria-valuemax={duration || 0}
+        aria-valuenow={progress}
       />
 
       <div className="flex items-center justify-between gap-2">
@@ -187,6 +185,7 @@ export function AudioPlayer({
               disabled={currentTrack === 'arabic' && isPlaying}
               className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-full transition-colors disabled:opacity-50"
               title="Play Arabic"
+              aria-label="Play Arabic recitation"
             >
               <SkipBack className="size-4 sm:size-5" />
             </button>
@@ -196,6 +195,7 @@ export function AudioPlayer({
             onClick={togglePlay}
             className="p-2 sm:p-3 bg-black text-white hover:bg-gray-800 rounded-full transition-colors"
             title={isPlaying ? 'Pause' : 'Play'}
+            aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
           >
             {isPlaying ? (
               <Pause className="size-4 sm:size-5" />
@@ -210,6 +210,7 @@ export function AudioPlayer({
               disabled={currentTrack === 'english' && isPlaying}
               className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-full transition-colors disabled:opacity-50"
               title="Play English"
+              aria-label="Play English translation"
             >
               <SkipForward className="size-4 sm:size-5" />
             </button>
@@ -222,6 +223,7 @@ export function AudioPlayer({
             onClick={toggleMute}
             className="p-1.5 sm:p-2 hover:bg-gray-200 rounded-full transition-colors"
             title={isMuted ? 'Unmute' : 'Mute'}
+            aria-label={isMuted ? 'Unmute audio' : 'Mute audio'}
           >
             {isMuted ? (
               <VolumeX className="size-4 sm:size-5" />
@@ -238,6 +240,10 @@ export function AudioPlayer({
             onChange={handleVolumeChange}
             className="w-16 sm:w-20 h-1 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-black"
             title="Volume"
+            aria-label="Volume control"
+            aria-valuemin={0}
+            aria-valuemax={1}
+            aria-valuenow={volume}
           />
         </div>
       </div>
