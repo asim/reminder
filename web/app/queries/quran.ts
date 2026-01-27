@@ -28,6 +28,9 @@ type VerseType = {
   text: string;
   arabic: string;
   words?: WordByWord[];
+  comments?: string;
+  audio_arabic?: string;
+  audio_english?: string;
 };
 
 type ChapterResponseType = {

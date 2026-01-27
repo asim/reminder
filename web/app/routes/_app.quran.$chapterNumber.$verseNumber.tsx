@@ -5,6 +5,7 @@ import React from 'react';
 import { Link } from 'react-router';
 import { PageError } from '~/components/interface/page-error';
 import { PrimaryButton } from '~/components/interface/primary-button';
+import { AudioPlayer } from '~/components/quran/audio-player';
 import { ChapterHeader } from '~/components/quran/chapter-header';
 import { ViewMode } from '~/components/quran/view-mode';
 import { useQuranViewMode } from '~/hooks/use-quran-view-mode';
@@ -73,6 +74,13 @@ export default function QuranVerse(props: Route.ComponentProps) {
           </label>
         </div>
       )}
+
+      {/* Audio Player */}
+      <AudioPlayer
+        arabicUrl={verse.audio_arabic}
+        englishUrl={verse.audio_english}
+        verseLabel={`Quran ${data.number}:${verse.number}`}
+      />
 
       {mode === 'arabic' && (
         <div className='flex flex-col flex-grow'>

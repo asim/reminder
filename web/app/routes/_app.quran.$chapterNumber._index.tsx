@@ -6,6 +6,7 @@ import { Link } from 'react-router';
 import { BookmarkButton } from '~/components/interface/bookmark-button';
 import { PageError } from '~/components/interface/page-error';
 import { PrimaryButton } from '~/components/interface/primary-button';
+import { AudioPlayer } from '~/components/quran/audio-player';
 import { ChapterHeader } from '~/components/quran/chapter-header';
 import { ViewMode } from '~/components/quran/view-mode';
 import { useQuranViewMode } from '~/hooks/use-quran-view-mode';
@@ -45,6 +46,10 @@ export default function QuranChapter(props: Route.ComponentProps) {
   const [mode, setMode] = useQuranViewMode();
   const [wordByWord, setWordByWord] = useWordByWordToggle();
   const [showCommentary, setShowCommentary] = React.useState(false);
+  const [currentVerseIndex, setCurrentVerseIndex] = React.useState(0);
+
+  // Filter out verse 0 (Bismillah) for playback
+  const playableVerses = data.verses.filter(v => v.number !== 0);
 
   useEffect(() => {
     if (!data || !window.location.hash) {
@@ -77,6 +82,18 @@ export default function QuranChapter(props: Route.ComponentProps) {
   const previousChapter = Number(chapterNumber) - 1;
   const nextChapter = Number(chapterNumber) + 1;
 
+  const handleVersePlayComplete = () => {
+    // Move to next verse when current verse audio completes
+    if (currentVerseIndex < playableVerses.length - 1) {
+      setCurrentVerseIndex(currentVerseIndex + 1);
+    } else {
+      // Reset to first verse when chapter completes
+      setCurrentVerseIndex(0);
+    }
+  };
+
+  const currentVerse = playableVerses[currentVerseIndex];
+
   return (
     <div className='max-w-4xl flex flex-col w-full mb-8 sm:mb-12 flex-grow mx-auto p-0 lg:p-8'>
       <ViewMode mode={mode} onChange={setMode} />
@@ -85,6 +102,17 @@ export default function QuranChapter(props: Route.ComponentProps) {
         translation={data.english}
         subtitle={`Chapter ${data.number}`}
       />
+      
+      {/* Chapter Audio Player */}
+      {currentVerse && (
+        <AudioPlayer
+          arabicUrl={currentVerse.audio_arabic}
+          englishUrl={currentVerse.audio_english}
+          verseLabel={`Quran ${data.number}:${currentVerse.number}`}
+          onPlayComplete={handleVersePlayComplete}
+        />
+      )}
+      
       {mode === 'translation' && (
         <div className='mb-4 flex items-center gap-6'>
           <label className='flex items-center gap-2 cursor-pointer'>
