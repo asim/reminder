@@ -44,6 +44,7 @@ export default function NameDetail() {
                 itemKey={`${name.number}`}
                 label={`Name ${name.number}: ${name.meaning}`}
                 url={`/names/${name.number}`}
+                excerpt={name.summary ? (name.summary.length > 80 ? name.summary.slice(0, 80) + '...' : name.summary) : name.english}
               />
             </div>
             <div className='text-3xl sm:text-4xl md:text-5xl my-4 sm:my-7 font-arabic font-medium text-black'>

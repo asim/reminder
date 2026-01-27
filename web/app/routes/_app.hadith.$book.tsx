@@ -149,6 +149,7 @@ export default function HadithBook() {
                     itemKey={`${bookNumber}:${hadithNumber}`}
                     label={`Hadith ${bookNumber}:${hadithNumber} - ${hadith.info}`}
                     url={`/hadith/${bookNumber}#${hadithNumber}`}
+                    excerpt={hadith.text.length > 80 ? hadith.text.slice(0, 80) + '...' : hadith.text}
                   />
                 </div>
               </div>

@@ -7,6 +7,7 @@ interface BookmarkButtonProps {
   itemKey: string;
   label: string;
   url: string;
+  excerpt?: string;
   className?: string;
 }
 
@@ -15,13 +16,14 @@ export function BookmarkButton({
   itemKey,
   label,
   url,
+  excerpt,
   className,
 }: BookmarkButtonProps) {
   const { hasBookmark, toggleBookmark } = useBookmarks();
   const isBookmarked = hasBookmark(type, itemKey);
 
   const handleClick = () => {
-    toggleBookmark(type, itemKey, label, url);
+    toggleBookmark(type, itemKey, label, url, excerpt);
   };
 
   return (

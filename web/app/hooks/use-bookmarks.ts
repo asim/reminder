@@ -8,6 +8,7 @@ export interface Bookmark {
   label: string;
   url: string;
   timestamp: string;
+  excerpt?: string;
 }
 
 export interface BookmarksData {
@@ -62,13 +63,15 @@ export function useBookmarks() {
     type: BookmarkType,
     key: string,
     label: string,
-    url: string
+    url: string,
+    excerpt?: string
   ) => {
     const newBookmarks = { ...bookmarks };
     newBookmarks[type][key] = {
       label,
       url,
       timestamp: new Date().toISOString(),
+      excerpt,
     };
     setBookmarks(newBookmarks);
     saveBookmarks(newBookmarks);
@@ -89,13 +92,14 @@ export function useBookmarks() {
     type: BookmarkType,
     key: string,
     label: string,
-    url: string
+    url: string,
+    excerpt?: string
   ): boolean => {
     if (hasBookmark(type, key)) {
       removeBookmark(type, key);
       return false;
     } else {
-      addBookmark(type, key, label, url);
+      addBookmark(type, key, label, url, excerpt);
       return true;
     }
   };

@@ -59,13 +59,16 @@ export default function BookmarksPage() {
               >
                 <Link
                   to={bookmark.url}
-                  className='flex-grow text-base sm:text-lg text-gray-800 hover:text-black'
+                  className='flex-grow text-gray-800 hover:text-black'
                 >
-                  {bookmark.label}
+                  <div className='text-base sm:text-lg font-medium'>{bookmark.label}</div>
+                  {bookmark.excerpt && (
+                    <div className='text-sm text-gray-500 mt-1 line-clamp-2'>{bookmark.excerpt}</div>
+                  )}
                 </Link>
                 <button
                   onClick={() => removeBookmark('quran', key)}
-                  className='ml-4 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors'
+                  className='ml-4 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors flex-shrink-0'
                   aria-label='Delete bookmark'
                 >
                   <Trash2 className='size-4' />
@@ -87,13 +90,16 @@ export default function BookmarksPage() {
               >
                 <Link
                   to={bookmark.url}
-                  className='flex-grow text-base sm:text-lg text-gray-800 hover:text-black'
+                  className='flex-grow text-gray-800 hover:text-black'
                 >
-                  {bookmark.label}
+                  <div className='text-base sm:text-lg font-medium'>{bookmark.label}</div>
+                  {bookmark.excerpt && (
+                    <div className='text-sm text-gray-500 mt-1 line-clamp-2'>{bookmark.excerpt}</div>
+                  )}
                 </Link>
                 <button
                   onClick={() => removeBookmark('hadith', key)}
-                  className='ml-4 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors'
+                  className='ml-4 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors flex-shrink-0'
                   aria-label='Delete bookmark'
                 >
                   <Trash2 className='size-4' />
@@ -117,13 +123,16 @@ export default function BookmarksPage() {
               >
                 <Link
                   to={bookmark.url}
-                  className='flex-grow text-base sm:text-lg text-gray-800 hover:text-black'
+                  className='flex-grow text-gray-800 hover:text-black'
                 >
-                  {bookmark.label}
+                  <div className='text-base sm:text-lg font-medium'>{bookmark.label}</div>
+                  {bookmark.excerpt && (
+                    <div className='text-sm text-gray-500 mt-1 line-clamp-2'>{bookmark.excerpt}</div>
+                  )}
                 </Link>
                 <button
                   onClick={() => removeBookmark('names', key)}
-                  className='ml-4 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors'
+                  className='ml-4 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors flex-shrink-0'
                   aria-label='Delete bookmark'
                 >
                   <Trash2 className='size-4' />
