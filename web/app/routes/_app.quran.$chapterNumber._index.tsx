@@ -52,6 +52,12 @@ export default function QuranChapter(props: Route.ComponentProps) {
   // Filter out verse 0 (Bismillah) for playback
   const playableVerses = data.verses.filter(v => v.number !== 0);
 
+  // Reset playback state when chapter changes
+  useEffect(() => {
+    setCurrentVerseIndex(0);
+    setIsAutoPlaying(false);
+  }, [chapterNumber]);
+
   useEffect(() => {
     if (!data || !window.location.hash) {
       return;
