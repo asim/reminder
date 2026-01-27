@@ -20,7 +20,8 @@ export function AudioPlayer({
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const arabicAudioRef = useRef<HTMLAudioElement>(null);
+  const englishAudioRef = useRef<HTMLAudioElement>(null);
 
   // Reset player when URLs change
   useEffect(() => {
@@ -31,9 +32,13 @@ export function AudioPlayer({
 
   // Update audio element volume and muted state
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
-      audioRef.current.muted = isMuted;
+    if (arabicAudioRef.current) {
+      arabicAudioRef.current.volume = volume;
+      arabicAudioRef.current.muted = isMuted;
+    }
+    if (englishAudioRef.current) {
+      englishAudioRef.current.volume = volume;
+      englishAudioRef.current.muted = isMuted;
     }
   }, [volume, isMuted]);
 
@@ -41,19 +46,30 @@ export function AudioPlayer({
   const playSequence = async () => {
     if (!arabicUrl && !englishUrl) return;
 
-    setIsPlaying(true);
-    
     // Start with Arabic if available
     if (arabicUrl) {
       setCurrentTrack('arabic');
+      if (arabicAudioRef.current) {
+        arabicAudioRef.current.currentTime = 0;
+        arabicAudioRef.current.play().catch(console.error);
+        setIsPlaying(true);
+      }
     } else if (englishUrl) {
       setCurrentTrack('english');
+      if (englishAudioRef.current) {
+        englishAudioRef.current.currentTime = 0;
+        englishAudioRef.current.play().catch(console.error);
+        setIsPlaying(true);
+      }
     }
   };
 
   const pause = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
+    if (arabicAudioRef.current) {
+      arabicAudioRef.current.pause();
+    }
+    if (englishAudioRef.current) {
+      englishAudioRef.current.pause();
     }
     setIsPlaying(false);
   };
@@ -68,25 +84,37 @@ export function AudioPlayer({
 
   const skipToEnglish = () => {
     if (englishUrl) {
-      if (audioRef.current) {
-        audioRef.current.pause();
+      // Pause Arabic
+      if (arabicAudioRef.current) {
+        arabicAudioRef.current.pause();
       }
       setCurrentTrack('english');
-      setIsPlaying(true);
       setProgress(0);
       setDuration(0);
+      // Play English
+      if (englishAudioRef.current) {
+        englishAudioRef.current.currentTime = 0;
+        englishAudioRef.current.play().catch(console.error);
+        setIsPlaying(true);
+      }
     }
   };
 
   const skipToArabic = () => {
     if (arabicUrl) {
-      if (audioRef.current) {
-        audioRef.current.pause();
+      // Pause English
+      if (englishAudioRef.current) {
+        englishAudioRef.current.pause();
       }
       setCurrentTrack('arabic');
-      setIsPlaying(true);
       setProgress(0);
       setDuration(0);
+      // Play Arabic
+      if (arabicAudioRef.current) {
+        arabicAudioRef.current.currentTime = 0;
+        arabicAudioRef.current.play().catch(console.error);
+        setIsPlaying(true);
+      }
     }
   };
 
@@ -103,23 +131,29 @@ export function AudioPlayer({
   };
 
   const handleTimeUpdate = () => {
-    if (audioRef.current) {
-      setProgress(audioRef.current.currentTime);
+    const audio = currentTrack === 'english' ? englishAudioRef.current : arabicAudioRef.current;
+    if (audio) {
+      setProgress(audio.currentTime);
     }
   };
 
   const handleLoadedMetadata = () => {
-    if (audioRef.current) {
-      setDuration(audioRef.current.duration);
+    const audio = currentTrack === 'english' ? englishAudioRef.current : arabicAudioRef.current;
+    if (audio) {
+      setDuration(audio.duration);
     }
   };
 
-  const handleEnded = () => {
+  const handleArabicEnded = () => {
     // When Arabic ends, play English
-    if (currentTrack === 'arabic' && englishUrl) {
+    if (englishUrl && englishAudioRef.current) {
       setCurrentTrack('english');
+      setProgress(0);
+      setDuration(0);
+      englishAudioRef.current.currentTime = 0;
+      englishAudioRef.current.play().catch(console.error);
     } else {
-      // Sequence complete
+      // No English, sequence complete
       setIsPlaying(false);
       setCurrentTrack(null);
       setProgress(0);
@@ -129,11 +163,22 @@ export function AudioPlayer({
     }
   };
 
+  const handleEnglishEnded = () => {
+    // English finished, sequence complete
+    setIsPlaying(false);
+    setCurrentTrack(null);
+    setProgress(0);
+    if (onPlayComplete) {
+      onPlayComplete();
+    }
+  };
+
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTime = parseFloat(e.target.value);
     setProgress(newTime);
-    if (audioRef.current) {
-      audioRef.current.currentTime = newTime;
+    const audio = currentTrack === 'english' ? englishAudioRef.current : arabicAudioRef.current;
+    if (audio) {
+      audio.currentTime = newTime;
     }
   };
 
@@ -143,8 +188,6 @@ export function AudioPlayer({
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-
-  const currentUrl = currentTrack === 'arabic' ? arabicUrl : currentTrack === 'english' ? englishUrl : null;
 
   if (!arabicUrl && !englishUrl) {
     return null;
@@ -248,15 +291,25 @@ export function AudioPlayer({
         </div>
       </div>
 
-      {/* Hidden audio element */}
-      {currentUrl && (
+      {/* Hidden audio elements - both always mounted for seamless switching */}
+      {arabicUrl && (
         <audio
-          ref={audioRef}
-          src={currentUrl}
-          onTimeUpdate={handleTimeUpdate}
-          onLoadedMetadata={handleLoadedMetadata}
-          onEnded={handleEnded}
-          autoPlay={isPlaying}
+          ref={arabicAudioRef}
+          src={arabicUrl}
+          onTimeUpdate={currentTrack === 'arabic' ? handleTimeUpdate : undefined}
+          onLoadedMetadata={currentTrack === 'arabic' ? handleLoadedMetadata : undefined}
+          onEnded={handleArabicEnded}
+          preload="auto"
+        />
+      )}
+      {englishUrl && (
+        <audio
+          ref={englishAudioRef}
+          src={englishUrl}
+          onTimeUpdate={currentTrack === 'english' ? handleTimeUpdate : undefined}
+          onLoadedMetadata={currentTrack === 'english' ? handleLoadedMetadata : undefined}
+          onEnded={handleEnglishEnded}
+          preload="auto"
         />
       )}
     </div>
