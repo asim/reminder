@@ -52,17 +52,16 @@ type Quran struct {
 }
 
 // GetAudioURL returns the audio URL for a verse
-// Using EveryAyah.com API for Arabic recitation (Mishary Alafasy)
-// and archive.org for English translation
+// Using EveryAyah.com API for both Arabic and English
 func GetAudioURL(chapter, verse int, language string) string {
 	if language == "arabic" {
 		// Using Mishary Alafasy recitation (high quality, 128kbps)
 		// Format: https://everyayah.com/data/Alafasy_128kbps/001001.mp3
 		return fmt.Sprintf("https://everyayah.com/data/Alafasy_128kbps/%03d%03d.mp3", chapter, verse)
 	} else if language == "english" {
-		// Using Clear Quran translation audio
-		// Format: https://archive.org/download/CLEAR_QURAN_AUDIO/001001.mp3
-		return fmt.Sprintf("https://archive.org/download/CLEAR_QURAN_AUDIO/%03d%03d.mp3", chapter, verse)
+		// Using Ibrahim Walk English translation (Sahih International)
+		// Format: https://everyayah.com/data/English/Sahih_Intnl_Ibrahim_Walk_192kbps/001001.mp3
+		return fmt.Sprintf("https://everyayah.com/data/English/Sahih_Intnl_Ibrahim_Walk_192kbps/%03d%03d.mp3", chapter, verse)
 	}
 	return ""
 }
