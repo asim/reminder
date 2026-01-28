@@ -47,7 +47,7 @@ export function SearchableSidebar(props: SearchableSidebarProps) {
       />
       <div
         className={cn(
-          'hidden lg:flex flex-col pb-15 w-[250px] border-r border-gray-200 overflow-y-auto',
+          'hidden lg:flex flex-col pb-15 w-[250px] border-r border-gray-200 overflow-y-auto overflow-x-hidden',
           {
             'fixed flex bg-white z-50 top-0 left-0 bottom-0': isOpen,
           }
