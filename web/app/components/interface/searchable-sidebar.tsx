@@ -81,8 +81,7 @@ export function SearchableSidebar(props: SearchableSidebarProps) {
               to={item.path}
               title={item.text}
               className={({ isActive }) =>
-                `py-2 px-4 flex items-center text-sm border-b border-gray-200 hover:bg-gray-50 cursor-pointer ${
-                  isActive ? 'bg-black pointer-events-none text-white' : ''
+                `py-2 px-4 flex items-center text-sm border-b border-gray-200 hover:bg-gray-50 cursor-pointer ${isActive ? 'bg-black pointer-events-none text-white' : ''
                 }`
               }
             >
