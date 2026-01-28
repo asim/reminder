@@ -13,9 +13,9 @@ var Description = `A collection of the Prophet Muhammad's sayings and actions, p
 
 // Collection represents a hadith collection like Bukhari or Muslim
 type Collection struct {
-	Name    string  `json:"name"`
-	Arabic  string  `json:"arabic"`
-	Books   []*Book `json:"books"`
+	Name   string  `json:"name"`
+	Arabic string  `json:"arabic"`
+	Books  []*Book `json:"books"`
 }
 
 type Book struct {
@@ -114,7 +114,7 @@ func Load() *Collection {
 		}
 		book.Hadiths = deduped
 		book.HadithCount = len(book.Hadiths)
-		
+
 		// Set legacy fields for API compatibility
 		for j, h := range book.Hadiths {
 			if h.Number == 0 {
@@ -147,12 +147,12 @@ func (b *Book) HTML() string {
 		data += fmt.Sprintf(`<div class="flex items-center justify-between mb-3"><h3 class="text-lg font-semibold text-gray-700">Hadith %d</h3><button class="bookmark-btn" data-type="hadith" data-key="%s" data-label="%s" data-url="%s">☆</button></div>`,
 			hadith.Number, hadithKey, hadithLabel, hadithURL)
 		data += fmt.Sprintf(`<p class="text-sm text-gray-500 mb-4">%s</p>`, hadith.Narrator)
-		
+
 		// Arabic text
 		if hadith.Arabic != "" {
 			data += fmt.Sprintf(`<div dir="rtl" class="text-xl leading-loose font-arabic text-right mb-4 pb-4 border-b border-gray-100">%s</div>`, hadith.Arabic)
 		}
-		
+
 		// English translation
 		data += fmt.Sprintf(`<div class="text-gray-700">%s</div>`, hadith.English)
 		data += `</div>`
