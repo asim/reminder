@@ -169,3 +169,6 @@ The sources used for data
 - [Sahih Bukhari](https://github.com/asim/bukhari)
 - [Word by word](https://github.com/asim/quranwbw)
 
+## Development
+
+Find me on [Discord](https://discord.gg/jwTYuUVAGh)
