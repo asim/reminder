@@ -79,19 +79,20 @@ export function SearchableSidebar(props: SearchableSidebarProps) {
             <NavLink
               key={item.key}
               to={item.path}
+              title={item.text}
               className={({ isActive }) =>
                 `py-2 px-4 flex items-center text-sm border-b border-gray-200 hover:bg-gray-50 cursor-pointer ${
                   isActive ? 'bg-black pointer-events-none text-white' : ''
                 }`
               }
             >
-              <span className='tabular-nums w-[20px] text-right mr-3 text-xs text-gray-400 inline-block'>
+              <span className='tabular-nums w-[28px] shrink-0 text-right mr-3 text-xs text-gray-400 inline-block'>
                 {item.number}
               </span>
-              <div className="truncate">
-                <div>{item.text}</div>
+              <div className="truncate min-w-0 flex-1">
+                <div className="truncate">{item.text}</div>
                 {item.extra && (
-                  <div className="text-gray-400 text-xs">{item.extra}</div>
+                  <div className="text-gray-400 text-xs truncate">{item.extra}</div>
                 )}
               </div>
             </NavLink>

@@ -7,6 +7,12 @@ import { BookmarkButton } from '~/components/interface/bookmark-button';
 import { getBookOptions } from '~/queries/hadith';
 import { queryClient } from '~/utils/query-client';
 
+function toArabicNumber(num: number) {
+  return num
+    .toString()
+    .replace(/\d/g, (d) => String.fromCharCode(0x0660 + Number(d)));
+}
+
 export function meta() {
   return [
     { title: 'Hadith - Reminder' },
@@ -158,9 +164,12 @@ export default function HadithBook() {
               {arabicText && (
                 <div
                   dir='rtl'
-                  className='text-xl sm:text-2xl leading-loose font-arabic text-right text-gray-800 border-b border-gray-100 pb-4'
+                  className='text-xl sm:text-2xl md:text-3xl leading-loose font-arabic text-right text-gray-800 border-b border-gray-100 pb-4'
                 >
                   {arabicText}
+                  <span className='mx-2 font-arabic'>
+                    ﴿{toArabicNumber(hadithNumber)}﴾
+                  </span>
                 </div>
               )}
 
