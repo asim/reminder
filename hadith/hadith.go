@@ -95,11 +95,24 @@ func Load() *Collection {
 		panic(err.Error())
 	}
 
-	// Set book numbers if not set
+	// Set book numbers if not set and deduplicate hadiths
 	for i, book := range collection.Books {
 		if book.Number == 0 {
 			book.Number = i + 1
 		}
+
+		// Deduplicate hadiths - the source data has duplicates where one has a number and one doesn't
+		seen := make(map[string]bool)
+		deduped := make([]*Hadith, 0, len(book.Hadiths))
+		for _, h := range book.Hadiths {
+			// Create a key based on content (narrator + english text)
+			key := h.Narrator + "|" + h.English
+			if !seen[key] {
+				seen[key] = true
+				deduped = append(deduped, h)
+			}
+		}
+		book.Hadiths = deduped
 		book.HadithCount = len(book.Hadiths)
 		
 		// Set legacy fields for API compatibility
