@@ -24,10 +24,6 @@ into a single app and API, providing helpful daily reminders using web push noti
 
 - Quran in English & Arabic
 - Quran Audio Recitation (Arabic & English)
-  - High-quality Arabic recitation (Mishary Alafasy)
-  - Modern English translation audio
-  - Sequential playback (Arabic → English)
-  - Full playback controls with accessibility support
 - Names of Allah & Meaning
 - Hadith (Bukhari) in English
 - Index & Search with RAG and LLMs
