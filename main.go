@@ -36,7 +36,7 @@ var (
 
 var mtx sync.RWMutex
 var history = map[string][]string{}
-var dailyName, dailyVerse, dailyHadith string
+var dailyName, dailyVerse, dailyHadith, dailyMessage string
 var links = map[string]string{}
 var dailyUpdated = time.Time{}
 var reminderDir = api.ReminderDir
@@ -769,12 +769,10 @@ func main() {
 		verse := dailyVerse
 		hadith := dailyHadith
 		name := dailyName
+		message := dailyMessage
 		updated := dailyUpdated
 		currentLinks := links
 		mtx.RUnlock()
-		
-		// Generate contextual message using LLM (pass request context for cancellation)
-		message := generateContextualMessage(r.Context(), verse, hadith, name)
 		
 		resp := map[string]interface{}{
 			"name":    name,
@@ -1329,6 +1327,9 @@ func main() {
 				hadithNum = 1
 			}
 			dailyHadith = fmt.Sprintf("%s - %s\n\n%s", book.Name, hadithNarrator, hadithText)
+
+			// Generate the contextual message once and cache it with the daily data
+			dailyMessage = generateContextualMessage(context.Background(), dailyVerse, dailyHadith, dailyName)
 
 			links = map[string]string{
 				"verse":  fmt.Sprintf("/quran/%d#%d", chap.Number, verseStart),
