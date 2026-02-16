@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -35,7 +36,7 @@ var (
 
 var mtx sync.RWMutex
 var history = map[string][]string{}
-var dailyName, dailyVerse, dailyHadith string
+var dailyName, dailyVerse, dailyHadith, dailyMessage string
 var links = map[string]string{}
 var dailyUpdated = time.Time{}
 var reminderDir = api.ReminderDir
@@ -457,6 +458,42 @@ func loadHourlyReminders(date string) []interface{} {
 	return hourlyReminders
 }
 
+// generateContextualMessage generates an LLM-based message using the verse, hadith, and name
+// The askLLM function panics on errors, which is why we use panic recovery here.
+func generateContextualMessage(ctx context.Context, verse, hadith, name string) (message string) {
+	// Fallback message in case LLM fails
+	defaultMessage := "In the Name of Allah—the Most Beneficent, Most Merciful"
+	message = defaultMessage // Set default in case of panic
+	
+	// Build context for the LLM
+	contexts := []string{
+		fmt.Sprintf("Verse from the Quran: %s", verse),
+		fmt.Sprintf("Hadith: %s", hadith),
+		fmt.Sprintf("Name of Allah: %s", name),
+	}
+	
+	// Create a question that asks the LLM to generate a beneficial message
+	question := "Based on the provided Quranic verse, Hadith, and name of Allah, generate a short, beneficial, and factual message (2-3 sentences) that provides spiritual guidance and reflection for the reader."
+	
+	// Use the LLM to generate the message
+	// Wrap in a recover to handle panics from askLLM (which panics on errors)
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("Failed to generate contextual message via LLM: %v\n", r)
+			message = defaultMessage // Ensure we return default on panic
+		}
+	}()
+	
+	llmMessage := askLLM(ctx, contexts, question)
+	
+	// If message is not empty, use it
+	if len(strings.TrimSpace(llmMessage)) > 0 {
+		message = llmMessage
+	}
+	
+	return message
+}
+
 func main() {
 	fmt.Println("New rand source")
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -729,16 +766,22 @@ func main() {
 	// Add /api/latest endpoint for the hourly updated reminder
 	http.HandleFunc("/api/latest", func(w http.ResponseWriter, r *http.Request) {
 		mtx.RLock()
-		message := "In the Name of Allah—the Most Beneficent, Most Merciful"
+		verse := dailyVerse
+		hadith := dailyHadith
+		name := dailyName
+		message := dailyMessage
+		updated := dailyUpdated
+		currentLinks := links
+		mtx.RUnlock()
+		
 		resp := map[string]interface{}{
-			"name":    dailyName,
-			"hadith":  dailyHadith,
-			"verse":   dailyVerse,
-			"links":   links,
-			"updated": dailyUpdated.Format(time.RFC850),
+			"name":    name,
+			"hadith":  hadith,
+			"verse":   verse,
+			"links":   currentLinks,
+			"updated": updated.Format(time.RFC850),
 			"message": message,
 		}
-		mtx.RUnlock()
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(resp)
 	})
@@ -1284,6 +1327,9 @@ func main() {
 				hadithNum = 1
 			}
 			dailyHadith = fmt.Sprintf("%s - %s\n\n%s", book.Name, hadithNarrator, hadithText)
+
+			// Generate the contextual message once and cache it with the daily data
+			dailyMessage = generateContextualMessage(context.Background(), dailyVerse, dailyHadith, dailyName)
 
 			links = map[string]string{
 				"verse":  fmt.Sprintf("/quran/%d#%d", chap.Number, verseStart),
