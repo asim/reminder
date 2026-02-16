@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -457,6 +458,41 @@ func loadHourlyReminders(date string) []interface{} {
 	return hourlyReminders
 }
 
+// generateContextualMessage generates an LLM-based message using the verse, hadith, and name
+func generateContextualMessage(verse, hadith, name string) (message string) {
+	// Fallback message in case LLM fails
+	defaultMessage := "In the Name of Allah—the Most Beneficent, Most Merciful"
+	message = defaultMessage // Set default in case of panic
+	
+	// Build context for the LLM
+	contexts := []string{
+		fmt.Sprintf("Verse from the Quran: %s", verse),
+		fmt.Sprintf("Hadith: %s", hadith),
+		fmt.Sprintf("Name of Allah: %s", name),
+	}
+	
+	// Create a question that asks the LLM to generate a beneficial message
+	question := "Based on the provided Quranic verse, Hadith, and name of Allah, generate a short, beneficial, and factual message (2-3 sentences) that provides spiritual guidance and reflection for the reader."
+	
+	// Use the LLM to generate the message
+	// Wrap in a recover to handle panics from askLLM
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("Error generating message: %v\n", r)
+			message = defaultMessage // Ensure we return default on panic
+		}
+	}()
+	
+	llmMessage := askLLM(context.Background(), contexts, question)
+	
+	// If message is not empty, use it
+	if len(strings.TrimSpace(llmMessage)) > 0 {
+		message = llmMessage
+	}
+	
+	return message
+}
+
 func main() {
 	fmt.Println("New rand source")
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -729,7 +765,15 @@ func main() {
 	// Add /api/latest endpoint for the hourly updated reminder
 	http.HandleFunc("/api/latest", func(w http.ResponseWriter, r *http.Request) {
 		mtx.RLock()
-		message := "In the Name of Allah—the Most Beneficent, Most Merciful"
+		verse := dailyVerse
+		hadith := dailyHadith
+		name := dailyName
+		mtx.RUnlock()
+		
+		// Generate contextual message using LLM
+		message := generateContextualMessage(verse, hadith, name)
+		
+		mtx.RLock()
 		resp := map[string]interface{}{
 			"name":    dailyName,
 			"hadith":  dailyHadith,
