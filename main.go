@@ -459,7 +459,7 @@ func loadHourlyReminders(date string) []interface{} {
 }
 
 // generateContextualMessage generates an LLM-based message using the verse, hadith, and name
-func generateContextualMessage(verse, hadith, name string) (message string) {
+func generateContextualMessage(ctx context.Context, verse, hadith, name string) (message string) {
 	// Fallback message in case LLM fails
 	defaultMessage := "In the Name of Allah—the Most Beneficent, Most Merciful"
 	message = defaultMessage // Set default in case of panic
@@ -478,12 +478,12 @@ func generateContextualMessage(verse, hadith, name string) (message string) {
 	// Wrap in a recover to handle panics from askLLM
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Printf("Error generating message: %v\n", r)
+			fmt.Printf("Failed to generate contextual message via LLM: %v\n", r)
 			message = defaultMessage // Ensure we return default on panic
 		}
 	}()
 	
-	llmMessage := askLLM(context.Background(), contexts, question)
+	llmMessage := askLLM(ctx, contexts, question)
 	
 	// If message is not empty, use it
 	if len(strings.TrimSpace(llmMessage)) > 0 {
@@ -768,21 +768,21 @@ func main() {
 		verse := dailyVerse
 		hadith := dailyHadith
 		name := dailyName
+		updated := dailyUpdated
+		currentLinks := links
 		mtx.RUnlock()
 		
-		// Generate contextual message using LLM
-		message := generateContextualMessage(verse, hadith, name)
+		// Generate contextual message using LLM (pass request context for cancellation)
+		message := generateContextualMessage(r.Context(), verse, hadith, name)
 		
-		mtx.RLock()
 		resp := map[string]interface{}{
-			"name":    dailyName,
-			"hadith":  dailyHadith,
-			"verse":   dailyVerse,
-			"links":   links,
-			"updated": dailyUpdated.Format(time.RFC850),
+			"name":    name,
+			"hadith":  hadith,
+			"verse":   verse,
+			"links":   currentLinks,
+			"updated": updated.Format(time.RFC850),
 			"message": message,
 		}
-		mtx.RUnlock()
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(resp)
 	})
