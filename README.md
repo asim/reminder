@@ -113,7 +113,10 @@ Go to [localhost:8080](https://localhost:8080)
 
 All queries are returned as JSON
 
-- `/api/latest` - for the latest reminder
+- `/api/latest` - for the latest reminder with LLM-generated contextual message
+  * Returns: verse, hadith, name of Allah, links, and an AI-generated spiritual message
+  * The `message` field contains an LLM-generated reflection (2-3 sentences) based on the verse, hadith, and name
+  * Falls back to default message ("In the Name of Allah—the Most Beneficent, Most Merciful") if LLM is unavailable
 - `/api/quran` - to get the entire quran
 - `/api/names` - to get the list of names
 - `/api/hadith` - to get the entire hadith
