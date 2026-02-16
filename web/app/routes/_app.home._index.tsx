@@ -50,6 +50,14 @@ export default function HomePage() {
                     </p>
                 </div>
 
+                {data.message && (
+                    <section>
+                        <div className="whitespace-pre-wrap leading-relaxed bg-purple-50 rounded-lg p-4 sm:p-6 text-sm sm:text-base shadow-sm border border-purple-100">
+                            {data.message}
+                        </div>
+                    </section>
+                )}
+
                 <section>
                     <h2 className="text-lg font-semibold mb-2">Verse</h2>
                     <div className="text-sm sm:text-base text-gray-700 mb-2">A verse from the Quran</div>
