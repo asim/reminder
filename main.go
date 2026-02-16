@@ -459,6 +459,7 @@ func loadHourlyReminders(date string) []interface{} {
 }
 
 // generateContextualMessage generates an LLM-based message using the verse, hadith, and name
+// The askLLM function panics on errors, which is why we use panic recovery here.
 func generateContextualMessage(ctx context.Context, verse, hadith, name string) (message string) {
 	// Fallback message in case LLM fails
 	defaultMessage := "In the Name of Allah—the Most Beneficent, Most Merciful"
@@ -475,7 +476,7 @@ func generateContextualMessage(ctx context.Context, verse, hadith, name string) 
 	question := "Based on the provided Quranic verse, Hadith, and name of Allah, generate a short, beneficial, and factual message (2-3 sentences) that provides spiritual guidance and reflection for the reader."
 	
 	// Use the LLM to generate the message
-	// Wrap in a recover to handle panics from askLLM
+	// Wrap in a recover to handle panics from askLLM (which panics on errors)
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Printf("Failed to generate contextual message via LLM: %v\n", r)
