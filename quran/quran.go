@@ -24,13 +24,13 @@ type Chapter struct {
 }
 
 type Verse struct {
-	Chapter     int     `json:"chapter"`
-	Number      int     `json:"number"`
-	Text        string  `json:"text"`
-	Arabic      string  `json:"arabic"`
-	Words       []*Word `json:"words"`
-	Comments    string  `json:"comments"`
-	AudioArabic string  `json:"audio_arabic,omitempty"`
+	Chapter      int     `json:"chapter"`
+	Number       int     `json:"number"`
+	Text         string  `json:"text"`
+	Arabic       string  `json:"arabic"`
+	Words        []*Word `json:"words"`
+	Comments     string  `json:"comments"`
+	AudioArabic  string  `json:"audio_arabic,omitempty"`
 	AudioEnglish string  `json:"audio_english,omitempty"`
 }
 

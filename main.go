@@ -458,23 +458,23 @@ func loadHourlyReminders(date string) []interface{} {
 	return hourlyReminders
 }
 
-// generateContextualMessage generates an LLM-based message using the verse, hadith, and name
+// generateMessage generates an LLM-based message using the verse, hadith, and name
 // The askLLM function panics on errors, which is why we use panic recovery here.
-func generateContextualMessage(ctx context.Context, verse, hadith, name string) (message string) {
+func generateMessage(ctx context.Context, verse, hadith, name string) (message string) {
 	// Fallback message in case LLM fails
 	defaultMessage := "In the Name of Allah—the Most Beneficent, Most Merciful"
 	message = defaultMessage // Set default in case of panic
-	
+
 	// Build context for the LLM
 	contexts := []string{
 		fmt.Sprintf("Verse from the Quran: %s", verse),
 		fmt.Sprintf("Hadith: %s", hadith),
 		fmt.Sprintf("Name of Allah: %s", name),
 	}
-	
+
 	// Create a question that asks the LLM to generate a beneficial message
 	question := "Based on the provided Quranic verse, Hadith, and name of Allah, generate a short, beneficial, and factual message (2-3 sentences) that provides spiritual guidance and reflection for the reader."
-	
+
 	// Use the LLM to generate the message
 	// Wrap in a recover to handle panics from askLLM (which panics on errors)
 	defer func() {
@@ -483,14 +483,14 @@ func generateContextualMessage(ctx context.Context, verse, hadith, name string) 
 			message = defaultMessage // Ensure we return default on panic
 		}
 	}()
-	
+
 	llmMessage := askLLM(ctx, contexts, question)
-	
+
 	// If message is not empty, use it
 	if len(strings.TrimSpace(llmMessage)) > 0 {
 		message = llmMessage
 	}
-	
+
 	return message
 }
 
@@ -773,7 +773,7 @@ func main() {
 		updated := dailyUpdated
 		currentLinks := links
 		mtx.RUnlock()
-		
+
 		resp := map[string]interface{}{
 			"name":    name,
 			"hadith":  hadith,
@@ -1275,27 +1275,27 @@ func main() {
 			nam := (*n)[rnd.Int()%len((*n))]
 			bookIdx := rnd.Int() % len(b.Books)
 			book := b.Books[bookIdx]
-			
+
 			// Safety check for books with no hadiths
 			if len(book.Hadiths) == 0 {
 				fmt.Printf("Book %d (%s) has no hadiths, skipping\n", bookIdx, book.Name)
 				mtx.Unlock()
 				continue
 			}
-			
+
 			chap := q.Chapters[rnd.Int()%len(q.Chapters)]
-			
+
 			// Safety check for chapters with no verses
 			if len(chap.Verses) == 0 {
 				fmt.Printf("Chapter %d has no verses, skipping\n", chap.Number)
 				mtx.Unlock()
 				continue
 			}
-			
+
 			ver := chap.Verses[rnd.Int()%len(chap.Verses)]
 			hadithIdx := rnd.Int() % len(book.Hadiths)
 			had := book.Hadiths[hadithIdx]
-			
+
 			fmt.Printf("Selected: Book %d (%s), Hadith %d, Chapter %d, Verse %d\n", bookIdx, book.Name, hadithIdx, chap.Number, ver.Number)
 
 			// make sure we're starting from the begining of a verse
@@ -1329,7 +1329,7 @@ func main() {
 			dailyHadith = fmt.Sprintf("%s - %s\n\n%s", book.Name, hadithNarrator, hadithText)
 
 			// Generate the contextual message once and cache it with the daily data
-			dailyMessage = generateContextualMessage(context.Background(), dailyVerse, dailyHadith, dailyName)
+			dailyMessage = generateMessage(context.Background(), dailyVerse, dailyHadith, dailyName)
 
 			links = map[string]string{
 				"verse":  fmt.Sprintf("/quran/%d#%d", chap.Number, verseStart),
@@ -1382,8 +1382,6 @@ func main() {
 					notifyVerse = notifyVerse[:250] + "..."
 				}
 
-				message := "In the Name of Allah—the Most Beneficent, Most Merciful"
-
 				dailyData := map[string]interface{}{
 					"verse":   dailyVerse,
 					"hadith":  dailyHadith,
@@ -1392,7 +1390,7 @@ func main() {
 					"date":    today,
 					"links":   links,
 					"updated": dailyUpdated.Format(time.RFC850),
-					"message": message,
+					"message": dailyMessage,
 				}
 
 				// Save to daily.json
