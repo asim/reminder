@@ -170,4 +170,4 @@ The sources used for data
 
 ## Development
 
-Find me on [Discord](https://discord.gg/jwTYuUVAGh)
+File an issue to discuss 
