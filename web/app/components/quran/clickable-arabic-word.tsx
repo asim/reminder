@@ -37,7 +37,7 @@ export function ClickableArabicWord({
   return (
     <span
       ref={ref}
-      className={`verse-arabic-word ${className}`}
+      className={`verse-arabic-word${className ? ` ${className}` : ''}`}
       onClick={handleClick}
       style={{ position: 'relative' }}
     >
