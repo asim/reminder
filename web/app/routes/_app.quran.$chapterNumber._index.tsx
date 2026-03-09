@@ -4,6 +4,7 @@ import { CircleChevronLeft, CircleChevronRight } from 'lucide-react';
 import React, { Fragment, useEffect } from 'react';
 import { Link } from 'react-router';
 import { BookmarkButton } from '~/components/interface/bookmark-button';
+import { ReadingBookmarkButton } from '~/components/interface/reading-bookmark-button';
 import { PageError } from '~/components/interface/page-error';
 import { PrimaryButton } from '~/components/interface/primary-button';
 import { AudioPlayer } from '~/components/quran/audio-player';
@@ -205,13 +206,21 @@ export default function QuranChapter(props: Route.ComponentProps) {
                   {verse.number !== 0 ? `${data.number}:${verse.number}` : ''}
                 </a>
                 {verse.number !== 0 && (
-                  <BookmarkButton
-                    type='quran'
-                    itemKey={`${data.number}:${verse.number}`}
-                    label={`${data.english} ${data.number}:${verse.number}`}
-                    url={`/quran/${data.number}#${verse.number}`}
-                    excerpt={verse.text.length > 80 ? verse.text.slice(0, 80) + '...' : verse.text}
-                  />
+                  <div className='flex items-center gap-1'>
+                    <ReadingBookmarkButton
+                      type='quran'
+                      label={`${data.english} ${data.number}:${verse.number}`}
+                      url={`/quran/${data.number}#${verse.number}`}
+                      excerpt={verse.text.length > 80 ? verse.text.slice(0, 80) + '...' : verse.text}
+                    />
+                    <BookmarkButton
+                      type='quran'
+                      itemKey={`${data.number}:${verse.number}`}
+                      label={`${data.english} ${data.number}:${verse.number}`}
+                      url={`/quran/${data.number}#${verse.number}`}
+                      excerpt={verse.text.length > 80 ? verse.text.slice(0, 80) + '...' : verse.text}
+                    />
+                  </div>
                 )}
               </div>
             </div>
@@ -273,13 +282,21 @@ export default function QuranChapter(props: Route.ComponentProps) {
                   {verse.number !== 0 ? `${data.number}:${verse.number}` : ''}
                 </a>
                 {verse.number !== 0 && (
-                  <BookmarkButton
-                    type='quran'
-                    itemKey={`${data.number}:${verse.number}`}
-                    label={`${data.english} ${data.number}:${verse.number}`}
-                    url={`/quran/${data.number}#${verse.number}`}
-                    excerpt={verse.text.length > 80 ? verse.text.slice(0, 80) + '...' : verse.text}
-                  />
+                  <div className='flex items-center gap-1'>
+                    <ReadingBookmarkButton
+                      type='quran'
+                      label={`${data.english} ${data.number}:${verse.number}`}
+                      url={`/quran/${data.number}#${verse.number}`}
+                      excerpt={verse.text.length > 80 ? verse.text.slice(0, 80) + '...' : verse.text}
+                    />
+                    <BookmarkButton
+                      type='quran'
+                      itemKey={`${data.number}:${verse.number}`}
+                      label={`${data.english} ${data.number}:${verse.number}`}
+                      url={`/quran/${data.number}#${verse.number}`}
+                      excerpt={verse.text.length > 80 ? verse.text.slice(0, 80) + '...' : verse.text}
+                    />
+                  </div>
                 )}
               </div>
             </div>

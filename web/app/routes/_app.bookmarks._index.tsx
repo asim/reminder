@@ -1,7 +1,8 @@
-import { Trash2 } from 'lucide-react';
+import { BookOpen, Trash2, X } from 'lucide-react';
 import { useEffect } from 'react';
 import { Link } from 'react-router';
 import { useBookmarks } from '~/hooks/use-bookmarks';
+import { useReadingBookmark } from '~/hooks/use-reading-bookmark';
 import { httpGet } from '~/utils/http';
 
 export function meta() {
@@ -20,6 +21,7 @@ export function meta() {
 
 export default function BookmarksPage() {
   const { bookmarks, removeBookmark, updateBookmark } = useBookmarks();
+  const { readingBookmarks, clearReadingBookmark } = useReadingBookmark();
 
   // Migrate existing bookmarks by fetching excerpts and updating labels
   useEffect(() => {
@@ -86,6 +88,12 @@ export default function BookmarksPage() {
     hadithEntries.length > 0 ||
     namesEntries.length > 0;
 
+  const readingBookmarkEntries = Object.entries(readingBookmarks).filter(
+    ([, bookmark]) => bookmark !== undefined
+  ) as [string, { label: string; url: string; timestamp: string; excerpt?: string }][];
+
+  const hasReadingBookmarks = readingBookmarkEntries.length > 0;
+
   return (
     <div className='max-w-4xl mx-auto w-full p-4 lg:p-8 mb-8 sm:mb-12 flex-grow overflow-y-auto'>
       <div className='text-center mt-0 sm:mt-6 md:mt-8 mb-4 sm:mb-8 md:mb-12'>
@@ -97,7 +105,45 @@ export default function BookmarksPage() {
         </div>
       </div>
 
-      {!hasAnyBookmarks && (
+      {/* Reading Bookmarks Section */}
+      {hasReadingBookmarks && (
+        <div className='mb-8 p-4 sm:p-6 bg-blue-50 border border-blue-200 rounded-lg'>
+          <div className='flex items-center gap-2 mb-4'>
+            <BookOpen className='size-5 text-blue-600' />
+            <h2 className='text-xl sm:text-2xl font-semibold text-blue-900'>Continue Reading</h2>
+          </div>
+          <div className='space-y-2'>
+            {readingBookmarkEntries.map(([type, bookmark]) => (
+              <div
+                key={type}
+                className='flex items-center justify-between p-3 sm:p-4 bg-white border border-blue-100 rounded-lg hover:border-blue-300 transition-colors'
+              >
+                <Link
+                  to={bookmark.url}
+                  className='flex-grow text-gray-800 hover:text-black'
+                >
+                  <div className='text-xs sm:text-sm font-medium text-blue-600 uppercase tracking-wide mb-0.5'>
+                    {type}
+                  </div>
+                  <div className='text-base sm:text-lg font-medium'>{bookmark.label}</div>
+                  {bookmark.excerpt && (
+                    <div className='text-sm text-gray-500 mt-1 line-clamp-2'>{bookmark.excerpt}</div>
+                  )}
+                </Link>
+                <button
+                  onClick={() => clearReadingBookmark(type as 'quran' | 'hadith' | 'names')}
+                  className='ml-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors flex-shrink-0'
+                  aria-label='Remove reading bookmark'
+                >
+                  <X className='size-4' />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {!hasAnyBookmarks && !hasReadingBookmarks && (
         <div className='text-center py-12 text-gray-500'>
           <p className='text-lg mb-2'>No bookmarks yet</p>
           <p className='text-sm'>
