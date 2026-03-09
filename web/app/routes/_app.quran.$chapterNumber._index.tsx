@@ -8,6 +8,7 @@ import { PageError } from '~/components/interface/page-error';
 import { PrimaryButton } from '~/components/interface/primary-button';
 import { AudioPlayer } from '~/components/quran/audio-player';
 import { ChapterHeader } from '~/components/quran/chapter-header';
+import { ClickableArabicWord } from '~/components/quran/clickable-arabic-word';
 import { ViewMode } from '~/components/quran/view-mode';
 import { useQuranViewMode } from '~/hooks/use-quran-view-mode';
 import { getChapterOptions } from '~/queries/quran';
@@ -159,7 +160,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
             <Fragment key={verse.number}>
               {verse.words && verse.words.length > 0
                 ? verse.words.map((word, idx, arr) => (
-                  <span key={idx} className='verse-arabic-word'>
+                  <ClickableArabicWord key={idx} arabic={word.arabic} transliteration={word.transliteration}>
                     {word.arabic}
                     {idx === arr.length - 1 && (
                       <span className='mx-2 font-arabic'>
@@ -167,7 +168,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
                       </span>
                     )}
                     &nbsp;
-                  </span>
+                  </ClickableArabicWord>
                 ))
                 : verse.arabic.split(' ').map((word, idx, arr) => (
                   <span key={idx} className='verse-arabic-word'>
@@ -232,20 +233,20 @@ export default function QuranChapter(props: Route.ComponentProps) {
                   ? verse.words.map((word, idx, arr) => {
                     if (idx === arr.length - 1) {
                       return (
-                        <span key={idx} className='verse-arabic-word text-3xl flex flex-col items-center mr-2 mb-2'>
+                        <ClickableArabicWord key={idx} arabic={word.arabic} transliteration={word.transliteration} className='text-3xl flex flex-col items-center mr-2 mb-2'>
                           <span className='flex flex-row items-center' dir="rtl">
                             <span>{word.arabic}</span>
                             <span className='mx-2 font-arabic'>{toArabicNumber(verse.number)}</span>
                           </span>
                           <span className='text-xs sm:text-sm mt-1 px-1 rounded bg-gray-100 text-gray-700'>{word.english}</span>
-                        </span>
+                        </ClickableArabicWord>
                       );
                     } else {
                       return (
-                        <span key={idx} className='verse-arabic-word text-3xl flex flex-col items-center mr-2 mb-2'>
+                        <ClickableArabicWord key={idx} arabic={word.arabic} transliteration={word.transliteration} className='text-3xl flex flex-col items-center mr-2 mb-2'>
                           <span>{word.arabic}</span>
                           <span className='text-xs sm:text-sm mt-1 px-1 rounded bg-gray-100 text-gray-700'>{word.english}</span>
-                        </span>
+                        </ClickableArabicWord>
                       );
                     }
                   })
