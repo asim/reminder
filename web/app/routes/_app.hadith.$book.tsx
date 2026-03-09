@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 import { BookmarkButton } from '~/components/interface/bookmark-button';
+import { ReadingBookmarkButton } from '~/components/interface/reading-bookmark-button';
 import { getBookOptions } from '~/queries/hadith';
 import { queryClient } from '~/utils/query-client';
 
@@ -150,6 +151,12 @@ export default function HadithBook() {
                   <span className='text-sm text-balance sm:text-base font-medium text-gray-700'>
                     {narrator}
                   </span>
+                  <ReadingBookmarkButton
+                    type='hadith'
+                    label={`${book.name} - Hadith ${hadithNumber}`}
+                    url={`/hadith/${bookNumber}#${hadithNumber}`}
+                    excerpt={englishText.length > 80 ? englishText.slice(0, 80) + '...' : englishText}
+                  />
                   <BookmarkButton
                     type='hadith'
                     itemKey={`${bookNumber}:${hadithNumber}`}

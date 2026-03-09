@@ -1,6 +1,7 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router';
 import { BookmarkButton } from '~/components/interface/bookmark-button';
+import { ReadingBookmarkButton } from '~/components/interface/reading-bookmark-button';
 import { getNameOptions } from '~/queries/names';
 
 export function meta() {
@@ -39,13 +40,21 @@ export default function NameDetail() {
               <h1 className='text-xl sm:text-2xl font-semibold text-gray-800'>
                 {name.meaning}
               </h1>
-              <BookmarkButton
-                type='names'
-                itemKey={`${name.number}`}
-                label={`Name ${name.number}: ${name.meaning}`}
-                url={`/names/${name.number}`}
-                excerpt={name.summary ? (name.summary.length > 80 ? name.summary.slice(0, 80) + '...' : name.summary) : name.english}
-              />
+              <div className='flex items-center gap-1'>
+                <ReadingBookmarkButton
+                  type='names'
+                  label={`Name ${name.number}: ${name.meaning}`}
+                  url={`/names/${name.number}`}
+                  excerpt={name.summary ? (name.summary.length > 80 ? name.summary.slice(0, 80) + '...' : name.summary) : name.english}
+                />
+                <BookmarkButton
+                  type='names'
+                  itemKey={`${name.number}`}
+                  label={`Name ${name.number}: ${name.meaning}`}
+                  url={`/names/${name.number}`}
+                  excerpt={name.summary ? (name.summary.length > 80 ? name.summary.slice(0, 80) + '...' : name.summary) : name.english}
+                />
+              </div>
             </div>
             <div className='text-3xl sm:text-4xl md:text-5xl my-4 sm:my-7 font-arabic font-medium text-black'>
               {name.arabic}
