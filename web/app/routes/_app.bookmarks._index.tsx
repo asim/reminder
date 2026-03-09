@@ -2,7 +2,7 @@ import { BookOpen, Trash2, X } from 'lucide-react';
 import { useEffect } from 'react';
 import { Link } from 'react-router';
 import { useBookmarks } from '~/hooks/use-bookmarks';
-import { useReadingBookmark } from '~/hooks/use-reading-bookmark';
+import { useReadingBookmark, type ReadingBookmark } from '~/hooks/use-reading-bookmark';
 import { httpGet } from '~/utils/http';
 
 export function meta() {
@@ -90,7 +90,7 @@ export default function BookmarksPage() {
 
   const readingBookmarkEntries = Object.entries(readingBookmarks).filter(
     ([, bookmark]) => bookmark !== undefined
-  ) as [string, { label: string; url: string; timestamp: string; excerpt?: string }][];
+  ) as [string, ReadingBookmark][];
 
   const hasReadingBookmarks = readingBookmarkEntries.length > 0;
 
