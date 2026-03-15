@@ -19,7 +19,6 @@ import (
 	"github.com/asim/reminder/app"
 	"github.com/asim/reminder/daily"
 	"github.com/asim/reminder/hadith"
-	"github.com/asim/reminder/mcp"
 	"github.com/asim/reminder/names"
 	"github.com/asim/reminder/quran"
 	"github.com/asim/reminder/search"
@@ -1216,9 +1215,9 @@ func main() {
 	api.RegisterRoutes(httpMux)
 
 	// Register MCP server
-	mcpServer := mcp.NewServer("reminder", "1.0.0")
+	mcpServer := api.NewServer("reminder", "1.0.0")
 
-	mcpServer.AddTool("get_latest", "Get the latest reminder (updated hourly) with a verse, hadith and name of Allah", mcp.InputSchema{
+	mcpServer.AddTool("get_latest", "Get the latest reminder (updated hourly) with a verse, hadith and name of Allah", api.InputSchema{
 		Type: "object",
 	}, func(args map[string]interface{}) (string, error) {
 		mtx.RLock()
@@ -1235,7 +1234,7 @@ func main() {
 		return string(b), nil
 	})
 
-	mcpServer.AddTool("get_daily", "Get today's daily reminder with a verse, hadith and name of Allah", mcp.InputSchema{
+	mcpServer.AddTool("get_daily", "Get today's daily reminder with a verse, hadith and name of Allah", api.InputSchema{
 		Type: "object",
 	}, func(args map[string]interface{}) (string, error) {
 		today := time.Now().UTC().Format("2006-01-02")
@@ -1260,9 +1259,9 @@ func main() {
 		return string(b), nil
 	})
 
-	mcpServer.AddTool("get_daily_by_date", "Get a daily reminder for a specific date", mcp.InputSchema{
+	mcpServer.AddTool("get_daily_by_date", "Get a daily reminder for a specific date", api.InputSchema{
 		Type: "object",
-		Properties: map[string]mcp.Property{
+		Properties: map[string]api.Property{
 			"date": {Type: "string", Description: "Date in YYYY-MM-DD format"},
 		},
 		Required: []string{"date"},
@@ -1280,16 +1279,16 @@ func main() {
 		return "", fmt.Errorf("not found")
 	})
 
-	mcpServer.AddTool("get_quran_chapters", "Get a list of all Quran chapters", mcp.InputSchema{
+	mcpServer.AddTool("get_quran_chapters", "Get a list of all Quran chapters", api.InputSchema{
 		Type: "object",
 	}, func(args map[string]interface{}) (string, error) {
 		b, _ := json.Marshal(q.Index().Chapters)
 		return string(b), nil
 	})
 
-	mcpServer.AddTool("get_quran_chapter", "Get a chapter of the Quran with all its verses", mcp.InputSchema{
+	mcpServer.AddTool("get_quran_chapter", "Get a chapter of the Quran with all its verses", api.InputSchema{
 		Type: "object",
-		Properties: map[string]mcp.Property{
+		Properties: map[string]api.Property{
 			"chapter": {Type: "number", Description: "Chapter number (1-114)"},
 		},
 		Required: []string{"chapter"},
@@ -1305,9 +1304,9 @@ func main() {
 		return string(q.Get(chapter).JSON()), nil
 	})
 
-	mcpServer.AddTool("get_quran_verse", "Get a specific verse of the Quran with word-by-word translation", mcp.InputSchema{
+	mcpServer.AddTool("get_quran_verse", "Get a specific verse of the Quran with word-by-word translation", api.InputSchema{
 		Type: "object",
-		Properties: map[string]mcp.Property{
+		Properties: map[string]api.Property{
 			"chapter": {Type: "number", Description: "Chapter number (1-114)"},
 			"verse":   {Type: "number", Description: "Verse number"},
 		},
@@ -1333,16 +1332,16 @@ func main() {
 		return string(cc.Verses[verse-1].JSON()), nil
 	})
 
-	mcpServer.AddTool("get_hadith_books", "Get a list of all hadith books in Sahih Bukhari", mcp.InputSchema{
+	mcpServer.AddTool("get_hadith_books", "Get a list of all hadith books in Sahih Bukhari", api.InputSchema{
 		Type: "object",
 	}, func(args map[string]interface{}) (string, error) {
 		bks, _ := json.Marshal(b.Index().Books)
 		return string(bks), nil
 	})
 
-	mcpServer.AddTool("get_hadith_book", "Get a specific book from Sahih Bukhari with all its hadiths", mcp.InputSchema{
+	mcpServer.AddTool("get_hadith_book", "Get a specific book from Sahih Bukhari with all its hadiths", api.InputSchema{
 		Type: "object",
-		Properties: map[string]mcp.Property{
+		Properties: map[string]api.Property{
 			"book": {Type: "number", Description: "Book number"},
 		},
 		Required: []string{"book"},
@@ -1358,15 +1357,15 @@ func main() {
 		return string(b.Get(book).JSON()), nil
 	})
 
-	mcpServer.AddTool("get_names", "Get all 99 Names of Allah", mcp.InputSchema{
+	mcpServer.AddTool("get_names", "Get all 99 Names of Allah", api.InputSchema{
 		Type: "object",
 	}, func(args map[string]interface{}) (string, error) {
 		return string(njson), nil
 	})
 
-	mcpServer.AddTool("get_name", "Get a specific Name of Allah with description and Quran references", mcp.InputSchema{
+	mcpServer.AddTool("get_name", "Get a specific Name of Allah with description and Quran references", api.InputSchema{
 		Type: "object",
-		Properties: map[string]mcp.Property{
+		Properties: map[string]api.Property{
 			"id": {Type: "number", Description: "Name number (1-99)"},
 		},
 		Required: []string{"id"},
@@ -1383,9 +1382,9 @@ func main() {
 		return string(byt), nil
 	})
 
-	mcpServer.AddTool("search", "Search Islamic content and get AI-summarised answers from the Quran, Hadith and Names of Allah", mcp.InputSchema{
+	mcpServer.AddTool("search", "Search Islamic content and get AI-summarised answers from the Quran, Hadith and Names of Allah", api.InputSchema{
 		Type: "object",
-		Properties: map[string]mcp.Property{
+		Properties: map[string]api.Property{
 			"q": {Type: "string", Description: "The question to ask"},
 		},
 		Required: []string{"q"},
