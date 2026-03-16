@@ -1,4 +1,4 @@
-package mcp
+package api
 
 import (
 	"bytes"
