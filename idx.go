@@ -10,6 +10,8 @@ import (
 	"github.com/asim/reminder/search"
 )
 
+// indexContent stores text as individual lines so each line becomes a
+// separately searchable document (e.g. individual verses or hadiths).
 func indexContent(idx *search.Index, md map[string]string, text string) {
 	lines := strings.Split(text, "\n")
 

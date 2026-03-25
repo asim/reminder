@@ -55,6 +55,7 @@ func (i *Index) Query(q string) ([]*Result, error) {
 
 	queryWords := tokenize(q)
 	if len(queryWords) == 0 {
+		// No searchable terms (empty query or only special characters)
 		return nil, nil
 	}
 
@@ -120,6 +121,6 @@ func (i *Index) Count() int {
 	return len(i.docs)
 }
 
-func New(name string) *Index {
+func New() *Index {
 	return &Index{}
 }

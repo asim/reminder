@@ -507,7 +507,7 @@ func main() {
 
 	// create search index
 	fmt.Println("Generating index")
-	idx := search.New("reminder")
+	idx := search.New()
 
 	// load data
 	fmt.Println("Initialising data")
