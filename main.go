@@ -26,9 +26,6 @@ import (
 )
 
 var (
-	IndexFlag  = flag.Bool("index", false, "Index data for search. Stored at $HOME/reminder.idx")
-	ExportFlag = flag.Bool("export", false, "Export the index data to $HOME/reminder.idx.gob.gz")
-	ImportFlag = flag.Bool("import", false, "Import the index data from $HOME/reminder.idx.gob.gz")
 	ServerFlag = flag.Bool("serve", false, "Run the server")
 	EnvFlag    = flag.String("env", "dev", "Set the environment")
 	WebFlag    = flag.Bool("web", false, "Without this flag, the lite version will be served")
@@ -508,19 +505,9 @@ func main() {
 	fmt.Println("Loading VAPID keys")
 	_ = api.LoadOrGenerateVAPIDKeys()
 
-	// create a new indexa
+	// create search index
 	fmt.Println("Generating index")
-	idx := search.New("reminder", false)
-
-	// async load the index
-	go func() {
-		// Load the pre-existing data
-		fmt.Println("Loading index")
-		if err := idx.Load(); err != nil {
-			fmt.Println(err)
-		}
-		fmt.Println("Loaded index")
-	}()
+	idx := search.New("reminder")
 
 	// load data
 	fmt.Println("Initialising data")
@@ -538,42 +525,18 @@ func main() {
 	njson := n.JSON()
 	hjson := b.JSON()
 
-	// index the quran in english
+	// build full-text search index from data
 	indexed := make(chan bool, 1)
 
-	if *IndexFlag {
-		// create a separate index that's persisted
-		// this is located in $HOME/reminder.idx
-		// it will need to be exported afterwards
-		sidx := search.New("reminder", true)
-
-		fmt.Println("Indexing data")
-		go func() {
-			indexQuran(sidx, q)
-			indexNames(sidx, n)
-			indexHadith(sidx, b)
-			indexTafsir(sidx, q)
-			// done
-			close(indexed)
-		}()
-	} else {
+	go func() {
+		fmt.Println("Building search index")
+		indexQuran(idx, q)
+		indexNames(idx, n)
+		indexHadith(idx, b)
+		indexTafsir(idx, q)
+		fmt.Printf("Search index built (%d documents)\n", idx.Count())
 		close(indexed)
-	}
-
-	if *ExportFlag {
-		fmt.Println("Exporting index")
-		if err := idx.Export(); err != nil {
-			fmt.Println(err)
-		}
-		return
-	}
-
-	if *ImportFlag {
-		fmt.Println("Importing index")
-		if err := idx.Import(); err != nil {
-			fmt.Println(err)
-		}
-	}
+	}()
 
 	if *WebFlag {
 		fmt.Println("Registering web handler")
