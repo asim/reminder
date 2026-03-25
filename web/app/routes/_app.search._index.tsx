@@ -228,9 +228,9 @@ export default function SearchIndex() {
                           >
                             <div className='flex-1 min-w-0'>
                               <div className='text-xs sm:text-sm font-medium text-gray-900 truncate'>
-                                {ref.metadata.type || 'Reference'} {ref.metadata.chapter && `- Chapter ${ref.metadata.chapter}`}
+                                {ref.metadata.source || 'Reference'} {ref.metadata.chapter && `- Chapter ${ref.metadata.chapter}`}
                                 {ref.metadata.verse && `:${ref.metadata.verse}`}
-                                {ref.metadata.hadith && `- Hadith ${ref.metadata.hadith}`}
+                                {ref.metadata.number && `- #${ref.metadata.number}`}
                               </div>
                               <div className='text-xs text-gray-500 mt-1'>
                                 {ref.text.substring(0, 80)}...
@@ -366,9 +366,9 @@ export default function SearchIndex() {
                                     >
                                       <div className='flex-1 min-w-0'>
                                         <div className='text-xs sm:text-sm font-medium text-gray-900 truncate'>
-                                          {ref.metadata.type || 'Reference'} {ref.metadata.chapter && `- Chapter ${ref.metadata.chapter}`}
+                                          {ref.metadata.source || 'Reference'} {ref.metadata.chapter && `- Chapter ${ref.metadata.chapter}`}
                                           {ref.metadata.verse && `:${ref.metadata.verse}`}
-                                          {ref.metadata.hadith && `- Hadith ${ref.metadata.hadith}`}
+                                          {ref.metadata.number && `- #${ref.metadata.number}`}
                                         </div>
                                         <div className='text-xs text-gray-500 mt-1'>
                                           {ref.text.substring(0, 80)}...
