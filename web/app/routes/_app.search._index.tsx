@@ -26,6 +26,7 @@ export function meta() {
 export default function SearchIndex() {
   const [query, setQuery] = useState('');
   const [submittedQuery, setSubmittedQuery] = useState('');
+  const [summarise, setSummarise] = useState(false);
   const [expandedRefs, setExpandedRefs] = useState<Record<number, boolean>>({});
   const [showReferences, setShowReferences] = useState(false);
   const [cachedSearches, setCachedSearches] = useState<CachedSearch[]>([]);
@@ -42,7 +43,7 @@ export default function SearchIndex() {
   );
 
   const { data: searchResults, isLoading } = useQuery({
-    ...searchOptions(submittedQuery),
+    ...searchOptions(submittedQuery, summarise),
     enabled: !!submittedQuery,
   });
 
@@ -179,6 +180,15 @@ export default function SearchIndex() {
               </div>
             )}
           </div>
+          <label className='flex items-center gap-2 mt-2 text-xs sm:text-sm text-gray-600 cursor-pointer select-none'>
+            <input
+              type='checkbox'
+              checked={summarise}
+              onChange={(e) => setSummarise(e.target.checked)}
+              className='rounded border-gray-300'
+            />
+            Summarise with AI
+          </label>
         </form>
 
         {isLoading && (
@@ -190,22 +200,80 @@ export default function SearchIndex() {
             <div className='mb-2 sm:mb-3 text-lg sm:text-xl font-medium'>
               {searchResults.q}
             </div>
-            <div
-              className='mb-3 sm:mb-4 text-sm sm:text-base prose prose-sm sm:prose-base max-w-none'
-              dangerouslySetInnerHTML={{ __html: searchResults.answer }}
-            />
+            {searchResults.answer && (
+              <div
+                className='mb-3 sm:mb-4 text-sm sm:text-base prose prose-sm sm:prose-base max-w-none'
+                dangerouslySetInnerHTML={{ __html: searchResults.answer }}
+              />
+            )}
 
-            <div className='mt-3 sm:mt-4 border-t pt-3'>
-              <button
-                onClick={toggleReferencesSection}
-                className='text-xs sm:text-sm font-medium text-gray-700 hover:text-black flex items-center gap-1'
-              >
-                <span>{showReferences ? '▼' : '▶'}</span>
-                <span>References ({searchResults.references.length})</span>
-              </button>
+            <div className={searchResults.answer ? 'mt-3 sm:mt-4 border-t pt-3' : ''}>
+              {searchResults.answer ? (
+                <>
+                  <button
+                    onClick={toggleReferencesSection}
+                    className='text-xs sm:text-sm font-medium text-gray-700 hover:text-black flex items-center gap-1'
+                  >
+                    <span>{showReferences ? '▼' : '▶'}</span>
+                    <span>References ({searchResults.references.length})</span>
+                  </button>
 
-              {showReferences && (
-                <div className='mt-3 space-y-3'>
+                  {showReferences && (
+                    <div className='mt-3 space-y-3'>
+                      {searchResults.references.map((ref, index) => (
+                        <div key={index} className='border border-gray-200 rounded-lg overflow-hidden'>
+                          <div
+                            className='bg-gray-50 px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-start justify-between gap-2'
+                            onClick={() => toggleReference(index)}
+                          >
+                            <div className='flex-1 min-w-0'>
+                              <div className='text-xs sm:text-sm font-medium text-gray-900 truncate'>
+                                {ref.metadata.type || 'Reference'} {ref.metadata.chapter && `- Chapter ${ref.metadata.chapter}`}
+                                {ref.metadata.verse && `:${ref.metadata.verse}`}
+                                {ref.metadata.hadith && `- Hadith ${ref.metadata.hadith}`}
+                              </div>
+                              <div className='text-xs text-gray-500 mt-1'>
+                                {ref.text.substring(0, 80)}...
+                              </div>
+                            </div>
+                            <div className='flex items-center gap-2 flex-shrink-0'>
+                              <span className='text-xs text-gray-500'>
+                                {(ref.score * 100).toFixed(0)}%
+                              </span>
+                              <span className='text-gray-400'>
+                                {expandedRefs[index] ? '▼' : '▶'}
+                              </span>
+                            </div>
+                          </div>
+
+                          {expandedRefs[index] && (
+                            <div className='px-3 py-3 bg-white space-y-2'>
+                              <div className='text-xs sm:text-sm text-gray-800 leading-relaxed'>
+                                {ref.text}
+                              </div>
+
+                              {Object.keys(ref.metadata).length > 0 && (
+                                <div className='pt-2 border-t border-gray-100'>
+                                  <div className='text-xs font-medium text-gray-600 mb-1'>Source Information:</div>
+                                  <div className='grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-gray-600'>
+                                    {Object.entries(ref.metadata).map(([key, value]) => (
+                                      <div key={key} className='flex gap-1'>
+                                        <span className='font-medium capitalize'>{key}:</span>
+                                        <span>{value}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className='space-y-3'>
                   {searchResults.references.map((ref, index) => (
                     <div key={index} className='border border-gray-200 rounded-lg overflow-hidden'>
                       <div
@@ -214,22 +282,17 @@ export default function SearchIndex() {
                       >
                         <div className='flex-1 min-w-0'>
                           <div className='text-xs sm:text-sm font-medium text-gray-900 truncate'>
-                            {ref.metadata.type || 'Reference'} {ref.metadata.chapter && `- Chapter ${ref.metadata.chapter}`}
+                            {ref.metadata.source || 'Reference'} {ref.metadata.chapter && `- Chapter ${ref.metadata.chapter}`}
                             {ref.metadata.verse && `:${ref.metadata.verse}`}
-                            {ref.metadata.hadith && `- Hadith ${ref.metadata.hadith}`}
+                            {ref.metadata.number && `- #${ref.metadata.number}`}
                           </div>
                           <div className='text-xs text-gray-500 mt-1'>
-                            {ref.text.substring(0, 80)}...
+                            {ref.text.substring(0, 120)}...
                           </div>
                         </div>
-                        <div className='flex items-center gap-2 flex-shrink-0'>
-                          <span className='text-xs text-gray-500'>
-                            {(ref.score * 100).toFixed(0)}%
-                          </span>
-                          <span className='text-gray-400'>
-                            {expandedRefs[index] ? '▼' : '▶'}
-                          </span>
-                        </div>
+                        <span className='text-gray-400 flex-shrink-0'>
+                          {expandedRefs[index] ? '▼' : '▶'}
+                        </span>
                       </div>
 
                       {expandedRefs[index] && (

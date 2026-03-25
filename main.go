@@ -1120,33 +1120,39 @@ func main() {
 
 			q := data["q"].(string)
 
+			// Check if LLM summarisation is requested (defaults to false)
+			summarise, _ := data["summarise"].(bool)
+
 			res, err := idx.Query(q)
 			if err != nil {
 				http.Error(w, err.Error(), 500)
 				return
 			}
 
-			var tokens int
-			var contexts []string
+			var answerMD string
 
-			for _, r := range res {
-				if tokens >= 8000 {
-					break
+			if summarise {
+				var tokens int
+				var contexts []string
+
+				for _, r := range res {
+					if tokens >= 8000 {
+						break
+					}
+
+					for k, v := range r.Metadata {
+						delete(r.Metadata, k)
+						r.Metadata[strings.ToLower(k)] = v
+					}
+
+					b, _ := json.Marshal(r)
+					tokens += len(b)
+					contexts = append(contexts, string(b))
 				}
 
-				for k, v := range r.Metadata {
-					delete(r.Metadata, k)
-					r.Metadata[strings.ToLower(k)] = v
-				}
-
-				b, _ := json.Marshal(r)
-				tokens += len(b)
-				// TODO: maybe just provide text
-				contexts = append(contexts, string(b))
+				answer := askLLM(r.Context(), contexts, q)
+				answerMD = string(app.Render([]byte(answer)))
 			}
-
-			answer := askLLM(r.Context(), contexts, q)
-			answerMD := string(app.Render([]byte(answer)))
 
 			output, _ := json.Marshal(map[string]interface{}{
 				"q":          q,
@@ -1155,18 +1161,20 @@ func main() {
 			})
 			w.Write(output)
 
-			var ctx string
+			if summarise {
+				var ctx string
 
-			// look for the context cookie
-			c, err := r.Cookie("session")
-			if err == nil {
-				ctx = c.Value
-				h, ok := history[ctx]
-				if !ok {
-					h = []string{}
+				// look for the context cookie
+				c, err := r.Cookie("session")
+				if err == nil {
+					ctx = c.Value
+					h, ok := history[ctx]
+					if !ok {
+						h = []string{}
+					}
+					h = append([]string{q, answerMD}, h...)
+					history[ctx] = h
 				}
-				h = append([]string{q, answerMD}, h...)
-				history[ctx] = h
 			}
 
 			return
@@ -1345,10 +1353,11 @@ func main() {
 		return string(byt), nil
 	})
 
-	mcpServer.AddTool("search", "Search Islamic content and get AI-summarised answers from the Quran, Hadith and Names of Allah", api.InputSchema{
+	mcpServer.AddTool("search", "Search Islamic content from the Quran, Hadith and Names of Allah. Optionally summarise results with an LLM.", api.InputSchema{
 		Type: "object",
 		Properties: map[string]api.Property{
-			"q": {Type: "string", Description: "The question to ask"},
+			"q":         {Type: "string", Description: "The search query or question"},
+			"summarise": {Type: "boolean", Description: "Whether to summarise results using an LLM (default: false)"},
 		},
 		Required: []string{"q"},
 	}, func(args map[string]interface{}) (string, error) {
@@ -1363,27 +1372,33 @@ func main() {
 			return "", fmt.Errorf("q is required")
 		}
 
+		summarise, _ := args["summarise"].(bool)
+
 		res, err := idx.Query(question)
 		if err != nil {
 			return "", err
 		}
 
-		var tokens int
-		var contexts []string
-		for _, r := range res {
-			if tokens >= 8000 {
-				break
-			}
-			for k, v := range r.Metadata {
-				delete(r.Metadata, k)
-				r.Metadata[strings.ToLower(k)] = v
-			}
-			b, _ := json.Marshal(r)
-			tokens += len(b)
-			contexts = append(contexts, string(b))
-		}
+		var answer string
 
-		answer := askLLM(context.Background(), contexts, question)
+		if summarise {
+			var tokens int
+			var contexts []string
+			for _, r := range res {
+				if tokens >= 8000 {
+					break
+				}
+				for k, v := range r.Metadata {
+					delete(r.Metadata, k)
+					r.Metadata[strings.ToLower(k)] = v
+				}
+				b, _ := json.Marshal(r)
+				tokens += len(b)
+				contexts = append(contexts, string(b))
+			}
+
+			answer = askLLM(context.Background(), contexts, question)
+		}
 
 		output, _ := json.Marshal(map[string]interface{}{
 			"q":          question,
