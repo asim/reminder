@@ -1,19 +1,17 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"strings"
 	"text/template"
-
-	"github.com/sashabaranov/go-openai"
 )
 
-// There are many different ways to provide the context to the LLM.
-// You can pass each context as user message, or the list as one user message,
-// or pass it in the system prompt. The system prompt itself also has a big impact
-// on how well the LLM handles the context, especially for LLMs with < 7B parameters.
-// The prompt engineering is up to you, it's out of scope for the vector database.
 var systemPromptTpl = template.Must(template.New("system_prompt").Parse(`
 You are a helpful assistant with access to knowledge of the Quran, Hadiths and names of Allah. You are tasked with answering questions related to Islam, life and the world.
 
@@ -35,66 +33,102 @@ Anything between the following 'context' XML blocks is retrieved from the knowle
 Don't mention the knowledge base, context or search results in your answer.
 `))
 
+type chatMessage struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+type chatRequest struct {
+	Model               string        `json:"model"`
+	Messages            []chatMessage `json:"messages"`
+	MaxCompletionTokens int           `json:"max_completion_tokens,omitempty"`
+}
+
+type chatChoice struct {
+	Message chatMessage `json:"message"`
+}
+
+type chatResponse struct {
+	Choices []chatChoice `json:"choices"`
+}
+
 func askLLM(ctx context.Context, contexts []string, question string) string {
 	var apiKey string
 	var model string
-	var config openai.ClientConfig
+	var baseURL string
 
-	// Priority: 1. Fanar, 2. Ollama (local), 3. OpenAI (fallback)
+	// Priority: 1. Fanar, 2. Ollama (local)
 	fanarKey := os.Getenv("FANAR_API_KEY")
 	ollamaModel := os.Getenv("OLLAMA_LLM_MODEL")
-	openaiKey := os.Getenv("OPENAI_API_KEY")
 
 	if len(fanarKey) > 0 {
 		// Use Fanar API
 		apiKey = fanarKey
-		config = openai.DefaultConfig(apiKey)
-		config.BaseURL = "https://api.fanar.qa/v1"
+		baseURL = "https://api.fanar.qa/v1"
 		model = "Fanar"
-	} else if len(ollamaModel) > 0 || (len(openaiKey) == 0) {
-		// Use local Ollama (default if no API keys set)
-		if ollamaModel == "" {
-			ollamaModel = "llama3.2" // Default Ollama model
-		}
-		baseURL := os.Getenv("OLLAMA_BASE_URL")
-		if baseURL == "" {
-			baseURL = "http://localhost:11434/v1"
-		}
-		config = openai.DefaultConfig("ollama") // API key not needed for Ollama
-		config.BaseURL = baseURL
-		model = ollamaModel
 	} else {
-		// Fallback to OpenAI
-		apiKey = openaiKey
-		config = openai.DefaultConfig(apiKey)
-		model = openai.GPT4oMini
+		// Use local Ollama (default)
+		if ollamaModel == "" {
+			ollamaModel = "llama3.2"
+		}
+		ollamaURL := os.Getenv("OLLAMA_BASE_URL")
+		if ollamaURL == "" {
+			ollamaURL = "http://localhost:11434/v1"
+		}
+		apiKey = "ollama"
+		baseURL = ollamaURL
+		model = ollamaModel
 	}
 
-	openAIClient := openai.NewClientWithConfig(config)
 	sb := &strings.Builder{}
-	err := systemPromptTpl.Execute(sb, contexts)
-	if err != nil {
+	if err := systemPromptTpl.Execute(sb, contexts); err != nil {
 		panic(err)
 	}
-	messages := []openai.ChatCompletionMessage{
-		{
-			Role:    openai.ChatMessageRoleSystem,
-			Content: sb.String(),
-		}, {
-			Role:    openai.ChatMessageRoleUser,
-			Content: "Question: " + question,
-		},
-	}
-	res, err := openAIClient.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
-		Model:               model,
-		Messages:            messages,
-		MaxCompletionTokens: 8192,
-	})
-	if err != nil {
-		panic(err)
-	}
-	reply := res.Choices[0].Message.Content
-	reply = strings.TrimSpace(reply)
 
-	return reply
+	reqBody := chatRequest{
+		Model: model,
+		Messages: []chatMessage{
+			{Role: "system", Content: sb.String()},
+			{Role: "user", Content: "Question: " + question},
+		},
+		MaxCompletionTokens: 8192,
+	}
+
+	body, err := json.Marshal(reqBody)
+	if err != nil {
+		panic(err)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "POST", baseURL+"/chat/completions", bytes.NewReader(body))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+apiKey)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		panic(fmt.Sprintf("LLM API error: %s %s", resp.Status, string(respBody)))
+	}
+
+	var chatResp chatResponse
+	if err := json.Unmarshal(respBody, &chatResp); err != nil {
+		panic(err)
+	}
+
+	if len(chatResp.Choices) == 0 {
+		return ""
+	}
+
+	return strings.TrimSpace(chatResp.Choices[0].Message.Content)
 }

@@ -26,9 +26,6 @@ import (
 )
 
 var (
-	IndexFlag  = flag.Bool("index", false, "Index data for search. Stored at $HOME/reminder.idx")
-	ExportFlag = flag.Bool("export", false, "Export the index data to $HOME/reminder.idx.gob.gz")
-	ImportFlag = flag.Bool("import", false, "Import the index data from $HOME/reminder.idx.gob.gz")
 	ServerFlag = flag.Bool("serve", false, "Run the server")
 	EnvFlag    = flag.String("env", "dev", "Set the environment")
 	WebFlag    = flag.Bool("web", false, "Without this flag, the lite version will be served")
@@ -508,19 +505,9 @@ func main() {
 	fmt.Println("Loading VAPID keys")
 	_ = api.LoadOrGenerateVAPIDKeys()
 
-	// create a new indexa
+	// create search index
 	fmt.Println("Generating index")
-	idx := search.New("reminder", false)
-
-	// async load the index
-	go func() {
-		// Load the pre-existing data
-		fmt.Println("Loading index")
-		if err := idx.Load(); err != nil {
-			fmt.Println(err)
-		}
-		fmt.Println("Loaded index")
-	}()
+	idx := search.New("search.db")
 
 	// load data
 	fmt.Println("Initialising data")
@@ -538,42 +525,22 @@ func main() {
 	njson := n.JSON()
 	hjson := b.JSON()
 
-	// index the quran in english
+	// build full-text search index from data
 	indexed := make(chan bool, 1)
 
-	if *IndexFlag {
-		// create a separate index that's persisted
-		// this is located in $HOME/reminder.idx
-		// it will need to be exported afterwards
-		sidx := search.New("reminder", true)
-
-		fmt.Println("Indexing data")
-		go func() {
-			indexQuran(sidx, q)
-			indexNames(sidx, n)
-			indexHadith(sidx, b)
-			indexTafsir(sidx, q)
-			// done
-			close(indexed)
-		}()
-	} else {
+	go func() {
+		if idx.Built() {
+			fmt.Printf("Search index loaded from disk (%d documents)\n", idx.Count())
+		} else {
+			fmt.Println("Building search index")
+			indexQuran(idx, q)
+			indexNames(idx, n)
+			indexHadith(idx, b)
+			indexTafsir(idx, q)
+			fmt.Printf("Search index built (%d documents)\n", idx.Count())
+		}
 		close(indexed)
-	}
-
-	if *ExportFlag {
-		fmt.Println("Exporting index")
-		if err := idx.Export(); err != nil {
-			fmt.Println(err)
-		}
-		return
-	}
-
-	if *ImportFlag {
-		fmt.Println("Importing index")
-		if err := idx.Import(); err != nil {
-			fmt.Println(err)
-		}
-	}
+	}()
 
 	if *WebFlag {
 		fmt.Println("Registering web handler")
@@ -1157,33 +1124,39 @@ func main() {
 
 			q := data["q"].(string)
 
+			// Check if LLM summarisation is requested (defaults to false)
+			summarise, _ := data["summarise"].(bool)
+
 			res, err := idx.Query(q)
 			if err != nil {
 				http.Error(w, err.Error(), 500)
 				return
 			}
 
-			var tokens int
-			var contexts []string
+			var answerMD string
 
-			for _, r := range res {
-				if tokens >= 8000 {
-					break
+			if summarise {
+				var tokens int
+				var contexts []string
+
+				for _, r := range res {
+					if tokens >= 8000 {
+						break
+					}
+
+					for k, v := range r.Metadata {
+						delete(r.Metadata, k)
+						r.Metadata[strings.ToLower(k)] = v
+					}
+
+					b, _ := json.Marshal(r)
+					tokens += len(b)
+					contexts = append(contexts, string(b))
 				}
 
-				for k, v := range r.Metadata {
-					delete(r.Metadata, k)
-					r.Metadata[strings.ToLower(k)] = v
-				}
-
-				b, _ := json.Marshal(r)
-				tokens += len(b)
-				// TODO: maybe just provide text
-				contexts = append(contexts, string(b))
+				answer := askLLM(r.Context(), contexts, q)
+				answerMD = string(app.Render([]byte(answer)))
 			}
-
-			answer := askLLM(r.Context(), contexts, q)
-			answerMD := string(app.Render([]byte(answer)))
 
 			output, _ := json.Marshal(map[string]interface{}{
 				"q":          q,
@@ -1192,18 +1165,20 @@ func main() {
 			})
 			w.Write(output)
 
-			var ctx string
+			if summarise {
+				var ctx string
 
-			// look for the context cookie
-			c, err := r.Cookie("session")
-			if err == nil {
-				ctx = c.Value
-				h, ok := history[ctx]
-				if !ok {
-					h = []string{}
+				// look for the context cookie
+				c, err := r.Cookie("session")
+				if err == nil {
+					ctx = c.Value
+					h, ok := history[ctx]
+					if !ok {
+						h = []string{}
+					}
+					h = append([]string{q, answerMD}, h...)
+					history[ctx] = h
 				}
-				h = append([]string{q, answerMD}, h...)
-				history[ctx] = h
 			}
 
 			return
@@ -1382,10 +1357,11 @@ func main() {
 		return string(byt), nil
 	})
 
-	mcpServer.AddTool("search", "Search Islamic content and get AI-summarised answers from the Quran, Hadith and Names of Allah", api.InputSchema{
+	mcpServer.AddTool("search", "Search Islamic content from the Quran, Hadith and Names of Allah. Optionally summarise results with an LLM.", api.InputSchema{
 		Type: "object",
 		Properties: map[string]api.Property{
-			"q": {Type: "string", Description: "The question to ask"},
+			"q":         {Type: "string", Description: "The search query or question"},
+			"summarise": {Type: "boolean", Description: "Whether to summarise results using an LLM (default: false)"},
 		},
 		Required: []string{"q"},
 	}, func(args map[string]interface{}) (string, error) {
@@ -1400,27 +1376,33 @@ func main() {
 			return "", fmt.Errorf("q is required")
 		}
 
+		summarise, _ := args["summarise"].(bool)
+
 		res, err := idx.Query(question)
 		if err != nil {
 			return "", err
 		}
 
-		var tokens int
-		var contexts []string
-		for _, r := range res {
-			if tokens >= 8000 {
-				break
-			}
-			for k, v := range r.Metadata {
-				delete(r.Metadata, k)
-				r.Metadata[strings.ToLower(k)] = v
-			}
-			b, _ := json.Marshal(r)
-			tokens += len(b)
-			contexts = append(contexts, string(b))
-		}
+		var answer string
 
-		answer := askLLM(context.Background(), contexts, question)
+		if summarise {
+			var tokens int
+			var contexts []string
+			for _, r := range res {
+				if tokens >= 8000 {
+					break
+				}
+				for k, v := range r.Metadata {
+					delete(r.Metadata, k)
+					r.Metadata[strings.ToLower(k)] = v
+				}
+				b, _ := json.Marshal(r)
+				tokens += len(b)
+				contexts = append(contexts, string(b))
+			}
+
+			answer = askLLM(context.Background(), contexts, question)
+		}
 
 		output, _ := json.Marshal(map[string]interface{}{
 			"q":          question,

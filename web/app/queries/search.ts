@@ -18,8 +18,8 @@ export type SearchHistoryType = {
   history: string[];
 };
 
-export const searchOptions = (query: string) => ({
-  queryKey: ['search', query],
+export const searchOptions = (query: string, summarise: boolean = false) => ({
+  queryKey: ['search', query, summarise],
   queryFn: async () => {
     if (!query.trim()) {
       return null;
@@ -27,6 +27,7 @@ export const searchOptions = (query: string) => ({
 
     const data = await httpPost<SearchResponseType>('/api/search', {
       q: query,
+      summarise,
     });
 
     queryClient.invalidateQueries({

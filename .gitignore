@@ -4,3 +4,4 @@ index.md
 .env
 node_modules
 .pnpm-store
+search.db
