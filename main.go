@@ -507,7 +507,7 @@ func main() {
 
 	// create search index
 	fmt.Println("Generating index")
-	idx := search.New()
+	idx := search.New("search.db")
 
 	// load data
 	fmt.Println("Initialising data")
@@ -529,12 +529,16 @@ func main() {
 	indexed := make(chan bool, 1)
 
 	go func() {
-		fmt.Println("Building search index")
-		indexQuran(idx, q)
-		indexNames(idx, n)
-		indexHadith(idx, b)
-		indexTafsir(idx, q)
-		fmt.Printf("Search index built (%d documents)\n", idx.Count())
+		if idx.Built() {
+			fmt.Printf("Search index loaded from disk (%d documents)\n", idx.Count())
+		} else {
+			fmt.Println("Building search index")
+			indexQuran(idx, q)
+			indexNames(idx, n)
+			indexHadith(idx, b)
+			indexTafsir(idx, q)
+			fmt.Printf("Search index built (%d documents)\n", idx.Count())
+		}
 		close(indexed)
 	}()
 

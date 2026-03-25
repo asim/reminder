@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 	"sync"
 	"unicode"
@@ -16,6 +17,7 @@ type Index struct {
 	mu    sync.RWMutex
 	db    *sql.DB
 	count int
+	built bool // true when the index was loaded from an existing file
 }
 
 // Result represents a single search result.
@@ -23,6 +25,83 @@ type Result struct {
 	Text     string            `json:"text"`
 	Score    float32           `json:"score"`
 	Metadata map[string]string `json:"metadata"`
+}
+
+// synonyms maps common Islamic terms to related words so that a search
+// for one concept also matches documents using alternative vocabulary.
+// Only the canonical (map key) is looked up; values are extras to OR in.
+var synonyms = map[string][]string{
+	"mercy":        {"merciful", "compassion", "compassionate", "forgiveness", "pardon", "rahma"},
+	"merciful":     {"mercy", "compassion", "compassionate", "rahma"},
+	"forgiveness":  {"forgive", "pardon", "mercy", "repentance", "tawbah"},
+	"forgive":      {"forgiveness", "pardon", "mercy", "repentance"},
+	"repentance":   {"repent", "forgiveness", "tawbah", "pardon"},
+	"repent":       {"repentance", "forgiveness", "tawbah"},
+	"prayer":       {"salah", "salat", "worship", "pray"},
+	"pray":         {"prayer", "salah", "salat", "worship"},
+	"salah":        {"prayer", "salat", "worship"},
+	"fasting":      {"fast", "sawm", "ramadan"},
+	"fast":         {"fasting", "sawm", "ramadan"},
+	"charity":      {"sadaqah", "zakat", "alms", "giving"},
+	"zakat":        {"charity", "sadaqah", "alms"},
+	"pilgrimage":   {"hajj", "umrah"},
+	"hajj":         {"pilgrimage", "umrah"},
+	"patience":     {"patient", "sabr", "perseverance", "steadfast"},
+	"patient":      {"patience", "sabr", "perseverance"},
+	"sabr":         {"patience", "patient", "perseverance"},
+	"faith":        {"iman", "belief", "believe", "trust"},
+	"iman":         {"faith", "belief", "believe"},
+	"belief":       {"faith", "iman", "believe"},
+	"righteous":    {"righteousness", "piety", "taqwa", "good"},
+	"righteousness": {"righteous", "piety", "taqwa"},
+	"taqwa":        {"piety", "righteousness", "righteous", "god-consciousness"},
+	"piety":        {"taqwa", "righteous", "righteousness", "devout"},
+	"worship":      {"prayer", "ibadah", "devotion"},
+	"sin":          {"sins", "transgression", "wrongdoing", "evil"},
+	"sins":         {"sin", "transgression", "wrongdoing"},
+	"paradise":     {"jannah", "heaven", "garden", "gardens"},
+	"jannah":       {"paradise", "heaven", "garden"},
+	"heaven":       {"paradise", "jannah", "garden"},
+	"hell":         {"jahannam", "hellfire", "fire", "punishment"},
+	"jahannam":     {"hell", "hellfire", "fire"},
+	"angel":        {"angels", "malaika"},
+	"angels":       {"angel", "malaika"},
+	"prophet":      {"prophets", "messenger", "messengers", "rasul"},
+	"prophets":     {"prophet", "messenger", "messengers"},
+	"messenger":    {"prophet", "messengers", "rasul"},
+	"knowledge":    {"learn", "wisdom", "ilm", "understanding"},
+	"wisdom":       {"knowledge", "wise", "hikma"},
+	"death":        {"die", "dying", "grave", "hereafter", "akhira"},
+	"hereafter":    {"akhira", "afterlife", "death", "judgment"},
+	"judgment":     {"judgement", "reckoning", "hereafter", "account"},
+	"justice":      {"just", "fairness", "equity"},
+	"truth":        {"truthful", "honest", "honesty", "true"},
+	"grateful":     {"gratitude", "thankful", "thanks", "shukr"},
+	"gratitude":    {"grateful", "thankful", "shukr"},
+}
+
+// expandSynonyms adds synonyms for each query word. Returns a
+// deduplicated list containing the original words plus any synonyms.
+func expandSynonyms(words []string) []string {
+	seen := make(map[string]struct{}, len(words)*2)
+	expanded := make([]string, 0, len(words)*2)
+
+	for _, w := range words {
+		if _, ok := seen[w]; ok {
+			continue
+		}
+		seen[w] = struct{}{}
+		expanded = append(expanded, w)
+
+		for _, syn := range synonyms[w] {
+			if _, ok := seen[syn]; ok {
+				continue
+			}
+			seen[syn] = struct{}{}
+			expanded = append(expanded, syn)
+		}
+	}
+	return expanded
 }
 
 // tokenize splits text into lowercase words suitable for FTS5 queries.
@@ -33,17 +112,47 @@ func tokenize(s string) []string {
 	})
 }
 
-// New creates a new in-memory SQLite FTS5 search index.
-func New() *Index {
-	db, err := sql.Open("sqlite", ":memory:")
+// New creates an SQLite FTS5 search index. If path is empty the index
+// is created in memory; otherwise it is persisted to the given file.
+// When a file already exists and contains a populated index, the
+// returned Index has Built() == true so the caller can skip re-indexing.
+func New(path ...string) *Index {
+	dsn := ":memory:"
+	if len(path) > 0 && path[0] != "" {
+		dsn = path[0]
+	}
+
+	// Check whether the DB file already exists before opening it
+	// (sql.Open will create the file if it doesn't exist).
+	existed := false
+	if dsn != ":memory:" {
+		if _, err := os.Stat(dsn); err == nil {
+			existed = true
+		}
+	}
+
+	db, err := sql.Open("sqlite", dsn)
 	if err != nil {
 		panic(fmt.Sprintf("search: failed to open sqlite: %v", err))
 	}
 
-	// Create a regular table for metadata and an FTS5 virtual table for text.
+	idx := &Index{db: db}
+
+	if existed {
+		// Verify the existing DB has the expected tables.
+		var cnt int
+		if err := db.QueryRow(`SELECT COUNT(*) FROM docs`).Scan(&cnt); err == nil && cnt > 0 {
+			idx.count = cnt
+			idx.built = true
+			return idx
+		}
+		// Table missing or empty — fall through and create it.
+	}
+
+	// Create tables for a fresh index.
 	stmts := []string{
-		`CREATE TABLE docs (id INTEGER PRIMARY KEY AUTOINCREMENT, text TEXT NOT NULL, metadata TEXT NOT NULL)`,
-		`CREATE VIRTUAL TABLE docs_fts USING fts5(text, content=docs, content_rowid=id)`,
+		`CREATE TABLE IF NOT EXISTS docs (id INTEGER PRIMARY KEY AUTOINCREMENT, text TEXT NOT NULL, metadata TEXT NOT NULL)`,
+		`CREATE VIRTUAL TABLE IF NOT EXISTS docs_fts USING fts5(text, content=docs, content_rowid=id)`,
 	}
 	for _, s := range stmts {
 		if _, err := db.Exec(s); err != nil {
@@ -51,7 +160,13 @@ func New() *Index {
 		}
 	}
 
-	return &Index{db: db}
+	return idx
+}
+
+// Built reports whether the index was loaded from an existing file
+// that already contained documents.
+func (i *Index) Built() bool {
+	return i.built
 }
 
 // Store adds documents with the given metadata into the search index.
@@ -101,6 +216,8 @@ func (i *Index) Store(md map[string]string, content ...string) error {
 }
 
 // Query searches the index using FTS5 MATCH with BM25 ranking.
+// Synonyms for common Islamic terms are automatically included so that
+// e.g. searching "forgiveness" also matches "mercy", "pardon", etc.
 // Returns the top 25 results ordered by relevance.
 func (i *Index) Query(q string) ([]*Result, error) {
 	i.mu.RLock()
@@ -110,6 +227,9 @@ func (i *Index) Query(q string) ([]*Result, error) {
 	if len(words) == 0 {
 		return nil, nil
 	}
+
+	// Expand with synonyms so conceptually related terms are included.
+	words = expandSynonyms(words)
 
 	// Build an FTS5 query: each word is matched with OR so partial matches
 	// are included, and BM25 naturally ranks documents with more matches higher.
