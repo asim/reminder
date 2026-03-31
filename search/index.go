@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 	"sync"
 	"unicode"
@@ -12,12 +13,14 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-// Index is a full-text search index backed by SQLite FTS5.
+// Index is a full-text search index backed by SQLite FTS5,
+// with optional semantic search via embeddings.
 type Index struct {
-	mu    sync.RWMutex
-	db    *sql.DB
-	count int
-	built bool
+	mu       sync.RWMutex
+	db       *sql.DB
+	count    int
+	built    bool
+	Embedder *Embedder // nil if embeddings not available
 }
 
 // Result represents a single search result.
@@ -220,11 +223,8 @@ func (i *Index) Store(md map[string]string, content ...string) error {
 	return tx.Commit()
 }
 
-// Query performs a full-text search and returns up to 25 results ranked by BM25.
-func (i *Index) Query(q string) ([]*Result, error) {
-	i.mu.RLock()
-	defer i.mu.RUnlock()
-
+// queryFTS performs a full-text search and returns up to N results ranked by BM25.
+func (i *Index) queryFTS(q string, limit int) ([]*Result, error) {
 	words := tokenize(q)
 	if len(words) == 0 {
 		return nil, nil
@@ -244,8 +244,8 @@ func (i *Index) Query(q string) ([]*Result, error) {
 		JOIN docs d ON d.id = f.rowid
 		WHERE docs_fts MATCH ?
 		ORDER BY rank
-		LIMIT 25
-	`, ftsQuery)
+		LIMIT ?
+	`, ftsQuery, limit)
 	if err != nil {
 		return nil, fmt.Errorf("search: query: %w", err)
 	}
@@ -274,6 +274,65 @@ func (i *Index) Query(q string) ([]*Result, error) {
 	}
 
 	return results, rows.Err()
+}
+
+// Query performs a hybrid search: semantic (embeddings) + keyword (FTS5).
+// When embeddings are available, results from both are merged and deduplicated.
+// When embeddings are not available, falls back to FTS5 only.
+func (i *Index) Query(q string) ([]*Result, error) {
+	i.mu.RLock()
+	defer i.mu.RUnlock()
+
+	if i.Embedder == nil || i.Embedder.Count() == 0 {
+		return i.queryFTS(q, 25)
+	}
+
+	// Semantic search via embeddings
+	queryVec, err := i.Embedder.Embed(q)
+	if err != nil {
+		// Fall back to FTS5 if embedding fails
+		return i.queryFTS(q, 25)
+	}
+	semanticResults := i.Embedder.Search(queryVec, 15)
+
+	// Keyword search via FTS5
+	ftsResults, _ := i.queryFTS(q, 15)
+
+	// Merge and deduplicate, preferring the higher score
+	seen := make(map[string]*Result)
+	for _, r := range semanticResults {
+		seen[r.Text] = r
+	}
+	for _, r := range ftsResults {
+		if existing, ok := seen[r.Text]; ok {
+			// Keep whichever has a higher score
+			if r.Score > existing.Score {
+				seen[r.Text] = r
+			}
+		} else {
+			seen[r.Text] = r
+		}
+	}
+
+	// Collect and sort by score descending
+	merged := make([]*Result, 0, len(seen))
+	for _, r := range seen {
+		merged = append(merged, r)
+	}
+	sort.Slice(merged, func(i, j int) bool {
+		return merged[i].Score > merged[j].Score
+	})
+
+	if len(merged) > 25 {
+		merged = merged[:25]
+	}
+
+	return merged, nil
+}
+
+// DB returns the underlying database connection for direct queries.
+func (i *Index) DB() *sql.DB {
+	return i.db
 }
 
 // Close closes the underlying database connection.

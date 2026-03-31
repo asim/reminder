@@ -525,26 +525,60 @@ func main() {
 
 	// Create SQLite FTS5 search index (persisted to ~/.reminder/search.db)
 	home, _ := os.UserHomeDir()
-	dbPath := filepath.Join(home, ".reminder", "search.db")
-	os.MkdirAll(filepath.Join(home, ".reminder"), 0755)
+	reminderHome := filepath.Join(home, ".reminder")
+	os.MkdirAll(reminderHome, 0755)
+
+	dbPath := filepath.Join(reminderHome, "search.db")
 	fmt.Println("Opening search index")
 	idx := search.New(dbPath)
+
+	// Initialize embedder for semantic search
+	modelDir := filepath.Join(reminderHome, "models")
+	embedPath := filepath.Join(reminderHome, "embeddings.bin")
+
+	fmt.Println("Initialising embedding model")
+	embedder, err := search.NewEmbedder(modelDir)
+	if err != nil {
+		fmt.Printf("Warning: embeddings unavailable (%v), falling back to keyword search\n", err)
+	} else {
+		idx.Embedder = embedder
+		// Try loading persisted embeddings
+		if err := embedder.Load(embedPath); err == nil && embedder.Count() > 0 {
+			fmt.Printf("Loaded %d embeddings from disk\n", embedder.Count())
+		}
+	}
 
 	// Index content if not already built (or if -index flag is set)
 	indexed := make(chan bool, 1)
 
-	if *IndexFlag || !idx.Built() {
+	needsIndex := *IndexFlag || !idx.Built()
+	needsEmbed := embedder != nil && embedder.Count() == 0
+
+	if needsIndex || needsEmbed {
 		fmt.Println("Indexing data")
 		go func() {
-			indexQuran(idx, q)
-			indexNames(idx, n)
-			indexHadith(idx, b)
-			indexTafsir(idx, q)
-			fmt.Printf("Indexing complete (%d documents)\n", idx.Count())
+			if needsIndex {
+				indexQuran(idx, q)
+				indexNames(idx, n)
+				indexHadith(idx, b)
+				indexTafsir(idx, q)
+				fmt.Printf("FTS indexing complete (%d documents)\n", idx.Count())
+			}
+
+			if needsEmbed {
+				fmt.Println("Building embeddings (this may take a few minutes on first run)...")
+				buildEmbeddings(idx, embedder)
+				if err := embedder.Save(embedPath); err != nil {
+					fmt.Printf("Warning: failed to save embeddings: %v\n", err)
+				} else {
+					fmt.Printf("Saved %d embeddings to disk\n", embedder.Count())
+				}
+			}
+
 			close(indexed)
 		}()
 	} else {
-		fmt.Printf("Search index loaded (%d documents)\n", idx.Count())
+		fmt.Printf("Search index loaded (%d documents, %d embeddings)\n", idx.Count(), embedder.Count())
 		close(indexed)
 	}
 
