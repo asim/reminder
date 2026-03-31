@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { getSearchHistoryOptions, searchOptions, type SearchResponseType } from '~/queries/search';
+import { getSearchHistoryOptions, searchOptions, summariseSearch, type SearchResponseType } from '~/queries/search';
 import {
   cacheSearchResult,
   getAllCachedSearches,
@@ -31,6 +31,8 @@ export default function SearchIndex() {
   const [cachedSearches, setCachedSearches] = useState<CachedSearch[]>([]);
   const [expandedHistoryRefs, setExpandedHistoryRefs] = useState<Record<string, boolean>>({});
   const [expandedHistoryRefItems, setExpandedHistoryRefItems] = useState<Record<string, boolean>>({});
+  const [summary, setSummary] = useState<string | null>(null);
+  const [isSummarising, setIsSummarising] = useState(false);
 
   // Load cached searches on mount
   useEffect(() => {
@@ -63,6 +65,8 @@ export default function SearchIndex() {
 
     setSubmittedQuery(query);
     setShowReferences(false);
+    setSummary(null);
+    setIsSummarising(false);
     setQuery('');
     refetchHistory();
   };
@@ -135,6 +139,14 @@ export default function SearchIndex() {
     }));
   };
 
+  const sourceLabel = (metadata: Record<string, string>) => {
+    if (metadata.source === 'quran') return `Quran ${metadata.chapter}:${metadata.verse}`;
+    if (metadata.source === 'bukhari') return `Bukhari, Book ${metadata.book_num}, #${metadata.number}`;
+    if (metadata.source === 'names') return `${metadata.english} (${metadata.arabic})`;
+    if (metadata.source === 'tafsir') return `Tafsir ${metadata.chapter}:${metadata.verse}`;
+    return metadata.source || 'Reference';
+  };
+
   const toggleHistoryReference = (historyKey: string, refIndex: number) => {
     const key = `${historyKey}-${refIndex}`;
     setExpandedHistoryRefItems((prev) => ({
@@ -190,74 +202,74 @@ export default function SearchIndex() {
             <div className='mb-2 sm:mb-3 text-lg sm:text-xl font-medium'>
               {searchResults.q}
             </div>
-            <div
-              className='mb-3 sm:mb-4 text-sm sm:text-base prose prose-sm sm:prose-base max-w-none'
-              dangerouslySetInnerHTML={{ __html: searchResults.answer }}
-            />
 
-            <div className='mt-3 sm:mt-4 border-t pt-3'>
-              <button
-                onClick={toggleReferencesSection}
-                className='text-xs sm:text-sm font-medium text-gray-700 hover:text-black flex items-center gap-1'
-              >
-                <span>{showReferences ? '▼' : '▶'}</span>
-                <span>References ({searchResults.references.length})</span>
-              </button>
-
-              {showReferences && (
-                <div className='mt-3 space-y-3'>
-                  {searchResults.references.map((ref, index) => (
-                    <div key={index} className='border border-gray-200 rounded-lg overflow-hidden'>
-                      <div
-                        className='bg-gray-50 px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-start justify-between gap-2'
-                        onClick={() => toggleReference(index)}
-                      >
-                        <div className='flex-1 min-w-0'>
-                          <div className='text-xs sm:text-sm font-medium text-gray-900 truncate'>
-                            {ref.metadata.type || 'Reference'} {ref.metadata.chapter && `- Chapter ${ref.metadata.chapter}`}
-                            {ref.metadata.verse && `:${ref.metadata.verse}`}
-                            {ref.metadata.hadith && `- Hadith ${ref.metadata.hadith}`}
-                          </div>
-                          <div className='text-xs text-gray-500 mt-1'>
-                            {ref.text.substring(0, 80)}...
-                          </div>
-                        </div>
-                        <div className='flex items-center gap-2 flex-shrink-0'>
-                          <span className='text-xs text-gray-500'>
-                            {(ref.score * 100).toFixed(0)}%
-                          </span>
-                          <span className='text-gray-400'>
-                            {expandedRefs[index] ? '▼' : '▶'}
-                          </span>
-                        </div>
-                      </div>
-
-                      {expandedRefs[index] && (
-                        <div className='px-3 py-3 bg-white space-y-2'>
-                          <div className='text-xs sm:text-sm text-gray-800 leading-relaxed'>
-                            {ref.text}
-                          </div>
-
-                          {Object.keys(ref.metadata).length > 0 && (
-                            <div className='pt-2 border-t border-gray-100'>
-                              <div className='text-xs font-medium text-gray-600 mb-1'>Source Information:</div>
-                              <div className='grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-gray-600'>
-                                {Object.entries(ref.metadata).map(([key, value]) => (
-                                  <div key={key} className='flex gap-1'>
-                                    <span className='font-medium capitalize'>{key}:</span>
-                                    <span>{value}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+            {/* Summarise button or summary */}
+            <div className='mb-3 sm:mb-4'>
+              {summary ? (
+                <div
+                  className='text-sm sm:text-base prose prose-sm sm:prose-base max-w-none'
+                  dangerouslySetInnerHTML={{ __html: summary }}
+                />
+              ) : isSummarising ? (
+                <div className='flex items-center gap-2 text-sm text-gray-500'>
+                  <Loader2 className='animate-spin h-4 w-4' />
+                  <span>Summarising...</span>
                 </div>
+              ) : (
+                <button
+                  onClick={async () => {
+                    setIsSummarising(true);
+                    try {
+                      const result = await summariseSearch(searchResults.q);
+                      setSummary(result.answer || '');
+                    } catch {
+                      setSummary('<p class="text-red-500">Failed to summarise. Try again later.</p>');
+                    } finally {
+                      setIsSummarising(false);
+                    }
+                  }}
+                  className='px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded text-sm text-gray-700'
+                >
+                  Summarise with AI
+                </button>
               )}
             </div>
+
+            {/* Results shown directly */}
+            {searchResults.references.length > 0 ? (
+              <div className='space-y-3'>
+                {searchResults.references.map((ref, index) => (
+                  <div key={index} className='border border-gray-200 rounded-lg overflow-hidden'>
+                    <div
+                      className='bg-gray-50 px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-start justify-between gap-2'
+                      onClick={() => toggleReference(index)}
+                    >
+                      <div className='flex-1 min-w-0'>
+                        <div className='text-xs sm:text-sm font-medium text-gray-900'>
+                          {sourceLabel(ref.metadata)}
+                        </div>
+                        <div className='text-xs text-gray-500 mt-1'>
+                          {ref.text.substring(0, 120)}{ref.text.length > 120 ? '...' : ''}
+                        </div>
+                      </div>
+                      <span className='text-gray-400 flex-shrink-0'>
+                        {expandedRefs[index] ? '▼' : '▶'}
+                      </span>
+                    </div>
+
+                    {expandedRefs[index] && (
+                      <div className='px-3 py-3 bg-white'>
+                        <div className='text-xs sm:text-sm text-gray-800 leading-relaxed'>
+                          {ref.text}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className='text-sm text-gray-500'>No results found.</div>
+            )}
           </div>
         )}
 

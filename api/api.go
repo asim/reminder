@@ -164,20 +164,25 @@ var Endpoints = []*Endpoint{
 	{
 		Name:        "Search",
 		Path:        "/api/search",
-		Description: "Get summarised answers via an LLM",
+		Description: "Full-text search across Quran, Hadith, and Names of Allah. Set summarise to true for an AI-generated summary.",
 		Params: []*Param{
 			{
 				Name:        "q",
 				Value:       "string",
-				Description: "The question to ask",
+				Description: "The search query",
+			},
+			{
+				Name:        "summarise",
+				Value:       "boolean",
+				Description: "Set to true to include an AI-generated summary (optional, slower)",
 			},
 		},
 		Response: []*Value{{
 			Type: "JSON",
 			Params: []*Param{
-				{Name: "q", Value: "string", Description: "The question asked"},
-				{Name: "answer", Value: "string", Description: "Answer to the question"},
-				{Name: "references", Value: "array", Description: "A list of references used"},
+				{Name: "q", Value: "string", Description: "The query searched"},
+				{Name: "references", Value: "array", Description: "Search results ranked by relevance"},
+				{Name: "answer", Value: "string", Description: "AI-generated summary (only when summarise is true)"},
 			},
 		}},
 	},

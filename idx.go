@@ -193,3 +193,63 @@ func indexHadith(idx *search.Index, b *hadith.Collection) {
 	// Clear checkpoint when all done
 	clearCheckpoint()
 }
+
+// buildEmbeddings reads all documents from the FTS index and computes embeddings.
+func buildEmbeddings(idx *search.Index, embedder *search.Embedder) {
+	db := idx.DB()
+	if db == nil {
+		return
+	}
+
+	rows, err := db.Query(`SELECT text, metadata FROM docs`)
+	if err != nil {
+		fmt.Printf("Error reading docs for embedding: %v\n", err)
+		return
+	}
+	defer rows.Close()
+
+	// Batch documents for efficient embedding
+	const batchSize = 32
+	var batchTexts []string
+	var batchMetas []string
+
+	processBatch := func(texts, metas []string) {
+		vecs, err := embedder.EmbedBatch(texts)
+		if err != nil {
+			fmt.Printf("Error embedding batch: %v\n", err)
+			return
+		}
+		for i, vec := range vecs {
+			embedder.Add(texts[i], metas[i], vec)
+		}
+	}
+
+	total := 0
+	for rows.Next() {
+		var text, meta string
+		if err := rows.Scan(&text, &meta); err != nil {
+			continue
+		}
+
+		batchTexts = append(batchTexts, text)
+		batchMetas = append(batchMetas, meta)
+
+		if len(batchTexts) >= batchSize {
+			processBatch(batchTexts, batchMetas)
+			total += len(batchTexts)
+			if total%1000 == 0 {
+				fmt.Printf("Embedded %d documents...\n", total)
+			}
+			batchTexts = batchTexts[:0]
+			batchMetas = batchMetas[:0]
+		}
+	}
+
+	// Process remaining
+	if len(batchTexts) > 0 {
+		processBatch(batchTexts, batchMetas)
+		total += len(batchTexts)
+	}
+
+	fmt.Printf("Embedding complete: %d documents\n", total)
+}
