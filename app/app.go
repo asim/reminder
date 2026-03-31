@@ -265,19 +265,19 @@ function summarise(btn, encodedQuery) {
     slot.innerHTML = "<span class='text-gray-400'>Summarising...</span>";
 
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/api/search/summarise", true);
+    xhr.open("POST", "/api/search", true);
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
             if (xhr.status === 200) {
                 var json = JSON.parse(xhr.responseText);
-                slot.innerHTML = "<div class='prose max-w-none text-gray-700'>" + json.answer + "</div>";
+                slot.innerHTML = "<div class='prose max-w-none text-gray-700'>" + (json.answer || '') + "</div>";
             } else {
                 slot.innerHTML = "<span class='text-red-500 text-sm'>Failed to summarise. Try again later.</span>";
             }
         }
     };
-    xhr.send(JSON.stringify({"q": decodeURIComponent(encodedQuery)}));
+    xhr.send(JSON.stringify({"q": decodeURIComponent(encodedQuery), "summarise": true}));
 }
 </script>
 `

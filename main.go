@@ -1143,80 +1143,44 @@ func main() {
 				}
 			}
 
-			output, _ := json.Marshal(map[string]interface{}{
+			result := map[string]interface{}{
 				"q":          q,
 				"references": res,
-			})
+			}
+
+			// Opt-in summarisation via summarise field
+			if summarise, _ := data["summarise"].(bool); summarise {
+				var tokens int
+				var contexts []string
+				for _, r := range res {
+					if tokens >= 8000 {
+						break
+					}
+					b, _ := json.Marshal(r)
+					tokens += len(b)
+					contexts = append(contexts, string(b))
+				}
+
+				answer := askLLM(r.Context(), contexts, q)
+				answerMD := string(app.Render([]byte(answer)))
+				result["answer"] = answerMD
+
+				// Store in session history
+				c, err := r.Cookie("session")
+				if err == nil {
+					ctx := c.Value
+					h, ok := history[ctx]
+					if !ok {
+						h = []string{}
+					}
+					h = append([]string{q, answerMD}, h...)
+					history[ctx] = h
+				}
+			}
+
+			output, _ := json.Marshal(result)
 			w.Write(output)
 			return
-		}
-	})
-
-	// Summarise is opt-in and can be called after search results are displayed
-	http.HandleFunc("/api/search/summarise", func(w http.ResponseWriter, r *http.Request) {
-		select {
-		case <-indexed:
-		default:
-			w.Write([]byte(`{"error": "Indexing content"}`))
-			return
-		}
-
-		if r.Method != "POST" {
-			http.Error(w, "method not allowed", 405)
-			return
-		}
-
-		b, _ := io.ReadAll(r.Body)
-		var data map[string]interface{}
-		json.Unmarshal(b, &data)
-
-		q, _ := data["q"].(string)
-		if q == "" {
-			http.Error(w, `{"error":"q is required"}`, 400)
-			return
-		}
-
-		res, err := idx.Query(q)
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-			return
-		}
-
-		var tokens int
-		var contexts []string
-
-		for _, r := range res {
-			if tokens >= 8000 {
-				break
-			}
-			for k, v := range r.Metadata {
-				delete(r.Metadata, k)
-				r.Metadata[strings.ToLower(k)] = v
-			}
-			b, _ := json.Marshal(r)
-			tokens += len(b)
-			contexts = append(contexts, string(b))
-		}
-
-		answer := askLLM(r.Context(), contexts, q)
-		answerMD := string(app.Render([]byte(answer)))
-
-		output, _ := json.Marshal(map[string]interface{}{
-			"q":      q,
-			"answer": answerMD,
-		})
-		w.Write(output)
-
-		// Store in session history
-		c, err := r.Cookie("session")
-		if err == nil {
-			ctx := c.Value
-			h, ok := history[ctx]
-			if !ok {
-				h = []string{}
-			}
-			h = append([]string{q, answerMD}, h...)
-			history[ctx] = h
 		}
 	})
 
