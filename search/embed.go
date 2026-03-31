@@ -1,9 +1,12 @@
 package search
 
 import (
+	"bytes"
+	"crypto/sha256"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"io"
 	"math"
 	"os"
 	"sort"
@@ -140,10 +143,32 @@ func (e *Embedder) Search(queryVec []float32, topN int) []*Result {
 	return results
 }
 
-// Save persists embeddings to a binary file.
+// Save persists embeddings to a binary file with a SHA-256 checksum
+// appended at the end to detect tampering.
 func (e *Embedder) Save(path string) error {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
+
+	// Write data to buffer so we can compute checksum
+	var buf bytes.Buffer
+
+	count := uint32(len(e.vecs))
+	binary.Write(&buf, binary.LittleEndian, count)
+
+	for i := range e.vecs {
+		textBytes := []byte(e.texts[i])
+		binary.Write(&buf, binary.LittleEndian, uint32(len(textBytes)))
+		buf.Write(textBytes)
+
+		metaBytes := []byte(e.metas[i])
+		binary.Write(&buf, binary.LittleEndian, uint32(len(metaBytes)))
+		buf.Write(metaBytes)
+
+		binary.Write(&buf, binary.LittleEndian, e.vecs[i])
+	}
+
+	// Compute SHA-256 over the data
+	checksum := sha256.Sum256(buf.Bytes())
 
 	f, err := os.Create(path)
 	if err != nil {
@@ -151,46 +176,45 @@ func (e *Embedder) Save(path string) error {
 	}
 	defer f.Close()
 
-	// Write count
-	count := uint32(len(e.vecs))
-	if err := binary.Write(f, binary.LittleEndian, count); err != nil {
+	// Write data + checksum
+	if _, err := f.Write(buf.Bytes()); err != nil {
 		return err
 	}
-
-	for i := range e.vecs {
-		// Write text length + text
-		textBytes := []byte(e.texts[i])
-		if err := binary.Write(f, binary.LittleEndian, uint32(len(textBytes))); err != nil {
-			return err
-		}
-		f.Write(textBytes)
-
-		// Write metadata length + metadata
-		metaBytes := []byte(e.metas[i])
-		if err := binary.Write(f, binary.LittleEndian, uint32(len(metaBytes))); err != nil {
-			return err
-		}
-		f.Write(metaBytes)
-
-		// Write embedding
-		if err := binary.Write(f, binary.LittleEndian, e.vecs[i]); err != nil {
-			return err
-		}
+	if _, err := f.Write(checksum[:]); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-// Load reads embeddings from a binary file.
+// Load reads embeddings from a binary file and verifies the SHA-256 checksum
+// to ensure the data has not been tampered with.
 func (e *Embedder) Load(path string) error {
-	f, err := os.Open(path)
+	raw, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+
+	// File must be at least 32 bytes (SHA-256 checksum)
+	if len(raw) < sha256.Size {
+		return fmt.Errorf("embed: file too small to contain checksum")
+	}
+
+	// Split data and checksum
+	data := raw[:len(raw)-sha256.Size]
+	storedChecksum := raw[len(raw)-sha256.Size:]
+
+	// Verify checksum
+	computed := sha256.Sum256(data)
+	if !bytes.Equal(computed[:], storedChecksum) {
+		return fmt.Errorf("embed: checksum mismatch — file may be corrupted or tampered with")
+	}
+
+	// Parse verified data
+	r := bytes.NewReader(data)
 
 	var count uint32
-	if err := binary.Read(f, binary.LittleEndian, &count); err != nil {
+	if err := binary.Read(r, binary.LittleEndian, &count); err != nil {
 		return err
 	}
 
@@ -199,29 +223,26 @@ func (e *Embedder) Load(path string) error {
 	metas := make([]string, 0, count)
 
 	for i := uint32(0); i < count; i++ {
-		// Read text
 		var textLen uint32
-		if err := binary.Read(f, binary.LittleEndian, &textLen); err != nil {
+		if err := binary.Read(r, binary.LittleEndian, &textLen); err != nil {
 			return err
 		}
 		textBytes := make([]byte, textLen)
-		if _, err := f.Read(textBytes); err != nil {
+		if _, err := io.ReadFull(r, textBytes); err != nil {
 			return err
 		}
 
-		// Read metadata
 		var metaLen uint32
-		if err := binary.Read(f, binary.LittleEndian, &metaLen); err != nil {
+		if err := binary.Read(r, binary.LittleEndian, &metaLen); err != nil {
 			return err
 		}
 		metaBytes := make([]byte, metaLen)
-		if _, err := f.Read(metaBytes); err != nil {
+		if _, err := io.ReadFull(r, metaBytes); err != nil {
 			return err
 		}
 
-		// Read embedding
 		vec := make([]float32, embeddingDim)
-		if err := binary.Read(f, binary.LittleEndian, vec); err != nil {
+		if err := binary.Read(r, binary.LittleEndian, vec); err != nil {
 			return err
 		}
 
