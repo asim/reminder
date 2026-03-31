@@ -32,10 +32,12 @@ func NewEmbedder(modelDir string) (*Embedder, error) {
 		return nil, fmt.Errorf("embed: create session: %w", err)
 	}
 
+	opts := hugot.NewDownloadOptions()
+	opts.OnnxFilePath = "onnx/model.onnx"
 	modelPath, err := hugot.DownloadModel(
 		"sentence-transformers/all-MiniLM-L6-v2",
 		modelDir,
-		hugot.NewDownloadOptions(),
+		opts,
 	)
 	if err != nil {
 		session.Destroy()
@@ -43,8 +45,9 @@ func NewEmbedder(modelDir string) (*Embedder, error) {
 	}
 
 	pipeline, err := hugot.NewPipeline(session, hugot.FeatureExtractionConfig{
-		ModelPath: modelPath,
-		Name:      "search-embeddings",
+		ModelPath:    modelPath,
+		Name:         "search-embeddings",
+		OnnxFilename: "onnx/model.onnx",
 	})
 	if err != nil {
 		session.Destroy()

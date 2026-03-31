@@ -554,17 +554,18 @@ func main() {
 	needsIndex := *IndexFlag || !idx.Built()
 	needsEmbed := embedder != nil && embedder.Count() == 0
 
-	if needsIndex || needsEmbed {
+	if needsIndex {
 		fmt.Println("Indexing data")
 		go func() {
-			if needsIndex {
-				indexQuran(idx, q)
-				indexNames(idx, n)
-				indexHadith(idx, b)
-				indexTafsir(idx, q)
-				fmt.Printf("FTS indexing complete (%d documents)\n", idx.Count())
-			}
+			indexQuran(idx, q)
+			indexNames(idx, n)
+			indexHadith(idx, b)
+			indexTafsir(idx, q)
+			fmt.Printf("FTS indexing complete (%d documents)\n", idx.Count())
+			// FTS is ready — open search (keyword-only until embeddings finish)
+			close(indexed)
 
+			// Build embeddings in background after FTS is ready
 			if needsEmbed {
 				fmt.Println("Building embeddings (this may take a few minutes on first run)...")
 				buildEmbeddings(idx, embedder)
@@ -574,11 +575,26 @@ func main() {
 					fmt.Printf("Saved %d embeddings to disk\n", embedder.Count())
 				}
 			}
-
-			close(indexed)
+		}()
+	} else if needsEmbed {
+		// FTS already built, search is available immediately
+		close(indexed)
+		// Build embeddings in background
+		go func() {
+			fmt.Println("Building embeddings (this may take a few minutes on first run)...")
+			buildEmbeddings(idx, embedder)
+			if err := embedder.Save(embedPath); err != nil {
+				fmt.Printf("Warning: failed to save embeddings: %v\n", err)
+			} else {
+				fmt.Printf("Saved %d embeddings to disk\n", embedder.Count())
+			}
 		}()
 	} else {
-		fmt.Printf("Search index loaded (%d documents, %d embeddings)\n", idx.Count(), embedder.Count())
+		embedCount := 0
+		if embedder != nil {
+			embedCount = embedder.Count()
+		}
+		fmt.Printf("Search index loaded (%d documents, %d embeddings)\n", idx.Count(), embedCount)
 		close(indexed)
 	}
 
