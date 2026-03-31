@@ -144,8 +144,8 @@ code {
 var SearchTemplate = `
 <div class="mb-6">
   <form id="question" action="/search" method="post">
-    <input id="q" name="q" placeholder="Ask a question about Islam, Quran, Hadith..." 
-           autocomplete="off" autofocus 
+    <input id="q" name="q" placeholder="Search the Quran, Hadith, Names of Allah..."
+           autocomplete="off" autofocus
            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent">
   </form>
 </div>
@@ -153,90 +153,132 @@ var SearchTemplate = `
 <div id="answer" class="space-y-6"></div>
 <script>
 function expand(el) {
-      var ref = el.nextSibling;
+    var ref = el.nextSibling;
+    if (ref.style.display == 'none') {
+        ref.style.display = 'block';
+    } else {
+        ref.style.display = 'none';
+    }
+}
 
-      if (ref.style.display == 'none') {
-          ref.style.display = 'block';
-      } else {
-          ref.style.display = 'none';
-      }
+function sourceLabel(md) {
+    if (!md) return '';
+    if (md.source === 'quran') return 'Quran ' + md.chapter + ':' + md.verse;
+    if (md.source === 'bukhari') return 'Bukhari, Book ' + md.book_num + ', #' + md.number;
+    if (md.source === 'names') return md.english + ' (' + md.arabic + ')';
+    if (md.source === 'tafsir') return 'Tafsir ' + md.chapter + ':' + md.verse;
+    return md.source || '';
 }
 
 function reference(el) {
-	return "<div class='p-3 bg-gray-50 rounded text-sm'><strong>Text:</strong> " + el.text + "<br><strong>Metadata:</strong> " + JSON.stringify(el.metadata) + "<br><strong>Score:</strong> " + el.score + "</div>";
+    var label = sourceLabel(el.metadata);
+    return "<div class='p-3 bg-gray-50 rounded text-sm mb-2'>" +
+        (label ? "<div class='font-medium text-gray-900 mb-1'>" + label + "</div>" : "") +
+        "<div class='text-gray-700'>" + el.text + "</div></div>";
 }
 
 function getCookie(name) {
     var cookies = document.cookie.split(';');
-    for(var i=0 ; i < cookies.length ; ++i) {
+    for (var i = 0; i < cookies.length; ++i) {
         var pair = cookies[i].trim().split('=');
-        if(pair[0] == name)
-            return pair[1];
+        if (pair[0] == name) return pair[1];
     }
     return null;
-};
+}
 
 function setCookie(name, value) {
     document.cookie = name + "=" + value;
 }
 
-document.addEventListener('DOMContentLoaded', function(){
-    // check if session exists
+document.addEventListener('DOMContentLoaded', function() {
     var uuid = getCookie("session");
-
     if (uuid == undefined) {
         uuid = self.crypto.randomUUID();
-	setCookie("session", uuid);
+        setCookie("session", uuid);
     }
 
-    var url = "/api/search";
-
-    // attempt to get the existing responses
+    // Load history
     var xhr = new XMLHttpRequest();
-    xhr.open("GET", url, true);
-    xhr.onreadystatechange = function () {
+    xhr.open("GET", "/api/search", true);
+    xhr.onreadystatechange = function() {
         if (xhr.readyState === 4 && xhr.status === 200) {
-	  var ans = document.getElementById("answer");
-	  var json = JSON.parse(xhr.responseText);
-	  json.history.forEach(function(el) {
-		ans.innerHTML += "<div class='p-4 bg-gray-50 rounded mb-4'>" + el + "</div>";
-	  });
+            var ans = document.getElementById("answer");
+            var json = JSON.parse(xhr.responseText);
+            if (json.history) {
+                json.history.forEach(function(el) {
+                    ans.innerHTML += "<div class='p-4 bg-gray-50 rounded mb-4'>" + el + "</div>";
+                });
+            }
         }
     };
-
     xhr.send(null);
 
     var form = document.getElementById("question");
     form.addEventListener("submit", function(ev) {
-	var ans = document.getElementById("answer");
-	var resp = document.getElementById("resp");
         ev.preventDefault();
-	var q = document.getElementById("q");
-	var xhr = new XMLHttpRequest();
-	xhr.open("POST", url, true);
-	xhr.setRequestHeader("Content-Type", "application/json");
-	xhr.onreadystatechange = function () {
-	    if (xhr.readyState === 4 && xhr.status === 200) {
-		var json = JSON.parse(xhr.responseText);
-		var text = "<div class='p-6 bg-white border border-gray-200 rounded-lg shadow-sm mb-6'>";
-		text += "<div class='font-semibold text-gray-900 mb-3'>" + json.q + "</div>";
-		text += "<div class='prose max-w-none text-gray-700 mb-4'>" + json.answer + "</div>";
-		text += "<div class='cursor-pointer text-sm text-blue-600 hover:text-blue-800 font-medium' id='expand' onclick='expand(this); return false;'>Show References ▼</div>";
-		text += "<div class='mt-4 space-y-2' style='display: none;'>";
-		for (i = 0; i < json.references.length; i++) {
-                    text += reference(json.references[i]);
-		}
-		text += "</div></div>";
-		ans.innerHTML = text + ans.innerHTML; 
-		resp.innerText = "";
-	    }
-	};
-	var data = JSON.stringify({"q": q.value});
-	resp.innerText = "seeking...";
-	xhr.send(data);
-	q.value = '';
+        var ans = document.getElementById("answer");
+        var resp = document.getElementById("resp");
+        var q = document.getElementById("q");
+        var query = q.value;
+        q.value = '';
+        resp.innerText = "searching...";
+
+        // Step 1: Get results immediately
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/api/search", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                var json = JSON.parse(xhr.responseText);
+                var resultId = 'result-' + Date.now();
+
+                var text = "<div id='" + resultId + "' class='p-6 bg-white border border-gray-200 rounded-lg shadow-sm mb-6'>";
+                text += "<div class='font-semibold text-gray-900 mb-3'>" + json.q + "</div>";
+
+                // Summary placeholder — will be filled async
+                text += "<div class='summary-slot text-gray-500 text-sm mb-4'>";
+                text += "<button class='summarise-btn px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700 text-sm' onclick='summarise(this, \"" + encodeURIComponent(json.q) + "\")'>Summarise with AI</button>";
+                text += "</div>";
+
+                // Show results directly
+                if (json.references && json.references.length > 0) {
+                    text += "<div class='space-y-2'>";
+                    for (var i = 0; i < json.references.length; i++) {
+                        text += reference(json.references[i]);
+                    }
+                    text += "</div>";
+                } else {
+                    text += "<div class='text-gray-500 text-sm'>No results found.</div>";
+                }
+
+                text += "</div>";
+                ans.innerHTML = text + ans.innerHTML;
+                resp.innerText = "";
+            }
+        };
+        xhr.send(JSON.stringify({"q": query}));
     });
 }, false);
+
+function summarise(btn, encodedQuery) {
+    var slot = btn.parentNode;
+    slot.innerHTML = "<span class='text-gray-400'>Summarising...</span>";
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/search/summarise", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                var json = JSON.parse(xhr.responseText);
+                slot.innerHTML = "<div class='prose max-w-none text-gray-700'>" + json.answer + "</div>";
+            } else {
+                slot.innerHTML = "<span class='text-red-500 text-sm'>Failed to summarise. Try again later.</span>";
+            }
+        }
+    };
+    xhr.send(JSON.stringify({"q": decodeURIComponent(encodedQuery)}));
+}
 </script>
 `
 
