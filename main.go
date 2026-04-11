@@ -245,7 +245,7 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Collection, a 
 		hadithLink := links["hadith"]
 		nameLink := links["name"]
 
-		data := fmt.Sprintf(template, verseLink, dailyVerse, hadithLink, dailyHadith, nameLink, dailyName, dailyUpdated.Format(time.RFC850))
+		data := fmt.Sprintf(template, verseLink, dailyVerse, hadithLink, dailyHadith, nameLink, dailyName, dailyUpdated.Format(time.RFC3339))
 		mtx.RUnlock()
 
 		html := app.RenderHTML("Daily Reminder", "Daily reminder from the quran, hadith and names of Allah", data)
@@ -751,7 +751,7 @@ func main() {
 				"hadith":  dailyHadith,
 				"verse":   dailyVerse,
 				"links":   links,
-				"updated": dailyUpdated.Format(time.RFC850),
+				"updated": dailyUpdated.Format(time.RFC3339),
 				"message": message,
 				"hijri":   daily.Date().Display,
 				"date":    today,
@@ -779,7 +779,7 @@ func main() {
 			"hadith":  hadith,
 			"verse":   verse,
 			"links":   currentLinks,
-			"updated": updated.Format(time.RFC850),
+			"updated": updated.Format(time.RFC3339),
 			"message": message,
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -1226,7 +1226,7 @@ func main() {
 			"hadith":  dailyHadith,
 			"verse":   dailyVerse,
 			"links":   links,
-			"updated": dailyUpdated.Format(time.RFC850),
+			"updated": dailyUpdated.Format(time.RFC3339),
 			"message": dailyMessage,
 		}
 		mtx.RUnlock()
@@ -1250,7 +1250,7 @@ func main() {
 			"hadith":  dailyHadith,
 			"verse":   dailyVerse,
 			"links":   links,
-			"updated": dailyUpdated.Format(time.RFC850),
+			"updated": dailyUpdated.Format(time.RFC3339),
 			"message": message,
 			"hijri":   daily.Date().Display,
 			"date":    today,
@@ -1607,7 +1607,7 @@ func main() {
 					"hijri":   hijriDate,
 					"date":    today,
 					"links":   links,
-					"updated": dailyUpdated.Format(time.RFC850),
+					"updated": dailyUpdated.Format(time.RFC3339),
 					"message": dailyMessage,
 				}
 
