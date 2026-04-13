@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 import { BookmarkButton } from '~/components/interface/bookmark-button';
 import { ReadingBookmarkButton } from '~/components/interface/reading-bookmark-button';
+import { ShareButton } from '~/components/interface/share-button';
 import { getBookOptions } from '~/queries/hadith';
 import { queryClient } from '~/utils/query-client';
 
@@ -97,7 +98,13 @@ export default function HadithBook() {
 
   return (
     <div className='max-w-4xl mx-auto w-full mb-8 sm:mb-12 flex-grow p-0 lg:p-8'>
-      <div className='text-center mt-0 sm:mt-6 md:mt-8 mb-4 sm:mb-8 md:mb-12'>
+      <div className='flex justify-end mt-0 sm:mt-6 md:mt-8'>
+        <ShareButton
+          title={`${book.name} - Sahih Bukhari`}
+          url={`/hadith/${bookNumber}`}
+        />
+      </div>
+      <div className='text-center mb-4 sm:mb-8 md:mb-12'>
         <h1 className='text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2 flex items-center justify-center'>
           {book.name}
         </h1>
@@ -163,6 +170,11 @@ export default function HadithBook() {
                     label={`${book.name} - Hadith ${hadithNumber}`}
                     url={`/hadith/${bookNumber}#${hadithNumber}`}
                     excerpt={englishText.length > 80 ? englishText.slice(0, 80) + '...' : englishText}
+                  />
+                  <ShareButton
+                    title={`${book.name} - Hadith ${hadithNumber}`}
+                    text={englishText}
+                    url={`/hadith/${bookNumber}#${hadithNumber}`}
                   />
                 </div>
               </div>

@@ -5,6 +5,7 @@ import React from 'react';
 import { Link } from 'react-router';
 import { PageError } from '~/components/interface/page-error';
 import { PrimaryButton } from '~/components/interface/primary-button';
+import { ShareButton } from '~/components/interface/share-button';
 import { AudioPlayer } from '~/components/quran/audio-player';
 import { ChapterHeader } from '~/components/quran/chapter-header';
 import { ClickableArabicWord } from '~/components/quran/clickable-arabic-word';
@@ -48,6 +49,13 @@ export default function QuranVerse(props: Route.ComponentProps) {
   return (
     <div className='max-w-4xl flex flex-col w-full mx-auto p-0 lg:p-8'>
       <ViewMode mode={mode} onChange={setMode} />
+      <div className='flex justify-end'>
+        <ShareButton
+          title={`Quran ${data.number}:${verseNumber} - ${data.english}`}
+          text={verse.text}
+          url={`/quran/${data.number}/${verseNumber}`}
+        />
+      </div>
       <ChapterHeader
         title={data.name}
         translation={data.english}

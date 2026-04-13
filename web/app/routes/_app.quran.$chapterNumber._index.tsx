@@ -5,6 +5,7 @@ import React, { Fragment, useEffect } from 'react';
 import { Link } from 'react-router';
 import { BookmarkButton } from '~/components/interface/bookmark-button';
 import { ReadingBookmarkButton } from '~/components/interface/reading-bookmark-button';
+import { ShareButton } from '~/components/interface/share-button';
 import { PageError } from '~/components/interface/page-error';
 import { PrimaryButton } from '~/components/interface/primary-button';
 import { AudioPlayer } from '~/components/quran/audio-player';
@@ -112,6 +113,12 @@ export default function QuranChapter(props: Route.ComponentProps) {
   return (
     <div className='max-w-4xl flex flex-col w-full mb-8 sm:mb-12 flex-grow mx-auto p-0 lg:p-8'>
       <ViewMode mode={mode} onChange={setMode} />
+      <div className='flex justify-end'>
+        <ShareButton
+          title={`${data.english} (${data.name}) - Quran Chapter ${data.number}`}
+          url={`/quran/${data.number}`}
+        />
+      </div>
       <ChapterHeader
         title={data.name}
         translation={data.english}
@@ -221,6 +228,11 @@ export default function QuranChapter(props: Route.ComponentProps) {
                       url={`/quran/${data.number}#${verse.number}`}
                       excerpt={verse.text.length > 80 ? verse.text.slice(0, 80) + '...' : verse.text}
                     />
+                    <ShareButton
+                      title={`Quran ${data.number}:${verse.number} - ${data.english}`}
+                      text={verse.text}
+                      url={`/quran/${data.number}/${verse.number}`}
+                    />
                   </div>
                 )}
               </div>
@@ -296,6 +308,11 @@ export default function QuranChapter(props: Route.ComponentProps) {
                       label={`${data.english} ${data.number}:${verse.number}`}
                       url={`/quran/${data.number}#${verse.number}`}
                       excerpt={verse.text.length > 80 ? verse.text.slice(0, 80) + '...' : verse.text}
+                    />
+                    <ShareButton
+                      title={`Quran ${data.number}:${verse.number} - ${data.english}`}
+                      text={verse.text}
+                      url={`/quran/${data.number}/${verse.number}`}
                     />
                   </div>
                 )}

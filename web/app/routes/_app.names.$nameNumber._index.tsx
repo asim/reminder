@@ -2,6 +2,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router';
 import { BookmarkButton } from '~/components/interface/bookmark-button';
 import { ReadingBookmarkButton } from '~/components/interface/reading-bookmark-button';
+import { ShareButton } from '~/components/interface/share-button';
 import { getNameOptions } from '~/queries/names';
 
 export function meta() {
@@ -53,6 +54,11 @@ export default function NameDetail() {
                   label={`Name ${name.number}: ${name.meaning}`}
                   url={`/names/${name.number}`}
                   excerpt={name.summary ? (name.summary.length > 80 ? name.summary.slice(0, 80) + '...' : name.summary) : name.english}
+                />
+                <ShareButton
+                  title={`${name.english} (${name.arabic}) - ${name.meaning}`}
+                  text={name.summary}
+                  url={`/names/${name.number}`}
                 />
               </div>
             </div>
