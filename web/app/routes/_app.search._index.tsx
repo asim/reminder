@@ -1,7 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { getSearchHistoryOptions, searchOptions, type SearchResponseType } from '~/queries/search';
+import {
+  getSearchHistoryOptions,
+  searchOptions,
+  searchSummaryOptions,
+  type SearchResponseType,
+} from '~/queries/search';
 import {
   cacheSearchResult,
   getAllCachedSearches,
@@ -26,8 +31,9 @@ export function meta() {
 export default function SearchIndex() {
   const [query, setQuery] = useState('');
   const [submittedQuery, setSubmittedQuery] = useState('');
+  const [wantSummary, setWantSummary] = useState(false);
   const [expandedRefs, setExpandedRefs] = useState<Record<number, boolean>>({});
-  const [showReferences, setShowReferences] = useState(false);
+  const [showReferences, setShowReferences] = useState(true);
   const [cachedSearches, setCachedSearches] = useState<CachedSearch[]>([]);
   const [expandedHistoryRefs, setExpandedHistoryRefs] = useState<Record<string, boolean>>({});
   const [expandedHistoryRefItems, setExpandedHistoryRefItems] = useState<Record<string, boolean>>({});
@@ -41,30 +47,47 @@ export default function SearchIndex() {
     getSearchHistoryOptions()
   );
 
+  // Fast path: references return immediately without LLM summarisation.
   const { data: searchResults, isLoading } = useQuery({
     ...searchOptions(submittedQuery),
     enabled: !!submittedQuery,
   });
 
-  // Cache search results when received
+  // Slow path: only runs when the user opted into summarisation and the
+  // fast path has returned its references.
+  const { data: summaryResults, isLoading: isSummaryLoading } = useQuery({
+    ...searchSummaryOptions(submittedQuery),
+    enabled: !!submittedQuery && wantSummary && !!searchResults,
+  });
+
+  // Merge the references from the fast query with the answer from the slow
+  // query so the UI has a single object to render.
+  const mergedResults = useMemo<SearchResponseType | null>(() => {
+    if (!searchResults) return null;
+    return {
+      ...searchResults,
+      answer: summaryResults?.answer ?? '',
+    };
+  }, [searchResults, summaryResults]);
+
+  // Cache search results (with summary if present) when received
   useEffect(() => {
-    if (searchResults && submittedQuery) {
-      cacheSearchResult(submittedQuery, searchResults);
+    if (mergedResults && submittedQuery && mergedResults.answer) {
+      cacheSearchResult(submittedQuery, mergedResults);
       setCachedSearches(getAllCachedSearches());
+      refetchHistory();
     }
-  }, [searchResults, submittedQuery]);
+  }, [mergedResults, submittedQuery, refetchHistory]);
 
   const handleSubmit = (e: React.FormEvent) => {
-    console.log('handleSubmit called');
     e.preventDefault();
     if (!query.trim()) {
       return;
     }
 
     setSubmittedQuery(query);
-    setShowReferences(false);
+    setShowReferences(true);
     setQuery('');
-    refetchHistory();
   };
 
   // Create merged history with cached data
@@ -158,10 +181,7 @@ export default function SearchIndex() {
               className='w-full p-2 sm:p-3 border border-gray-300 rounded-md text-sm sm:text-base disabled:opacity-90'
               placeholder={isLoading ? 'Seeking...' : 'Ask a question'}
               value={query}
-              onChange={(e) => {
-                console.log('Input changed:', e.target.value);
-                setQuery(e.target.value);
-              }}
+              onChange={(e) => setQuery(e.target.value)}
               autoComplete='off'
               disabled={isLoading}
               autoFocus
@@ -174,26 +194,45 @@ export default function SearchIndex() {
               Search
             </button>
             {isLoading && (
-              <div className='absolute right-3 top-1/2 -translate-y-1/2'>
+              <div className='absolute right-28 top-1/2 -translate-y-1/2'>
                 <Loader2 className='animate-spin h-4 w-4 sm:h-5 sm:w-5 text-gray-400' />
               </div>
             )}
           </div>
+          <label className='mt-2 flex items-center gap-2 cursor-pointer text-xs sm:text-sm text-gray-600 select-none'>
+            <input
+              type='checkbox'
+              checked={wantSummary}
+              onChange={(e) => setWantSummary(e.target.checked)}
+              className='accent-black h-3.5 w-3.5 rounded'
+            />
+            <span>Include AI summary (slower)</span>
+          </label>
         </form>
 
         {isLoading && (
           <div className='mb-3 sm:mb-4 text-sm sm:text-base'>Seeking...</div>
         )}
 
-        {searchResults && (
+        {mergedResults && (
           <div className='mb-6 sm:mb-8 border border-gray-200 rounded-md p-3 sm:p-4'>
             <div className='mb-2 sm:mb-3 text-lg sm:text-xl font-medium'>
-              {searchResults.q}
+              {mergedResults.q}
             </div>
-            <div
-              className='mb-3 sm:mb-4 text-sm sm:text-base prose prose-sm sm:prose-base max-w-none'
-              dangerouslySetInnerHTML={{ __html: searchResults.answer }}
-            />
+
+            {wantSummary && (
+              isSummaryLoading || !mergedResults.answer ? (
+                <div className='mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base text-gray-500'>
+                  <Loader2 className='animate-spin h-4 w-4' />
+                  <span>Generating summary...</span>
+                </div>
+              ) : (
+                <div
+                  className='mb-3 sm:mb-4 text-sm sm:text-base prose prose-sm sm:prose-base max-w-none'
+                  dangerouslySetInnerHTML={{ __html: mergedResults.answer }}
+                />
+              )
+            )}
 
             <div className='mt-3 sm:mt-4 border-t pt-3'>
               <button
@@ -201,12 +240,12 @@ export default function SearchIndex() {
                 className='text-xs sm:text-sm font-medium text-gray-700 hover:text-black flex items-center gap-1'
               >
                 <span>{showReferences ? '▼' : '▶'}</span>
-                <span>References ({searchResults.references.length})</span>
+                <span>References ({mergedResults.references.length})</span>
               </button>
 
               {showReferences && (
                 <div className='mt-3 space-y-3'>
-                  {searchResults.references.map((ref, index) => (
+                  {mergedResults.references.map((ref, index) => (
                     <div key={index} className='border border-gray-200 rounded-lg overflow-hidden'>
                       <div
                         className='bg-gray-50 px-3 py-2 cursor-pointer hover:bg-gray-100 flex items-start justify-between gap-2'

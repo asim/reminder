@@ -1155,11 +1155,39 @@ func main() {
 			var data map[string]interface{}
 			json.Unmarshal(b, &data)
 
-			q := data["q"].(string)
+			q, _ := data["q"].(string)
+
+			// summarise defaults to true when absent for backward compat.
+			// The new web UI explicitly sets summarise=false for the fast
+			// path that only returns references, then issues a second call
+			// with summarise=true to fetch the LLM answer.
+			summarise := true
+			if v, ok := data["summarise"]; ok {
+				if bv, ok := v.(bool); ok {
+					summarise = bv
+				}
+			}
 
 			res, err := idx.Query(q)
 			if err != nil {
 				http.Error(w, err.Error(), 500)
+				return
+			}
+
+			for _, r := range res {
+				for k, v := range r.Metadata {
+					delete(r.Metadata, k)
+					r.Metadata[strings.ToLower(k)] = v
+				}
+			}
+
+			if !summarise {
+				output, _ := json.Marshal(map[string]interface{}{
+					"q":          q,
+					"answer":     "",
+					"references": res,
+				})
+				w.Write(output)
 				return
 			}
 
@@ -1169,11 +1197,6 @@ func main() {
 			for _, r := range res {
 				if tokens >= 8000 {
 					break
-				}
-
-				for k, v := range r.Metadata {
-					delete(r.Metadata, k)
-					r.Metadata[strings.ToLower(k)] = v
 				}
 
 				b, _ := json.Marshal(r)
