@@ -1,8 +1,11 @@
-import { Bookmark, Search } from 'lucide-react';
+import { Bookmark, Download, Search } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router';
+import { usePwaInstall } from '~/hooks/use-pwa-install';
 import { cn } from '~/utils/classname';
 
 export default function AppLayout() {
+  const { canInstall, install } = usePwaInstall();
+
   const buttonClass = ({ isActive }: { isActive: boolean }) =>
     cn(
       'bg-white transition-colors hover:opacity-100 flex items-center gap-1 text-black px-2 py-0.5 rounded-md text-xs',
@@ -38,8 +41,17 @@ export default function AppLayout() {
             Names
           </NavLink>
         </div>
-        {/* Right-aligned search/api links */}
+        {/* Right-aligned links */}
         <div className='hidden lg:flex items-center gap-2 order-3'>
+          {canInstall && (
+            <button
+              onClick={install}
+              className='bg-white text-black hover:opacity-80 flex items-center gap-1 px-2 py-0.5 rounded-md text-xs transition-colors'
+            >
+              <Download className='size-3' />
+              Install
+            </button>
+          )}
           <NavLink className={buttonClass} to='/bookmarks'>
             <Bookmark className='size-3' />
             Bookmarks
@@ -50,6 +62,14 @@ export default function AppLayout() {
           </NavLink>
         </div>
         <div className='lg:hidden flex items-center gap-1 ml-auto order-4'>
+          {canInstall && (
+            <button
+              onClick={install}
+              className='bg-white text-black hover:opacity-80 flex items-center gap-1 px-2 py-0.5 rounded-md text-xs transition-colors'
+            >
+              <Download className='size-3' />
+            </button>
+          )}
           <NavLink to='/bookmarks' className={buttonClass}>
             <Bookmark className='size-3' />
           </NavLink>
