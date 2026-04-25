@@ -45,6 +45,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <Scripts />
           <NavigationProgress />
         </QueryClientProvider>
+        <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/reminder.js')}` }} />
       </body>
     </html>
   );
