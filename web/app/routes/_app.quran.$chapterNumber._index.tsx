@@ -11,6 +11,7 @@ import { PrimaryButton } from '~/components/interface/primary-button';
 import { AudioPlayer } from '~/components/quran/audio-player';
 import { ChapterHeader } from '~/components/quran/chapter-header';
 import { ClickableArabicWord } from '~/components/quran/clickable-arabic-word';
+import { TranscriptButton } from '~/components/quran/transcript-button';
 import { ViewMode } from '~/components/quran/view-mode';
 import { useQuranViewMode } from '~/hooks/use-quran-view-mode';
 import { getChapterOptions } from '~/queries/quran';
@@ -118,7 +119,13 @@ export default function QuranChapter(props: Route.ComponentProps) {
   return (
     <div className='max-w-4xl flex flex-col w-full mb-8 sm:mb-12 flex-grow mx-auto p-0 lg:p-8'>
       <ViewMode mode={mode} onChange={setMode} />
-      <div className='flex justify-end'>
+      <div className='flex justify-end gap-1'>
+        <TranscriptButton
+          chapterNumber={data.number}
+          chapterName={data.name}
+          chapterEnglish={data.english}
+          verses={data.verses}
+        />
         <ShareButton
           title={`${data.english} (${data.name}) - Quran Chapter ${data.number}`}
           url={buildQuranShareUrl(`/quran/${data.number}`, { mode, wordByWord, commentary: showCommentary })}
