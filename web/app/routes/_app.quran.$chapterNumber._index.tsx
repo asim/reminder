@@ -2,7 +2,7 @@ import type { Route } from '.react-router/types/app/routes/+types/_app.quran.$ch
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { CircleChevronLeft, CircleChevronRight } from 'lucide-react';
 import React, { Fragment, useEffect } from 'react';
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import { BookmarkButton } from '~/components/interface/bookmark-button';
 import { ReadingBookmarkButton } from '~/components/interface/reading-bookmark-button';
 import { ShareButton } from '~/components/interface/share-button';
@@ -16,6 +16,7 @@ import { useQuranViewMode } from '~/hooks/use-quran-view-mode';
 import { getChapterOptions } from '~/queries/quran';
 import { useWordByWordToggle } from '~/use-word-by-word-toggle';
 import { queryClient } from '~/utils/query-client';
+import { buildQuranShareUrl } from '~/utils/quran-share';
 
 function toArabicNumber(num: number) {
   return num
@@ -46,9 +47,13 @@ export async function clientLoader(props: Route.LoaderArgs) {
 export default function QuranChapter(props: Route.ComponentProps) {
   const { chapterNumber } = props.params;
   const { data } = useSuspenseQuery(getChapterOptions(Number(chapterNumber)));
+  const [searchParams] = useSearchParams();
   const [mode, setMode] = useQuranViewMode();
   const [wordByWord, setWordByWord] = useWordByWordToggle();
-  const [showCommentary, setShowCommentary] = React.useState(false);
+  const [showCommentary, setShowCommentary] = React.useState(() => {
+    const param = searchParams.get('commentary');
+    return param === '1' || param === 'true';
+  });
   const [currentVerseIndex, setCurrentVerseIndex] = React.useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = React.useState(false);
 
@@ -116,7 +121,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
       <div className='flex justify-end'>
         <ShareButton
           title={`${data.english} (${data.name}) - Quran Chapter ${data.number}`}
-          url={`/quran/${data.number}`}
+          url={buildQuranShareUrl(`/quran/${data.number}`, { mode, wordByWord, commentary: showCommentary })}
         />
       </div>
       <ChapterHeader
@@ -231,7 +236,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
                     <ShareButton
                       title={`Quran ${data.number}:${verse.number} - ${data.english}`}
                       text={verse.text}
-                      url={`/quran/${data.number}/${verse.number}`}
+                      url={buildQuranShareUrl(`/quran/${data.number}/${verse.number}`, { mode, wordByWord, commentary: showCommentary })}
                     />
                   </div>
                 )}
@@ -312,7 +317,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
                     <ShareButton
                       title={`Quran ${data.number}:${verse.number} - ${data.english}`}
                       text={verse.text}
-                      url={`/quran/${data.number}/${verse.number}`}
+                      url={buildQuranShareUrl(`/quran/${data.number}/${verse.number}`, { mode, wordByWord, commentary: showCommentary })}
                     />
                   </div>
                 )}

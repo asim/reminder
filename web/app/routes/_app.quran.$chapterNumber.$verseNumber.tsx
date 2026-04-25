@@ -2,7 +2,7 @@ import type { Route } from '.react-router/types/app/routes/+types/_app.quran.$ch
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { CircleChevronLeft, CircleChevronRight } from 'lucide-react';
 import React from 'react';
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import { PageError } from '~/components/interface/page-error';
 import { PrimaryButton } from '~/components/interface/primary-button';
 import { ShareButton } from '~/components/interface/share-button';
@@ -13,6 +13,7 @@ import { ViewMode } from '~/components/quran/view-mode';
 import { useQuranViewMode } from '~/hooks/use-quran-view-mode';
 import { getChapterOptions } from '~/queries/quran';
 import { useWordByWordToggle } from '~/use-word-by-word-toggle';
+import { buildQuranShareUrl } from '~/utils/quran-share';
 
 function toArabicNumber(num: number) {
   return num
@@ -24,9 +25,13 @@ export default function QuranVerse(props: Route.ComponentProps) {
   const { chapterNumber, verseNumber } = props.params;
 
   const { data } = useSuspenseQuery(getChapterOptions(Number(chapterNumber)));
+  const [searchParams] = useSearchParams();
   const [mode, setMode] = useQuranViewMode();
   const [wordByWord, setWordByWord] = useWordByWordToggle();
-  const [showCommentary, setShowCommentary] = React.useState(false);
+  const [showCommentary, setShowCommentary] = React.useState(() => {
+    const param = searchParams.get('commentary');
+    return param === '1' || param === 'true';
+  });
 
   const verse = data.verses.find(
     (verse) => verse.number === Number(verseNumber)
@@ -53,7 +58,7 @@ export default function QuranVerse(props: Route.ComponentProps) {
         <ShareButton
           title={`Quran ${data.number}:${verseNumber} - ${data.english}`}
           text={verse.text}
-          url={`/quran/${data.number}/${verseNumber}`}
+          url={buildQuranShareUrl(`/quran/${data.number}/${verseNumber}`, { mode, wordByWord, commentary: showCommentary })}
         />
       </div>
       <ChapterHeader
