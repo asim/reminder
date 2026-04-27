@@ -254,6 +254,39 @@ export function AudioPlayer({
     return null;
   }
 
+  // Media Session API: keeps audio alive when screen is off and shows
+  // lock-screen controls on mobile.
+  useEffect(() => {
+    if (!('mediaSession' in navigator)) return;
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: verseLabel,
+      artist: currentTrack === 'arabic' ? 'Arabic Recitation' : currentTrack === 'english' ? 'English Translation' : 'Quran Audio',
+      album: 'Reminder',
+      artwork: [
+        { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      ],
+    });
+
+    navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+
+    navigator.mediaSession.setActionHandler('play', () => {
+      if (!isPlaying) playSequence();
+    });
+    navigator.mediaSession.setActionHandler('pause', () => {
+      if (isPlaying) pause();
+    });
+    navigator.mediaSession.setActionHandler('previoustrack', arabicUrl ? skipToArabic : null);
+    navigator.mediaSession.setActionHandler('nexttrack', englishUrl ? skipToEnglish : null);
+
+    return () => {
+      navigator.mediaSession.setActionHandler('play', null);
+      navigator.mediaSession.setActionHandler('pause', null);
+      navigator.mediaSession.setActionHandler('previoustrack', null);
+      navigator.mediaSession.setActionHandler('nexttrack', null);
+    };
+  }, [isPlaying, currentTrack, verseLabel, arabicUrl, englishUrl]);
+
   return (
     <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 sm:p-4 mb-4">
       <div className="flex items-center justify-between mb-2">
