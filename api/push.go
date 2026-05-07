@@ -183,24 +183,45 @@ func RegisterRoutes(mux *http.ServeMux) {
 }
 
 func SendPushNotification(sub PushSubscription, payload string) error {
-	fmt.Println("Pushing to sub", sub.Endpoint)
+	// Safe key extraction — avoids panic on corrupted subscriptions
+	p256dh, _ := sub.Keys["p256dh"].(string)
+	auth, _ := sub.Keys["auth"].(string)
+	if p256dh == "" || auth == "" {
+		return fmt.Errorf("invalid subscription keys for %s", sub.Endpoint)
+	}
+
 	subscription := &webpush.Subscription{
 		Endpoint: sub.Endpoint,
 		Keys: webpush.Keys{
-			P256dh: sub.Keys["p256dh"].(string),
-			Auth:   sub.Keys["auth"].(string),
+			P256dh: p256dh,
+			Auth:   auth,
 		},
 	}
+
 	resp, err := webpush.SendNotification([]byte(payload), subscription, &webpush.Options{
 		Subscriber:      VAPIDEmail,
 		VAPIDPublicKey:  VAPIDPublicKey,
 		VAPIDPrivateKey: VAPIDPrivateKey,
-		TTL:             60,
+		TTL:             86400, // 24 hours — gives the push service time to deliver
 	})
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
+	// Drain body so the connection can be reused
+	io.Copy(io.Discard, resp.Body)
+
+	// Remove subscription if the push service says it's gone
+	if resp.StatusCode == http.StatusGone || resp.StatusCode == http.StatusNotFound {
+		log.Printf("Removing expired push subscription: %s (status %d)", sub.Endpoint, resp.StatusCode)
+		RemovePushSubscription(sub.Endpoint)
+		return fmt.Errorf("subscription expired (status %d)", resp.StatusCode)
+	}
+
+	if resp.StatusCode >= 400 {
+		return fmt.Errorf("push service returned status %d for %s", resp.StatusCode, sub.Endpoint)
+	}
+
 	return nil
 }
 

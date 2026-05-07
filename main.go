@@ -1509,6 +1509,12 @@ func main() {
 		}
 
 		for {
+			func() {
+				defer func() {
+					if r := recover(); r != nil {
+						fmt.Printf("Daily loop recovered from panic: %v\n", r)
+					}
+				}()
 			fmt.Println("Running daily")
 
 			mtx.Lock()
@@ -1521,7 +1527,7 @@ func main() {
 			if len(book.Hadiths) == 0 {
 				fmt.Printf("Book %d (%s) has no hadiths, skipping\n", bookIdx, book.Name)
 				mtx.Unlock()
-				continue
+				return
 			}
 
 			chap := q.Chapters[rnd.Int()%len(q.Chapters)]
@@ -1530,7 +1536,7 @@ func main() {
 			if len(chap.Verses) == 0 {
 				fmt.Printf("Chapter %d has no verses, skipping\n", chap.Number)
 				mtx.Unlock()
-				continue
+				return
 			}
 
 			ver := chap.Verses[rnd.Int()%len(chap.Verses)]
@@ -1542,13 +1548,13 @@ func main() {
 			// make sure we're starting from the begining of a verse
 			if !isCapital(ver.Text) {
 				mtx.Unlock()
-				continue
+				return
 			}
 
 			// skip zero verse e.g bismillah
 			if ver.Number == 0 {
 				mtx.Unlock()
-				continue
+				return
 			}
 
 			dailyName = fmt.Sprintf("%s - %s - %s\n\n%s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
@@ -1667,6 +1673,8 @@ func main() {
 
 				mtx.Unlock()
 			}
+
+			}() // end of panic-recovery wrapper
 
 			// Update hourly for /api/latest
 			time.Sleep(time.Hour)
