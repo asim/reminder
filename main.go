@@ -1519,40 +1519,43 @@ func main() {
 
 			mtx.Lock()
 
-			nam := (*n)[rnd.Int()%len((*n))]
-			bookIdx := rnd.Int() % len(b.Books)
-			book := b.Books[bookIdx]
+			var nam *names.Name
+			var book *hadith.Book
+			var chap *quran.Chapter
+			var ver *quran.Verse
+			var had *hadith.Hadith
 
-			// Safety check for books with no hadiths
-			if len(book.Hadiths) == 0 {
-				fmt.Printf("Book %d (%s) has no hadiths, skipping\n", bookIdx, book.Name)
-				mtx.Unlock()
-				return
+			// Retry random selection up to 50 times to avoid skipping
+			// an entire hour when we pick a bad combination.
+			found := false
+			for attempt := 0; attempt < 50; attempt++ {
+				nam = (*n)[rnd.Int()%len((*n))]
+				bookIdx := rnd.Int() % len(b.Books)
+				book = b.Books[bookIdx]
+
+				if len(book.Hadiths) == 0 {
+					continue
+				}
+
+				chap = q.Chapters[rnd.Int()%len(q.Chapters)]
+
+				if len(chap.Verses) == 0 {
+					continue
+				}
+
+				ver = chap.Verses[rnd.Int()%len(chap.Verses)]
+				had = book.Hadiths[rnd.Int()%len(book.Hadiths)]
+
+				if ver.Number == 0 || !isCapital(ver.Text) {
+					continue
+				}
+
+				found = true
+				break
 			}
 
-			chap := q.Chapters[rnd.Int()%len(q.Chapters)]
-
-			// Safety check for chapters with no verses
-			if len(chap.Verses) == 0 {
-				fmt.Printf("Chapter %d has no verses, skipping\n", chap.Number)
-				mtx.Unlock()
-				return
-			}
-
-			ver := chap.Verses[rnd.Int()%len(chap.Verses)]
-			hadithIdx := rnd.Int() % len(book.Hadiths)
-			had := book.Hadiths[hadithIdx]
-
-			fmt.Printf("Selected: Book %d (%s), Hadith %d, Chapter %d, Verse %d\n", bookIdx, book.Name, hadithIdx, chap.Number, ver.Number)
-
-			// make sure we're starting from the begining of a verse
-			if !isCapital(ver.Text) {
-				mtx.Unlock()
-				return
-			}
-
-			// skip zero verse e.g bismillah
-			if ver.Number == 0 {
+			if !found {
+				fmt.Println("Could not find valid content after 50 attempts, will retry next hour")
 				mtx.Unlock()
 				return
 			}
