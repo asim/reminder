@@ -168,19 +168,22 @@ const endpoints: Endpoint[] = [
   },
   {
     title: 'Search',
-    description: 'Get summarised answers via an LLM',
+    description: 'Search the Quran, Hadith, and Names of Allah. Returns matching references ranked by relevance. Optionally include an AI-generated summary by setting summarise to true (slower).',
     url: '/api/search',
     method: 'POST',
     requestFormat: 'JSON',
     responseFormat: 'JSON',
-    params: [{ name: 'q', type: 'string', description: 'The question to ask' }],
+    params: [
+      { name: 'q', type: 'string', description: 'The search query or question' },
+      { name: 'summarise', type: 'boolean', description: 'Set to true for an AI summary (default: true). Set to false for fast results without LLM processing.' },
+    ],
     responseFields: [
-      { name: 'q', type: 'string', description: 'The question asked' },
-      { name: 'answer', type: 'string', description: 'Answer to the question' },
+      { name: 'q', type: 'string', description: 'The query submitted' },
+      { name: 'answer', type: 'string', description: 'AI-generated summary (empty string when summarise is false)' },
       {
         name: 'references',
         type: 'array',
-        description: 'A list of references used',
+        description: 'Ranked list of matching results with text, score, and source metadata',
       },
     ],
   },
