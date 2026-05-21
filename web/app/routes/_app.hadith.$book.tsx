@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 import { BookmarkButton } from '~/components/interface/bookmark-button';
+import { EmbedButton } from '~/components/interface/embed-button';
 import { ReadingBookmarkButton } from '~/components/interface/reading-bookmark-button';
 import { ShareButton } from '~/components/interface/share-button';
 import { getBookOptions } from '~/queries/hadith';
@@ -171,6 +172,7 @@ export default function HadithBook() {
                     url={`/hadith/${bookNumber}#${hadithNumber}`}
                     excerpt={englishText.length > 80 ? englishText.slice(0, 80) + '...' : englishText}
                   />
+                  <EmbedButton path={`/hadith/${bookNumber}/${hadithNumber}`} />
                   <ShareButton
                     title={`${book.name} - Hadith ${hadithNumber}`}
                     text={englishText}

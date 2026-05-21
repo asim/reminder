@@ -3,6 +3,7 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { CircleChevronLeft, CircleChevronRight } from 'lucide-react';
 import React from 'react';
 import { Link, useSearchParams } from 'react-router';
+import { EmbedButton } from '~/components/interface/embed-button';
 import { PageError } from '~/components/interface/page-error';
 import { PrimaryButton } from '~/components/interface/primary-button';
 import { ShareButton } from '~/components/interface/share-button';
@@ -54,7 +55,8 @@ export default function QuranVerse(props: Route.ComponentProps) {
   return (
     <div className='max-w-4xl flex flex-col w-full mx-auto p-0 lg:p-8'>
       <ViewMode mode={mode} onChange={setMode} />
-      <div className='flex justify-end'>
+      <div className='flex justify-end gap-1'>
+        <EmbedButton path={`/quran/${data.number}/${verseNumber}`} />
         <ShareButton
           title={`Quran ${data.number}:${verseNumber} - ${data.english}`}
           text={verse.text}

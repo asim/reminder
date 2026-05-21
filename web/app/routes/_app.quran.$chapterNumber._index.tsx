@@ -4,6 +4,7 @@ import { CircleChevronLeft, CircleChevronRight } from 'lucide-react';
 import React, { Fragment, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { BookmarkButton } from '~/components/interface/bookmark-button';
+import { EmbedButton } from '~/components/interface/embed-button';
 import { ReadingBookmarkButton } from '~/components/interface/reading-bookmark-button';
 import { ShareButton } from '~/components/interface/share-button';
 import { PageError } from '~/components/interface/page-error';
@@ -240,6 +241,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
                       url={`/quran/${data.number}#${verse.number}`}
                       excerpt={verse.text.length > 80 ? verse.text.slice(0, 80) + '...' : verse.text}
                     />
+                    <EmbedButton path={`/quran/${data.number}/${verse.number}`} />
                     <ShareButton
                       title={`Quran ${data.number}:${verse.number} - ${data.english}`}
                       text={verse.text}
@@ -321,6 +323,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
                       url={`/quran/${data.number}#${verse.number}`}
                       excerpt={verse.text.length > 80 ? verse.text.slice(0, 80) + '...' : verse.text}
                     />
+                    <EmbedButton path={`/quran/${data.number}/${verse.number}`} />
                     <ShareButton
                       title={`Quran ${data.number}:${verse.number} - ${data.english}`}
                       text={verse.text}
