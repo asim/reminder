@@ -1690,7 +1690,17 @@ func main() {
 
 		fmt.Println("Starting server :8080")
 		if err := http.ListenAndServe(":8080", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if *EnvFlag == "dev" {
+			// CORS for API routes — allow any origin
+			if strings.HasPrefix(r.URL.Path, "/api/") || r.URL.Path == "/mcp" {
+				w.Header().Set("Access-Control-Allow-Origin", "*")
+				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+				w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+				if r.Method == "OPTIONS" {
+					w.WriteHeader(http.StatusOK)
+					return
+				}
+			} else if *EnvFlag == "dev" {
 				w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
 				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 				w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
