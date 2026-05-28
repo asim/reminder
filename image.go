@@ -30,9 +30,11 @@ func generateImage(message string) string {
 	}
 
 	prompt := fmt.Sprintf(
-		"A serene, beautiful landscape scene inspired by the following spiritual reflection. "+
-			"No text, no words, no letters, no writing. Peaceful, contemplative, natural beauty. "+
-			"Warm golden light, soft atmosphere. Photorealistic style.\n\n%s",
+		"A serene landscape scene inspired by the following spiritual reflection. "+
+			"No people, no faces, no human figures, no animals. Only natural scenery. "+
+			"No text, no words, no letters, no writing. "+
+			"Mountains, rivers, deserts, forests, oceans, skies, or gardens. "+
+			"Peaceful, contemplative, warm golden light, soft atmosphere. Photorealistic.\n\n%s",
 		message,
 	)
 
