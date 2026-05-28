@@ -1648,14 +1648,8 @@ func main() {
 
 			mtx.Unlock()
 
-			// Generate image in the background so it doesn't block content
-			go func(msg string) {
-				if img := generateImage(msg); img != "" {
-					mtx.Lock()
-					dailyImage = img
-					mtx.Unlock()
-				}
-			}(dailyMessage)
+			// Submit image generation (non-blocking, result picked up next cycle)
+			generateImage(dailyMessage)
 
 			// Check if we should send push notification (new day or within grace period after midnight)
 			if lastPushDate != today || (lastPushDate == today && isWithinGracePeriod()) {
