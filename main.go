@@ -36,7 +36,7 @@ var (
 
 var mtx sync.RWMutex
 var history = map[string][]string{}
-var dailyName, dailyVerse, dailyHadith, dailyMessage, dailyImage string
+var dailyName, dailyVerse, dailyHadith, dailyMessage string
 var links = map[string]string{}
 var dailyUpdated = time.Time{}
 var reminderDir = api.ReminderDir
@@ -770,7 +770,6 @@ func main() {
 		hadith := dailyHadith
 		name := dailyName
 		message := dailyMessage
-		image := dailyImage
 		updated := dailyUpdated
 		currentLinks := links
 		mtx.RUnlock()
@@ -782,35 +781,9 @@ func main() {
 			"links":   currentLinks,
 			"updated": updated.Format(time.RFC3339),
 			"message": message,
-			"image":   "",
-		}
-		if image != "" {
-			resp["image"] = "/api/image"
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(resp)
-	})
-
-	http.HandleFunc("/api/image", func(w http.ResponseWriter, r *http.Request) {
-		mtx.RLock()
-		imgURL := dailyImage
-		mtx.RUnlock()
-
-		if imgURL == "" {
-			http.NotFound(w, r)
-			return
-		}
-
-		resp, err := http.Get(imgURL)
-		if err != nil {
-			http.Error(w, "failed to fetch image", 502)
-			return
-		}
-		defer resp.Body.Close()
-
-		w.Header().Set("Content-Type", resp.Header.Get("Content-Type"))
-		w.Header().Set("Cache-Control", "public, max-age=3600")
-		io.Copy(w, resp.Body)
 	})
 
 	http.HandleFunc("/api/daily/{date}", func(w http.ResponseWriter, r *http.Request) {
@@ -1647,9 +1620,6 @@ func main() {
 			saveHourlyReminder(today, timestamp, hourlyData)
 
 			mtx.Unlock()
-
-			// Generate image in background — fills in when ready
-			go generateImage(dailyMessage)
 
 			// Check if we should send push notification (new day or within grace period after midnight)
 			if lastPushDate != today || (lastPushDate == today && isWithinGracePeriod()) {
