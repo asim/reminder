@@ -37,7 +37,7 @@ func generateImage(message string) string {
 	)
 
 	body, _ := json.Marshal(imageRequest{
-		Model:  "black-forest-labs/flux-2-pro/text-to-image",
+		Model:  "black-forest-labs/flux-schnell/text-to-image",
 		Prompt: prompt,
 		Width:  1024,
 		Height: 576,
