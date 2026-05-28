@@ -7,27 +7,9 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
-
-type imageRequest struct {
-	Model  string `json:"model"`
-	Prompt string `json:"prompt"`
-	Width  int    `json:"width"`
-	Height int    `json:"height"`
-}
-
-type imageResponse struct {
-	Code    int `json:"code"`
-	Data    struct {
-		ID      string   `json:"id"`
-		Outputs []string `json:"outputs"`
-		Status  string   `json:"status"`
-		URLs    struct {
-			Get string `json:"get"`
-		} `json:"urls"`
-	} `json:"data"`
-}
 
 func generateImage(message string) string {
 	apiKey := os.Getenv("ATLAS_API_KEY")
@@ -44,16 +26,16 @@ func generateImage(message string) string {
 		message,
 	)
 
-	body, _ := json.Marshal(imageRequest{
-		Model:  "black-forest-labs/flux-schnell",
-		Prompt: prompt,
-		Width:  1024,
-		Height: 576,
+	body, _ := json.Marshal(map[string]interface{}{
+		"model":  "black-forest-labs/flux-schnell",
+		"prompt": prompt,
+		"width":  1024,
+		"height": 576,
 	})
 
 	req, err := http.NewRequest("POST", "https://api.atlascloud.ai/api/v1/model/generateImage", bytes.NewReader(body))
 	if err != nil {
-		fmt.Printf("Image generation request error: %v\n", err)
+		fmt.Printf("Image: request error: %v\n", err)
 		return ""
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -62,71 +44,149 @@ func generateImage(message string) string {
 	client := &http.Client{Timeout: 60 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Printf("Image generation error: %v\n", err)
+		fmt.Printf("Image: http error: %v\n", err)
 		return ""
 	}
 	defer resp.Body.Close()
 	respBody, _ := io.ReadAll(resp.Body)
 
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-		fmt.Printf("Image generation returned status %d: %s\n", resp.StatusCode, string(respBody))
+	fmt.Printf("Image: initial response (%d): %s\n", resp.StatusCode, string(respBody))
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return ""
 	}
 
-	fmt.Printf("Image generation response (%d): %s\n", resp.StatusCode, string(respBody))
-
-	var result imageResponse
-	if err := json.Unmarshal(respBody, &result); err != nil {
-		fmt.Printf("Image generation parse error: %v\n", err)
+	// Parse response as generic map to handle any shape
+	var raw map[string]interface{}
+	if err := json.Unmarshal(respBody, &raw); err != nil {
+		fmt.Printf("Image: parse error: %v\n", err)
 		return ""
 	}
 
-	if len(result.Data.Outputs) > 0 && result.Data.Outputs[0] != "" {
-		fmt.Printf("Image generated: %s\n", result.Data.Outputs[0])
-		return result.Data.Outputs[0]
+	// The response may have a "data" envelope or be flat
+	data := raw
+	if d, ok := raw["data"].(map[string]interface{}); ok {
+		data = d
 	}
 
-	// If async, poll using the URL from the response
-	if result.Data.URLs.Get != "" {
-		return pollImageResult(apiKey, result.Data.URLs.Get)
-	}
-	if result.Data.ID != "" {
-		return pollImageResult(apiKey, "https://api.atlascloud.ai/api/v1/model/prediction/"+result.Data.ID)
+	// Check for image URL in outputs
+	if url := extractImageURL(data); url != "" {
+		return url
 	}
 
-	fmt.Println("Image generation: no outputs and no poll URL in response")
-	return ""
+	// Find a poll URL
+	pollURL := ""
+	if urls, ok := data["urls"].(map[string]interface{}); ok {
+		if u, ok := urls["get"].(string); ok {
+			pollURL = u
+		}
+	}
+	if pollURL == "" {
+		if id, ok := data["id"].(string); ok && id != "" {
+			pollURL = "https://api.atlascloud.ai/api/v1/model/prediction/" + id
+		}
+	}
+
+	if pollURL == "" {
+		fmt.Println("Image: no image URL and no poll URL found")
+		return ""
+	}
+
+	fmt.Printf("Image: polling %s\n", pollURL)
+	return pollForImage(apiKey, pollURL)
 }
 
-func pollImageResult(apiKey, pollURL string) string {
+func pollForImage(apiKey, pollURL string) string {
 	client := &http.Client{Timeout: 30 * time.Second}
 
-	for i := 0; i < 20; i++ {
-		time.Sleep(3 * time.Second)
+	for i := 0; i < 30; i++ {
+		time.Sleep(2 * time.Second)
 
 		req, _ := http.NewRequest("GET", pollURL, nil)
 		req.Header.Set("Authorization", "Bearer "+apiKey)
 
 		resp, err := client.Do(req)
 		if err != nil {
+			fmt.Printf("Image: poll %d error: %v\n", i+1, err)
 			continue
 		}
 		body, _ := io.ReadAll(resp.Body)
 		resp.Body.Close()
 
-		fmt.Printf("Image poll %d (%d): %s\n", i+1, resp.StatusCode, string(body))
+		fmt.Printf("Image: poll %d (%d): %s\n", i+1, resp.StatusCode, string(body))
 
-		var result imageResponse
-		if err := json.Unmarshal(body, &result); err != nil {
+		var raw map[string]interface{}
+		if err := json.Unmarshal(body, &raw); err != nil {
 			continue
 		}
 
-		if len(result.Data.Outputs) > 0 && result.Data.Outputs[0] != "" {
-			fmt.Printf("Image ready (poll %d): %s\n", i+1, result.Data.Outputs[0])
-			return result.Data.Outputs[0]
+		data := raw
+		if d, ok := raw["data"].(map[string]interface{}); ok {
+			data = d
+		}
+
+		if url := extractImageURL(data); url != "" {
+			fmt.Printf("Image: ready after poll %d: %s\n", i+1, url)
+			return url
+		}
+
+		// Check for terminal failure
+		if status, _ := data["status"].(string); status == "failed" || status == "canceled" {
+			if errMsg, _ := data["error"].(string); errMsg != "" {
+				fmt.Printf("Image: generation failed: %s\n", errMsg)
+			} else {
+				fmt.Printf("Image: generation %s\n", status)
+			}
+			return ""
 		}
 	}
 
-	fmt.Println("Image generation timed out after polling")
+	fmt.Println("Image: timed out after 60s of polling")
 	return ""
+}
+
+// extractImageURL looks for an image URL in any common response field
+func extractImageURL(data map[string]interface{}) string {
+	// Check "outputs" array (strings or objects with url field)
+	if outputs, ok := data["outputs"]; ok && outputs != nil {
+		if arr, ok := outputs.([]interface{}); ok {
+			for _, item := range arr {
+				if s, ok := item.(string); ok && isImageURL(s) {
+					return s
+				}
+				if obj, ok := item.(map[string]interface{}); ok {
+					for _, key := range []string{"url", "image", "src"} {
+						if u, ok := obj[key].(string); ok && isImageURL(u) {
+							return u
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Check "output" singular
+	if output, ok := data["output"].(string); ok && isImageURL(output) {
+		return output
+	}
+	if output, ok := data["output"].(map[string]interface{}); ok {
+		for _, key := range []string{"url", "image", "src"} {
+			if u, ok := output[key].(string); ok && isImageURL(u) {
+				return u
+			}
+		}
+	}
+
+	// Check "image" or "image_url" top-level
+	for _, key := range []string{"image", "image_url", "url"} {
+		if u, ok := data[key].(string); ok && isImageURL(u) {
+			return u
+		}
+	}
+
+	return ""
+}
+
+func isImageURL(s string) bool {
+	return strings.HasPrefix(s, "http://") || strings.HasPrefix(s, "https://")
 }
