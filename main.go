@@ -782,10 +782,35 @@ func main() {
 			"links":   currentLinks,
 			"updated": updated.Format(time.RFC3339),
 			"message": message,
-			"image":   image,
+			"image":   "",
+		}
+		if image != "" {
+			resp["image"] = "/api/image"
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(resp)
+	})
+
+	http.HandleFunc("/api/image", func(w http.ResponseWriter, r *http.Request) {
+		mtx.RLock()
+		imgURL := dailyImage
+		mtx.RUnlock()
+
+		if imgURL == "" {
+			http.NotFound(w, r)
+			return
+		}
+
+		resp, err := http.Get(imgURL)
+		if err != nil {
+			http.Error(w, "failed to fetch image", 502)
+			return
+		}
+		defer resp.Body.Close()
+
+		w.Header().Set("Content-Type", resp.Header.Get("Content-Type"))
+		w.Header().Set("Cache-Control", "public, max-age=3600")
+		io.Copy(w, resp.Body)
 	})
 
 	http.HandleFunc("/api/daily/{date}", func(w http.ResponseWriter, r *http.Request) {
