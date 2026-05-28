@@ -1583,9 +1583,6 @@ func main() {
 			// Generate the contextual message once and cache it with the daily data
 			dailyMessage = generateMessage(context.Background(), dailyVerse, dailyHadith, dailyName)
 
-			// Generate an image based on the message (if ATLAS_API_KEY is set)
-			dailyImage = generateImage(dailyMessage)
-
 			links = map[string]string{
 				"verse":  fmt.Sprintf("/quran/%d#%d", chap.Number, verseStart),
 				"hadith": fmt.Sprintf("/hadith/%d#%d", book.Number, hadithNum),
@@ -1625,6 +1622,15 @@ func main() {
 			saveHourlyReminder(today, timestamp, hourlyData)
 
 			mtx.Unlock()
+
+			// Generate image in the background so it doesn't block content
+			go func(msg string) {
+				if img := generateImage(msg); img != "" {
+					mtx.Lock()
+					dailyImage = img
+					mtx.Unlock()
+				}
+			}(dailyMessage)
 
 			// Check if we should send push notification (new day or within grace period after midnight)
 			if lastPushDate != today || (lastPushDate == today && isWithinGracePeriod()) {
