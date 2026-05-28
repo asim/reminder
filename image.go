@@ -62,10 +62,12 @@ func generateImage(message string) string {
 	defer resp.Body.Close()
 	respBody, _ := io.ReadAll(resp.Body)
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
 		fmt.Printf("Image generation returned status %d: %s\n", resp.StatusCode, string(respBody))
 		return ""
 	}
+
+	fmt.Printf("Image generation response (%d): %s\n", resp.StatusCode, string(respBody))
 
 	var result imageResponse
 	if err := json.Unmarshal(respBody, &result); err != nil {
@@ -79,10 +81,11 @@ func generateImage(message string) string {
 	}
 
 	// If async, poll for result
-	if result.ID != "" && result.Status != "" {
+	if result.ID != "" {
 		return pollImageResult(apiKey, result.ID)
 	}
 
+	fmt.Println("Image generation: no outputs and no async ID in response")
 	return ""
 }
 
@@ -102,6 +105,8 @@ func pollImageResult(apiKey, id string) string {
 		}
 		body, _ := io.ReadAll(resp.Body)
 		resp.Body.Close()
+
+		fmt.Printf("Image poll %d (%d): %s\n", i+1, resp.StatusCode, string(body))
 
 		var result imageResponse
 		if err := json.Unmarshal(body, &result); err != nil {
