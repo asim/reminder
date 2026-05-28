@@ -10,6 +10,7 @@ interface LatestResponse {
     links: Record<string, string>;
     updated: string;
     message: string;
+    image: string;
 }
 
 function useRelativeTime(isoDate: string) {
@@ -78,6 +79,17 @@ export default function HomePage() {
                         {relativeTime}
                     </p>
                 </div>
+
+                {data.image && (
+                    <section>
+                        <img
+                            src={data.image}
+                            alt="Reminder"
+                            className="w-full rounded-lg shadow-sm"
+                            loading="eager"
+                        />
+                    </section>
+                )}
 
                 {data.message && (
                     <section>

@@ -36,7 +36,7 @@ var (
 
 var mtx sync.RWMutex
 var history = map[string][]string{}
-var dailyName, dailyVerse, dailyHadith, dailyMessage string
+var dailyName, dailyVerse, dailyHadith, dailyMessage, dailyImage string
 var links = map[string]string{}
 var dailyUpdated = time.Time{}
 var reminderDir = api.ReminderDir
@@ -770,6 +770,7 @@ func main() {
 		hadith := dailyHadith
 		name := dailyName
 		message := dailyMessage
+		image := dailyImage
 		updated := dailyUpdated
 		currentLinks := links
 		mtx.RUnlock()
@@ -781,6 +782,7 @@ func main() {
 			"links":   currentLinks,
 			"updated": updated.Format(time.RFC3339),
 			"message": message,
+			"image":   image,
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(resp)
@@ -1580,6 +1582,9 @@ func main() {
 
 			// Generate the contextual message once and cache it with the daily data
 			dailyMessage = generateMessage(context.Background(), dailyVerse, dailyHadith, dailyName)
+
+			// Generate an image based on the message (if ATLAS_API_KEY is set)
+			dailyImage = generateImage(dailyMessage)
 
 			links = map[string]string{
 				"verse":  fmt.Sprintf("/quran/%d#%d", chap.Number, verseStart),
