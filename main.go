@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"math/rand"
 	"net/http"
 	"os"
@@ -389,7 +390,7 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Collection, a 
 }
 
 func loadLastPushDate() string {
-	fmt.Println("Load last pushdate")
+	log.Println("Load last pushdate")
 	b, err := os.ReadFile(lastPushDateFile)
 	if err != nil {
 		return ""
@@ -404,7 +405,7 @@ func saveLastPushDate(date string) {
 
 // On startup, load daily index
 func loadDailyIndex() map[string]interface{} {
-	fmt.Println("Load daily index")
+	log.Println("Load daily index")
 	dailyFile := api.ReminderPath("daily.json")
 	var idx map[string]interface{}
 	if b, err := os.ReadFile(dailyFile); err == nil {
@@ -479,7 +480,7 @@ func generateMessage(ctx context.Context, verse, hadith, name string) (message s
 	// Wrap in a recover to handle panics from askLLM (which panics on errors)
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Printf("Failed to generate contextual message via LLM: %v\n", r)
+			log.Printf("Failed to generate contextual message via LLM: %v\n", r)
 			message = defaultMessage // Ensure we return default on panic
 		}
 	}()
@@ -495,43 +496,43 @@ func generateMessage(ctx context.Context, verse, hadith, name string) (message s
 }
 
 func main() {
-	fmt.Println("New rand source")
+	log.Println("New rand source")
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	flag.Parse()
 
 	// Load push subscriptions
-	fmt.Println("Loading subscriptions")
+	log.Println("Loading subscriptions")
 	_ = api.LoadPushSubscriptions()
 
 	// Load or generate VAPID keys
-	fmt.Println("Loading VAPID keys")
+	log.Println("Loading VAPID keys")
 	_ = api.LoadOrGenerateVAPIDKeys()
 
 	// create a new indexa
-	fmt.Println("Generating index")
+	log.Println("Generating index")
 	idx := search.New("reminder", false)
 
 	// async load the index
 	go func() {
 		// Load the pre-existing data
-		fmt.Println("Loading index")
+		log.Println("Loading index")
 		if err := idx.Load(); err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		}
-		fmt.Println("Loaded index")
+		log.Println("Loaded index")
 	}()
 
 	// load data
-	fmt.Println("Initialising data")
+	log.Println("Initialising data")
 	q := quran.Load()
-	fmt.Println("Loaded Quran")
+	log.Println("Loaded Quran")
 	n := names.Load()
-	fmt.Println("Loaded Names")
+	log.Println("Loaded Names")
 	b := hadith.Load()
-	fmt.Println("Loaded Hadith")
+	log.Println("Loaded Hadith")
 	a := api.Load()
-	fmt.Println("Loaded API")
+	log.Println("Loaded API")
 
 	// generate json
 	qjson := q.JSON()
@@ -547,7 +548,7 @@ func main() {
 		// it will need to be exported afterwards
 		sidx := search.New("reminder", true)
 
-		fmt.Println("Indexing data")
+		log.Println("Indexing data")
 		go func() {
 			indexQuran(sidx, q)
 			indexNames(sidx, n)
@@ -561,22 +562,22 @@ func main() {
 	}
 
 	if *ExportFlag {
-		fmt.Println("Exporting index")
+		log.Println("Exporting index")
 		if err := idx.Export(); err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		}
 		return
 	}
 
 	if *ImportFlag {
-		fmt.Println("Importing index")
+		log.Println("Importing index")
 		if err := idx.Import(); err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		}
 	}
 
 	if *WebFlag {
-		fmt.Println("Registering web handler")
+		log.Println("Registering web handler")
 
 		// Register TOC handlers for API clients only
 		http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
@@ -673,7 +674,7 @@ func main() {
 		// Everything else goes to SPA
 		http.Handle("/", app.ServeWeb())
 	} else {
-		fmt.Println("Registering lite handler")
+		log.Println("Registering lite handler")
 		registerLiteRoutes(q, n, b, a)
 	}
 
@@ -1233,7 +1234,7 @@ func main() {
 		}
 	})
 
-	fmt.Println("Registering routes")
+	log.Println("Registering routes")
 	httpMux := http.DefaultServeMux
 	api.RegisterRoutes(httpMux)
 
@@ -1512,10 +1513,10 @@ func main() {
 			func() {
 				defer func() {
 					if r := recover(); r != nil {
-						fmt.Printf("Daily loop recovered from panic: %v\n", r)
+						log.Printf("Daily loop recovered from panic: %v\n", r)
 					}
 				}()
-			fmt.Println("Running daily")
+			log.Println("Running daily")
 
 			mtx.Lock()
 
@@ -1555,7 +1556,7 @@ func main() {
 			}
 
 			if !found {
-				fmt.Println("Could not find valid content after 50 attempts, will retry next hour")
+				log.Println("Could not find valid content after 50 attempts, will retry next hour")
 				mtx.Unlock()
 				return
 			}
@@ -1658,20 +1659,20 @@ func main() {
 
 				// Only send if we haven't already sent today
 				if lastPushDate != today {
-					fmt.Println("Sending push notification at midnight UTC")
+					log.Println("Sending push notification at midnight UTC")
 
 					errors := api.SendPushToAll(string(b))
 					if len(errors) > 0 {
-						fmt.Println("Push notification errors:")
+						log.Println("Push notification errors:")
 						for _, err := range errors {
-							fmt.Println(err)
+							log.Println(err)
 						}
 					}
 
 					lastPushDate = today
 					saveLastPushDate(today)
 				} else {
-					fmt.Println("Push notification already sent today, skipping")
+					log.Println("Push notification already sent today, skipping")
 				}
 
 				mtx.Unlock()
@@ -1685,10 +1686,10 @@ func main() {
 	}
 
 	if *ServerFlag {
-		fmt.Println("Starting daily")
+		log.Println("Starting daily")
 		go daily()
 
-		fmt.Println("Starting server :8080")
+		log.Println("Starting server :8080")
 		if err := http.ListenAndServe(":8080", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// CORS for API routes — allow any origin
 			if strings.HasPrefix(r.URL.Path, "/api/") || r.URL.Path == "/mcp" {
@@ -1729,7 +1730,7 @@ func main() {
 
 			http.DefaultServeMux.ServeHTTP(w, r)
 		})); err != nil {
-			fmt.Printf("Server error: %v\n", err)
+			log.Printf("Server error: %v\n", err)
 		}
 	}
 

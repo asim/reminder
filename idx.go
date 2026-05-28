@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -53,23 +54,23 @@ func indexContent(idx *search.Index, md map[string]string, text string) {
 	// index the documents
 	lines := strings.Split(text, "\n")
 
-	fmt.Println("Indexing: ", md["source"], md["chapter"], md["verse"])
+	log.Println("Indexing: ", md["source"], md["chapter"], md["verse"])
 
 	if err := idx.Store(md, lines...); err != nil {
-		fmt.Println("Error indexing", err)
+		log.Println("Error indexing", err)
 	}
 }
 
 func indexQuran(idx *search.Index, q *quran.Quran) {
 	cp := loadCheckpoint()
 	if cp.QuranDone {
-		fmt.Println("Quran already indexed, skipping")
+		log.Println("Quran already indexed, skipping")
 		return
 	}
 
-	fmt.Println("Indexing Quran")
+	log.Println("Indexing Quran")
 	if cp.QuranChapter > 0 {
-		fmt.Printf("Resuming from chapter %d, verse %d\n", cp.QuranChapter, cp.QuranVerse)
+		log.Printf("Resuming from chapter %d, verse %d\n", cp.QuranChapter, cp.QuranVerse)
 	}
 
 	for _, chapter := range q.Chapters {
@@ -107,11 +108,11 @@ func indexQuran(idx *search.Index, q *quran.Quran) {
 func indexNames(idx *search.Index, n *names.Names) {
 	cp := loadCheckpoint()
 	if cp.NamesDone {
-		fmt.Println("Names already indexed, skipping")
+		log.Println("Names already indexed, skipping")
 		return
 	}
 
-	fmt.Println("Indexing Names")
+	log.Println("Indexing Names")
 
 	for _, name := range *n {
 		indexContent(idx, map[string]string{
@@ -129,11 +130,11 @@ func indexNames(idx *search.Index, n *names.Names) {
 func indexTafsir(idx *search.Index, q *quran.Quran) {
 	cp := loadCheckpoint()
 	if cp.TafsirDone {
-		fmt.Println("Tafsir already indexed, skipping")
+		log.Println("Tafsir already indexed, skipping")
 		return
 	}
 
-	fmt.Println("Indexing Tafsir")
+	log.Println("Indexing Tafsir")
 
 	for _, comment := range q.Commentary {
 		indexContent(idx, map[string]string{
@@ -150,13 +151,13 @@ func indexTafsir(idx *search.Index, q *quran.Quran) {
 func indexHadith(idx *search.Index, b *hadith.Collection) {
 	cp := loadCheckpoint()
 	if cp.HadithDone {
-		fmt.Println("Hadith already indexed, skipping")
+		log.Println("Hadith already indexed, skipping")
 		return
 	}
 
-	fmt.Println("Indexing Hadith")
+	log.Println("Indexing Hadith")
 	if cp.HadithBook > 0 {
-		fmt.Printf("Resuming from book %d, hadith %d\n", cp.HadithBook, cp.HadithNum)
+		log.Printf("Resuming from book %d, hadith %d\n", cp.HadithBook, cp.HadithNum)
 	}
 
 	for bookIdx, book := range b.Books {
