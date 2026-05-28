@@ -18,9 +18,15 @@ type imageRequest struct {
 }
 
 type imageResponse struct {
-	ID      string   `json:"id"`
-	Outputs []string `json:"outputs"`
-	Status  string   `json:"status"`
+	Code    int `json:"code"`
+	Data    struct {
+		ID      string   `json:"id"`
+		Outputs []string `json:"outputs"`
+		Status  string   `json:"status"`
+		URLs    struct {
+			Get string `json:"get"`
+		} `json:"urls"`
+	} `json:"data"`
 }
 
 func generateImage(message string) string {
@@ -75,28 +81,30 @@ func generateImage(message string) string {
 		return ""
 	}
 
-	if len(result.Outputs) > 0 && result.Outputs[0] != "" {
-		fmt.Printf("Image generated: %s\n", result.Outputs[0])
-		return result.Outputs[0]
+	if len(result.Data.Outputs) > 0 && result.Data.Outputs[0] != "" {
+		fmt.Printf("Image generated: %s\n", result.Data.Outputs[0])
+		return result.Data.Outputs[0]
 	}
 
-	// If async, poll for result
-	if result.ID != "" {
-		return pollImageResult(apiKey, result.ID)
+	// If async, poll using the URL from the response
+	if result.Data.URLs.Get != "" {
+		return pollImageResult(apiKey, result.Data.URLs.Get)
+	}
+	if result.Data.ID != "" {
+		return pollImageResult(apiKey, "https://api.atlascloud.ai/api/v1/model/prediction/"+result.Data.ID)
 	}
 
-	fmt.Println("Image generation: no outputs and no async ID in response")
+	fmt.Println("Image generation: no outputs and no poll URL in response")
 	return ""
 }
 
-func pollImageResult(apiKey, id string) string {
+func pollImageResult(apiKey, pollURL string) string {
 	client := &http.Client{Timeout: 30 * time.Second}
-	url := fmt.Sprintf("https://api.atlascloud.ai/api/v1/model/generateImage/%s", id)
 
 	for i := 0; i < 20; i++ {
 		time.Sleep(3 * time.Second)
 
-		req, _ := http.NewRequest("GET", url, nil)
+		req, _ := http.NewRequest("GET", pollURL, nil)
 		req.Header.Set("Authorization", "Bearer "+apiKey)
 
 		resp, err := client.Do(req)
@@ -113,9 +121,9 @@ func pollImageResult(apiKey, id string) string {
 			continue
 		}
 
-		if len(result.Outputs) > 0 && result.Outputs[0] != "" {
-			fmt.Printf("Image ready (poll %d): %s\n", i+1, result.Outputs[0])
-			return result.Outputs[0]
+		if len(result.Data.Outputs) > 0 && result.Data.Outputs[0] != "" {
+			fmt.Printf("Image ready (poll %d): %s\n", i+1, result.Data.Outputs[0])
+			return result.Data.Outputs[0]
 		}
 	}
 
