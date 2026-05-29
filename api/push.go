@@ -180,6 +180,26 @@ func RegisterRoutes(mux *http.ServeMux) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(VAPIDPublicKey))
 	})
+
+	// Show active subscription count and endpoints (for diagnostics)
+	mux.HandleFunc("/api/push/status", func(w http.ResponseWriter, r *http.Request) {
+		subs := ListPushSubscriptions()
+		endpoints := make([]string, len(subs))
+		for i, s := range subs {
+			// Show just the domain, not the full token
+			parts := strings.SplitN(s.Endpoint, "/", 4)
+			if len(parts) >= 3 {
+				endpoints[i] = parts[0] + "//" + parts[2] + "/..."
+			} else {
+				endpoints[i] = s.Endpoint
+			}
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"count":     len(subs),
+			"endpoints": endpoints,
+		})
+	})
 }
 
 func SendPushNotification(sub PushSubscription, payload string) error {
