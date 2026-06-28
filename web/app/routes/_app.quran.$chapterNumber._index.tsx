@@ -15,6 +15,7 @@ import { TranscriptButton } from '~/components/quran/transcript-button';
 import { ViewMode } from '~/components/quran/view-mode';
 import { useQuranViewMode } from '~/hooks/use-quran-view-mode';
 import { getChapterOptions } from '~/queries/quran';
+import { useTransliterationToggle } from '~/use-transliteration-toggle';
 import { useWordByWordToggle } from '~/use-word-by-word-toggle';
 import { queryClient } from '~/utils/query-client';
 import { buildQuranShareUrl } from '~/utils/quran-share';
@@ -51,6 +52,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
   const [searchParams] = useSearchParams();
   const [mode, setMode] = useQuranViewMode();
   const [wordByWord, setWordByWord] = useWordByWordToggle();
+  const [showTransliteration, setShowTransliteration] = useTransliterationToggle();
   const [showCommentary, setShowCommentary] = React.useState(() => {
     const param = searchParams.get('commentary');
     return param === '1' || param === 'true';
@@ -149,45 +151,61 @@ export default function QuranChapter(props: Route.ComponentProps) {
         />
       )}
       
-      {mode === 'translation' && (
-        <div className='mb-4 flex items-center gap-6'>
+      {(mode === 'translation' || mode === 'arabic') && (
+        <div className='mb-4 flex items-center gap-4 sm:gap-6 flex-wrap'>
+          {mode === 'translation' && (
+            <label className='flex items-center gap-2 cursor-pointer'>
+              <input
+                type='checkbox'
+                checked={wordByWord}
+                onChange={e => setWordByWord(e.target.checked)}
+                className='accent-black h-4 w-4 rounded'
+              />
+              <span className='text-sm'>Word-by-word</span>
+            </label>
+          )}
           <label className='flex items-center gap-2 cursor-pointer'>
             <input
               type='checkbox'
-              checked={wordByWord}
-              onChange={e => setWordByWord(e.target.checked)}
+              checked={showTransliteration}
+              onChange={e => setShowTransliteration(e.target.checked)}
               className='accent-black h-4 w-4 rounded'
             />
-            <span className='text-sm'>Show word-by-word translation</span>
+            <span className='text-sm'>Transliteration</span>
           </label>
-          <label className='flex items-center gap-2 cursor-pointer'>
-            <input
-              type='checkbox'
-              checked={showCommentary}
-              onChange={e => setShowCommentary(e.target.checked)}
-              className='accent-black h-4 w-4 rounded'
-            />
-            <span className='text-sm'>Show commentary</span>
-          </label>
+          {mode === 'translation' && (
+            <label className='flex items-center gap-2 cursor-pointer'>
+              <input
+                type='checkbox'
+                checked={showCommentary}
+                onChange={e => setShowCommentary(e.target.checked)}
+                className='accent-black h-4 w-4 rounded'
+              />
+              <span className='text-sm'>Commentary</span>
+            </label>
+          )}
         </div>
       )}
       {mode === 'arabic' && (
         <div
           dir='rtl'
-          className='flex flex-grow flex-wrap font-arabic text-right text-2xl sm:text-2xl md:text-3xl leading-loose content-start'
+          className={`flex flex-grow flex-wrap font-arabic text-right text-2xl sm:text-2xl md:text-3xl leading-loose content-start${showTransliteration ? ' items-end' : ''}`}
         >
           {data.verses.map((verse) => (
             <Fragment key={verse.number}>
               {verse.words && verse.words.length > 0
                 ? verse.words.map((word, idx, arr) => (
-                  <ClickableArabicWord key={idx} arabic={word.arabic} transliteration={word.transliteration}>
+                  <ClickableArabicWord key={idx} arabic={word.arabic} transliteration={word.transliteration} className={showTransliteration ? 'flex flex-col items-center ml-2 mb-2' : ''}>
                     {word.arabic}
                     {idx === arr.length - 1 && (
                       <span className='mx-2 font-arabic'>
                         {toArabicNumber(verse.number)}
                       </span>
                     )}
-                    &nbsp;
+                    {!showTransliteration && <>&nbsp;</>}
+                    {showTransliteration && (
+                      <span className='text-xs sm:text-sm mt-1 px-1 rounded bg-gray-100 text-gray-700 font-sans' dir='ltr'>{word.transliteration}</span>
+                    )}
                   </ClickableArabicWord>
                 ))
                 : verse.arabic.split(' ').map((word, idx, arr) => (
@@ -262,7 +280,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
               className='border-b border-gray-100 pb-3 sm:pb-8'
             >
               <div className='flex flex-row-reverse flex-wrap text-xl sm:text-2xl md:text-3xl mb-3 sm:mb-4 text-right leading-loose font-arabic items-end'>
-                {wordByWord && verse.words && verse.words.length > 0
+                {(wordByWord || showTransliteration) && verse.words && verse.words.length > 0
                   ? verse.words.map((word, idx, arr) => {
                     if (idx === arr.length - 1) {
                       return (
@@ -271,14 +289,24 @@ export default function QuranChapter(props: Route.ComponentProps) {
                             <span>{word.arabic}</span>
                             <span className='mx-2 font-arabic'>{toArabicNumber(verse.number)}</span>
                           </span>
-                          <span className='text-xs sm:text-sm mt-1 px-1 rounded bg-gray-100 text-gray-700'>{word.english}</span>
+                          {showTransliteration && (
+                            <span className='text-xs mt-1 px-1 rounded bg-blue-50 text-blue-700 font-sans' dir='ltr'>{word.transliteration}</span>
+                          )}
+                          {wordByWord && (
+                            <span className='text-xs sm:text-sm mt-1 px-1 rounded bg-gray-100 text-gray-700 font-sans'>{word.english}</span>
+                          )}
                         </ClickableArabicWord>
                       );
                     } else {
                       return (
                         <ClickableArabicWord key={idx} arabic={word.arabic} transliteration={word.transliteration} className='text-3xl flex flex-col items-center mr-2 mb-2'>
                           <span>{word.arabic}</span>
-                          <span className='text-xs sm:text-sm mt-1 px-1 rounded bg-gray-100 text-gray-700'>{word.english}</span>
+                          {showTransliteration && (
+                            <span className='text-xs mt-1 px-1 rounded bg-blue-50 text-blue-700 font-sans' dir='ltr'>{word.transliteration}</span>
+                          )}
+                          {wordByWord && (
+                            <span className='text-xs sm:text-sm mt-1 px-1 rounded bg-gray-100 text-gray-700 font-sans'>{word.english}</span>
+                          )}
                         </ClickableArabicWord>
                       );
                     }
