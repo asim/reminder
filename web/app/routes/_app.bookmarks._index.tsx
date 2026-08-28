@@ -2,7 +2,7 @@ import { BookOpen, Trash2, X } from 'lucide-react';
 import { useEffect } from 'react';
 import { Link } from 'react-router';
 import { useBookmarks } from '~/hooks/use-bookmarks';
-import { useReadingBookmark, type ReadingBookmark } from '~/hooks/use-reading-bookmark';
+import { useReadingBookmark, type ReadingBookmarkType } from '~/hooks/use-reading-bookmark';
 import { httpGet } from '~/utils/http';
 
 export function meta() {
@@ -21,7 +21,7 @@ export function meta() {
 
 export default function BookmarksPage() {
   const { bookmarks, removeBookmark, updateBookmark } = useBookmarks();
-  const { readingBookmarks, clearReadingBookmark } = useReadingBookmark();
+  const { readingBookmarks, removeReadingBookmark } = useReadingBookmark();
 
   // Migrate existing bookmarks by fetching excerpts and updating labels
   useEffect(() => {
@@ -30,12 +30,12 @@ export default function BookmarksPage() {
         // Check if needs migration (no excerpt or old label format)
         const needsExcerpt = !bookmark.excerpt;
         const needsLabel = bookmark.label.startsWith('Quran ');
-        
+
         if (!needsExcerpt && !needsLabel) continue;
-        
+
         const [chapter, verse] = key.split(':').map(Number);
         if (!chapter || !verse) continue;
-        
+
         try {
           const data = await httpGet<{ english: string; verses: { number: number; text: string }[] }>(`/api/quran/${chapter}`);
           const verseData = data.verses.find(v => v.number === verse);
@@ -58,10 +58,10 @@ export default function BookmarksPage() {
     const migrateHadithBookmarks = async () => {
       for (const [key, bookmark] of Object.entries(bookmarks.hadith)) {
         if (bookmark.excerpt) continue;
-        
+
         const [book, hadithNum] = key.split(':').map(Number);
         if (!book || !hadithNum) continue;
-        
+
         try {
           const data = await httpGet<{ hadiths: { number: number; text: string }[] }>(`/api/hadith/${book}`);
           const hadith = data.hadiths.find(h => h.number === hadithNum);
@@ -88,11 +88,15 @@ export default function BookmarksPage() {
     hadithEntries.length > 0 ||
     namesEntries.length > 0;
 
-  const readingBookmarkEntries = Object.entries(readingBookmarks).filter(
-    ([, bookmark]) => bookmark !== undefined
-  ) as [string, ReadingBookmark][];
+  // Collect all reading bookmarks across types
+  const allReadingBookmarks: { type: ReadingBookmarkType; bookmark: { label: string; url: string; timestamp: string; excerpt?: string } }[] = [];
+  for (const type of ['quran', 'hadith', 'names'] as ReadingBookmarkType[]) {
+    for (const bookmark of readingBookmarks[type]) {
+      allReadingBookmarks.push({ type, bookmark });
+    }
+  }
 
-  const hasReadingBookmarks = readingBookmarkEntries.length > 0;
+  const hasReadingBookmarks = allReadingBookmarks.length > 0;
 
   return (
     <div className='max-w-4xl mx-auto w-full p-4 lg:p-8 mb-8 sm:mb-12 flex-grow overflow-y-auto'>
@@ -113,9 +117,9 @@ export default function BookmarksPage() {
             <h2 className='text-xl sm:text-2xl font-semibold text-blue-900'>Continue Reading</h2>
           </div>
           <div className='space-y-2'>
-            {readingBookmarkEntries.map(([type, bookmark]) => (
+            {allReadingBookmarks.map(({ type, bookmark }) => (
               <div
-                key={type}
+                key={`${type}-${bookmark.url}`}
                 className='flex items-center justify-between p-3 sm:p-4 bg-white border border-blue-100 rounded-lg hover:border-blue-300 transition-colors'
               >
                 <Link
@@ -131,7 +135,7 @@ export default function BookmarksPage() {
                   )}
                 </Link>
                 <button
-                  onClick={() => clearReadingBookmark(type as 'quran' | 'hadith' | 'names')}
+                  onClick={() => removeReadingBookmark(type, bookmark.url)}
                   className='ml-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors flex-shrink-0'
                   aria-label='Remove reading bookmark'
                 >

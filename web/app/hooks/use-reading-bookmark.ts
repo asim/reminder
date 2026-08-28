@@ -12,13 +12,38 @@ export interface ReadingBookmark {
 }
 
 export interface ReadingBookmarksData {
-  quran?: ReadingBookmark;
-  hadith?: ReadingBookmark;
-  names?: ReadingBookmark;
+  quran: ReadingBookmark[];
+  hadith: ReadingBookmark[];
+  names: ReadingBookmark[];
 }
 
 function initReadingBookmarks(): ReadingBookmarksData {
-  return {};
+  return { quran: [], hadith: [], names: [] };
+}
+
+/**
+ * Migrate from old single-bookmark format:
+ *   { quran?: ReadingBookmark, hadith?: ReadingBookmark, names?: ReadingBookmark }
+ * to new multi-bookmark format:
+ *   { quran: ReadingBookmark[], hadith: ReadingBookmark[], names: ReadingBookmark[] }
+ */
+function migrateIfNeeded(raw: Record<string, unknown>): ReadingBookmarksData {
+  const result = initReadingBookmarks();
+
+  for (const type of ['quran', 'hadith', 'names'] as ReadingBookmarkType[]) {
+    const value = raw[type];
+    if (!value) continue;
+
+    if (Array.isArray(value)) {
+      // Already in new format
+      result[type] = value as ReadingBookmark[];
+    } else if (typeof value === 'object' && 'url' in (value as Record<string, unknown>)) {
+      // Old single-bookmark format — wrap in array
+      result[type] = [value as ReadingBookmark];
+    }
+  }
+
+  return result;
 }
 
 function getStoredReadingBookmarks(): ReadingBookmarksData {
@@ -31,7 +56,8 @@ function getStoredReadingBookmarks(): ReadingBookmarksData {
     if (!stored) {
       return initReadingBookmarks();
     }
-    return JSON.parse(stored);
+    const parsed = JSON.parse(stored);
+    return migrateIfNeeded(parsed);
   } catch (e) {
     console.error('Error reading reading bookmarks:', e);
     return initReadingBookmarks();
@@ -55,41 +81,55 @@ function saveReadingBookmarks(bookmarks: ReadingBookmarksData): boolean {
 export function useReadingBookmark() {
   const [readingBookmarks, setReadingBookmarks] = useState<ReadingBookmarksData>(getStoredReadingBookmarks);
 
-  const setReadingBookmark = (
+  const addReadingBookmark = (
     type: ReadingBookmarkType,
     label: string,
     url: string,
     excerpt?: string
   ) => {
     const newBookmarks = { ...readingBookmarks };
-    newBookmarks[type] = {
-      label,
-      url,
-      timestamp: new Date().toISOString(),
-      excerpt,
-    };
+    // Remove any existing bookmark with the same URL to avoid duplicates
+    newBookmarks[type] = newBookmarks[type].filter(b => b.url !== url);
+    // Add new bookmark at the front (most recent first)
+    newBookmarks[type] = [
+      { label, url, timestamp: new Date().toISOString(), excerpt },
+      ...newBookmarks[type],
+    ];
+    setReadingBookmarks(newBookmarks);
+    saveReadingBookmarks(newBookmarks);
+  };
+
+  const removeReadingBookmark = (type: ReadingBookmarkType, url: string) => {
+    const newBookmarks = { ...readingBookmarks };
+    newBookmarks[type] = newBookmarks[type].filter(b => b.url !== url);
     setReadingBookmarks(newBookmarks);
     saveReadingBookmarks(newBookmarks);
   };
 
   const clearReadingBookmark = (type: ReadingBookmarkType) => {
     const newBookmarks = { ...readingBookmarks };
-    delete newBookmarks[type];
+    newBookmarks[type] = [];
     setReadingBookmarks(newBookmarks);
     saveReadingBookmarks(newBookmarks);
   };
 
-  const getReadingBookmark = (type: ReadingBookmarkType): ReadingBookmark | undefined => {
-    return readingBookmarks[type];
+  const isReadingBookmark = (type: ReadingBookmarkType, url: string): boolean => {
+    return readingBookmarks[type].some(b => b.url === url);
   };
 
-  const isReadingBookmark = (type: ReadingBookmarkType, url: string): boolean => {
-    return readingBookmarks[type]?.url === url;
+  // Backward-compatible: return the most recent bookmark for a type
+  const getReadingBookmark = (type: ReadingBookmarkType): ReadingBookmark | undefined => {
+    return readingBookmarks[type][0];
   };
+
+  // Legacy single-bookmark setter for backward compat (wraps addReadingBookmark)
+  const setReadingBookmark = addReadingBookmark;
 
   return {
     readingBookmarks,
     setReadingBookmark,
+    addReadingBookmark,
+    removeReadingBookmark,
     clearReadingBookmark,
     getReadingBookmark,
     isReadingBookmark,
