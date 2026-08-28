@@ -17,14 +17,14 @@ export function ReadingBookmarkButton({
   excerpt,
   className,
 }: ReadingBookmarkButtonProps) {
-  const { isReadingBookmark, setReadingBookmark, clearReadingBookmark } = useReadingBookmark();
+  const { isReadingBookmark, addReadingBookmark, removeReadingBookmark } = useReadingBookmark();
   const isActive = isReadingBookmark(type, url);
 
   const handleClick = () => {
     if (isActive) {
-      clearReadingBookmark(type);
+      removeReadingBookmark(type, url);
     } else {
-      setReadingBookmark(type, label, url, excerpt);
+      addReadingBookmark(type, label, url, excerpt);
     }
   };
 
@@ -35,8 +35,8 @@ export function ReadingBookmarkButton({
         'inline-flex items-center justify-center p-1 rounded-md transition-colors hover:bg-gray-100',
         className
       )}
-      title={isActive ? 'Remove reading bookmark' : 'Set as reading bookmark'}
-      aria-label={isActive ? 'Remove reading bookmark' : 'Set as reading bookmark'}
+      title={isActive ? 'Remove reading bookmark' : 'Mark as reading position'}
+      aria-label={isActive ? 'Remove reading bookmark' : 'Mark as reading position'}
     >
       <BookmarkCheck
         className={cn(
