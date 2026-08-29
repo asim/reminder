@@ -9,7 +9,8 @@
 #   ./deploy.sh --cron     - Install a cron job to run every 5 minutes
 #   ./deploy.sh --install  - Install systemd service + deploy timer
 #
-# Expects a .env file in the deploy directory with environment variables.
+# By default, the binary, .env, and data are expected in the same directory
+# as this script. Set REMINDER_HOME to override (e.g. REMINDER_HOME=/root).
 # Stores the currently running version in .version file.
 
 set -euo pipefail
@@ -17,9 +18,11 @@ set -euo pipefail
 REPO="asim/reminder"
 ARCH="linux_amd64"
 DEPLOY_DIR="$(cd "$(dirname "$0")" && pwd)"
-VERSION_FILE="$DEPLOY_DIR/.version"
-LOG_FILE="$DEPLOY_DIR/reminder.log"
-BINARY="$DEPLOY_DIR/reminder"
+# HOME_DIR is where the binary, .env, and data live — override with REMINDER_HOME
+HOME_DIR="${REMINDER_HOME:-$DEPLOY_DIR}"
+VERSION_FILE="$HOME_DIR/.version"
+LOG_FILE="$HOME_DIR/reminder.log"
+BINARY="$HOME_DIR/reminder"
 SERVICE_NAME="reminder"
 
 log() {
@@ -52,7 +55,7 @@ deploy_version() {
     local url="https://github.com/$REPO/releases/download/v${version}/${file}"
 
     log "Downloading reminder v${version}"
-    cd "$DEPLOY_DIR"
+    cd "$HOME_DIR"
 
     if ! wget -q "$url" -O "$file"; then
         log "ERROR: Failed to download $url"
@@ -63,13 +66,13 @@ deploy_version() {
     log "Extracting $file"
     tar zxf "$file"
 
-    if [ ! -f "$DEPLOY_DIR/reminder" ]; then
+    if [ ! -f "$HOME_DIR/reminder" ]; then
         log "ERROR: Binary not found after extraction"
         rm -f "$file"
         return 1
     fi
 
-    chmod +x "$DEPLOY_DIR/reminder"
+    chmod +x "$HOME_DIR/reminder"
 
     if has_systemd_service; then
         log "Restarting via systemd"
@@ -80,9 +83,9 @@ deploy_version() {
         sleep 3
 
         log "Starting reminder v${version}"
-        if [ -f "$DEPLOY_DIR/.env" ]; then
+        if [ -f "$HOME_DIR/.env" ]; then
             set -a
-            . "$DEPLOY_DIR/.env"
+            . "$HOME_DIR/.env"
             set +a
         fi
 
@@ -106,12 +109,12 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=$DEPLOY_DIR
-ExecStart=/bin/bash -c 'set -a; . $DEPLOY_DIR/.env; set +a; exec $DEPLOY_DIR/reminder --serve --web'
+WorkingDirectory=$HOME_DIR
+ExecStart=/bin/bash -c 'set -a; . $HOME_DIR/.env; set +a; exec $HOME_DIR/reminder --serve --web'
 Restart=on-failure
 RestartSec=5
-StandardOutput=append:$DEPLOY_DIR/reminder.log
-StandardError=append:$DEPLOY_DIR/reminder.log
+StandardOutput=append:$HOME_DIR/reminder.log
+StandardError=append:$HOME_DIR/reminder.log
 NoNewPrivileges=true
 
 [Install]
