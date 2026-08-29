@@ -110,6 +110,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 WorkingDirectory=$HOME_DIR
+Environment=HOME=$HOME_DIR
 ExecStart=/bin/bash -c 'set -a; . $HOME_DIR/.env; set +a; exec $HOME_DIR/reminder --serve --web'
 Restart=on-failure
 RestartSec=5
