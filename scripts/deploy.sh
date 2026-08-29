@@ -4,11 +4,12 @@
 # Checks for new GitHub releases and deploys automatically.
 #
 # Usage:
-#   ./deploy.sh          - Check for new release and deploy if available
-#   ./deploy.sh --force  - Force re-deploy the latest release
-#   ./deploy.sh --cron   - Install a cron job to run every 5 minutes
+#   ./deploy.sh            - Check for new release and deploy if available
+#   ./deploy.sh --force    - Force re-deploy the latest release
+#   ./deploy.sh --cron     - Install a cron job to run every 5 minutes
+#   ./deploy.sh --install  - Install systemd service + deploy timer
 #
-# Expects a .env file in the same directory with environment variables.
+# Expects a .env file in the deploy directory with environment variables.
 # Stores the currently running version in .version file.
 
 set -euo pipefail
@@ -19,6 +20,7 @@ DEPLOY_DIR="$(cd "$(dirname "$0")" && pwd)"
 VERSION_FILE="$DEPLOY_DIR/.version"
 LOG_FILE="$DEPLOY_DIR/reminder.log"
 BINARY="$DEPLOY_DIR/reminder"
+SERVICE_NAME="reminder"
 
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
@@ -37,6 +39,11 @@ get_current_version() {
     else
         echo ""
     fi
+}
+
+# Check if systemd is managing the service
+has_systemd_service() {
+    systemctl is-enabled "$SERVICE_NAME" >/dev/null 2>&1
 }
 
 deploy_version() {
@@ -64,24 +71,92 @@ deploy_version() {
 
     chmod +x "$DEPLOY_DIR/reminder"
 
-    log "Stopping current instance"
-    killall reminder 2>/dev/null || true
-    sleep 3
+    if has_systemd_service; then
+        log "Restarting via systemd"
+        sudo systemctl restart "$SERVICE_NAME"
+    else
+        log "Stopping current instance"
+        killall reminder 2>/dev/null || true
+        sleep 3
 
-    log "Starting reminder v${version}"
-    if [ -f "$DEPLOY_DIR/.env" ]; then
-        set -a
-        . "$DEPLOY_DIR/.env"
-        set +a
+        log "Starting reminder v${version}"
+        if [ -f "$DEPLOY_DIR/.env" ]; then
+            set -a
+            . "$DEPLOY_DIR/.env"
+            set +a
+        fi
+
+        nohup "$BINARY" --serve --web >> "$LOG_FILE" 2>&1 &
+        disown
     fi
-
-    nohup "$BINARY" --serve --web >> "$LOG_FILE" 2>&1 &
-    disown
 
     echo "$version" > "$VERSION_FILE"
     rm -f "$file"
 
-    log "Deployed reminder v${version} (pid $!)"
+    log "Deployed reminder v${version}"
+}
+
+install_systemd() {
+    local service_src="$DEPLOY_DIR/reminder.service"
+
+    if [ ! -f "$service_src" ]; then
+        log "ERROR: reminder.service not found in $DEPLOY_DIR"
+        exit 1
+    fi
+
+    # Update WorkingDirectory and paths to match actual deploy dir
+    sed \
+        -e "s|WorkingDirectory=.*|WorkingDirectory=$DEPLOY_DIR|" \
+        -e "s|EnvironmentFile=.*|EnvironmentFile=-$DEPLOY_DIR/.env|" \
+        -e "s|ExecStart=.*|ExecStart=$DEPLOY_DIR/reminder --serve --web|" \
+        -e "s|StandardOutput=.*|StandardOutput=append:$DEPLOY_DIR/reminder.log|" \
+        -e "s|StandardError=.*|StandardError=append:$DEPLOY_DIR/reminder.log|" \
+        -e "s|ReadWritePaths=.*|ReadWritePaths=$DEPLOY_DIR|" \
+        "$service_src" | sudo tee /etc/systemd/system/reminder.service >/dev/null
+
+    # Install deploy timer (runs every 5 minutes instead of cron)
+    sudo tee /etc/systemd/system/reminder-deploy.service >/dev/null <<EOF
+[Unit]
+Description=Check for new reminder releases
+
+[Service]
+Type=oneshot
+ExecStart=$DEPLOY_DIR/deploy.sh
+StandardOutput=append:$DEPLOY_DIR/deploy.log
+StandardError=append:$DEPLOY_DIR/deploy.log
+EOF
+
+    sudo tee /etc/systemd/system/reminder-deploy.timer >/dev/null <<EOF
+[Unit]
+Description=Check for new reminder releases every 5 minutes
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=5min
+
+[Install]
+WantedBy=timers.target
+EOF
+
+    sudo systemctl daemon-reload
+
+    # Stop any manually-running instance
+    killall reminder 2>/dev/null || true
+    sleep 2
+
+    # Enable and start
+    sudo systemctl enable --now reminder
+    sudo systemctl enable --now reminder-deploy.timer
+
+    log "Installed and started:"
+    log "  reminder.service        - starts on boot, restarts on crash"
+    log "  reminder-deploy.timer   - checks for updates every 5 min"
+    log ""
+    log "Useful commands:"
+    log "  sudo systemctl status reminder         - check status"
+    log "  sudo journalctl -u reminder -f         - follow logs"
+    log "  sudo systemctl restart reminder         - restart"
+    log "  sudo systemctl stop reminder            - stop"
 }
 
 install_cron() {
@@ -98,11 +173,17 @@ install_cron() {
     log "Deploy logs will go to $DEPLOY_DIR/deploy.log"
 }
 
-# Handle --cron flag
-if [ "${1:-}" = "--cron" ]; then
-    install_cron
-    exit 0
-fi
+# Handle flags
+case "${1:-}" in
+    --install)
+        install_systemd
+        exit 0
+        ;;
+    --cron)
+        install_cron
+        exit 0
+        ;;
+esac
 
 FORCE=false
 if [ "${1:-}" = "--force" ]; then
