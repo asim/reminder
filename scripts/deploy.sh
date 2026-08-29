@@ -97,22 +97,27 @@ deploy_version() {
 }
 
 install_systemd() {
-    local service_src="$DEPLOY_DIR/reminder.service"
+    # Write service unit inline — no external file needed
+    sudo tee /etc/systemd/system/reminder.service >/dev/null <<EOF
+[Unit]
+Description=Reminder - Quran, Hadith & Names of Allah
+After=network-online.target
+Wants=network-online.target
 
-    if [ ! -f "$service_src" ]; then
-        log "ERROR: reminder.service not found in $DEPLOY_DIR"
-        exit 1
-    fi
+[Service]
+Type=simple
+WorkingDirectory=$DEPLOY_DIR
+EnvironmentFile=-$DEPLOY_DIR/.env
+ExecStart=$DEPLOY_DIR/reminder --serve --web
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:$DEPLOY_DIR/reminder.log
+StandardError=append:$DEPLOY_DIR/reminder.log
+NoNewPrivileges=true
 
-    # Update WorkingDirectory and paths to match actual deploy dir
-    sed \
-        -e "s|WorkingDirectory=.*|WorkingDirectory=$DEPLOY_DIR|" \
-        -e "s|EnvironmentFile=.*|EnvironmentFile=-$DEPLOY_DIR/.env|" \
-        -e "s|ExecStart=.*|ExecStart=$DEPLOY_DIR/reminder --serve --web|" \
-        -e "s|StandardOutput=.*|StandardOutput=append:$DEPLOY_DIR/reminder.log|" \
-        -e "s|StandardError=.*|StandardError=append:$DEPLOY_DIR/reminder.log|" \
-        -e "s|ReadWritePaths=.*|ReadWritePaths=$DEPLOY_DIR|" \
-        "$service_src" | sudo tee /etc/systemd/system/reminder.service >/dev/null
+[Install]
+WantedBy=multi-user.target
+EOF
 
     # Install deploy timer (runs every 5 minutes instead of cron)
     sudo tee /etc/systemd/system/reminder-deploy.service >/dev/null <<EOF
