@@ -32,6 +32,11 @@ type Result struct {
 
 // synonyms maps common Islamic terms to related words so that a search
 // for one concept also matches documents using alternative vocabulary.
+// ftsTokenizer is the FTS5 tokenizer. Porter stemming lets "grieving",
+// "grieved" and "grieves" all match a query for "grieve". Changing this
+// invalidates existing indexes, which are detected and rebuilt in New.
+const ftsTokenizer = "porter unicode61"
+
 var synonyms = map[string][]string{
 	"mercy":         {"merciful", "compassion", "compassionate", "forgiveness", "pardon", "rahma"},
 	"merciful":      {"mercy", "compassion", "compassionate", "rahma"},
@@ -80,6 +85,51 @@ var synonyms = map[string][]string{
 	"truth":         {"truthful", "honest", "honesty", "true"},
 	"grateful":      {"gratitude", "thankful", "thanks", "shukr"},
 	"gratitude":     {"grateful", "thankful", "shukr"},
+
+	// Modern conversational vocabulary mapped onto the archaic register the
+	// translations actually use. Someone typing "anxiety" or "I feel
+	// depressed" finds nothing without this, and those are among the most
+	// common things people search for.
+	"anxiety":    {"anxious", "fear", "afraid", "grieve", "distress", "worry", "despair"},
+	"anxious":    {"anxiety", "fear", "afraid", "grieve", "distress", "worry"},
+	"depressed":  {"depression", "grieve", "grief", "sorrow", "despair", "distress", "sad"},
+	"depression": {"depressed", "grieve", "grief", "sorrow", "despair", "distress"},
+	"sad":        {"sadness", "grieve", "grief", "sorrow", "distress", "weep"},
+	"sadness":    {"sad", "grieve", "grief", "sorrow", "distress"},
+	"grief":      {"grieve", "sorrow", "sad", "mourn", "distress"},
+	"grieve":     {"grief", "sorrow", "sad", "mourn", "distress"},
+	"worried":    {"worry", "anxious", "fear", "afraid", "grieve"},
+	"worry":      {"worried", "anxious", "fear", "afraid", "grieve"},
+	"lonely":     {"loneliness", "alone", "forsaken", "abandoned", "solitude"},
+	"loneliness": {"lonely", "alone", "forsaken", "abandoned"},
+	"stress":     {"hardship", "distress", "burden", "difficulty", "affliction"},
+	"despair":    {"hopeless", "grieve", "sorrow", "distress", "anxiety"},
+	"hopeless":   {"despair", "grieve", "sorrow", "distress"},
+	"hope":       {"hopeful", "tidings", "glad", "expectation", "mercy"},
+	"afraid":     {"fear", "fearful", "frightened", "terror", "dread"},
+	"fear":       {"afraid", "fearful", "frightened", "terror", "dread", "taqwa"},
+	"suffering":  {"hardship", "affliction", "trial", "test", "distress", "pain"},
+	"pain":       {"hardship", "affliction", "suffering", "distress", "hurt"},
+	"hardship":   {"difficulty", "affliction", "trial", "adversity", "ease"},
+	"struggle":   {"strive", "hardship", "jihad", "effort", "perseverance"},
+	"angry":      {"anger", "wrath", "rage", "fury"},
+	"anger":      {"angry", "wrath", "rage", "restrain"},
+	"illness":    {"sick", "sickness", "disease", "healing", "cure", "ill"},
+	"sick":       {"illness", "sickness", "disease", "healing", "cure"},
+	"healing":    {"heal", "cure", "remedy", "shifa", "illness"},
+	"poverty":    {"poor", "needy", "destitute", "hunger", "provision"},
+	"poor":       {"poverty", "needy", "destitute", "hunger"},
+	"wealth":     {"riches", "provision", "sustenance", "rizq", "money"},
+	"money":      {"wealth", "riches", "provision", "sustenance", "rizq"},
+	"lost":       {"astray", "guidance", "misguided", "straying"},
+	"guidance":   {"guide", "guided", "straight", "path", "huda"},
+	"doubt":      {"doubtful", "uncertain", "waver", "suspicion"},
+	"parents":    {"mother", "father", "kindred", "family"},
+	"family":     {"kindred", "relatives", "parents", "children", "household"},
+	"marriage":   {"marry", "spouse", "wives", "wife", "husband", "nikah"},
+	"children":   {"child", "offspring", "sons", "daughters", "progeny"},
+	"trial":      {"test", "tested", "affliction", "tribulation", "hardship"},
+	"test":       {"trial", "tested", "affliction", "tribulation"},
 }
 
 // expandSynonyms adds synonyms for each query word, returning a deduplicated list.
@@ -141,17 +191,31 @@ func New(path ...string) *Index {
 	idx := &Index{db: db}
 
 	if existed {
-		var cnt int
-		if err := db.QueryRow(`SELECT COUNT(*) FROM docs`).Scan(&cnt); err == nil && cnt > 0 {
-			idx.count = cnt
-			idx.built = true
-			return idx
+		// Only reuse the existing index if it was built with the current
+		// schema. Older indexes used the default unicode61 tokenizer with
+		// no stemming; those are dropped and rebuilt.
+		var sqlText string
+		err := db.QueryRow(
+			`SELECT sql FROM sqlite_master WHERE type='table' AND name='docs_fts'`,
+		).Scan(&sqlText)
+
+		if err == nil && strings.Contains(sqlText, ftsTokenizer) {
+			var cnt int
+			if err := db.QueryRow(`SELECT COUNT(*) FROM docs`).Scan(&cnt); err == nil && cnt > 0 {
+				idx.count = cnt
+				idx.built = true
+				return idx
+			}
+		} else if err == nil {
+			// Stale schema — drop so it gets rebuilt below.
+			db.Exec(`DROP TABLE IF EXISTS docs_fts`)
+			db.Exec(`DROP TABLE IF EXISTS docs`)
 		}
 	}
 
 	stmts := []string{
 		`CREATE TABLE IF NOT EXISTS docs (id INTEGER PRIMARY KEY AUTOINCREMENT, text TEXT NOT NULL, metadata TEXT NOT NULL)`,
-		`CREATE VIRTUAL TABLE IF NOT EXISTS docs_fts USING fts5(text, content=docs, content_rowid=id)`,
+		`CREATE VIRTUAL TABLE IF NOT EXISTS docs_fts USING fts5(text, content=docs, content_rowid=id, tokenize = '` + ftsTokenizer + `')`,
 	}
 	for _, s := range stmts {
 		if _, err := db.Exec(s); err != nil {
