@@ -168,23 +168,23 @@ const endpoints: Endpoint[] = [
   },
   {
     title: 'Search',
-    description: 'Full-text search across Quran, Hadith, and Names of Allah. Set summarise to true for an AI-generated summary.',
+    description: 'Search the Quran, Hadith, and Names of Allah. Returns matching references ranked by relevance. Optionally include an AI-generated summary by setting summarise to true (slower).',
     url: '/api/search',
     method: 'POST',
     requestFormat: 'JSON',
     responseFormat: 'JSON',
     params: [
-      { name: 'q', type: 'string', description: 'The search query' },
-      { name: 'summarise', type: 'boolean', description: 'Set to true to include an AI-generated summary (optional, slower)' },
+      { name: 'q', type: 'string', description: 'The search query or question' },
+      { name: 'summarise', type: 'boolean', description: 'Set to true for an AI summary (default: true). Set to false for fast results without LLM processing.' },
     ],
     responseFields: [
-      { name: 'q', type: 'string', description: 'The query searched' },
+      { name: 'q', type: 'string', description: 'The query submitted' },
+      { name: 'answer', type: 'string', description: 'AI-generated summary (empty string when summarise is false)' },
       {
         name: 'references',
         type: 'array',
-        description: 'Search results ranked by relevance',
+        description: 'Ranked list of matching results with text, score, and source metadata',
       },
-      { name: 'answer', type: 'string', description: 'AI-generated summary (only when summarise is true)' },
     ],
   },
 ];

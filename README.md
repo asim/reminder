@@ -38,7 +38,7 @@ Find the latest [release](https://github.com/asim/reminder/releases/latest)
 Or Go install
 
 ```
-go get github.com.com/asim/reminder@latest
+go install github.com/asim/reminder@latest
 ```
 
 ## Usage

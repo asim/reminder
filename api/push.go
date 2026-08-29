@@ -71,9 +71,9 @@ func LoadOrGenerateVAPIDKeys() error {
 	// Debug: print decoded length and first byte
 	decoded, err := decodeBase64URL(VAPIDPublicKey)
 	if err == nil {
-		fmt.Printf("[VAPID] Decoded public key length: %d, first byte: %d\n", len(decoded), decoded[0])
+		log.Printf("[VAPID] Decoded public key length: %d, first byte: %d\n", len(decoded), decoded[0])
 	} else {
-		fmt.Printf("[VAPID] Failed to decode public key: %v\n", err)
+		log.Printf("[VAPID] Failed to decode public key: %v\n", err)
 	}
 	// Load private key
 	priv, err := os.ReadFile(privPath)
@@ -180,27 +180,68 @@ func RegisterRoutes(mux *http.ServeMux) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(VAPIDPublicKey))
 	})
+
+	// Show active subscription count and endpoints (for diagnostics)
+	mux.HandleFunc("/api/push/status", func(w http.ResponseWriter, r *http.Request) {
+		subs := ListPushSubscriptions()
+		endpoints := make([]string, len(subs))
+		for i, s := range subs {
+			// Show just the domain, not the full token
+			parts := strings.SplitN(s.Endpoint, "/", 4)
+			if len(parts) >= 3 {
+				endpoints[i] = parts[0] + "//" + parts[2] + "/..."
+			} else {
+				endpoints[i] = s.Endpoint
+			}
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"count":     len(subs),
+			"endpoints": endpoints,
+		})
+	})
 }
 
 func SendPushNotification(sub PushSubscription, payload string) error {
-	fmt.Println("Pushing to sub", sub.Endpoint)
+	// Safe key extraction — avoids panic on corrupted subscriptions
+	p256dh, _ := sub.Keys["p256dh"].(string)
+	auth, _ := sub.Keys["auth"].(string)
+	if p256dh == "" || auth == "" {
+		return fmt.Errorf("invalid subscription keys for %s", sub.Endpoint)
+	}
+
 	subscription := &webpush.Subscription{
 		Endpoint: sub.Endpoint,
 		Keys: webpush.Keys{
-			P256dh: sub.Keys["p256dh"].(string),
-			Auth:   sub.Keys["auth"].(string),
+			P256dh: p256dh,
+			Auth:   auth,
 		},
 	}
+
 	resp, err := webpush.SendNotification([]byte(payload), subscription, &webpush.Options{
 		Subscriber:      VAPIDEmail,
 		VAPIDPublicKey:  VAPIDPublicKey,
 		VAPIDPrivateKey: VAPIDPrivateKey,
-		TTL:             60,
+		TTL:             86400, // 24 hours — gives the push service time to deliver
 	})
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
+	// Drain body so the connection can be reused
+	io.Copy(io.Discard, resp.Body)
+
+	// Remove subscription if the push service says it's gone
+	if resp.StatusCode == http.StatusGone || resp.StatusCode == http.StatusNotFound {
+		log.Printf("Removing expired push subscription: %s (status %d)", sub.Endpoint, resp.StatusCode)
+		RemovePushSubscription(sub.Endpoint)
+		return fmt.Errorf("subscription expired (status %d)", resp.StatusCode)
+	}
+
+	if resp.StatusCode >= 400 {
+		return fmt.Errorf("push service returned status %d for %s", resp.StatusCode, sub.Endpoint)
+	}
+
 	return nil
 }
 

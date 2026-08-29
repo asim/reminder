@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { httpGet } from '~/utils/http';
 
@@ -9,6 +10,35 @@ interface LatestResponse {
     links: Record<string, string>;
     updated: string;
     message: string;
+}
+
+function useRelativeTime(isoDate: string) {
+    const [text, setText] = useState('');
+
+    useEffect(() => {
+        const update = () => {
+            const updatedAt = new Date(isoDate).getTime();
+            const now = Date.now();
+            const agoMs = now - updatedAt;
+            const agoMins = Math.floor(agoMs / 60000);
+            const nextMs = 3600000 - agoMs;
+            const nextMins = Math.max(0, Math.ceil(nextMs / 60000));
+
+            if (agoMins < 1) {
+                setText('Updated just now — next update in about an hour');
+            } else if (agoMins === 1) {
+                setText(`Updated 1 min ago · next update in ${nextMins} min`);
+            } else {
+                setText(`Updated ${agoMins} min ago · next update in ${nextMins} min`);
+            }
+        };
+
+        update();
+        const id = setInterval(update, 30000);
+        return () => clearInterval(id);
+    }, [isoDate]);
+
+    return text;
 }
 
 export function meta() {
@@ -29,8 +59,10 @@ export default function HomePage() {
     const { data, isLoading, error } = useQuery<LatestResponse>({
         queryKey: ['latest'],
         queryFn: async () => httpGet<LatestResponse>('/api/latest'),
-        refetchInterval: 60000, // Refetch every minute
+        refetchInterval: 60000,
     });
+
+    const relativeTime = useRelativeTime(data?.updated ?? new Date().toISOString());
 
     if (isLoading) return <div className="p-4">Loading...</div>;
     if (error || !data) return <div className="p-4 text-red-500">Failed to load latest reminder.</div>;
@@ -42,11 +74,8 @@ export default function HomePage() {
                     <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 sm:mb-3">
                         Latest Reminder
                     </h1>
-                    <p className="text-sm sm:text-base text-gray-600 mb-1">
-                        Updated hourly with a new verse, hadith, and name
-                    </p>
                     <p className="text-xs sm:text-sm text-gray-500">
-                        Last updated: {new Date(data.updated).toLocaleString()}
+                        {relativeTime}
                     </p>
                 </div>
 

@@ -48,3 +48,56 @@
   border-style: solid;
   border-color: #1f2937 transparent transparent transparent;
 }
+
+@media print {
+  /* Hide nav, buttons, controls */
+  nav,
+  button,
+  .overflow-hidden {
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  /* Hide non-content elements */
+  [class*="bg-black"][class*="text-white"][class*="py-2"] {
+    display: none !important;
+  }
+
+  /* Audio players, view mode toggles, share/bookmark buttons */
+  audio,
+  [aria-label="Share"],
+  [aria-label="Transcript"],
+  [title="Share"],
+  [title="Bookmark"],
+  [title="Reading bookmark"] {
+    display: none !important;
+  }
+
+  /* Navigation buttons (prev/next) */
+  a[href*="CircleChevron"],
+  .flex.justify-between.mt-6 {
+    display: none !important;
+  }
+
+  body {
+    font-size: 12pt;
+    line-height: 1.6;
+    color: #000;
+    background: #fff;
+  }
+
+  /* Remove shadows, borders */
+  * {
+    box-shadow: none !important;
+  }
+
+  /* Ensure content is full-width */
+  .max-w-4xl {
+    max-width: 100% !important;
+  }
+
+  /* Page breaks */
+  .border-b {
+    page-break-inside: avoid;
+  }
+}

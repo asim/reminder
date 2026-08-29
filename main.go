@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"math/rand"
 	"net/http"
 	"os"
@@ -244,7 +245,7 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Collection, a 
 		hadithLink := links["hadith"]
 		nameLink := links["name"]
 
-		data := fmt.Sprintf(template, verseLink, dailyVerse, hadithLink, dailyHadith, nameLink, dailyName, dailyUpdated.Format(time.RFC850))
+		data := fmt.Sprintf(template, verseLink, dailyVerse, hadithLink, dailyHadith, nameLink, dailyName, dailyUpdated.Format(time.RFC3339))
 		mtx.RUnlock()
 
 		html := app.RenderHTML("Daily Reminder", "Daily reminder from the quran, hadith and names of Allah", data)
@@ -388,7 +389,7 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Collection, a 
 }
 
 func loadLastPushDate() string {
-	fmt.Println("Load last pushdate")
+	log.Println("Load last pushdate")
 	b, err := os.ReadFile(lastPushDateFile)
 	if err != nil {
 		return ""
@@ -403,7 +404,7 @@ func saveLastPushDate(date string) {
 
 // On startup, load daily index
 func loadDailyIndex() map[string]interface{} {
-	fmt.Println("Load daily index")
+	log.Println("Load daily index")
 	dailyFile := api.ReminderPath("daily.json")
 	var idx map[string]interface{}
 	if b, err := os.ReadFile(dailyFile); err == nil {
@@ -478,7 +479,7 @@ func generateMessage(ctx context.Context, verse, hadith, name string) (message s
 	// Wrap in a recover to handle panics from askLLM (which panics on errors)
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Printf("Failed to generate contextual message via LLM: %v\n", r)
+			log.Printf("Failed to generate contextual message via LLM: %v\n", r)
 			message = defaultMessage // Ensure we return default on panic
 		}
 	}()
@@ -494,29 +495,29 @@ func generateMessage(ctx context.Context, verse, hadith, name string) (message s
 }
 
 func main() {
-	fmt.Println("New rand source")
+	log.Println("New rand source")
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	flag.Parse()
 
 	// Load push subscriptions
-	fmt.Println("Loading subscriptions")
+	log.Println("Loading subscriptions")
 	_ = api.LoadPushSubscriptions()
 
 	// Load or generate VAPID keys
-	fmt.Println("Loading VAPID keys")
+	log.Println("Loading VAPID keys")
 	_ = api.LoadOrGenerateVAPIDKeys()
 
 	// load data
-	fmt.Println("Initialising data")
+	log.Println("Initialising data")
 	q := quran.Load()
-	fmt.Println("Loaded Quran")
+	log.Println("Loaded Quran")
 	n := names.Load()
-	fmt.Println("Loaded Names")
+	log.Println("Loaded Names")
 	b := hadith.Load()
-	fmt.Println("Loaded Hadith")
+	log.Println("Loaded Hadith")
 	a := api.Load()
-	fmt.Println("Loaded API")
+	log.Println("Loaded API")
 
 	// generate json
 	qjson := q.JSON()
@@ -555,7 +556,7 @@ func main() {
 	needsEmbed := embedder != nil && embedder.Count() == 0
 
 	if needsIndex {
-		fmt.Println("Indexing data")
+		log.Println("Indexing data")
 		go func() {
 			indexQuran(idx, q)
 			indexNames(idx, n)
@@ -599,7 +600,7 @@ func main() {
 	}
 
 	if *WebFlag {
-		fmt.Println("Registering web handler")
+		log.Println("Registering web handler")
 
 		// Register TOC handlers for API clients only
 		http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
@@ -696,7 +697,7 @@ func main() {
 		// Everything else goes to SPA
 		http.Handle("/", app.ServeWeb())
 	} else {
-		fmt.Println("Registering lite handler")
+		log.Println("Registering lite handler")
 		registerLiteRoutes(q, n, b, a)
 	}
 
@@ -774,7 +775,7 @@ func main() {
 				"hadith":  dailyHadith,
 				"verse":   dailyVerse,
 				"links":   links,
-				"updated": dailyUpdated.Format(time.RFC850),
+				"updated": dailyUpdated.Format(time.RFC3339),
 				"message": message,
 				"hijri":   daily.Date().Display,
 				"date":    today,
@@ -802,7 +803,7 @@ func main() {
 			"hadith":  hadith,
 			"verse":   verse,
 			"links":   currentLinks,
-			"updated": updated.Format(time.RFC850),
+			"updated": updated.Format(time.RFC3339),
 			"message": message,
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -1180,6 +1181,17 @@ func main() {
 				return
 			}
 
+			// summarise defaults to true when absent for backward compat.
+			// The web UI explicitly sets summarise=false for the fast path
+			// that only returns references, then issues a second call with
+			// summarise=true to fetch the LLM answer.
+			summarise := true
+			if v, ok := data["summarise"]; ok {
+				if bv, ok := v.(bool); ok {
+					summarise = bv
+				}
+			}
+
 			res, err := idx.Query(q)
 			if err != nil {
 				http.Error(w, err.Error(), 500)
@@ -1198,8 +1210,8 @@ func main() {
 				"references": res,
 			}
 
-			// Opt-in summarisation via summarise field
-			if summarise, _ := data["summarise"].(bool); summarise {
+			// Summarise unless the caller explicitly opted out
+			if summarise {
 				var tokens int
 				var contexts []string
 				for _, r := range res {
@@ -1234,7 +1246,7 @@ func main() {
 		}
 	})
 
-	fmt.Println("Registering routes")
+	log.Println("Registering routes")
 	httpMux := http.DefaultServeMux
 	api.RegisterRoutes(httpMux)
 
@@ -1250,7 +1262,7 @@ func main() {
 			"hadith":  dailyHadith,
 			"verse":   dailyVerse,
 			"links":   links,
-			"updated": dailyUpdated.Format(time.RFC850),
+			"updated": dailyUpdated.Format(time.RFC3339),
 			"message": dailyMessage,
 		}
 		mtx.RUnlock()
@@ -1274,7 +1286,7 @@ func main() {
 			"hadith":  dailyHadith,
 			"verse":   dailyVerse,
 			"links":   links,
-			"updated": dailyUpdated.Format(time.RFC850),
+			"updated": dailyUpdated.Format(time.RFC3339),
 			"message": message,
 			"hijri":   daily.Date().Display,
 			"date":    today,
@@ -1518,46 +1530,55 @@ func main() {
 		}
 
 		for {
-			fmt.Println("Running daily")
+			func() {
+				defer func() {
+					if r := recover(); r != nil {
+						log.Printf("Daily loop recovered from panic: %v\n", r)
+					}
+				}()
+			log.Println("Running daily")
 
 			mtx.Lock()
 
-			nam := (*n)[rnd.Int()%len((*n))]
-			bookIdx := rnd.Int() % len(b.Books)
-			book := b.Books[bookIdx]
+			var nam *names.Name
+			var book *hadith.Book
+			var chap *quran.Chapter
+			var ver *quran.Verse
+			var had *hadith.Hadith
 
-			// Safety check for books with no hadiths
-			if len(book.Hadiths) == 0 {
-				fmt.Printf("Book %d (%s) has no hadiths, skipping\n", bookIdx, book.Name)
-				mtx.Unlock()
-				continue
+			// Retry random selection up to 50 times to avoid skipping
+			// an entire hour when we pick a bad combination.
+			found := false
+			for attempt := 0; attempt < 50; attempt++ {
+				nam = (*n)[rnd.Int()%len((*n))]
+				bookIdx := rnd.Int() % len(b.Books)
+				book = b.Books[bookIdx]
+
+				if len(book.Hadiths) == 0 {
+					continue
+				}
+
+				chap = q.Chapters[rnd.Int()%len(q.Chapters)]
+
+				if len(chap.Verses) == 0 {
+					continue
+				}
+
+				ver = chap.Verses[rnd.Int()%len(chap.Verses)]
+				had = book.Hadiths[rnd.Int()%len(book.Hadiths)]
+
+				if ver.Number == 0 || !isCapital(ver.Text) {
+					continue
+				}
+
+				found = true
+				break
 			}
 
-			chap := q.Chapters[rnd.Int()%len(q.Chapters)]
-
-			// Safety check for chapters with no verses
-			if len(chap.Verses) == 0 {
-				fmt.Printf("Chapter %d has no verses, skipping\n", chap.Number)
+			if !found {
+				log.Println("Could not find valid content after 50 attempts, will retry next hour")
 				mtx.Unlock()
-				continue
-			}
-
-			ver := chap.Verses[rnd.Int()%len(chap.Verses)]
-			hadithIdx := rnd.Int() % len(book.Hadiths)
-			had := book.Hadiths[hadithIdx]
-
-			fmt.Printf("Selected: Book %d (%s), Hadith %d, Chapter %d, Verse %d\n", bookIdx, book.Name, hadithIdx, chap.Number, ver.Number)
-
-			// make sure we're starting from the begining of a verse
-			if !isCapital(ver.Text) {
-				mtx.Unlock()
-				continue
-			}
-
-			// skip zero verse e.g bismillah
-			if ver.Number == 0 {
-				mtx.Unlock()
-				continue
+				return
 			}
 
 			dailyName = fmt.Sprintf("%s - %s - %s\n\n%s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
@@ -1639,7 +1660,7 @@ func main() {
 					"hijri":   hijriDate,
 					"date":    today,
 					"links":   links,
-					"updated": dailyUpdated.Format(time.RFC850),
+					"updated": dailyUpdated.Format(time.RFC3339),
 					"message": dailyMessage,
 				}
 
@@ -1658,24 +1679,26 @@ func main() {
 
 				// Only send if we haven't already sent today
 				if lastPushDate != today {
-					fmt.Println("Sending push notification at midnight UTC")
+					log.Println("Sending push notification at midnight UTC")
 
 					errors := api.SendPushToAll(string(b))
 					if len(errors) > 0 {
-						fmt.Println("Push notification errors:")
+						log.Println("Push notification errors:")
 						for _, err := range errors {
-							fmt.Println(err)
+							log.Println(err)
 						}
 					}
 
 					lastPushDate = today
 					saveLastPushDate(today)
 				} else {
-					fmt.Println("Push notification already sent today, skipping")
+					log.Println("Push notification already sent today, skipping")
 				}
 
 				mtx.Unlock()
 			}
+
+			}() // end of panic-recovery wrapper
 
 			// Update hourly for /api/latest
 			time.Sleep(time.Hour)
@@ -1683,12 +1706,22 @@ func main() {
 	}
 
 	if *ServerFlag {
-		fmt.Println("Starting daily")
+		log.Println("Starting daily")
 		go daily()
 
-		fmt.Println("Starting server :8080")
+		log.Println("Starting server :8080")
 		if err := http.ListenAndServe(":8080", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if *EnvFlag == "dev" {
+			// CORS for API routes — allow any origin
+			if strings.HasPrefix(r.URL.Path, "/api/") || r.URL.Path == "/mcp" {
+				w.Header().Set("Access-Control-Allow-Origin", "*")
+				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+				w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+				if r.Method == "OPTIONS" {
+					w.WriteHeader(http.StatusOK)
+					return
+				}
+			} else if *EnvFlag == "dev" {
 				w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
 				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 				w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
@@ -1717,7 +1750,7 @@ func main() {
 
 			http.DefaultServeMux.ServeHTTP(w, r)
 		})); err != nil {
-			fmt.Printf("Server error: %v\n", err)
+			log.Printf("Server error: %v\n", err)
 		}
 	}
 
