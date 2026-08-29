@@ -194,3 +194,77 @@ func indexHadith(idx *search.Index, b *hadith.Collection) {
 	// Clear checkpoint when all done
 	clearCheckpoint()
 }
+
+// buildEmbeddings reads all documents from the FTS index and computes embeddings.
+// buildEmbeddings embeds every document in the index. It returns an error if
+// any batch fails, so that callers do not persist a partially embedded corpus:
+// a saved partial set looks complete on the next start and those documents
+// would never be embedded again.
+func buildEmbeddings(idx *search.Index, embedder *search.Embedder) error {
+	db := idx.DB()
+	if db == nil {
+		return fmt.Errorf("embeddings: no database")
+	}
+
+	rows, err := db.Query(`SELECT text, metadata FROM docs`)
+	if err != nil {
+		return fmt.Errorf("embeddings: read docs: %w", err)
+	}
+	defer rows.Close()
+
+	// Batch documents for efficient embedding
+	const batchSize = 32
+	var batchTexts []string
+	var batchMetas []string
+
+	processBatch := func(texts, metas []string) error {
+		vecs, err := embedder.EmbedBatch(texts)
+		if err != nil {
+			return fmt.Errorf("embeddings: embed batch: %w", err)
+		}
+		if len(vecs) != len(texts) {
+			return fmt.Errorf("embeddings: got %d vectors for %d texts", len(vecs), len(texts))
+		}
+		for i, vec := range vecs {
+			embedder.Add(texts[i], metas[i], vec)
+		}
+		return nil
+	}
+
+	total := 0
+	for rows.Next() {
+		var text, meta string
+		if err := rows.Scan(&text, &meta); err != nil {
+			return fmt.Errorf("embeddings: scan doc: %w", err)
+		}
+
+		batchTexts = append(batchTexts, text)
+		batchMetas = append(batchMetas, meta)
+
+		if len(batchTexts) >= batchSize {
+			if err := processBatch(batchTexts, batchMetas); err != nil {
+				return err
+			}
+			total += len(batchTexts)
+			if total%1000 == 0 {
+				log.Printf("Embedded %d documents...", total)
+			}
+			batchTexts = batchTexts[:0]
+			batchMetas = batchMetas[:0]
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return fmt.Errorf("embeddings: iterate docs: %w", err)
+	}
+
+	// Process remaining
+	if len(batchTexts) > 0 {
+		if err := processBatch(batchTexts, batchMetas); err != nil {
+			return err
+		}
+		total += len(batchTexts)
+	}
+
+	log.Printf("Embedding complete: %d documents", total)
+	return nil
+}

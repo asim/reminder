@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -10,6 +11,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -27,9 +29,7 @@ import (
 )
 
 var (
-	IndexFlag  = flag.Bool("index", false, "Index data for search. Stored at $HOME/reminder.idx")
-	ExportFlag = flag.Bool("export", false, "Export the index data to $HOME/reminder.idx.gob.gz")
-	ImportFlag = flag.Bool("import", false, "Import the index data from $HOME/reminder.idx.gob.gz")
+	IndexFlag = flag.Bool("index", false, "Index data for search")
 	ServerFlag = flag.Bool("serve", false, "Run the server")
 	EnvFlag    = flag.String("env", "dev", "Set the environment")
 	WebFlag    = flag.Bool("web", false, "Without this flag, the lite version will be served")
@@ -509,20 +509,6 @@ func main() {
 	log.Println("Loading VAPID keys")
 	_ = api.LoadOrGenerateVAPIDKeys()
 
-	// create a new indexa
-	log.Println("Generating index")
-	idx := search.New("reminder", false)
-
-	// async load the index
-	go func() {
-		// Load the pre-existing data
-		log.Println("Loading index")
-		if err := idx.Load(); err != nil {
-			log.Println(err)
-		}
-		log.Println("Loaded index")
-	}()
-
 	// load data
 	log.Println("Initialising data")
 	q := quran.Load()
@@ -539,41 +525,97 @@ func main() {
 	njson := n.JSON()
 	hjson := b.JSON()
 
-	// index the quran in english
+	// Create SQLite FTS5 search index (persisted to ~/.reminder/search.db)
+	home, _ := os.UserHomeDir()
+	reminderHome := filepath.Join(home, ".reminder")
+	os.MkdirAll(reminderHome, 0755)
+
+	dbPath := filepath.Join(reminderHome, "search.db")
+	fmt.Println("Opening search index")
+	idx := search.New(dbPath)
+
+	// Initialize embedder for semantic search
+	modelDir := filepath.Join(reminderHome, "models")
+	embedPath := filepath.Join(reminderHome, "embeddings.bin")
+
+	log.Println("Initialising embedding model")
+	embedder, err := search.NewEmbedder(modelDir)
+	if err != nil {
+		log.Printf("Embeddings unavailable (%v); using keyword search only", err)
+	} else {
+		idx.Embedder = embedder
+		log.Printf("Embedding provider: %s", embedder.Provider())
+
+		// Try loading persisted embeddings. A provider mismatch means the file
+		// was built by a different model, so it is discarded and rebuilt below
+		// rather than compared against incompatible query vectors.
+		switch err := embedder.Load(embedPath); {
+		case err == nil && embedder.Count() > 0:
+			log.Printf("Loaded %d embeddings from disk", embedder.Count())
+		case errors.Is(err, search.ErrProviderMismatch):
+			log.Printf("Stored embeddings do not match %s, rebuilding", embedder.Provider())
+		case err != nil && !os.IsNotExist(err):
+			log.Printf("Could not load embeddings (%v), rebuilding", err)
+		}
+	}
+
+	// Index content if not already built (or if -index flag is set)
 	indexed := make(chan bool, 1)
 
-	if *IndexFlag {
-		// create a separate index that's persisted
-		// this is located in $HOME/reminder.idx
-		// it will need to be exported afterwards
-		sidx := search.New("reminder", true)
+	needsIndex := *IndexFlag || !idx.Built()
 
+	// Embeddings must cover the whole corpus. Anything short of that means a
+	// previous build was interrupted or the index has since been rebuilt, so
+	// they are regenerated rather than left partially covering the documents.
+	embedComplete := func() bool {
+		return embedder != nil && idx.Count() > 0 && embedder.Count() == idx.Count()
+	}
+
+	// runEmbeddings builds and persists embeddings, saving only on success.
+	runEmbeddings := func() {
+		if embedder == nil || embedComplete() {
+			return
+		}
+		log.Println("Building embeddings (this may take a few minutes on first run)")
+		if err := buildEmbeddings(idx, embedder); err != nil {
+			log.Printf("Embedding build failed (%v); keyword search remains available", err)
+			return
+		}
+		if err := embedder.Save(embedPath); err != nil {
+			log.Printf("Warning: failed to save embeddings: %v", err)
+		} else {
+			log.Printf("Saved %d embeddings to disk", embedder.Count())
+		}
+	}
+
+	if needsIndex {
 		log.Println("Indexing data")
 		go func() {
-			indexQuran(sidx, q)
-			indexNames(sidx, n)
-			indexHadith(sidx, b)
-			indexTafsir(sidx, q)
-			// done
+			indexQuran(idx, q)
+			indexNames(idx, n)
+			indexHadith(idx, b)
+			indexTafsir(idx, q)
+
+			// Record completion only once every source is stored. If the
+			// process dies before this, the next start rebuilds rather than
+			// treating a partial corpus as finished.
+			if err := idx.MarkBuilt(); err != nil {
+				log.Printf("Warning: could not mark index complete: %v", err)
+			}
+			log.Printf("FTS indexing complete (%d documents)", idx.Count())
+
+			// FTS is ready — open search (keyword-only until embeddings finish)
 			close(indexed)
+
+			runEmbeddings()
 		}()
-	} else {
+	} else if !embedComplete() {
+		// FTS already built, search is available immediately
 		close(indexed)
-	}
-
-	if *ExportFlag {
-		log.Println("Exporting index")
-		if err := idx.Export(); err != nil {
-			log.Println(err)
-		}
-		return
-	}
-
-	if *ImportFlag {
-		log.Println("Importing index")
-		if err := idx.Import(); err != nil {
-			log.Println(err)
-		}
+		go runEmbeddings()
+	} else {
+		log.Printf("Search index loaded (%d documents, %d embeddings)", idx.Count(), embedder.Count())
+		close(indexed)
 	}
 
 	if *WebFlag {
@@ -1111,21 +1153,18 @@ func main() {
 		w.Write([]byte(answer))
 	})
 
+	// Search returns results immediately without waiting for LLM
 	http.HandleFunc("/api/search", func(w http.ResponseWriter, r *http.Request) {
 		select {
 		case <-indexed:
 		default:
-			// not indexed yet because blocked
 			w.Write([]byte(`{"error": "Indexing content"}`))
 			return
 		}
 
-		// indexed or no index of any kind
-
 		if r.Method == "GET" {
 			var ctx string
 
-			// look for the context cookie
 			c, err := r.Cookie("session")
 			if err == nil {
 				ctx = c.Value
@@ -1136,7 +1175,6 @@ func main() {
 				return
 			}
 
-			// pull the context which we only store in memory for now
 			h, ok := history[ctx]
 			if !ok {
 				h = []string{}
@@ -1157,11 +1195,15 @@ func main() {
 			json.Unmarshal(b, &data)
 
 			q, _ := data["q"].(string)
+			if q == "" {
+				http.Error(w, `{"error":"q is required"}`, 400)
+				return
+			}
 
 			// summarise defaults to true when absent for backward compat.
-			// The new web UI explicitly sets summarise=false for the fast
-			// path that only returns references, then issues a second call
-			// with summarise=true to fetch the LLM answer.
+			// The web UI explicitly sets summarise=false for the fast path
+			// that only returns references, then issues a second call with
+			// summarise=true to fetch the LLM answer.
 			summarise := true
 			if v, ok := data["summarise"]; ok {
 				if bv, ok := v.(bool); ok {
@@ -1182,54 +1224,43 @@ func main() {
 				}
 			}
 
-			if !summarise {
-				output, _ := json.Marshal(map[string]interface{}{
-					"q":          q,
-					"answer":     "",
-					"references": res,
-				})
-				w.Write(output)
-				return
-			}
-
-			var tokens int
-			var contexts []string
-
-			for _, r := range res {
-				if tokens >= 8000 {
-					break
-				}
-
-				b, _ := json.Marshal(r)
-				tokens += len(b)
-				// TODO: maybe just provide text
-				contexts = append(contexts, string(b))
-			}
-
-			answer := askLLM(r.Context(), contexts, q)
-			answerMD := string(app.Render([]byte(answer)))
-
-			output, _ := json.Marshal(map[string]interface{}{
+			result := map[string]interface{}{
 				"q":          q,
-				"answer":     answerMD,
 				"references": res,
-			})
-			w.Write(output)
-
-			var ctx string
-
-			// look for the context cookie
-			c, err := r.Cookie("session")
-			if err == nil {
-				ctx = c.Value
-				h, ok := history[ctx]
-				if !ok {
-					h = []string{}
-				}
-				h = append([]string{q, answerMD}, h...)
-				history[ctx] = h
 			}
 
+			// Summarise unless the caller explicitly opted out
+			if summarise {
+				var tokens int
+				var contexts []string
+				for _, r := range res {
+					if tokens >= 8000 {
+						break
+					}
+					b, _ := json.Marshal(r)
+					tokens += len(b)
+					contexts = append(contexts, string(b))
+				}
+
+				answer := askLLM(r.Context(), contexts, q)
+				answerMD := string(app.Render([]byte(answer)))
+				result["answer"] = answerMD
+
+				// Store in session history
+				c, err := r.Cookie("session")
+				if err == nil {
+					ctx := c.Value
+					h, ok := history[ctx]
+					if !ok {
+						h = []string{}
+					}
+					h = append([]string{q, answerMD}, h...)
+					history[ctx] = h
+				}
+			}
+
+			output, _ := json.Marshal(result)
+			w.Write(output)
 			return
 		}
 	})
@@ -1406,10 +1437,11 @@ func main() {
 		return string(byt), nil
 	})
 
-	mcpServer.AddTool("search", "Search Islamic content and get AI-summarised answers from the Quran, Hadith and Names of Allah", api.InputSchema{
+	mcpServer.AddTool("search", "Search Islamic content from the Quran, Hadith and Names of Allah. Returns matching results.", api.InputSchema{
 		Type: "object",
 		Properties: map[string]api.Property{
-			"q": {Type: "string", Description: "The question to ask"},
+			"q":         {Type: "string", Description: "The search query"},
+			"summarise": {Type: "boolean", Description: "Set to true to include an AI-generated summary (slower)"},
 		},
 		Required: []string{"q"},
 	}, func(args map[string]interface{}) (string, error) {
@@ -1429,28 +1461,35 @@ func main() {
 			return "", err
 		}
 
-		var tokens int
-		var contexts []string
 		for _, r := range res {
-			if tokens >= 8000 {
-				break
-			}
 			for k, v := range r.Metadata {
 				delete(r.Metadata, k)
 				r.Metadata[strings.ToLower(k)] = v
 			}
-			b, _ := json.Marshal(r)
-			tokens += len(b)
-			contexts = append(contexts, string(b))
 		}
 
-		answer := askLLM(context.Background(), contexts, question)
-
-		output, _ := json.Marshal(map[string]interface{}{
+		result := map[string]interface{}{
 			"q":          question,
-			"answer":     answer,
 			"references": res,
-		})
+		}
+
+		// Only run LLM summarisation if explicitly requested
+		if summarise, _ := args["summarise"].(bool); summarise {
+			var tokens int
+			var contexts []string
+			for _, r := range res {
+				if tokens >= 8000 {
+					break
+				}
+				b, _ := json.Marshal(r)
+				tokens += len(b)
+				contexts = append(contexts, string(b))
+			}
+			answer := askLLM(context.Background(), contexts, question)
+			result["answer"] = answer
+		}
+
+		output, _ := json.Marshal(result)
 		return string(output), nil
 	})
 
