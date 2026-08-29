@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -537,15 +538,24 @@ func main() {
 	modelDir := filepath.Join(reminderHome, "models")
 	embedPath := filepath.Join(reminderHome, "embeddings.bin")
 
-	fmt.Println("Initialising embedding model")
+	log.Println("Initialising embedding model")
 	embedder, err := search.NewEmbedder(modelDir)
 	if err != nil {
-		fmt.Printf("Warning: embeddings unavailable (%v), falling back to keyword search\n", err)
+		log.Printf("Embeddings unavailable (%v); using keyword search only", err)
 	} else {
 		idx.Embedder = embedder
-		// Try loading persisted embeddings
-		if err := embedder.Load(embedPath); err == nil && embedder.Count() > 0 {
-			fmt.Printf("Loaded %d embeddings from disk\n", embedder.Count())
+		log.Printf("Embedding provider: %s", embedder.Provider())
+
+		// Try loading persisted embeddings. A provider mismatch means the file
+		// was built by a different model, so it is discarded and rebuilt below
+		// rather than compared against incompatible query vectors.
+		switch err := embedder.Load(embedPath); {
+		case err == nil && embedder.Count() > 0:
+			log.Printf("Loaded %d embeddings from disk", embedder.Count())
+		case errors.Is(err, search.ErrProviderMismatch):
+			log.Printf("Stored embeddings do not match %s, rebuilding", embedder.Provider())
+		case err != nil && !os.IsNotExist(err):
+			log.Printf("Could not load embeddings (%v), rebuilding", err)
 		}
 	}
 
