@@ -107,8 +107,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 WorkingDirectory=$DEPLOY_DIR
-EnvironmentFile=-$DEPLOY_DIR/.env
-ExecStart=$DEPLOY_DIR/reminder --serve --web
+ExecStart=/bin/bash -c 'set -a; . $DEPLOY_DIR/.env; set +a; exec $DEPLOY_DIR/reminder --serve --web'
 Restart=on-failure
 RestartSec=5
 StandardOutput=append:$DEPLOY_DIR/reminder.log
