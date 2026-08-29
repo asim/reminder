@@ -11,6 +11,11 @@ export type SearchResponseType = {
   q: string;
   answer?: string;
   references: SearchReference[];
+  /**
+   * False when the server has no LLM configured. Search works without one,
+   * so the Ask AI control is hidden rather than offered and then failing.
+   */
+  summarise_available?: boolean;
 };
 
 export type SearchHistoryType = {

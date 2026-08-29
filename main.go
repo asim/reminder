@@ -1227,10 +1227,13 @@ func main() {
 			result := map[string]interface{}{
 				"q":          q,
 				"references": res,
+				// Lets clients hide summarisation controls when no model is
+				// configured. Search works without one; summaries do not.
+				"summarise_available": LLMAvailable(),
 			}
 
-			// Summarise unless the caller explicitly opted out
-			if summarise {
+			// Summarise unless the caller opted out or no model is available
+			if summarise && LLMAvailable() {
 				var tokens int
 				var contexts []string
 				for _, r := range res {
@@ -1242,20 +1245,27 @@ func main() {
 					contexts = append(contexts, string(b))
 				}
 
-				answer := askLLM(r.Context(), contexts, q)
-				answerMD := string(app.Render([]byte(answer)))
-				result["answer"] = answerMD
+				answer, err := askLLMSafe(r.Context(), contexts, q)
+				if err != nil {
+					// References are still useful, so return them with the
+					// summary omitted rather than failing the whole request.
+					log.Printf("Summarisation failed for %q: %v", q, err)
+					result["answer"] = ""
+				} else {
+					answerMD := string(app.Render([]byte(answer)))
+					result["answer"] = answerMD
 
-				// Store in session history
-				c, err := r.Cookie("session")
-				if err == nil {
-					ctx := c.Value
-					h, ok := history[ctx]
-					if !ok {
-						h = []string{}
+					// Store in session history
+					c, err := r.Cookie("session")
+					if err == nil {
+						ctx := c.Value
+						h, ok := history[ctx]
+						if !ok {
+							h = []string{}
+						}
+						h = append([]string{q, answerMD}, h...)
+						history[ctx] = h
 					}
-					h = append([]string{q, answerMD}, h...)
-					history[ctx] = h
 				}
 			}
 

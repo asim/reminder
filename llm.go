@@ -2,14 +2,80 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"text/template"
+	"time"
 
 	anthropic "github.com/anthropics/anthropic-sdk-go"
 	"github.com/anthropics/anthropic-sdk-go/option"
 	"github.com/sashabaranov/go-openai"
 )
+
+var (
+	llmOnce      sync.Once
+	llmReachable bool
+)
+
+// LLMAvailable reports whether summarisation can actually run. Search itself
+// never needs an LLM, so when none is configured the UI hides the summarise
+// controls rather than offering a button that cannot work.
+//
+// An explicit key or model is taken at face value. Otherwise the local Ollama
+// endpoint is probed once, so that someone running Ollama without setting
+// OLLAMA_LLM_MODEL is still offered summaries.
+func LLMAvailable() bool {
+	llmOnce.Do(func() { llmReachable = detectLLM() })
+	return llmReachable
+}
+
+// detectLLM performs the actual check. Kept separate from the cached wrapper
+// so it can be exercised directly.
+func detectLLM() bool {
+	if os.Getenv("ANTHROPIC_API_KEY") != "" ||
+		os.Getenv("OPENAI_API_KEY") != "" ||
+		os.Getenv("OLLAMA_LLM_MODEL") != "" {
+		return true
+	}
+	return ollamaReachable()
+}
+
+// ollamaReachable checks for a local Ollama instance with a short timeout so
+// startup is not delayed when there is nothing listening.
+func ollamaReachable() bool {
+	baseURL := os.Getenv("OLLAMA_BASE_URL")
+	if baseURL == "" {
+		baseURL = "http://localhost:11434/v1"
+	}
+	baseURL = strings.TrimSuffix(baseURL, "/v1")
+
+	client := &http.Client{Timeout: 2 * time.Second}
+	resp, err := client.Get(baseURL + "/api/tags")
+	if err != nil {
+		return false
+	}
+	defer resp.Body.Close()
+	return resp.StatusCode == http.StatusOK
+}
+
+// askLLMSafe calls askLLM, turning its panics into errors. The underlying
+// clients panic on failure, which in an HTTP handler drops the connection and
+// logs a stack trace instead of returning something the caller can act on.
+func askLLMSafe(ctx context.Context, contexts []string, question string) (answer string, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("llm: %v", r)
+		}
+	}()
+
+	if !LLMAvailable() {
+		return "", fmt.Errorf("llm: no model configured")
+	}
+	return askLLM(ctx, contexts, question), nil
+}
 
 var systemPromptTpl = template.Must(template.New("system_prompt").Parse(`
 You are a helpful assistant with access to knowledge of the Quran, Hadiths and names of Allah. You are tasked with answering questions related to Islam, life and the world.

@@ -235,10 +235,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 var text = "<div id='" + resultId + "' class='p-6 bg-white border border-gray-200 rounded-lg shadow-sm mb-6'>";
                 text += "<div class='font-semibold text-gray-900 mb-3'>" + json.q + "</div>";
 
-                // Summary placeholder — will be filled async
-                text += "<div class='summary-slot text-gray-500 text-sm mb-4'>";
-                text += "<button class='summarise-btn px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700 text-sm' onclick='summarise(this, \"" + encodeURIComponent(json.q) + "\")'>Summarise with AI</button>";
-                text += "</div>";
+                // Summary placeholder — only offered when a model is configured
+                if (json.summarise_available) {
+                    text += "<div class='summary-slot text-gray-500 text-sm mb-4'>";
+                    text += "<button class='summarise-btn px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700 text-sm' onclick='summarise(this, \"" + encodeURIComponent(json.q) + "\")'>Summarise with AI</button>";
+                    text += "</div>";
+                }
 
                 // Show results directly
                 if (json.references && json.references.length > 0) {

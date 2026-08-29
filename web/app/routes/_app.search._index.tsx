@@ -155,9 +155,15 @@ export default function SearchIndex() {
     enabled: !!submittedQuery,
   });
 
+  // The server reports whether it has an LLM. Treat an absent flag as
+  // available so the control still appears against older builds; only an
+  // explicit false hides it.
+  const summariseAvailable = searchResults?.summarise_available !== false;
+
   const { data: summaryResults, isLoading: isSummaryLoading } = useQuery({
     ...searchSummaryOptions(submittedQuery),
-    enabled: !!submittedQuery && mode === 'ask' && !!searchResults,
+    enabled:
+      !!submittedQuery && mode === 'ask' && !!searchResults && summariseAvailable,
   });
 
   const mergedResults = useMemo<SearchResponseType | null>(() => {
@@ -260,15 +266,17 @@ export default function SearchIndex() {
               <SearchIcon className='size-3.5' />
               Search
             </button>
-            <button
-              type='button'
-              onClick={() => doSubmit('ask')}
-              disabled={isLoading || !query.trim()}
-              className='flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-300 text-gray-700 text-xs sm:text-sm hover:bg-gray-100 disabled:opacity-60 transition-colors'
-            >
-              <MessageSquare className='size-3.5' />
-              Ask AI
-            </button>
+            {summariseAvailable && (
+              <button
+                type='button'
+                onClick={() => doSubmit('ask')}
+                disabled={isLoading || !query.trim()}
+                className='flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-300 text-gray-700 text-xs sm:text-sm hover:bg-gray-100 disabled:opacity-60 transition-colors'
+              >
+                <MessageSquare className='size-3.5' />
+                Ask AI
+              </button>
+            )}
           </div>
         </form>
 
