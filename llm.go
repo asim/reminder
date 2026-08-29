@@ -39,7 +39,7 @@ func askLLM(ctx context.Context, contexts []string, question string) string {
 	}
 	systemPrompt := sb.String()
 
-	// Priority: 1. Claude (Anthropic), 2. Fanar, 3. Ollama, 4. OpenAI
+	// Priority: 1. Claude (Anthropic), 2. Ollama, 3. OpenAI
 	anthropicKey := os.Getenv("ANTHROPIC_API_KEY")
 	if len(anthropicKey) > 0 {
 		return askClaude(ctx, anthropicKey, systemPrompt, question)
@@ -80,17 +80,12 @@ func askOpenAICompat(ctx context.Context, systemPrompt, question string) string 
 	var model string
 	var config openai.ClientConfig
 
-	fanarKey := os.Getenv("FANAR_API_KEY")
 	ollamaModel := os.Getenv("OLLAMA_LLM_MODEL")
 	openaiKey := os.Getenv("OPENAI_API_KEY")
 
-	if len(fanarKey) > 0 {
-		config = openai.DefaultConfig(fanarKey)
-		config.BaseURL = "https://api.fanar.qa/v1"
-		model = "Fanar"
-	} else if len(ollamaModel) > 0 || (len(openaiKey) == 0) {
+	if len(ollamaModel) > 0 || (len(openaiKey) == 0) {
 		if ollamaModel == "" {
-			ollamaModel = "llama3.2"
+			ollamaModel = "gemma3:1b"
 		}
 		baseURL := os.Getenv("OLLAMA_BASE_URL")
 		if baseURL == "" {
