@@ -191,31 +191,34 @@ func New(path ...string) *Index {
 	idx := &Index{db: db}
 
 	if existed {
-		// Only reuse the existing index if it was built with the current
-		// schema. Older indexes used the default unicode61 tokenizer with
-		// no stemming; those are dropped and rebuilt.
+		// Reuse the existing index only if it was built with the current
+		// schema and the build actually ran to completion. Older indexes used
+		// the default unicode61 tokenizer with no stemming.
 		var sqlText string
 		err := db.QueryRow(
 			`SELECT sql FROM sqlite_master WHERE type='table' AND name='docs_fts'`,
 		).Scan(&sqlText)
 
 		if err == nil && strings.Contains(sqlText, ftsTokenizer) {
-			var cnt int
-			if err := db.QueryRow(`SELECT COUNT(*) FROM docs`).Scan(&cnt); err == nil && cnt > 0 {
+			if cnt, ok := completedDocCount(db); ok {
 				idx.count = cnt
 				idx.built = true
 				return idx
 			}
-		} else if err == nil {
-			// Stale schema — drop so it gets rebuilt below.
-			db.Exec(`DROP TABLE IF EXISTS docs_fts`)
-			db.Exec(`DROP TABLE IF EXISTS docs`)
 		}
+
+		// Stale schema, or a build that was interrupted partway through.
+		// Either way the contents cannot be trusted, so start over rather
+		// than serving a corpus that is silently missing whole sections.
+		db.Exec(`DROP TABLE IF EXISTS docs_fts`)
+		db.Exec(`DROP TABLE IF EXISTS docs`)
+		db.Exec(`DROP TABLE IF EXISTS meta`)
 	}
 
 	stmts := []string{
 		`CREATE TABLE IF NOT EXISTS docs (id INTEGER PRIMARY KEY AUTOINCREMENT, text TEXT NOT NULL, metadata TEXT NOT NULL)`,
 		`CREATE VIRTUAL TABLE IF NOT EXISTS docs_fts USING fts5(text, content=docs, content_rowid=id, tokenize = '` + ftsTokenizer + `')`,
+		`CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)`,
 	}
 	for _, s := range stmts {
 		if _, err := db.Exec(s); err != nil {
@@ -227,8 +230,57 @@ func New(path ...string) *Index {
 }
 
 // Built reports whether the index was loaded from an existing persisted file.
+// metaDocCount is the key under which a completed build records how many
+// documents it wrote. Its presence is what marks an index as finished.
+const metaDocCount = "indexed_docs"
+
+// completedDocCount reports the document count of a finished build. It returns
+// false when the marker is absent or disagrees with the rows actually present,
+// which is what an interrupted build looks like.
+func completedDocCount(db *sql.DB) (int, bool) {
+	var marked int
+	if err := db.QueryRow(
+		`SELECT value FROM meta WHERE key = ?`, metaDocCount,
+	).Scan(&marked); err != nil {
+		return 0, false
+	}
+
+	var actual int
+	if err := db.QueryRow(`SELECT COUNT(*) FROM docs`).Scan(&actual); err != nil {
+		return 0, false
+	}
+
+	if marked == 0 || marked != actual {
+		return 0, false
+	}
+	return actual, true
+}
+
+// Built reports whether the index holds a complete corpus. It is false for a
+// build that was interrupted partway through, so that indexing runs again
+// instead of permanently serving a partial corpus.
 func (i *Index) Built() bool {
+	i.mu.RLock()
+	defer i.mu.RUnlock()
 	return i.built
+}
+
+// MarkBuilt records that indexing finished. Call it only once every source has
+// been stored; until then a restart must redo the work.
+func (i *Index) MarkBuilt() error {
+	i.mu.Lock()
+	defer i.mu.Unlock()
+
+	if _, err := i.db.Exec(
+		`INSERT INTO meta (key, value) VALUES (?, ?)
+		 ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+		metaDocCount, i.count,
+	); err != nil {
+		return fmt.Errorf("search: mark built: %w", err)
+	}
+
+	i.built = true
+	return nil
 }
 
 // Count returns the number of indexed documents.

@@ -73,9 +73,14 @@ func TestPersistentIndex(t *testing.T) {
 	if idx.Count() != 1 {
 		t.Errorf("expected count=1, got %d", idx.Count())
 	}
+	// A build is only complete once it says so. Without this the index is
+	// treated as interrupted and rebuilt on the next open.
+	if err := idx.MarkBuilt(); err != nil {
+		t.Fatalf("mark built: %v", err)
+	}
 	idx.Close()
 
-	// Reopen — should detect existing data
+	// Reopen — should detect the completed index
 	idx2 := New(dbPath)
 	defer idx2.Close()
 	if !idx2.Built() {

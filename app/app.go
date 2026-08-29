@@ -256,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 resp.innerText = "";
             }
         };
-        xhr.send(JSON.stringify({"q": query}));
+        xhr.send(JSON.stringify({"q": query, "summarise": false}));
     });
 }, false);
 

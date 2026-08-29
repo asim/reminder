@@ -563,7 +563,30 @@ func main() {
 	indexed := make(chan bool, 1)
 
 	needsIndex := *IndexFlag || !idx.Built()
-	needsEmbed := embedder != nil && embedder.Count() == 0
+
+	// Embeddings must cover the whole corpus. Anything short of that means a
+	// previous build was interrupted or the index has since been rebuilt, so
+	// they are regenerated rather than left partially covering the documents.
+	embedComplete := func() bool {
+		return embedder != nil && idx.Count() > 0 && embedder.Count() == idx.Count()
+	}
+
+	// runEmbeddings builds and persists embeddings, saving only on success.
+	runEmbeddings := func() {
+		if embedder == nil || embedComplete() {
+			return
+		}
+		log.Println("Building embeddings (this may take a few minutes on first run)")
+		if err := buildEmbeddings(idx, embedder); err != nil {
+			log.Printf("Embedding build failed (%v); keyword search remains available", err)
+			return
+		}
+		if err := embedder.Save(embedPath); err != nil {
+			log.Printf("Warning: failed to save embeddings: %v", err)
+		} else {
+			log.Printf("Saved %d embeddings to disk", embedder.Count())
+		}
+	}
 
 	if needsIndex {
 		log.Println("Indexing data")
@@ -572,40 +595,26 @@ func main() {
 			indexNames(idx, n)
 			indexHadith(idx, b)
 			indexTafsir(idx, q)
-			fmt.Printf("FTS indexing complete (%d documents)\n", idx.Count())
+
+			// Record completion only once every source is stored. If the
+			// process dies before this, the next start rebuilds rather than
+			// treating a partial corpus as finished.
+			if err := idx.MarkBuilt(); err != nil {
+				log.Printf("Warning: could not mark index complete: %v", err)
+			}
+			log.Printf("FTS indexing complete (%d documents)", idx.Count())
+
 			// FTS is ready — open search (keyword-only until embeddings finish)
 			close(indexed)
 
-			// Build embeddings in background after FTS is ready
-			if needsEmbed {
-				fmt.Println("Building embeddings (this may take a few minutes on first run)...")
-				buildEmbeddings(idx, embedder)
-				if err := embedder.Save(embedPath); err != nil {
-					fmt.Printf("Warning: failed to save embeddings: %v\n", err)
-				} else {
-					fmt.Printf("Saved %d embeddings to disk\n", embedder.Count())
-				}
-			}
+			runEmbeddings()
 		}()
-	} else if needsEmbed {
+	} else if !embedComplete() {
 		// FTS already built, search is available immediately
 		close(indexed)
-		// Build embeddings in background
-		go func() {
-			fmt.Println("Building embeddings (this may take a few minutes on first run)...")
-			buildEmbeddings(idx, embedder)
-			if err := embedder.Save(embedPath); err != nil {
-				fmt.Printf("Warning: failed to save embeddings: %v\n", err)
-			} else {
-				fmt.Printf("Saved %d embeddings to disk\n", embedder.Count())
-			}
-		}()
+		go runEmbeddings()
 	} else {
-		embedCount := 0
-		if embedder != nil {
-			embedCount = embedder.Count()
-		}
-		fmt.Printf("Search index loaded (%d documents, %d embeddings)\n", idx.Count(), embedCount)
+		log.Printf("Search index loaded (%d documents, %d embeddings)", idx.Count(), embedder.Count())
 		close(indexed)
 	}
 

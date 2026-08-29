@@ -133,3 +133,61 @@ func TestStaleSchemaRebuild(t *testing.T) {
 		t.Error("expected stemmed match after rebuild")
 	}
 }
+
+// TestPartialIndexNotMarkedBuilt covers an interrupted first build. Previously
+// any non-empty docs table counted as built, so a process killed midway
+// through indexing came back up and skipped the rest of the corpus forever —
+// permanently missing whole sections. This matters more under systemd, which
+// restarts the service automatically after a crash.
+func TestPartialIndexNotMarkedBuilt(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "search.db")
+
+	// Simulate a build that stored some documents and then died before
+	// finishing: no MarkBuilt call.
+	partial := New(path)
+	seedVerses(t, partial)
+	if partial.Built() {
+		t.Fatal("index should not report built before MarkBuilt")
+	}
+	partial.Close()
+
+	// Restarting must not treat the partial corpus as complete.
+	reopened := New(path)
+	defer reopened.Close()
+	if reopened.Built() {
+		t.Fatal("partial index was treated as built; the rest of the corpus would never be indexed")
+	}
+}
+
+// TestMarkBuiltPersists is the companion: a completed build is reused.
+func TestMarkBuiltPersists(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "search.db")
+
+	first := New(path)
+	seedVerses(t, first)
+	if err := first.MarkBuilt(); err != nil {
+		t.Fatalf("mark built: %v", err)
+	}
+	want := first.Count()
+	first.Close()
+
+	reopened := New(path)
+	defer reopened.Close()
+	if !reopened.Built() {
+		t.Fatal("completed index should be reused, not rebuilt")
+	}
+	if reopened.Count() != want {
+		t.Errorf("expected %d documents, got %d", want, reopened.Count())
+	}
+
+	// And it must still be queryable without re-indexing.
+	res, err := reopened.Query("patience")
+	if err != nil {
+		t.Fatalf("query: %v", err)
+	}
+	if len(res) == 0 {
+		t.Error("expected results from the reused index")
+	}
+}
