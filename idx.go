@@ -50,7 +50,7 @@ func clearCheckpoint() {
 	os.Remove(getCheckpointPath())
 }
 
-func indexContent(idx *search.Index, md map[string]string, text string) {
+func indexContent(idx search.Searcher, md map[string]string, text string) {
 	// index the documents
 	lines := strings.Split(text, "\n")
 
@@ -61,7 +61,7 @@ func indexContent(idx *search.Index, md map[string]string, text string) {
 	}
 }
 
-func indexQuran(idx *search.Index, q *quran.Quran) {
+func indexQuran(idx search.Searcher, q *quran.Quran) {
 	cp := loadCheckpoint()
 	if cp.QuranDone {
 		log.Println("Quran already indexed, skipping")
@@ -105,7 +105,7 @@ func indexQuran(idx *search.Index, q *quran.Quran) {
 	saveCheckpoint(cp)
 }
 
-func indexNames(idx *search.Index, n *names.Names) {
+func indexNames(idx search.Searcher, n *names.Names) {
 	cp := loadCheckpoint()
 	if cp.NamesDone {
 		log.Println("Names already indexed, skipping")
@@ -127,7 +127,7 @@ func indexNames(idx *search.Index, n *names.Names) {
 	saveCheckpoint(cp)
 }
 
-func indexTafsir(idx *search.Index, q *quran.Quran) {
+func indexTafsir(idx search.Searcher, q *quran.Quran) {
 	cp := loadCheckpoint()
 	if cp.TafsirDone {
 		log.Println("Tafsir already indexed, skipping")
@@ -148,7 +148,7 @@ func indexTafsir(idx *search.Index, q *quran.Quran) {
 	saveCheckpoint(cp)
 }
 
-func indexHadith(idx *search.Index, b *hadith.Collection) {
+func indexHadith(idx search.Searcher, b *hadith.Collection) {
 	cp := loadCheckpoint()
 	if cp.HadithDone {
 		log.Println("Hadith already indexed, skipping")
