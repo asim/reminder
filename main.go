@@ -530,8 +530,11 @@ func main() {
 	reminderHome := filepath.Join(home, ".reminder")
 	os.MkdirAll(reminderHome, 0755)
 
+	// Clear out artefacts from the vector search era before opening the index
+	removeLegacyFiles()
+
 	dbPath := filepath.Join(reminderHome, "search.db")
-	fmt.Println("Opening search index")
+	log.Println("Opening search index")
 	idx := search.New(dbPath)
 
 	// Initialize embedder for semantic search
