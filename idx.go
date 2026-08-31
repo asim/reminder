@@ -13,23 +13,30 @@ import (
 	"github.com/asim/reminder/search"
 )
 
-// removeLegacyFiles deletes artefacts from the vector search era. The embedded
-// chromem index is a large file that nothing reads any more, and a leftover
-// indexing checkpoint would make the indexers skip sources that the current
-// build has not actually written.
+// removeLegacyFiles clears state that would make this build behave wrongly.
+//
+// Only the indexing checkpoint is deleted. It predates FTS5 and would tell the
+// indexers to skip sources this build has not written, silently leaving them
+// out of the corpus. The old chromem index is left alone: nothing reads it, but
+// it is the rollback path to the previous release and deleting it is the
+// operator's call, not something to do behind their back on startup.
 func removeLegacyFiles() {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return
 	}
 
-	for _, p := range []string{
-		filepath.Join(home, "reminder-index-checkpoint.json"),
-		filepath.Join(home, ".reminder", "data", "reminder.idx.gob.gz"),
-	} {
-		if err := os.Remove(p); err == nil {
-			log.Printf("Removed unused file %s", p)
-		}
+	checkpoint := filepath.Join(home, "reminder-index-checkpoint.json")
+	if err := os.Remove(checkpoint); err == nil {
+		log.Printf("Removed stale indexing checkpoint %s", checkpoint)
+	}
+
+	// Mention the old index rather than removing it, so the space can be
+	// reclaimed once the new search is known to be working.
+	oldIndex := filepath.Join(home, ".reminder", "data", "reminder.idx.gob.gz")
+	if fi, err := os.Stat(oldIndex); err == nil {
+		log.Printf("Note: %s (%d MB) is no longer used and can be deleted once this release is confirmed working",
+			oldIndex, fi.Size()/(1024*1024))
 	}
 }
 
