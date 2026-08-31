@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -13,34 +14,43 @@ import (
 	"github.com/asim/reminder/search"
 )
 
-// removeLegacyFiles clears state that would make this build behave wrongly.
-//
-// Only the indexing checkpoint is deleted. It predates FTS5 and would tell the
-// indexers to skip sources this build has not written, silently leaving them
-// out of the corpus. The old chromem index is left alone: nothing reads it, but
-// it is the rollback path to the previous release and deleting it is the
-// operator's call, not something to do behind their back on startup.
-func removeLegacyFiles() {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return
-	}
-
-	checkpoint := filepath.Join(home, "reminder-index-checkpoint.json")
-	if err := os.Remove(checkpoint); err == nil {
-		log.Printf("Removed stale indexing checkpoint %s", checkpoint)
-	}
-
-	// Mention the old index rather than removing it, so the space can be
-	// reclaimed once the new search is known to be working.
-	oldIndex := filepath.Join(home, ".reminder", "data", "reminder.idx.gob.gz")
-	if fi, err := os.Stat(oldIndex); err == nil {
-		log.Printf("Note: %s (%d MB) is no longer used and can be deleted once this release is confirmed working",
-			oldIndex, fi.Size()/(1024*1024))
-	}
+// Checkpoint tracks indexing progress for resumption
+type Checkpoint struct {
+	QuranChapter int  `json:"quran_chapter"`
+	QuranVerse   int  `json:"quran_verse"`
+	QuranDone    bool `json:"quran_done"`
+	NamesDone    bool `json:"names_done"`
+	HadithBook   int  `json:"hadith_book"`
+	HadithNum    int  `json:"hadith_num"`
+	HadithDone   bool `json:"hadith_done"`
+	TafsirDone   bool `json:"tafsir_done"`
 }
 
-func indexContent(idx *search.Index, md map[string]string, text string) {
+func getCheckpointPath() string {
+	home, _ := os.UserHomeDir()
+	return filepath.Join(home, "reminder-index-checkpoint.json")
+}
+
+func loadCheckpoint() *Checkpoint {
+	cp := &Checkpoint{}
+	data, err := os.ReadFile(getCheckpointPath())
+	if err != nil {
+		return cp
+	}
+	json.Unmarshal(data, cp)
+	return cp
+}
+
+func saveCheckpoint(cp *Checkpoint) {
+	data, _ := json.MarshalIndent(cp, "", "  ")
+	os.WriteFile(getCheckpointPath(), data, 0644)
+}
+
+func clearCheckpoint() {
+	os.Remove(getCheckpointPath())
+}
+
+func indexContent(idx search.Searcher, md map[string]string, text string) {
 	// index the documents
 	lines := strings.Split(text, "\n")
 
@@ -51,22 +61,57 @@ func indexContent(idx *search.Index, md map[string]string, text string) {
 	}
 }
 
-func indexQuran(idx *search.Index, q *quran.Quran) {
+func indexQuran(idx search.Searcher, q *quran.Quran) {
+	cp := loadCheckpoint()
+	if cp.QuranDone {
+		log.Println("Quran already indexed, skipping")
+		return
+	}
+
 	log.Println("Indexing Quran")
+	if cp.QuranChapter > 0 {
+		log.Printf("Resuming from chapter %d, verse %d\n", cp.QuranChapter, cp.QuranVerse)
+	}
 
 	for _, chapter := range q.Chapters {
+		// Skip already indexed chapters
+		if chapter.Number < cp.QuranChapter {
+			continue
+		}
+
 		for _, verse := range chapter.Verses {
+			// Skip already indexed verses in resumed chapter
+			if chapter.Number == cp.QuranChapter && verse.Number <= cp.QuranVerse {
+				continue
+			}
+
 			indexContent(idx, map[string]string{
 				"source":  "quran",
 				"chapter": fmt.Sprintf("%v", chapter.Number),
 				"verse":   fmt.Sprintf("%v", verse.Number),
 				"name":    chapter.Name,
 			}, verse.Text)
+
+			// Save checkpoint every 50 verses
+			if verse.Number%50 == 0 {
+				cp.QuranChapter = chapter.Number
+				cp.QuranVerse = verse.Number
+				saveCheckpoint(cp)
+			}
 		}
 	}
+
+	cp.QuranDone = true
+	saveCheckpoint(cp)
 }
 
-func indexNames(idx *search.Index, n *names.Names) {
+func indexNames(idx search.Searcher, n *names.Names) {
+	cp := loadCheckpoint()
+	if cp.NamesDone {
+		log.Println("Names already indexed, skipping")
+		return
+	}
+
 	log.Println("Indexing Names")
 
 	for _, name := range *n {
@@ -77,9 +122,18 @@ func indexNames(idx *search.Index, n *names.Names) {
 			"arabic":  name.Arabic,
 		}, strings.Join([]string{name.Meaning, name.English, name.Description}, " - "))
 	}
+
+	cp.NamesDone = true
+	saveCheckpoint(cp)
 }
 
-func indexTafsir(idx *search.Index, q *quran.Quran) {
+func indexTafsir(idx search.Searcher, q *quran.Quran) {
+	cp := loadCheckpoint()
+	if cp.TafsirDone {
+		log.Println("Tafsir already indexed, skipping")
+		return
+	}
+
 	log.Println("Indexing Tafsir")
 
 	for _, comment := range q.Commentary {
@@ -89,13 +143,35 @@ func indexTafsir(idx *search.Index, q *quran.Quran) {
 			"verse":   fmt.Sprintf("%v", comment.Verse),
 		}, comment.Text)
 	}
+
+	cp.TafsirDone = true
+	saveCheckpoint(cp)
 }
 
-func indexHadith(idx *search.Index, b *hadith.Collection) {
-	log.Println("Indexing Hadith")
+func indexHadith(idx search.Searcher, b *hadith.Collection) {
+	cp := loadCheckpoint()
+	if cp.HadithDone {
+		log.Println("Hadith already indexed, skipping")
+		return
+	}
 
-	for _, book := range b.Books {
+	log.Println("Indexing Hadith")
+	if cp.HadithBook > 0 {
+		log.Printf("Resuming from book %d, hadith %d\n", cp.HadithBook, cp.HadithNum)
+	}
+
+	for bookIdx, book := range b.Books {
+		// Skip already indexed books
+		if bookIdx+1 < cp.HadithBook {
+			continue
+		}
+
 		for _, h := range book.Hadiths {
+			// Skip already indexed hadiths in resumed book
+			if bookIdx+1 == cp.HadithBook && h.Number <= cp.HadithNum {
+				continue
+			}
+
 			indexContent(idx, map[string]string{
 				"source":   "bukhari",
 				"book":     book.Name,
@@ -103,80 +179,18 @@ func indexHadith(idx *search.Index, b *hadith.Collection) {
 				"narrator": h.Narrator,
 				"number":   fmt.Sprintf("%d", h.Number),
 			}, h.English)
-		}
-	}
-}
 
-// buildEmbeddings reads all documents from the FTS index and computes embeddings.
-// buildEmbeddings embeds every document in the index. It returns an error if
-// any batch fails, so that callers do not persist a partially embedded corpus:
-// a saved partial set looks complete on the next start and those documents
-// would never be embedded again.
-func buildEmbeddings(idx *search.Index, embedder *search.Embedder) error {
-	db := idx.DB()
-	if db == nil {
-		return fmt.Errorf("embeddings: no database")
-	}
-
-	rows, err := db.Query(`SELECT text, metadata FROM docs`)
-	if err != nil {
-		return fmt.Errorf("embeddings: read docs: %w", err)
-	}
-	defer rows.Close()
-
-	// Batch documents for efficient embedding
-	const batchSize = 32
-	var batchTexts []string
-	var batchMetas []string
-
-	processBatch := func(texts, metas []string) error {
-		vecs, err := embedder.EmbedBatch(texts)
-		if err != nil {
-			return fmt.Errorf("embeddings: embed batch: %w", err)
-		}
-		if len(vecs) != len(texts) {
-			return fmt.Errorf("embeddings: got %d vectors for %d texts", len(vecs), len(texts))
-		}
-		for i, vec := range vecs {
-			embedder.Add(texts[i], metas[i], vec)
-		}
-		return nil
-	}
-
-	total := 0
-	for rows.Next() {
-		var text, meta string
-		if err := rows.Scan(&text, &meta); err != nil {
-			return fmt.Errorf("embeddings: scan doc: %w", err)
-		}
-
-		batchTexts = append(batchTexts, text)
-		batchMetas = append(batchMetas, meta)
-
-		if len(batchTexts) >= batchSize {
-			if err := processBatch(batchTexts, batchMetas); err != nil {
-				return err
+			// Save checkpoint every 100 hadiths
+			if h.Number%100 == 0 {
+				cp.HadithBook = bookIdx + 1
+				cp.HadithNum = h.Number
+				saveCheckpoint(cp)
 			}
-			total += len(batchTexts)
-			if total%1000 == 0 {
-				log.Printf("Embedded %d documents...", total)
-			}
-			batchTexts = batchTexts[:0]
-			batchMetas = batchMetas[:0]
 		}
 	}
-	if err := rows.Err(); err != nil {
-		return fmt.Errorf("embeddings: iterate docs: %w", err)
-	}
 
-	// Process remaining
-	if len(batchTexts) > 0 {
-		if err := processBatch(batchTexts, batchMetas); err != nil {
-			return err
-		}
-		total += len(batchTexts)
-	}
-
-	log.Printf("Embedding complete: %d documents", total)
-	return nil
+	cp.HadithDone = true
+	saveCheckpoint(cp)
+	// Clear checkpoint when all done
+	clearCheckpoint()
 }

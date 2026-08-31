@@ -9,7 +9,7 @@ type SearchReference = {
 
 export type SearchResponseType = {
   q: string;
-  answer?: string;
+  answer: string;
   references: SearchReference[];
   /**
    * False when the server has no LLM configured. Search works without one,
@@ -62,14 +62,6 @@ export const searchSummaryOptions = (query: string) => ({
   },
   enabled: !!query.trim(),
 });
-
-export const summariseSearch = async (query: string) => {
-  const data = await httpPost<SearchResponseType>('/api/search', {
-    q: query,
-    summarise: true,
-  });
-  return data;
-};
 
 export const getSearchHistoryOptions = () => ({
   queryKey: ['search-history'],
