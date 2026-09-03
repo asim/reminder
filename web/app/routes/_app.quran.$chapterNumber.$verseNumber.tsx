@@ -47,7 +47,15 @@ export default function QuranVerse(props: Route.ComponentProps) {
   const previousVerse = Number(verseNumber) - 1;
   const nextVerse = Number(verseNumber) + 1;
   const hasPreviousVerse = previousVerse >= 1;
-  const hasNextVerse = nextVerse <= data.verses.length;
+
+  // Every chapter but 1 and 9 carries a Bismillah entry numbered 0, so the
+  // array is one longer than the verse count. Use the highest verse number
+  // instead, or the last verse links to one past the end of the chapter.
+  const lastVerse = data.verses.reduce(
+    (max, v) => (v.number > max ? v.number : max),
+    0
+  );
+  const hasNextVerse = nextVerse <= lastVerse;
 
   const nextChapter = Number(chapterNumber) + 1;
   const previousChapter = Number(chapterNumber) - 1;
