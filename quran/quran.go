@@ -238,7 +238,9 @@ func Load() *Quran {
 
 		arabicText := arabic[fmt.Sprintf("%d", chapter)].([]interface{})
 
-		// Add Bismillah as first verse for all chapters except 1 and 9
+		// Add the Bismillah as verse 0. Al-Fatiha is exempt because its first
+		// verse is the Bismillah itself, and At-Tawbah because it opens
+		// without one.
 		if chapter != 1 && chapter != 9 {
 			verses = append(verses, &Verse{
 				Chapter: chapter,

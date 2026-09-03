@@ -48,9 +48,10 @@ export default function QuranVerse(props: Route.ComponentProps) {
   const nextVerse = Number(verseNumber) + 1;
   const hasPreviousVerse = previousVerse >= 1;
 
-  // Every chapter but 1 and 9 carries a Bismillah entry numbered 0, so the
-  // array is one longer than the verse count. Use the highest verse number
-  // instead, or the last verse links to one past the end of the chapter.
+  // Chapters carry the Bismillah as an entry numbered 0, so the array is one
+  // longer than the verse count. Al-Fatiha is exempt because its first verse
+  // is the Bismillah, and At-Tawbah because it opens without one. Use the
+  // highest verse number, or the last verse links past the end of the chapter.
   const lastVerse = data.verses.reduce(
     (max, v) => (v.number > max ? v.number : max),
     0
