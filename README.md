@@ -78,10 +78,7 @@ export ANTHROPIC_API_KEY=xxx
 An explicit Ollama model takes priority, then OpenAI, then Anthropic.
 OpenAI API credentials are required; a ChatGPT/Codex subscription is not an API key.
 
-The reader provides sticky reading controls, links back to the full chapter at
-the selected verse, and an Explain action. Explain uses the selected verse and
-stored commentary, labels AI output, and falls back to commentary if no model
-is available.
+The reader links back to the full chapter at the selected verse.
 
 Summaries are optional. With no model configured the summarise controls are
 hidden and search still returns references.
@@ -188,14 +185,12 @@ File an issue to discuss
 
 The web app automatically saves the Quran (including Arabic, translation,
 word-by-word text, transliteration and stored commentary), Bukhari and names
-on this device while online. Wait for **“Quran, hadith and names saved for offline
-reading”** before disconnecting. The download resumes after an interrupted
-connection. Texts and the app shell survive reloads and browser restarts, subject
+on this device in the background while online. The initial download needs a
+connection and resumes after an interruption. Texts and the app shell survive reloads and browser restarts, subject
 to the browser's storage limits and eviction policy.
 
 Saved reading modes, bookmarks and unopened chapters work offline. Audio,
-server search and new AI explanations need a connection; Explain can still show
-the selected verse's stored commentary. Unsaved content shows a reconnect message
+server search and AI features need a connection. Unsaved content shows a reconnect message
 instead of waiting indefinitely. Previously viewed daily reminders are cached,
 but new reminders require a connection.
 

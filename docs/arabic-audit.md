@@ -47,11 +47,10 @@ separate left-to-right annotations. Verse zero has no numbered ayah marker.
 Arabic verse anchors exist in every reading mode. JSON, Markdown, lite HTML,
 embeds and transcripts receive their Quran Arabic from the same loaded corpus.
 
-Both bundled font copies are identical **Noto Naskh Arabic** fonts, distributed
-under the included SIL Open Font License, from the [Google Fonts source](https://github.com/google/fonts/tree/main/ofl/notonaskharabic).
+Both bundled font copies are identical **KFGQPC HAFS Uthmanic Script** fonts.
 The cmap covers all non-whitespace code points in the refreshed corpus.
-Browser checks of 11:41, 2:72 and 2:255 confirmed rendering of the corrected
-marks; the previous font displayed a dotted circle for U+06EA in 11:41.
+A focused browser check found a dotted-circle rendering issue for U+06EA in
+11:41 with this font. This remains unresolved; the original font is retained.
 Glyph coverage is not a substitute for scholarly proofreading or checking
 every browser's shaping. Existing exported copies are not retroactively updated.
 
