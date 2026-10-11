@@ -62,7 +62,7 @@ export default function NameDetail() {
                 />
               </div>
             </div>
-            <div className='text-3xl sm:text-4xl md:text-5xl my-4 sm:my-7 font-arabic font-medium text-black'>
+            <div lang='ar' dir='rtl' className='text-3xl sm:text-4xl md:text-5xl my-4 sm:my-7 font-arabic font-medium text-black'>
               {name.arabic}
             </div>
             <div className='text-lg sm:text-xl md:text-2xl font-medium text-gray-600 mb-1 sm:mb-2'>

@@ -19,11 +19,13 @@ export function ViewMode(props: ViewModeProps) {
   const onChange = props.onChange;
 
   return (
-    <div className='flex items-center justify-center gap-2 mb-8'>
+    <div className='flex items-center justify-center gap-2 mb-2'>
       {MODES.map((viewMode) => (
         <button
           key={viewMode.id}
           type='button'
+          aria-label={`${viewMode.id} view`}
+          aria-pressed={mode === viewMode.id}
           onClick={() => onChange(viewMode.id)}
           className={cn(
             'flex items-center text-sm gap-1.5 px-3 py-3 lg:py-1.5 rounded-lg cursor-pointer border border-black/10 hover:bg-black/5 capitalize',

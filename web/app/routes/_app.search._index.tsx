@@ -150,7 +150,7 @@ export default function SearchIndex() {
     getSearchHistoryOptions()
   );
 
-  const { data: searchResults, isLoading } = useQuery({
+  const { data: searchResults, isLoading, error: searchError } = useQuery({
     ...searchOptions(submittedQuery),
     enabled: !!submittedQuery,
   });
@@ -160,7 +160,7 @@ export default function SearchIndex() {
   // explicit false hides it.
   const summariseAvailable = searchResults?.summarise_available !== false;
 
-  const { data: summaryResults, isLoading: isSummaryLoading } = useQuery({
+  const { data: summaryResults, isLoading: isSummaryLoading, error: summaryError } = useQuery({
     ...searchSummaryOptions(submittedQuery),
     enabled:
       !!submittedQuery && mode === 'ask' && !!searchResults && summariseAvailable,
@@ -286,6 +286,8 @@ export default function SearchIndex() {
           </div>
         )}
 
+        {searchError && <p className='mb-4 text-sm' role='alert'>Search needs a connection. You can still read downloaded texts from Quran, Hadith and Names.</p>}
+
         {/* Search mode: show results as cards */}
         {mergedResults && mode === 'search' && (
           <div className='mb-6 sm:mb-8'>
@@ -307,12 +309,12 @@ export default function SearchIndex() {
               <div className='mb-2 sm:mb-3 text-lg sm:text-xl font-medium'>
                 {mergedResults.q}
               </div>
-              {isSummaryLoading || !mergedResults.answer ? (
+              {summaryError ? <p className='text-sm'>AI explanations need a connection. The references remain available below.</p> : isSummaryLoading ? (
                 <div className='flex items-center gap-2 text-sm sm:text-base text-gray-500'>
                   <Loader2 className='animate-spin h-4 w-4' />
                   <span>Generating AI summary...</span>
                 </div>
-              ) : (
+              ) : !mergedResults.answer ? <p className='text-sm'>No AI explanation is available. Read the references below.</p> : (
                 <div
                   className='text-sm sm:text-base prose prose-sm sm:prose-base max-w-none'
                   dangerouslySetInnerHTML={{ __html: mergedResults.answer }}

@@ -12,7 +12,10 @@ export function PageError({ error }: PageErrorProps) {
   let subtitle = 'An unexpected error occurred.';
 
   if (error instanceof FetchError) {
-    if (error.status === 404) {
+    if (error.status === 503) {
+      title = 'Not available offline yet';
+      subtitle = error.message;
+    } else if (error.status === 404) {
       title = 'Page not found';
       subtitle = 'Please make sure the page you are looking for exists.';
     } else {
@@ -33,6 +36,7 @@ export function PageError({ error }: PageErrorProps) {
         <Frown className='size-18 mb-6 text-gray-300' />
         <h1 className='text-3xl mb-2 font-bold'>{title}</h1>
         <p className='text-lg text-gray-500'>{subtitle}</p>
+        <a href='/quran' className='mt-4 underline'>Back to Quran</a>
       </div>
     </div>
   );

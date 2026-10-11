@@ -150,7 +150,7 @@ func (b *Book) HTML() string {
 
 		// Arabic text
 		if hadith.Arabic != "" {
-			data += fmt.Sprintf(`<div dir="rtl" class="text-xl leading-loose font-arabic text-right mb-4 pb-4 border-b border-gray-100">%s</div>`, hadith.Arabic)
+			data += fmt.Sprintf(`<div lang="ar" dir="rtl" class="text-xl leading-loose arabic text-right mb-4 pb-4 border-b border-gray-100">%s</div>`, hadith.Arabic)
 		}
 
 		// English translation

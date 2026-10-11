@@ -66,6 +66,9 @@ export async function httpCall<ResponseType = AppResponse>(
 
     return data as ResponseType;
   } catch (error: any) {
+    if (typeof navigator !== 'undefined' && !navigator.onLine && !(error instanceof FetchError)) {
+      throw new FetchError(503, 'This is not available offline yet. Connect to the internet to download it.');
+    }
     throw error;
   }
 }

@@ -9,19 +9,15 @@ import { PrimaryButton } from '~/components/interface/primary-button';
 import { ShareButton } from '~/components/interface/share-button';
 import { AudioPlayer } from '~/components/quran/audio-player';
 import { ChapterHeader } from '~/components/quran/chapter-header';
-import { ClickableArabicWord } from '~/components/quran/clickable-arabic-word';
-import { ViewMode } from '~/components/quran/view-mode';
+import { VerseArabic } from '~/components/quran/verse-arabic';
+import { ReadingControls } from '~/components/quran/reading-controls';
+import { ExplainVerse } from '~/components/quran/explain-verse';
 import { useQuranViewMode } from '~/hooks/use-quran-view-mode';
 import { getChapterOptions } from '~/queries/quran';
 import { useTransliterationToggle } from '~/use-transliteration-toggle';
 import { useWordByWordToggle } from '~/use-word-by-word-toggle';
 import { buildQuranShareUrl } from '~/utils/quran-share';
 
-function toArabicNumber(num: number) {
-  return num
-    .toString()
-    .replace(/\d/g, (d) => String.fromCharCode(0x0660 + Number(d)));
-}
 
 export default function QuranVerse(props: Route.ComponentProps) {
   const { chapterNumber, verseNumber } = props.params;
@@ -65,13 +61,13 @@ export default function QuranVerse(props: Route.ComponentProps) {
 
   return (
     <div className='max-w-4xl flex flex-col w-full mx-auto p-0 lg:p-8'>
-      <ViewMode mode={mode} onChange={setMode} />
+      <ReadingControls mode={mode} setMode={setMode} wordByWord={wordByWord} setWordByWord={setWordByWord} transliteration={showTransliteration} setTransliteration={setShowTransliteration} commentary={showCommentary} setCommentary={setShowCommentary} />
       <div className='flex justify-end gap-1'>
         <EmbedButton path={`/quran/${data.number}/${verseNumber}`} />
         <ShareButton
           title={`Quran ${data.number}:${verseNumber} - ${data.english}`}
           text={verse.text}
-          url={buildQuranShareUrl(`/quran/${data.number}/${verseNumber}`, { mode, wordByWord, commentary: showCommentary })}
+          url={buildQuranShareUrl(`/quran/${data.number}/${verseNumber}`, { mode, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}
         />
       </div>
       <ChapterHeader
@@ -79,41 +75,8 @@ export default function QuranVerse(props: Route.ComponentProps) {
         translation={data.english}
         subtitle={`Verse ${data.number}:${verseNumber}`}
       />
-      {(mode === 'translation' || mode === 'arabic') && (
-        <div className='mb-4 flex items-center gap-4 sm:gap-6 flex-wrap'>
-          {mode === 'translation' && (
-            <label className='flex items-center gap-2 cursor-pointer'>
-              <input
-                type='checkbox'
-                checked={wordByWord}
-                onChange={e => setWordByWord(e.target.checked)}
-                className='accent-black h-4 w-4 rounded'
-              />
-              <span className='text-sm'>Word-by-word</span>
-            </label>
-          )}
-          <label className='flex items-center gap-2 cursor-pointer'>
-            <input
-              type='checkbox'
-              checked={showTransliteration}
-              onChange={e => setShowTransliteration(e.target.checked)}
-              className='accent-black h-4 w-4 rounded'
-            />
-            <span className='text-sm'>Transliteration</span>
-          </label>
-          {mode === 'translation' && (
-            <label className='flex items-center gap-2 cursor-pointer'>
-              <input
-                type='checkbox'
-                checked={showCommentary}
-                onChange={e => setShowCommentary(e.target.checked)}
-                className='accent-black h-4 w-4 rounded'
-              />
-              <span className='text-sm'>Commentary</span>
-            </label>
-          )}
-        </div>
-      )}
+
+
 
       {/* Audio Player */}
       <AudioPlayer
@@ -122,113 +85,24 @@ export default function QuranVerse(props: Route.ComponentProps) {
         verseLabel={`Quran ${data.number}:${verse.number}`}
       />
 
-      {mode === 'arabic' && (
-        <div className='flex flex-col flex-grow'>
-          <div
-            dir='rtl'
-            className={`flex flex-wrap text-2xl sm:text-2xl md:text-3xl text-right leading-loose font-arabic${showTransliteration ? ' items-end' : ''}`}
-          >
-            {verse.words && verse.words.length > 0
-              ? verse.words.map((word, idx, arr) => (
-                <ClickableArabicWord key={idx} arabic={word.arabic} transliteration={word.transliteration} className={showTransliteration ? 'flex flex-col items-center ml-2 mb-2' : ''}>
-                  {word.arabic}
-                  {idx === arr.length - 1 && (
-                    <span className='mx-2 font-arabic'>
-                      {toArabicNumber(verse.number)}
-                    </span>
-                  )}
-                  {!showTransliteration && <>&nbsp;</>}
-                  {showTransliteration && (
-                    <span className='text-xs sm:text-sm mt-1 px-1 rounded bg-gray-100 text-gray-700 font-sans' dir='ltr'>{word.transliteration}</span>
-                  )}
-                </ClickableArabicWord>
-              ))
-              : verse.arabic.split(' ').map((word, idx, arr) => (
-                <span key={idx} className='verse-arabic-word'>
-                  {word}
-                  {idx === arr.length - 1 && (
-                    <span className='mx-2 font-arabic'>
-                      {toArabicNumber(verse.number)}
-                    </span>
-                  )}
-                  &nbsp;
-                </span>
-              ))}
-          </div>
-        </div>
-      )}
-
-      {mode === 'english' && (
-        <div className='flex flex-col flex-grow'>
-          <div className='text-base sm:text-lg md:text-xl leading-relaxed'>
-            {verse.text}
-          </div>
-        </div>
-      )}
-
-      {mode === 'translation' && (
-        <div className='flex flex-col flex-grow'>
-          <div className='flex flex-row-reverse flex-wrap text-xl sm:text-2xl md:text-3xl mb-3 sm:mb-4 text-right leading-loose font-arabic items-end'>
-            {(wordByWord || showTransliteration) && verse.words && verse.words.length > 0
-              ? verse.words.map((word, idx, arr) => {
-                if (idx === arr.length - 1) {
-                  return (
-                    <ClickableArabicWord key={idx} arabic={word.arabic} transliteration={word.transliteration} className='text-3xl flex flex-col items-center mr-2 mb-2'>
-                      <span className='flex flex-row items-center' dir="rtl">
-                        <span>{word.arabic}</span>
-                        <span className='mx-2 font-arabic'>{toArabicNumber(verse.number)}</span>
-                      </span>
-                      {showTransliteration && (
-                        <span className='text-xs mt-1 px-1 rounded bg-blue-50 text-blue-700 font-sans' dir='ltr'>{word.transliteration}</span>
-                      )}
-                      {wordByWord && (
-                        <span className='text-xs sm:text-sm mt-1 px-1 rounded bg-gray-100 text-gray-700 font-sans'>{word.english}</span>
-                      )}
-                    </ClickableArabicWord>
-                  );
-                } else {
-                  return (
-                    <ClickableArabicWord key={idx} arabic={word.arabic} transliteration={word.transliteration} className='text-3xl flex flex-col items-center mr-2 mb-2'>
-                      <span>{word.arabic}</span>
-                      {showTransliteration && (
-                        <span className='text-xs mt-1 px-1 rounded bg-blue-50 text-blue-700 font-sans' dir='ltr'>{word.transliteration}</span>
-                      )}
-                      {wordByWord && (
-                        <span className='text-xs sm:text-sm mt-1 px-1 rounded bg-gray-100 text-gray-700 font-sans'>{word.english}</span>
-                      )}
-                    </ClickableArabicWord>
-                  );
-                }
-              })
-              : (
-                <span className='verse-arabic-word text-3xl flex flex-row items-center mr-2 mb-2' dir="rtl">
-                  {verse.arabic}
-                  <span className='mx-2 font-arabic'>{toArabicNumber(verse.number)}</span>
-                </span>
-              )}
-          </div>
-          <div className='text-base sm:text-lg md:text-xl leading-relaxed'>
-            {verse.text}
-          </div>
-          {showCommentary && verse.comments && (
-            <div className='mt-2 p-2 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-900 rounded text-sm'>
-              <strong>Commentary:</strong> {verse.comments}
-            </div>
-          )}
-        </div>
-      )}
-
+      <section data-chapter-verse={`${data.number}:${verse.number}`}>
+        {mode !== 'english' && <VerseArabic verse={verse} wordByWord={wordByWord} transliteration={showTransliteration} />}
+        {mode !== 'arabic' && <p className='text-base sm:text-lg leading-relaxed'>{verse.text}</p>}
+        {showCommentary && verse.comments && <div className='mt-3 p-3 bg-yellow-50 text-sm leading-relaxed'><strong>Tafsir (stored commentary):</strong> {verse.comments}</div>}
+        <ExplainVerse key={`${data.number}:${verse.number}`} chapter={data.number} verse={verse.number} commentary={verse.comments} />
+      </section>
+      <Link className='my-4 text-sm underline underline-offset-4' to={buildQuranShareUrl(`/quran/${data.number}`, { mode, wordByWord, commentary: showCommentary, transliteration: showTransliteration }) + `#${verse.number}`}>Read full chapter at {data.number}:{verse.number}</Link>
       <div className='flex justify-between mt-6 sm:mt-8 mb-8 sm:mb-12'>
         {hasPreviousVerse ? (
-          <PrimaryButton asChild disabled={previousVerse <= 1} className='text-sm sm:text-base py-1 sm:py-2 px-2 sm:px-4'>
-            <Link to={`/quran/${chapterNumber}/${previousVerse}`}>
+          <PrimaryButton asChild disabled={!hasPreviousVerse} className='text-sm sm:text-base py-1 sm:py-2 px-2 sm:px-4'>
+            <Link to={buildQuranShareUrl(`/quran/${chapterNumber}/${previousVerse}`, { mode, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}>
               <CircleChevronLeft className='size-3 sm:size-4' />
               <span className='ml-1'>Previous</span>
             </Link>
           </PrimaryButton>
         ) : (
           <PrimaryButton asChild disabled={!hasPreviousChapter} className='text-sm sm:text-base py-1 sm:py-2 px-2 sm:px-4'>
-            <Link to={`/quran/${previousChapter}`}>
+            <Link to={buildQuranShareUrl(`/quran/${previousChapter}`, { mode, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}>
               <CircleChevronLeft className='size-3 sm:size-4' />
               <span className='ml-1'>Previous</span>
             </Link>
@@ -237,20 +111,21 @@ export default function QuranVerse(props: Route.ComponentProps) {
 
         {hasNextVerse ? (
           <PrimaryButton asChild disabled={!hasNextVerse} className='text-sm sm:text-base py-1 sm:py-2 px-2 sm:px-4'>
-            <Link to={`/quran/${chapterNumber}/${nextVerse}`}>
+            <Link to={buildQuranShareUrl(`/quran/${chapterNumber}/${nextVerse}`, { mode, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}>
               <span className='mr-1'>Next</span>
               <CircleChevronRight className='size-3 sm:size-4' />
             </Link>
           </PrimaryButton>
         ) : (
           <PrimaryButton asChild disabled={!hasNextChapter} className='text-sm sm:text-base py-1 sm:py-2 px-2 sm:px-4'>
-            <Link to={`/quran/${nextChapter}`}>
+            <Link to={buildQuranShareUrl(`/quran/${nextChapter}`, { mode, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}>
               <span className='mr-1'>Next</span>
               <CircleChevronRight className='size-3 sm:size-4' />
             </Link>
           </PrimaryButton>
         )}
       </div>
+      <p className='text-xs text-gray-500 mt-4'>Arabic: <a className='underline' href='https://quranenc.com/en/home'>QuranEnc · Uthmani</a></p>
     </div>
   );
 }

@@ -64,15 +64,24 @@ reminder --serve
 **LLM Configuration** (optional) - used for answer summaries:
 
 ```bash
-# Use Claude (takes priority)
-export ANTHROPIC_API_KEY=xxx
+# OpenAI (default: gpt-6-luna)
+export OPENAI_API_KEY=xxx
+export OPENAI_MODEL=gpt-6-luna  # optional override
 
 # Use a specific Ollama model (default: gemma3:1b)
 export OLLAMA_LLM_MODEL=gemma3:1b
 
-# Use OpenAI as fallback
-export OPENAI_API_KEY=xxx
+# Use Claude when OpenAI and an explicit Ollama model are not configured
+export ANTHROPIC_API_KEY=xxx
 ```
+
+An explicit Ollama model takes priority, then OpenAI, then Anthropic.
+OpenAI API credentials are required; a ChatGPT/Codex subscription is not an API key.
+
+The reader provides sticky reading controls, links back to the full chapter at
+the selected verse, and an Explain action. Explain uses the selected verse and
+stored commentary, labels AI output, and falls back to commentary if no model
+is available.
 
 Summaries are optional. With no model configured the summarise controls are
 hidden and search still returns references.
@@ -161,6 +170,8 @@ it is a reminder to the whole world.”
 
 ## Sources
 
+See [the Arabic source audit](docs/arabic-audit.md) for verification scope and limitations.
+
 The sources used for data
 
 - [Arabic Quran](https://github.com/asim/quran-json-arabic)
@@ -172,3 +183,23 @@ The sources used for data
 ## Development
 
 File an issue to discuss 
+
+## Offline reading
+
+The web app automatically saves the Quran (including Arabic, translation,
+word-by-word text, transliteration and stored commentary), Bukhari and names
+on this device while online. Wait for **“Quran, hadith and names saved for offline
+reading”** before disconnecting. The download resumes after an interrupted
+connection. Texts and the app shell survive reloads and browser restarts, subject
+to the browser's storage limits and eviction policy.
+
+Saved reading modes, bookmarks and unopened chapters work offline. Audio,
+server search and new AI explanations need a connection; Explain can still show
+the selected verse's stored commentary. Unsaved content shows a reconnect message
+instead of waiting indefinitely. Previously viewed daily reminders are cached,
+but new reminders require a connection.
+
+`npm run build` generates the versioned service worker after building all route
+bundles. Deploy the complete `web/build/client` output (as `make web`/`make build`
+already do). Development mode does not install an offline cache. Production must
+use HTTPS (or localhost) for service workers.

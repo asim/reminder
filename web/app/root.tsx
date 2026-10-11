@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import { startOfflineDownload } from '~/utils/offline';
 import {
   Links,
   Meta,
@@ -17,9 +19,9 @@ import './app.css';
 export const links: Route.LinksFunction = () => [
   {
     rel: 'preload',
-    href: '/fonts/arabic.otf',
+    href: '/fonts/arabic.ttf',
     as: 'font',
-    type: 'font/otf',
+    type: 'font/ttf',
     crossOrigin: 'anonymous',
   },
   {
@@ -29,6 +31,7 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  useEffect(startOfflineDownload, []);
   return (
     <html lang='en'>
       <head>
@@ -45,7 +48,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <Scripts />
           <NavigationProgress />
         </QueryClientProvider>
-        <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/reminder.js')}` }} />
       </body>
     </html>
   );

@@ -43,7 +43,7 @@ export function ClickableArabicWord({
     >
       {children ?? arabic}
       {showTooltip && transliteration && (
-        <span className='transliteration-tooltip'>{transliteration}</span>
+        <span lang='en' dir='ltr' className='transliteration-tooltip'>{transliteration}</span>
       )}
     </span>
   );

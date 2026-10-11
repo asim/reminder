@@ -39,7 +39,7 @@ func (name *Name) HTML() string {
 
 	// Arabic name card
 	data += `<div class="mb-6 p-6 bg-white border border-gray-200 rounded-lg shadow-sm">`
-	data += `<div class="arabic text-center text-4xl mb-4">` + name.Arabic + `</div>`
+	data += `<div lang="ar" dir="rtl" class="arabic text-center text-4xl mb-4">` + name.Arabic + `</div>`
 	data += `<h3 class="text-xl font-semibold text-center text-gray-700">` + name.English + `</h3>`
 	data += `</div>`
 
