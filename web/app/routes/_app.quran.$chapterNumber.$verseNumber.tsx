@@ -89,7 +89,7 @@ export default function QuranVerse(props: Route.ComponentProps) {
         {mode !== 'english' && <VerseArabic verse={verse} wordByWord={wordByWord} transliteration={showTransliteration} />}
         {mode !== 'arabic' && <p className='text-base sm:text-lg leading-relaxed'>{verse.text}</p>}
         {showCommentary && verse.comments && <div className='mt-3 p-3 bg-yellow-50 text-sm leading-relaxed'><strong>Tafsir (stored commentary):</strong> {verse.comments}</div>}
-        <ExplainVerse key={`${data.number}:${verse.number}`} chapter={data.number} verse={verse.number} />
+        <ExplainVerse key={`${data.number}:${verse.number}`} chapter={data.number} verse={verse.number} commentary={verse.comments} />
       </section>
       <Link className='my-4 text-sm underline underline-offset-4' to={buildQuranShareUrl(`/quran/${data.number}`, { mode, wordByWord, commentary: showCommentary, transliteration: showTransliteration }) + `#${verse.number}`}>Read full chapter at {data.number}:{verse.number}</Link>
       <div className='flex justify-between mt-6 sm:mt-8 mb-8 sm:mb-12'>

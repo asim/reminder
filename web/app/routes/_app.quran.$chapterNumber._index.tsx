@@ -152,7 +152,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
                   <ShareButton title={`Quran ${data.number}:${verse.number}`} text={verse.text} url={buildQuranShareUrl(`/quran/${data.number}/${verse.number}`, { mode, wordByWord, commentary: showCommentary, transliteration: showTransliteration })} />
                 </div>
               </div>
-              <ExplainVerse chapter={data.number} verse={verse.number} />
+              <ExplainVerse chapter={data.number} verse={verse.number} commentary={verse.comments} />
             </>}
           </section>
         ))}

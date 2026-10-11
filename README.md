@@ -183,3 +183,23 @@ The sources used for data
 ## Development
 
 File an issue to discuss 
+
+## Offline reading
+
+The web app automatically saves the Quran (including Arabic, translation,
+word-by-word text, transliteration and stored commentary), Bukhari and names
+on this device while online. Wait for **“Quran, hadith and names saved for offline
+reading”** before disconnecting. The download resumes after an interrupted
+connection. Texts and the app shell survive reloads and browser restarts, subject
+to the browser's storage limits and eviction policy.
+
+Saved reading modes, bookmarks and unopened chapters work offline. Audio,
+server search and new AI explanations need a connection; Explain can still show
+the selected verse's stored commentary. Unsaved content shows a reconnect message
+instead of waiting indefinitely. Previously viewed daily reminders are cached,
+but new reminders require a connection.
+
+`npm run build` generates the versioned service worker after building all route
+bundles. Deploy the complete `web/build/client` output (as `make web`/`make build`
+already do). Development mode does not install an offline cache. Production must
+use HTTPS (or localhost) for service workers.

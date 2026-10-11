@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export function ExplainVerse({ chapter, verse }: { chapter: number; verse: number }) {
+export function ExplainVerse({ chapter, verse, commentary }: { chapter: number; verse: number; commentary?: string }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ text: string; generated: boolean }>();
@@ -13,7 +13,10 @@ export function ExplainVerse({ chapter, verse }: { chapter: number; verse: numbe
       const response = await fetch(`/api/quran/${chapter}/${verse}/explain`, { method: 'POST' });
       if (!response.ok) throw new Error('Explanation could not be loaded. Please try again.');
       setResult(await response.json());
-    } catch (e) { setError(e instanceof Error ? e.message : 'Could not load explanation.'); }
+    } catch (e) {
+      if (commentary) setResult({ text: commentary, generated: false });
+      else setError(e instanceof Error ? e.message : 'Could not load explanation.');
+    }
     finally { setLoading(false); }
   }
   return <div className='my-2 text-sm'>

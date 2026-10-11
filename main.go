@@ -356,7 +356,7 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Collection, a 
 	})
 
 	// Serve static files (bookmarks.js, manifest, etc.)
-	staticFiles := []string{"bookmarks.js", "reminder.js", "manifest.webmanifest", "arabic.otf", "reminder.png", "icon-192.png", "icon-96.png"}
+	staticFiles := []string{"bookmarks.js", "reminder.js", "manifest.webmanifest", "arabic.ttf", "reminder.png", "icon-192.png", "icon-96.png"}
 	for _, file := range staticFiles {
 		fileName := file
 		http.HandleFunc("/"+fileName, func(w http.ResponseWriter, r *http.Request) {
@@ -367,8 +367,8 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Collection, a 
 			} else if strings.HasSuffix(fileName, ".json") || strings.HasSuffix(fileName, ".webmanifest") {
 				w.Header().Set("Content-Type", "application/json")
 				w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
-			} else if strings.HasSuffix(fileName, ".otf") {
-				w.Header().Set("Content-Type", "font/otf")
+			} else if strings.HasSuffix(fileName, ".ttf") {
+				w.Header().Set("Content-Type", "font/ttf")
 				w.Header().Set("Cache-Control", "public, max-age=31536000")
 			} else if strings.HasSuffix(fileName, ".png") {
 				w.Header().Set("Content-Type", "image/png")

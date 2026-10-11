@@ -6,6 +6,8 @@ export const queryClient = new QueryClient({
     queries: {
       staleTime: 1000 * 60 * 1,
       retry: false,
+      // Requests must reach the service worker even when the browser is offline.
+      networkMode: 'offlineFirst',
     },
   },
 });
