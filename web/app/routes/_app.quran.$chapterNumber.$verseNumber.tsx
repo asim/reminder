@@ -10,8 +10,7 @@ import { ShareButton } from '~/components/interface/share-button';
 import { AudioPlayer } from '~/components/quran/audio-player';
 import { ChapterHeader } from '~/components/quran/chapter-header';
 import { VerseArabic } from '~/components/quran/verse-arabic';
-import { ReadingControls } from '~/components/quran/reading-controls';
-import { ExplainVerse } from '~/components/quran/explain-verse';
+import { ViewMode } from '~/components/quran/view-mode';
 import { useQuranViewMode } from '~/hooks/use-quran-view-mode';
 import { getChapterOptions } from '~/queries/quran';
 import { useTransliterationToggle } from '~/use-transliteration-toggle';
@@ -61,7 +60,7 @@ export default function QuranVerse(props: Route.ComponentProps) {
 
   return (
     <div className='max-w-4xl flex flex-col w-full mx-auto p-0 lg:p-8'>
-      <ReadingControls mode={mode} setMode={setMode} wordByWord={wordByWord} setWordByWord={setWordByWord} transliteration={showTransliteration} setTransliteration={setShowTransliteration} commentary={showCommentary} setCommentary={setShowCommentary} />
+      <ViewMode mode={mode} onChange={setMode} />
       <div className='flex justify-end gap-1'>
         <EmbedButton path={`/quran/${data.number}/${verseNumber}`} />
         <ShareButton
@@ -78,6 +77,41 @@ export default function QuranVerse(props: Route.ComponentProps) {
 
 
 
+      {(mode === 'translation' || mode === 'arabic') && (
+        <div className='mb-4 flex items-center gap-4 sm:gap-6 flex-wrap'>
+          {mode === 'translation' && (
+            <label className='flex items-center gap-2 cursor-pointer'>
+              <input
+                type='checkbox'
+                checked={wordByWord}
+                onChange={e => setWordByWord(e.target.checked)}
+                className='accent-black h-4 w-4 rounded'
+              />
+              <span className='text-sm'>Word-by-word</span>
+            </label>
+          )}
+          <label className='flex items-center gap-2 cursor-pointer'>
+            <input
+              type='checkbox'
+              checked={showTransliteration}
+              onChange={e => setShowTransliteration(e.target.checked)}
+              className='accent-black h-4 w-4 rounded'
+            />
+            <span className='text-sm'>Transliteration</span>
+          </label>
+          {mode === 'translation' && (
+            <label className='flex items-center gap-2 cursor-pointer'>
+              <input
+                type='checkbox'
+                checked={showCommentary}
+                onChange={e => setShowCommentary(e.target.checked)}
+                className='accent-black h-4 w-4 rounded'
+              />
+              <span className='text-sm'>Commentary</span>
+            </label>
+          )}
+        </div>
+      )}
       {/* Audio Player */}
       <AudioPlayer
         arabicUrl={verse.audio_arabic}
@@ -89,7 +123,6 @@ export default function QuranVerse(props: Route.ComponentProps) {
         {mode !== 'english' && <VerseArabic verse={verse} wordByWord={wordByWord} transliteration={showTransliteration} />}
         {mode !== 'arabic' && <p className='text-base sm:text-lg leading-relaxed'>{verse.text}</p>}
         {showCommentary && verse.comments && <div className='mt-3 p-3 bg-yellow-50 text-sm leading-relaxed'><strong>Tafsir (stored commentary):</strong> {verse.comments}</div>}
-        <ExplainVerse key={`${data.number}:${verse.number}`} chapter={data.number} verse={verse.number} commentary={verse.comments} />
       </section>
       <Link className='my-4 text-sm underline underline-offset-4' to={buildQuranShareUrl(`/quran/${data.number}`, { mode, wordByWord, commentary: showCommentary, transliteration: showTransliteration }) + `#${verse.number}`}>Read full chapter at {data.number}:{verse.number}</Link>
       <div className='flex justify-between mt-6 sm:mt-8 mb-8 sm:mb-12'>

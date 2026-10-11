@@ -11,8 +11,7 @@ import { PrimaryButton } from '~/components/interface/primary-button';
 import { AudioPlayer } from '~/components/quran/audio-player';
 import { ChapterHeader } from '~/components/quran/chapter-header';
 import { VerseArabic } from '~/components/quran/verse-arabic';
-import { ReadingControls } from '~/components/quran/reading-controls';
-import { ExplainVerse } from '~/components/quran/explain-verse';
+import { ViewMode } from '~/components/quran/view-mode';
 import { TranscriptButton } from '~/components/quran/transcript-button';
 import { useQuranViewMode } from '~/hooks/use-quran-view-mode';
 import { getChapterOptions } from '~/queries/quran';
@@ -104,7 +103,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
 
   return (
     <div className='max-w-4xl flex flex-col w-full mb-8 sm:mb-12 flex-grow mx-auto p-0 lg:p-8'>
-      <ReadingControls mode={mode} setMode={setMode} wordByWord={wordByWord} setWordByWord={setWordByWord} transliteration={showTransliteration} setTransliteration={setShowTransliteration} commentary={showCommentary} setCommentary={setShowCommentary} />
+      <ViewMode mode={mode} onChange={setMode} />
       <div className='flex justify-end gap-1'>
         <TranscriptButton
           chapterNumber={data.number}
@@ -137,6 +136,41 @@ export default function QuranChapter(props: Route.ComponentProps) {
       
 
 
+      {(mode === 'translation' || mode === 'arabic') && (
+        <div className='mb-4 flex items-center gap-4 sm:gap-6 flex-wrap'>
+          {mode === 'translation' && (
+            <label className='flex items-center gap-2 cursor-pointer'>
+              <input
+                type='checkbox'
+                checked={wordByWord}
+                onChange={e => setWordByWord(e.target.checked)}
+                className='accent-black h-4 w-4 rounded'
+              />
+              <span className='text-sm'>Word-by-word</span>
+            </label>
+          )}
+          <label className='flex items-center gap-2 cursor-pointer'>
+            <input
+              type='checkbox'
+              checked={showTransliteration}
+              onChange={e => setShowTransliteration(e.target.checked)}
+              className='accent-black h-4 w-4 rounded'
+            />
+            <span className='text-sm'>Transliteration</span>
+          </label>
+          {mode === 'translation' && (
+            <label className='flex items-center gap-2 cursor-pointer'>
+              <input
+                type='checkbox'
+                checked={showCommentary}
+                onChange={e => setShowCommentary(e.target.checked)}
+                className='accent-black h-4 w-4 rounded'
+              />
+              <span className='text-sm'>Commentary</span>
+            </label>
+          )}
+        </div>
+      )}
       <div className='space-y-6'>
         {data.verses.map(verse => (
           <section id={String(verse.number)} data-chapter-verse={`${data.number}:${verse.number}`} key={verse.number} className='border-b border-gray-100 pb-4 scroll-mt-36'>
@@ -152,7 +186,6 @@ export default function QuranChapter(props: Route.ComponentProps) {
                   <ShareButton title={`Quran ${data.number}:${verse.number}`} text={verse.text} url={buildQuranShareUrl(`/quran/${data.number}/${verse.number}`, { mode, wordByWord, commentary: showCommentary, transliteration: showTransliteration })} />
                 </div>
               </div>
-              <ExplainVerse chapter={data.number} verse={verse.number} commentary={verse.comments} />
             </>}
           </section>
         ))}

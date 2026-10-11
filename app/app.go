@@ -32,7 +32,7 @@ var Template = `
     html, body { height: 100%%; width: 100%%; margin: 0; padding: 0; font-family: "Nunito Sans", serif; }
 @font-face {
     font-family: 'arabic';
-    src: url('/arabic.ttf') format('truetype');
+    src: url('/arabic.otf') format('opentype');
     font-weight: normal;
     font-style: normal;
 }

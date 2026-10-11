@@ -1,4 +1,3 @@
-import { OfflineStatus } from '~/components/interface/offline-status';
 import { Bookmark, Download, Search } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router';
 import { usePwaInstall } from '~/hooks/use-pwa-install';
@@ -80,7 +79,6 @@ export default function AppLayout() {
           </NavLink>
         </div>
       </div>
-      <OfflineStatus />
       <div className='flex-1 overflow-y-auto'>
         <Outlet />
       </div>
