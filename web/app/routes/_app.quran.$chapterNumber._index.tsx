@@ -171,15 +171,15 @@ export default function QuranChapter(props: Route.ComponentProps) {
           )}
         </div>
       )}
-      <div className='space-y-6'>
+      <div className='space-y-3 sm:space-y-8'>
         {data.verses.map(verse => (
-          <section id={String(verse.number)} data-chapter-verse={`${data.number}:${verse.number}`} key={verse.number} className='border-b border-gray-100 pb-4 scroll-mt-36'>
+          <section id={String(verse.number)} data-chapter-verse={`${data.number}:${verse.number}`} key={verse.number} className='border-b border-gray-100 pb-3 sm:pb-8 scroll-mt-4'>
             {mode !== 'english' && <VerseArabic verse={verse} wordByWord={wordByWord} transliteration={showTransliteration} />}
             {mode !== 'arabic' && <p className='text-base sm:text-lg leading-relaxed'>{verse.text}</p>}
             {showCommentary && verse.comments && <div className='mt-3 p-3 bg-yellow-50 text-sm leading-relaxed'><strong>Tafsir (stored commentary):</strong> {verse.comments}</div>}
             {verse.number > 0 && <>
               <div className='flex items-center justify-between mt-2 gap-2'>
-                <Link className='text-sm underline underline-offset-4' to={buildQuranShareUrl(`/quran/${data.number}/${verse.number}`, { mode, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}>{data.number}:{verse.number}</Link>
+                <Link className='text-xs sm:text-sm text-gray-500' to={buildQuranShareUrl(`/quran/${data.number}/${verse.number}`, { mode, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}>{data.number}:{verse.number}</Link>
                 <div className='flex items-center gap-1'>
                   <ReadingBookmarkButton type='quran' label={`${data.english} ${data.number}:${verse.number}`} url={`/quran/${data.number}#${verse.number}`} excerpt={verse.text.slice(0, 80)} />
                   <BookmarkButton type='quran' itemKey={`${data.number}:${verse.number}`} label={`${data.english} ${data.number}:${verse.number}`} url={`/quran/${data.number}#${verse.number}`} excerpt={verse.text.slice(0, 80)} />
