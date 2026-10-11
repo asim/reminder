@@ -4,6 +4,7 @@ export interface QuranViewSettings {
   mode: ViewMode;
   wordByWord: boolean;
   commentary: boolean;
+  transliteration?: boolean;
 }
 
 export function buildQuranShareUrl(
@@ -12,15 +13,11 @@ export function buildQuranShareUrl(
 ): string {
   const params = new URLSearchParams();
 
-  if (settings.mode !== 'translation') {
-    params.set('mode', settings.mode);
-  }
-  if (settings.wordByWord) {
-    params.set('wbw', '1');
-  }
-  if (settings.commentary) {
-    params.set('commentary', '1');
-  }
+  // Explicit false values keep shared links independent of saved preferences.
+  params.set('mode', settings.mode);
+  params.set('wbw', settings.wordByWord ? '1' : '0');
+  params.set('commentary', settings.commentary ? '1' : '0');
+  params.set('transliteration', settings.transliteration ? '1' : '0');
 
   const qs = params.toString();
   return qs ? `${basePath}?${qs}` : basePath;

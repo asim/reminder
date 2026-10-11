@@ -293,11 +293,11 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Collection, a 
 
 		cc := q.Get(ch)
 
-		if ve < 1 || ve > len(cc.Verses) {
+		if cc.Verse(ve) == nil {
 			return
 		}
 
-		vv := cc.Verses[ve-1]
+		vv := cc.Verse(ve)
 
 		head := fmt.Sprintf("%d:%d | Quran", ch, ve)
 		vhtml := app.RenderHTML(head, "", vv.HTML())
@@ -731,6 +731,8 @@ func main() {
 		registerLiteRoutes(q, n, b, a)
 	}
 
+	registerExplanationRoute(http.DefaultServeMux, q)
+
 	http.HandleFunc("/api/quran", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(qjson))
 	})
@@ -779,11 +781,11 @@ func main() {
 		cc := q.Get(chapter)
 
 		verse, _ := strconv.Atoi(ve)
-		if verse < 1 || verse > len(cc.Verses) {
+		if cc.Verse(verse) == nil {
 			return
 		}
 
-		vee := cc.Verses[verse-1]
+		vee := cc.Verse(verse)
 		b := vee.JSON()
 
 		w.Write(b)
@@ -1421,10 +1423,10 @@ func main() {
 			return "", fmt.Errorf("chapter must be between 1 and 114")
 		}
 		cc := q.Get(chapter)
-		if verse < 1 || verse > len(cc.Verses) {
+		if cc.Verse(verse) == nil {
 			return "", fmt.Errorf("verse out of range")
 		}
-		return string(cc.Verses[verse-1].JSON()), nil
+		return string(cc.Verse(verse).JSON()), nil
 	})
 
 	mcpServer.AddTool("get_hadith_books", "Get a list of all hadith books in Sahih Bukhari", api.InputSchema{

@@ -64,15 +64,24 @@ reminder --serve
 **LLM Configuration** (optional) - used for answer summaries:
 
 ```bash
-# Use Claude (takes priority)
-export ANTHROPIC_API_KEY=xxx
+# OpenAI (default: gpt-6-luna)
+export OPENAI_API_KEY=xxx
+export OPENAI_MODEL=gpt-6-luna  # optional override
 
 # Use a specific Ollama model (default: gemma3:1b)
 export OLLAMA_LLM_MODEL=gemma3:1b
 
-# Use OpenAI as fallback
-export OPENAI_API_KEY=xxx
+# Use Claude when OpenAI and an explicit Ollama model are not configured
+export ANTHROPIC_API_KEY=xxx
 ```
+
+An explicit Ollama model takes priority, then OpenAI, then Anthropic.
+OpenAI API credentials are required; a ChatGPT/Codex subscription is not an API key.
+
+The reader provides sticky reading controls, links back to the full chapter at
+the selected verse, and an Explain action. Explain uses the selected verse and
+stored commentary, labels AI output, and falls back to commentary if no model
+is available.
 
 Summaries are optional. With no model configured the summarise controls are
 hidden and search still returns references.
@@ -160,6 +169,8 @@ it is a reminder to the whole world.”
 ```
 
 ## Sources
+
+See [the Arabic source audit](docs/arabic-audit.md) for verification scope and limitations.
 
 The sources used for data
 

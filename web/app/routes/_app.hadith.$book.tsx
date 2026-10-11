@@ -182,7 +182,7 @@ export default function HadithBook() {
               {/* Arabic text */}
               {arabicText && (
                 <div
-                  dir='rtl'
+                  lang='ar' dir='rtl'
                   className='text-xl sm:text-2xl md:text-3xl leading-loose font-arabic text-right text-gray-800 border-b border-gray-100 pb-4'
                 >
                   {arabicText}

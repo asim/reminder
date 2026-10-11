@@ -105,7 +105,10 @@ func askLLM(ctx context.Context, contexts []string, question string) string {
 	}
 	systemPrompt := sb.String()
 
-	// Priority: 1. Claude (Anthropic), 2. Ollama, 3. OpenAI
+	// Prefer explicit local configuration, then OpenAI, then Anthropic.
+	if os.Getenv("OLLAMA_LLM_MODEL") != "" || os.Getenv("OPENAI_API_KEY") != "" {
+		return askOpenAICompat(ctx, systemPrompt, question)
+	}
 	anthropicKey := os.Getenv("ANTHROPIC_API_KEY")
 	if len(anthropicKey) > 0 {
 		return askClaude(ctx, anthropicKey, systemPrompt, question)
@@ -162,7 +165,10 @@ func askOpenAICompat(ctx context.Context, systemPrompt, question string) string 
 		model = ollamaModel
 	} else {
 		config = openai.DefaultConfig(openaiKey)
-		model = openai.GPT4oMini
+		model = os.Getenv("OPENAI_MODEL")
+		if model == "" {
+			model = "gpt-6-luna"
+		}
 	}
 
 	openAIClient := openai.NewClientWithConfig(config)
@@ -182,6 +188,9 @@ func askOpenAICompat(ctx context.Context, systemPrompt, question string) string 
 	})
 	if err != nil {
 		panic(err)
+	}
+	if len(res.Choices) == 0 {
+		panic("llm: empty response")
 	}
 	reply := res.Choices[0].Message.Content
 	return strings.TrimSpace(reply)

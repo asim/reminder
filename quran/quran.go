@@ -4,6 +4,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 //go:embed data/*.json
@@ -66,6 +67,46 @@ func GetAudioURL(chapter, verse int, language string) string {
 	return ""
 }
 
+// Verse looks up the actual ayah number, excluding the unnumbered opening.
+func (ch *Chapter) Verse(number int) *Verse {
+	if number < 1 {
+		return nil
+	}
+	for _, verse := range ch.Verses {
+		if verse.Number == number {
+			return verse
+		}
+	}
+	return nil
+}
+
+// alignWords preserves the canonical Arabic exactly, including pause marks.
+// The learning source sometimes groups words differently from the Arabic source.
+func alignWords(chapter, number int, arabic string, words []*Word) []*Word {
+	key := fmt.Sprintf("%d:%d", chapter, number)
+	// Join learning annotations where the canonical source uses one written token.
+	joins := map[string]int{"15:7": 0, "27:20": 3, "36:22": 0}
+	if i, ok := joins[key]; ok {
+		words[i].English += " " + words[i+1].English
+		words[i].Transliteration += " " + words[i+1].Transliteration
+		words = append(words[:i+1], words[i+2:]...)
+	}
+	tokens := strings.Split(arabic, " ") // Preserve non-breaking spaces used with Quranic marks.
+	// Keep the source's two written tokens together under one learning annotation.
+	joins = map[string]int{"2:181": 2, "13:37": 7}
+	if i, ok := joins[key]; ok {
+		tokens[i] += " " + tokens[i+1]
+		tokens = append(tokens[:i+1], tokens[i+2:]...)
+	}
+	if len(tokens) != len(words) {
+		panic("word alignment mismatch: " + key)
+	}
+	for i := range words {
+		words[i].Arabic = tokens[i]
+	}
+	return words
+}
+
 func (ch *Chapter) JSON() []byte {
 	b, _ := json.Marshal(ch)
 	return b
@@ -89,7 +130,7 @@ func (ch *Chapter) HTML() string {
 		data += `<div class="mb-6 p-6 bg-white border border-gray-200 rounded-lg shadow-sm" id="` + fmt.Sprintf("%d", verse.Number) + `">`
 		data += fmt.Sprintf(`<div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold text-gray-700">%d:%d</h3><button class="bookmark-btn" data-type="quran" data-key="%s" data-label="%s" data-url="%s">☆</button></div>`,
 			ch.Number, verse.Number, verseKey, verseLabel, verseURL)
-		data += `<div class="arabic text-right text-2xl mb-4 leading-relaxed">` + verse.Arabic + `</div>`
+		data += `<div lang="ar" dir="rtl" class="arabic text-right text-2xl mb-4 leading-relaxed">` + verse.Arabic + `</div>`
 		data += `<div class="text-gray-700">` + verse.Text + `</div>`
 		data += `</div>`
 	}
@@ -104,10 +145,11 @@ func (v *Verse) HTML() string {
 	verseLabel := fmt.Sprintf("Quran %d:%d", v.Chapter, v.Number)
 	verseURL := fmt.Sprintf("/quran/%d#%d", v.Chapter, v.Number)
 
+	data += fmt.Sprintf(`<p><a href="%s">Read full chapter at %d:%d</a></p>`, verseURL, v.Chapter, v.Number)
 	data += `<div class="mb-6 p-6 bg-white border border-gray-200 rounded-lg shadow-sm">`
 	data += fmt.Sprintf(`<div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold text-gray-700">%d:%d</h3><button class="bookmark-btn" data-type="quran" data-key="%s" data-label="%s" data-url="%s">☆</button></div>`,
 		v.Chapter, v.Number, verseKey, verseLabel, verseURL)
-	data += `<div class="arabic text-right text-2xl mb-4 leading-relaxed">` + v.Arabic + `</div>`
+	data += `<div lang="ar" dir="rtl" class="arabic text-right text-2xl mb-4 leading-relaxed">` + v.Arabic + `</div>`
 	data += `<div class="text-gray-700">` + v.Text + `</div>`
 	data += `</div>`
 
@@ -127,7 +169,7 @@ func (q *Quran) Index() *Quran {
 			Name:       ch.Name,
 			Number:     ch.Number,
 			English:    ch.English,
-			VerseCount: len(ch.Verses),
+			VerseCount: ch.VerseCount,
 		}
 		nq.Chapters = append(nq.Chapters, chapter)
 	}
@@ -301,7 +343,7 @@ func Load() *Quran {
 				Number:       num,
 				Text:         ayah.([]interface{})[1].(string),
 				Arabic:       ar,
-				Words:        wbw,
+				Words:        alignWords(chapter, num, ar, wbw),
 				Comments:     text,
 				AudioArabic:  GetAudioURL(chapter, num, "arabic"),
 				AudioEnglish: GetAudioURL(chapter, num, "english"),
@@ -314,7 +356,7 @@ func Load() *Quran {
 			Number:     chapter,
 			Verses:     verses,
 			English:    english,
-			VerseCount: len(verses),
+			VerseCount: len(data),
 		})
 
 	}

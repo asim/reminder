@@ -25,7 +25,7 @@ export default function EmbedQuranVerse() {
     <div className='font-sans p-4 max-w-lg'>
       {verse.arabic && (
         <div
-          dir='rtl'
+          lang='ar' dir='rtl'
           className='text-xl leading-loose font-arabic text-right text-gray-800 mb-3'
         >
           {verse.arabic}
