@@ -158,7 +158,6 @@ export default function QuranVerse(props: Route.ComponentProps) {
           </PrimaryButton>
         )}
       </div>
-      <p className='text-xs text-gray-500 mt-4'>Arabic: <a className='underline' href='https://quranenc.com/en/home'>QuranEnc · Uthmani</a></p>
     </div>
   );
 }
