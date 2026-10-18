@@ -1,6 +1,6 @@
 import type { Route } from '.react-router/types/app/routes/+types/_app.quran.$chapterNumber._index';
 import { CircleChevronLeft, CircleChevronRight } from 'lucide-react';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Link, useLocation } from 'react-router';
 import { BookmarkButton } from '~/components/interface/bookmark-button';
 import { ReadingBookmarkButton } from '~/components/interface/reading-bookmark-button';
@@ -43,17 +43,10 @@ export default function QuranChapter(props: Route.ComponentProps) {
   const data = useTranslatedChapter(Number(chapterNumber), translation);
   const location = useLocation();
 
-  const [currentVerseIndex, setCurrentVerseIndex] = React.useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = React.useState(false);
-
-  // Filter out verse 0 (Bismillah) for playback
-  const playableVerses = data.verses.filter(v => v.number !== 0);
-
-  // Reset playback state when chapter changes
-  useEffect(() => {
-    setCurrentVerseIndex(0);
-    setIsAutoPlaying(false);
-  }, [chapterNumber]);
+  const playlist = data.verses.filter(verse => verse.number !== 0).flatMap(verse => [
+    ...(verse.audio_arabic ? [{ url: verse.audio_arabic, language: 'arabic' as const, label: `Quran ${data.number}:${verse.number}` }] : []),
+    ...(verse.audio_english ? [{ url: verse.audio_english, language: 'english' as const, label: `Quran ${data.number}:${verse.number}` }] : []),
+  ]);
 
   useEffect(() => {
     if (!data || !window.location.hash) {
@@ -72,24 +65,6 @@ export default function QuranChapter(props: Route.ComponentProps) {
 
   const previousChapter = Number(chapterNumber) - 1;
   const nextChapter = Number(chapterNumber) + 1;
-
-  const handleVersePlayComplete = () => {
-    // Move to next verse when current verse audio completes
-    if (currentVerseIndex < playableVerses.length - 1) {
-      setIsAutoPlaying(true);
-      setCurrentVerseIndex(currentVerseIndex + 1);
-    } else {
-      // Reset to first verse when chapter completes
-      setIsAutoPlaying(false);
-      setCurrentVerseIndex(0);
-    }
-  };
-
-  const handlePlayStart = () => {
-    setIsAutoPlaying(true);
-  };
-
-  const currentVerse = playableVerses[currentVerseIndex];
 
   return (
     <div style={textStyle} className='quran-reader max-w-4xl flex flex-col w-full mb-8 sm:mb-12 flex-grow mx-auto p-0 lg:p-8'>
@@ -113,18 +88,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
         </>}
       />
       
-      {/* Chapter Audio Player */}
-      {currentVerse && (
-        <AudioPlayer
-          arabicUrl={currentVerse.audio_arabic}
-          englishUrl={currentVerse.audio_english}
-          verseLabel={`Quran ${data.number}:${currentVerse.number}`}
-          onPlayComplete={handleVersePlayComplete}
-          onPlayStart={handlePlayStart}
-          autoPlay={isAutoPlaying}
-        />
-      )}
-      
+      <AudioPlayer playlist={playlist} verseLabel={`Quran ${data.number}:1`} />
 
       <div className='space-y-3 sm:space-y-8'>
         {data.verses.map(verse => (

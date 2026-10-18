@@ -1,297 +1,152 @@
 import { Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
+export type AudioTrack = { url: string; language: 'arabic' | 'english'; label: string };
 type AudioPlayerProps = {
   arabicUrl?: string;
   englishUrl?: string;
   verseLabel: string;
-  onPlayComplete?: () => void;
-  onPlayStart?: () => void;
-  autoPlay?: boolean;
+  playlist?: AudioTrack[];
 };
 
-export function AudioPlayer({
-  arabicUrl,
-  englishUrl,
-  verseLabel,
-  onPlayComplete,
-  onPlayStart,
-  autoPlay = false,
-}: AudioPlayerProps) {
+export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist }: AudioPlayerProps) {
+  const tracks = playlist || [
+    ...(arabicUrl ? [{ url: arabicUrl, language: 'arabic' as const, label: verseLabel }] : []),
+    ...(englishUrl ? [{ url: englishUrl, language: 'english' as const, label: verseLabel }] : []),
+  ];
+  const tracksRef = useRef(tracks);
+  tracksRef.current = tracks;
+  const queueKey = JSON.stringify(tracks);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const indexRef = useRef(-1);
+  const [index, setIndex] = useState(-1);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTrack, setCurrentTrack] = useState<'arabic' | 'english' | null>(null);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
-  const arabicAudioRef = useRef<HTMLAudioElement>(null);
-  const englishAudioRef = useRef<HTMLAudioElement>(null);
+  const [error, setError] = useState('');
+  const activeTrack = tracks[index];
+  const currentTrack = activeTrack?.language || null;
 
-  // Reset player when URLs change, and auto-play if enabled
-  useEffect(() => {
-    setCurrentTrack(null);
+  const playbackChanged = (playing: boolean) => {
+    setIsPlaying(playing);
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = playing ? 'playing' : 'paused';
+  };
+
+  const play = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    // Supported browsers can distinguish long-form playback from ambient sound.
+    const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
+    try { if (session) session.type = 'playback'; } catch { /* optional API */ }
+    setError('');
+    void audio.play().catch((reason: DOMException) => {
+      if (reason.name === 'AbortError') return; // A newer track or pause superseded this request.
+      playbackChanged(false);
+      setError('Playback could not start. Press play to retry.');
+    });
+  };
+
+  const startTrack = (next: number) => {
+    const audio = audioRef.current;
+    const track = tracksRef.current[next];
+    if (!audio || !track) return;
+    indexRef.current = next;
+    setIndex(next);
     setProgress(0);
     setDuration(0);
-    
-    if (autoPlay && (arabicUrl || englishUrl)) {
-      // Small delay to ensure audio elements are ready
-      const timer = setTimeout(() => {
-        if (arabicUrl && arabicAudioRef.current) {
-          setCurrentTrack('arabic');
-          arabicAudioRef.current.currentTime = 0;
-          arabicAudioRef.current.play().catch(console.error);
-          setIsPlaying(true);
-        } else if (englishUrl && englishAudioRef.current) {
-          setCurrentTrack('english');
-          englishAudioRef.current.currentTime = 0;
-          englishAudioRef.current.play().catch(console.error);
-          setIsPlaying(true);
-        }
-      }, 100);
-      return () => clearTimeout(timer);
-    } else {
-      setIsPlaying(false);
+    audio.src = track.url;
+    if ('mediaSession' in navigator && typeof MediaMetadata !== 'undefined') {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: track.label,
+        artist: track.language === 'arabic' ? 'Arabic Recitation' : 'English Translation',
+        album: 'Reminder',
+        artwork: [{ src: '/icon-192.png', sizes: '192x192', type: 'image/png' }],
+      });
     }
-  }, [arabicUrl, englishUrl, autoPlay]);
+    // Start directly from the media event. No background timer or React render
+    // is needed to advance to English or to the next verse.
+    play();
+  };
 
-  // Update audio element volume and muted state
+  const resume = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (indexRef.current < 0 || audio.ended) startTrack(0);
+    else play();
+  };
+  const pause = () => audioRef.current?.pause();
+  const togglePlay = () => audioRef.current?.paused ? resume() : pause();
+  const skipLanguage = (language: AudioTrack['language']) => {
+    const label = tracksRef.current[Math.max(indexRef.current, 0)]?.label;
+    const next = tracksRef.current.findIndex(track => track.label === label && track.language === language);
+    if (next >= 0) startTrack(next);
+  };
+  const skipToArabic = () => skipLanguage('arabic');
+  const skipToEnglish = () => skipLanguage('english');
+  const handleEnded = () => {
+    if (indexRef.current + 1 < tracksRef.current.length) startTrack(indexRef.current + 1);
+    else playbackChanged(false);
+  };
+
   useEffect(() => {
-    if (arabicAudioRef.current) {
-      arabicAudioRef.current.volume = volume;
-      arabicAudioRef.current.muted = isMuted;
-    }
-    if (englishAudioRef.current) {
-      englishAudioRef.current.volume = volume;
-      englishAudioRef.current.muted = isMuted;
-    }
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.pause();
+    indexRef.current = -1;
+    setIndex(-1);
+    setProgress(0);
+    setDuration(0);
+    setIsPlaying(false);
+    setError('');
+    // Prime the first resource without starting playback before a user gesture.
+    if (tracksRef.current[0]) audio.src = tracksRef.current[0].url;
+    else audio.removeAttribute('src');
+    const session = 'mediaSession' in navigator ? navigator.mediaSession : null;
+    const handler = (action: MediaSessionAction, callback: MediaSessionActionHandler | null) => {
+      try { session?.setActionHandler(action, callback); } catch { /* unsupported action */ }
+    };
+    if (session) { session.playbackState = 'none'; session.metadata = null; }
+    handler('play', resume);
+    handler('pause', pause);
+    handler('nexttrack', () => startTrack(indexRef.current + 1));
+    handler('previoustrack', () => startTrack(Math.max(0, indexRef.current - 1)));
+    handler('seekto', details => { if (details.seekTime !== undefined) audio.currentTime = details.seekTime; });
+    return () => {
+      audio.pause();
+      audio.removeAttribute('src');
+      audio.load();
+      for (const action of ['play', 'pause', 'nexttrack', 'previoustrack', 'seekto'] as MediaSessionAction[]) handler(action, null);
+      if (session) { session.playbackState = 'none'; session.metadata = null; }
+    };
+  }, [queueKey]);
+
+  useEffect(() => {
+    if (audioRef.current) { audioRef.current.volume = volume; audioRef.current.muted = isMuted; }
   }, [volume, isMuted]);
 
-  // Update duration when track changes
-  useEffect(() => {
-    if (currentTrack === 'arabic' && arabicAudioRef.current) {
-      const audio = arabicAudioRef.current;
-      if (audio.readyState >= 1) {
-        setDuration(audio.duration);
-      }
-    } else if (currentTrack === 'english' && englishAudioRef.current) {
-      const audio = englishAudioRef.current;
-      if (audio.readyState >= 1) {
-        setDuration(audio.duration);
-      }
-    }
-  }, [currentTrack]);
-
-  // Handle playback sequence: Arabic first, then English
-  const playSequence = async () => {
-    if (!arabicUrl && !englishUrl) return;
-
-    // Notify parent that playback started
-    if (onPlayStart) {
-      onPlayStart();
-    }
-
-    // Start with Arabic if available
-    if (arabicUrl && arabicAudioRef.current) {
-      setCurrentTrack('arabic');
-      arabicAudioRef.current.currentTime = 0;
-      setProgress(0);
-      if (arabicAudioRef.current.readyState >= 1) {
-        setDuration(arabicAudioRef.current.duration);
-      }
-      arabicAudioRef.current.play().catch(console.error);
-      setIsPlaying(true);
-    } else if (englishUrl && englishAudioRef.current) {
-      setCurrentTrack('english');
-      englishAudioRef.current.currentTime = 0;
-      setProgress(0);
-      if (englishAudioRef.current.readyState >= 1) {
-        setDuration(englishAudioRef.current.duration);
-      }
-      englishAudioRef.current.play().catch(console.error);
-      setIsPlaying(true);
-    }
+  const toggleMute = () => setIsMuted(!isMuted);
+  const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(event.target.value);
+    setVolume(value);
+    if (value > 0) setIsMuted(false);
   };
-
-  const pause = () => {
-    if (arabicAudioRef.current) {
-      arabicAudioRef.current.pause();
-    }
-    if (englishAudioRef.current) {
-      englishAudioRef.current.pause();
-    }
-    setIsPlaying(false);
+  const handleSeek = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(event.target.value);
+    if (audioRef.current) audioRef.current.currentTime = value;
+    setProgress(value);
   };
-
-  const togglePlay = () => {
-    if (isPlaying) {
-      pause();
-    } else {
-      playSequence();
-    }
-  };
-
-  const skipToEnglish = () => {
-    if (englishUrl && englishAudioRef.current) {
-      // Pause Arabic
-      if (arabicAudioRef.current) {
-        arabicAudioRef.current.pause();
-      }
-      setCurrentTrack('english');
-      setProgress(0);
-      englishAudioRef.current.currentTime = 0;
-      if (englishAudioRef.current.readyState >= 1) {
-        setDuration(englishAudioRef.current.duration);
-      }
-      englishAudioRef.current.play().catch(console.error);
-      setIsPlaying(true);
-    }
-  };
-
-  const skipToArabic = () => {
-    if (arabicUrl && arabicAudioRef.current) {
-      // Pause English
-      if (englishAudioRef.current) {
-        englishAudioRef.current.pause();
-      }
-      setCurrentTrack('arabic');
-      setProgress(0);
-      arabicAudioRef.current.currentTime = 0;
-      if (arabicAudioRef.current.readyState >= 1) {
-        setDuration(arabicAudioRef.current.duration);
-      }
-      arabicAudioRef.current.play().catch(console.error);
-      setIsPlaying(true);
-    }
-  };
-
-  const toggleMute = () => {
-    setIsMuted(!isMuted);
-  };
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = parseFloat(e.target.value);
-    setVolume(newVolume);
-    if (newVolume > 0 && isMuted) {
-      setIsMuted(false);
-    }
-  };
-
-  const handleArabicTimeUpdate = () => {
-    if (arabicAudioRef.current && currentTrack === 'arabic') {
-      setProgress(arabicAudioRef.current.currentTime);
-    }
-  };
-
-  const handleEnglishTimeUpdate = () => {
-    if (englishAudioRef.current && currentTrack === 'english') {
-      setProgress(englishAudioRef.current.currentTime);
-    }
-  };
-
-  const handleArabicLoadedMetadata = () => {
-    if (arabicAudioRef.current && currentTrack === 'arabic') {
-      setDuration(arabicAudioRef.current.duration);
-    }
-  };
-
-  const handleEnglishLoadedMetadata = () => {
-    if (englishAudioRef.current && currentTrack === 'english') {
-      setDuration(englishAudioRef.current.duration);
-    }
-  };
-
-  const handleArabicEnded = () => {
-    // When Arabic ends, play English
-    if (englishUrl && englishAudioRef.current) {
-      setCurrentTrack('english');
-      setProgress(0);
-      englishAudioRef.current.currentTime = 0;
-      if (englishAudioRef.current.readyState >= 1) {
-        setDuration(englishAudioRef.current.duration);
-      }
-      englishAudioRef.current.play().catch(console.error);
-    } else {
-      // No English, sequence complete
-      setIsPlaying(false);
-      setCurrentTrack(null);
-      setProgress(0);
-      setDuration(0);
-      if (onPlayComplete) {
-        onPlayComplete();
-      }
-    }
-  };
-
-  const handleEnglishEnded = () => {
-    // English finished, sequence complete
-    setIsPlaying(false);
-    setCurrentTrack(null);
-    setProgress(0);
-    setDuration(0);
-    if (onPlayComplete) {
-      onPlayComplete();
-    }
-  };
-
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTime = parseFloat(e.target.value);
-    setProgress(newTime);
-    if (currentTrack === 'arabic' && arabicAudioRef.current) {
-      arabicAudioRef.current.currentTime = newTime;
-    } else if (currentTrack === 'english' && englishAudioRef.current) {
-      englishAudioRef.current.currentTime = newTime;
-    }
-  };
-
   const formatTime = (seconds: number) => {
-    if (isNaN(seconds) || seconds === 0) return '0:00';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    if (!Number.isFinite(seconds) || seconds <= 0) return '0:00';
+    return `${Math.floor(seconds / 60)}:${Math.floor(seconds % 60).toString().padStart(2, '0')}`;
   };
-
-  if (!arabicUrl && !englishUrl) {
-    return null;
-  }
-
-  // Media Session API: keeps audio alive when screen is off and shows
-  // lock-screen controls on mobile.
-  useEffect(() => {
-    if (!('mediaSession' in navigator)) return;
-
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: verseLabel,
-      artist: currentTrack === 'arabic' ? 'Arabic Recitation' : currentTrack === 'english' ? 'English Translation' : 'Quran Audio',
-      album: 'Reminder',
-      artwork: [
-        { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
-      ],
-    });
-
-    navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
-
-    navigator.mediaSession.setActionHandler('play', () => {
-      if (!isPlaying) playSequence();
-    });
-    navigator.mediaSession.setActionHandler('pause', () => {
-      if (isPlaying) pause();
-    });
-    navigator.mediaSession.setActionHandler('previoustrack', arabicUrl ? skipToArabic : null);
-    navigator.mediaSession.setActionHandler('nexttrack', englishUrl ? skipToEnglish : null);
-
-    return () => {
-      navigator.mediaSession.setActionHandler('play', null);
-      navigator.mediaSession.setActionHandler('pause', null);
-      navigator.mediaSession.setActionHandler('previoustrack', null);
-      navigator.mediaSession.setActionHandler('nexttrack', null);
-    };
-  }, [isPlaying, currentTrack, verseLabel, arabicUrl, englishUrl]);
-
+  if (!tracks.length) return null;
   return (
     <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 sm:p-4 mb-4">
       <div className="flex items-center justify-between mb-2">
         <span className="text-xs sm:text-sm font-medium text-gray-700">
-          {verseLabel} - {currentTrack === 'arabic' ? 'Arabic' : currentTrack === 'english' ? 'English' : 'Audio'}
+          {activeTrack?.label || verseLabel} - {currentTrack === 'arabic' ? 'Arabic' : currentTrack === 'english' ? 'English' : 'Audio'}
         </span>
         <span className="text-xs text-gray-500">
           {formatTime(progress)} / {formatTime(duration)}
@@ -313,7 +168,7 @@ export function AudioPlayer({
       <div className="flex items-center justify-between gap-2">
         {/* Playback controls */}
         <div className="flex items-center gap-1 sm:gap-2">
-          {arabicUrl && (
+          {tracks.some(track => track.label === (activeTrack?.label || tracks[0]?.label) && track.language === 'arabic') && (
             <button
               onClick={skipToArabic}
               disabled={currentTrack === 'arabic' && isPlaying}
@@ -338,7 +193,7 @@ export function AudioPlayer({
             )}
           </button>
 
-          {englishUrl && (
+          {tracks.some(track => track.label === (activeTrack?.label || tracks[0]?.label) && track.language === 'english') && (
             <button
               onClick={skipToEnglish}
               disabled={currentTrack === 'english' && isPlaying}
@@ -379,27 +234,17 @@ export function AudioPlayer({
         </div>
       </div>
 
-      {/* Hidden audio elements - both always mounted for seamless switching */}
-      {arabicUrl && (
-        <audio
-          ref={arabicAudioRef}
-          src={arabicUrl}
-          onTimeUpdate={handleArabicTimeUpdate}
-          onLoadedMetadata={handleArabicLoadedMetadata}
-          onEnded={handleArabicEnded}
-          preload="auto"
-        />
-      )}
-      {englishUrl && (
-        <audio
-          ref={englishAudioRef}
-          src={englishUrl}
-          onTimeUpdate={handleEnglishTimeUpdate}
-          onLoadedMetadata={handleEnglishLoadedMetadata}
-          onEnded={handleEnglishEnded}
-          preload="auto"
-        />
-      )}
+      <audio
+        ref={audioRef}
+        preload="auto"
+        onPlay={() => playbackChanged(true)}
+        onPause={() => playbackChanged(false)}
+        onTimeUpdate={() => setProgress(audioRef.current?.currentTime || 0)}
+        onLoadedMetadata={() => setDuration(Number.isFinite(audioRef.current?.duration) ? audioRef.current!.duration : 0)}
+        onEnded={handleEnded}
+        onError={() => { playbackChanged(false); setError('Audio could not be loaded. Press play to retry.'); }}
+      />
+      {error && <p role="status" className="text-xs text-gray-600 mt-2">{error}</p>}
     </div>
   );
 }
