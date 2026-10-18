@@ -135,7 +135,7 @@
       "found": "(59:23)",
       "en":{
         "meaning":"The Greatest",
-        "desc": "He who is superior to His creatures, no creature has the right to claim greatness."
+        "desc": "Allah alone possesses absolute majesty and greatness; no creature can claim that greatness for itself."
       },
       "fr":{
         "meaning":"Le Supr\u00EAme, Le Majestueux",
@@ -233,7 +233,7 @@
       "found": "(51:58)",
       "en":{
         "meaning":"The Sustainer",
-        "desc": "Is the One who makes distribute to every creature what it needs."
+        "desc": "Allah provides His creatures with what they need. Provision includes nourishment and other gifts."
       },
       "fr":{
         "meaning":"Le Grand Pourvoyeur",
@@ -442,7 +442,7 @@
       "number":32,
       "found": "(2:235)(17:44)(22:59)(35:41)",
       "en":{
-        "meaning":"The Forebearing",
+        "meaning":"The Forbearing",
         "desc": "Is the One whose patience towards the disbeliefs of sinners exceeds all imagination (it is possible that forgiveness will be granted to them)."
       },
       "fr":{
@@ -513,7 +513,7 @@
       "found": "(13:9)(22:62)(31:30)",
       "en":{
         "meaning":"The Greatest",
-        "desc": "The Great: One who is greater than His creation, a greatness that only He knows."
+        "desc": "His greatness is the perfection of His being: His existence is eternal, and all created existence depends on Him."
       },
       "fr":{
         "meaning":"Le Tr\u00E8s Grand",
@@ -541,7 +541,7 @@
       "found": "(4:85)",
       "en":{
         "meaning":"The Sustainer",
-        "desc": "this word is among the lost words of the ancient Arabic language; very difficult to translate even in modern Arabic}. It would mean: Is the One who leaves no detail when He judges, even the most trivial."
+        "desc": "Allah supplies nourishment to bodies and hearts. In this sense, Al Muqeet is more specific than Ar Razzaaq, whose provision includes nourishment and other gifts."
       },
       "fr":{
         "meaning":"Est Celui qui ne laisse aucun d\u00E9tail lorsqu'Il juge, m\u00EAme les plus futiles.",
@@ -648,7 +648,7 @@
     },
     {
       "name":"\u0627\u0644\u0652\u0648\u064e\u062f\u064f\u0648\u062f\u064f",
-      "transliteration":"Al Wudood",
+      "transliteration":"Al Wadood",
       "number":47,
       "found": "(11:90)(85:14)",
       "en":{
@@ -667,7 +667,7 @@
       "found": "(11:73) ",
       "en":{
         "meaning":"The Glorious One, The Most Honorable",
-        "desc": "Is the One who is glorified in the infinitely past, present and eternal."
+        "desc": "His glory encompasses nobility, excellence in deeds and generosity. Al Majeed and Al Maajid share this meaning, with a difference of emphasis."
       },
       "fr":{
         "meaning":"Le Tout Glorieux",
@@ -830,7 +830,7 @@
     },
     {
       "name":"\u0627\u0644\u0652\u0645\u064f\u062d\u0652\u064a\u0650\u064a",
-      "transliteration":"Al Muhiy",
+      "transliteration":"Al Muhyee",
       "number":60,
       "found": "(7:158)(15:23)(30:50)(57:2)",
       "en":{
@@ -905,7 +905,7 @@
       "found": "(11:73)",
       "en":{
         "meaning":"The Glorious",
-        "desc": "Is the One who is better than any other and the One who bestows innumerable benefits very widely and without compensation"
+        "desc": "This name shares with Al Majeed the meaning of glory, nobility and generosity; it does not denote an unrelated attribute."
       },
       "fr":{
         "meaning":"L'Illustre",
@@ -946,8 +946,8 @@
       "number":68,
       "found": "(112:2)",
       "en":{
-        "meaning":"The Supreme Provider",
-        "desc": "Is the One to whom we can rely for any business and who can be called upon for all our needs; One who has no children or parents, neither like nor equivalent, according to Al-Hakim's explanation; The One who needs nothing and the One who everything needs, in order to exist, etc."
+        "meaning":"The One to Whom All Turn",
+        "desc": "Allah is the One to whom all turn for their needs. He needs nothing, while all depend on Him."
       },
       "fr":{
         "meaning":"L'Absolu",
@@ -998,7 +998,7 @@
     },
     {
       "name":"\u0627\u0644\u0652\u0645\u064f\u0624\u064e\u062e\u0650\u0651\u0631\u064f",
-      "transliteration":"Al Mu\u2019akhir",
+      "transliteration":"Al Mu\u2019akhkhir",
       "number":72,
       "found": "(71:4)",
       "en":{
@@ -1114,8 +1114,8 @@
       "number":80,
       "found": "(2:128)(4:64)(49:12)(110:3)",
       "en":{
-        "meaning":"The Guide to Repentence",
-        "desc": "Is the One who grants forgiveness to those who repent every time they repent"
+        "meaning":"The Guide to Repentance",
+        "desc": "Allah repeatedly enables His servants to repent and accepts their repentance."
       },
       "fr":{
         "meaning":"L'Accueillant au repentir",
@@ -1143,7 +1143,7 @@
       "found": "(4:99)(4:149)(22:60) ",
       "en":{
         "meaning":"The Forgiver",
-        "desc": "Is the One who sets aside and forgives sin and the One who preserves in every seemingly hopeless situation a door to honor, maintenance and blessings or to immediate repentance"
+        "desc": "Allah pardons by erasing sins. Al Ghafoor emphasises forgiveness and concealment of sins; Al Afuww emphasises their removal."
       },
       "fr":{
         "meaning":"Le Tr\u00E8s Indulgent",
