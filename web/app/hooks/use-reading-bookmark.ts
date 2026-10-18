@@ -1,6 +1,21 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const STORAGE_KEY = 'reminder_reading_bookmarks';
+const CHANGE_EVENT = 'reading-bookmarks-changed';
+
+// Display preferences do not change the saved reading position.
+export function readingPosition(url: string): string {
+  try {
+    const parsed = new URL(url, 'https://reminder.dev');
+    const path = parsed.pathname.replace(/\/$/, '');
+    const verse = path.match(/^\/quran\/(\d+)\/(\d+)$/);
+    if (verse) return `/quran/${verse[1]}#${verse[2]}`;
+    return path + parsed.hash;
+  } catch {
+    return url;
+  }
+}
+
 
 export type ReadingBookmarkType = 'quran' | 'hadith' | 'names';
 
@@ -71,6 +86,7 @@ function saveReadingBookmarks(bookmarks: ReadingBookmarksData): boolean {
 
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(bookmarks));
+    window.dispatchEvent(new Event(CHANGE_EVENT));
     return true;
   } catch (e) {
     console.error('Error saving reading bookmarks:', e);
@@ -81,15 +97,29 @@ function saveReadingBookmarks(bookmarks: ReadingBookmarksData): boolean {
 export function useReadingBookmark() {
   const [readingBookmarks, setReadingBookmarks] = useState<ReadingBookmarksData>(getStoredReadingBookmarks);
 
+  useEffect(() => {
+    const refresh = () => setReadingBookmarks(getStoredReadingBookmarks());
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === STORAGE_KEY || event.key === null) refresh();
+    };
+    window.addEventListener(CHANGE_EVENT, refresh);
+    window.addEventListener('storage', onStorage);
+    refresh();
+    return () => {
+      window.removeEventListener(CHANGE_EVENT, refresh);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, []);
+
   const addReadingBookmark = (
     type: ReadingBookmarkType,
     label: string,
     url: string,
     excerpt?: string
   ) => {
-    const newBookmarks = { ...readingBookmarks };
+    const newBookmarks = getStoredReadingBookmarks();
     // Remove any existing bookmark with the same URL to avoid duplicates
-    newBookmarks[type] = newBookmarks[type].filter(b => b.url !== url);
+    newBookmarks[type] = newBookmarks[type].filter(b => readingPosition(b.url) !== readingPosition(url));
     // Add new bookmark at the front (most recent first)
     newBookmarks[type] = [
       { label, url, timestamp: new Date().toISOString(), excerpt },
@@ -100,21 +130,21 @@ export function useReadingBookmark() {
   };
 
   const removeReadingBookmark = (type: ReadingBookmarkType, url: string) => {
-    const newBookmarks = { ...readingBookmarks };
-    newBookmarks[type] = newBookmarks[type].filter(b => b.url !== url);
+    const newBookmarks = getStoredReadingBookmarks();
+    newBookmarks[type] = newBookmarks[type].filter(b => readingPosition(b.url) !== readingPosition(url));
     setReadingBookmarks(newBookmarks);
     saveReadingBookmarks(newBookmarks);
   };
 
   const clearReadingBookmark = (type: ReadingBookmarkType) => {
-    const newBookmarks = { ...readingBookmarks };
+    const newBookmarks = getStoredReadingBookmarks();
     newBookmarks[type] = [];
     setReadingBookmarks(newBookmarks);
     saveReadingBookmarks(newBookmarks);
   };
 
   const isReadingBookmark = (type: ReadingBookmarkType, url: string): boolean => {
-    return readingBookmarks[type].some(b => b.url === url);
+    return readingBookmarks[type].some(b => readingPosition(b.url) === readingPosition(url));
   };
 
   // Backward-compatible: return the most recent bookmark for a type
