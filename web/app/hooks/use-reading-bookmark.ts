@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
 const STORAGE_KEY = 'reminder_reading_bookmarks';
-const CHANGE_EVENT = 'reading-bookmarks-changed';
 
 // Display preferences do not change the saved reading position.
 export function readingPosition(url: string): string {
@@ -86,7 +85,6 @@ function saveReadingBookmarks(bookmarks: ReadingBookmarksData): boolean {
 
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(bookmarks));
-    window.dispatchEvent(new Event(CHANGE_EVENT));
     return true;
   } catch (e) {
     console.error('Error saving reading bookmarks:', e);
@@ -94,22 +92,44 @@ function saveReadingBookmarks(bookmarks: ReadingBookmarksData): boolean {
   }
 }
 
-export function useReadingBookmark() {
-  const [readingBookmarks, setReadingBookmarks] = useState<ReadingBookmarksData>(getStoredReadingBookmarks);
+// One cached snapshot and browser listener for every mounted bookmark consumer.
+const serverSnapshot = initReadingBookmarks();
+let snapshot = serverSnapshot;
+const subscribers = new Set<() => void>();
+const getSnapshot = () => snapshot;
+const getServerSnapshot = () => serverSnapshot;
 
-  useEffect(() => {
-    const refresh = () => setReadingBookmarks(getStoredReadingBookmarks());
-    const onStorage = (event: StorageEvent) => {
-      if (event.key === STORAGE_KEY || event.key === null) refresh();
-    };
-    window.addEventListener(CHANGE_EVENT, refresh);
+function publish(bookmarks: ReadingBookmarksData) {
+  snapshot = bookmarks;
+  subscribers.forEach(notify => notify());
+}
+
+function onStorage(event: StorageEvent) {
+  if (event.key === STORAGE_KEY || event.key === null) {
+    publish(getStoredReadingBookmarks());
+  }
+}
+
+function subscribe(notify: () => void) {
+  subscribers.add(notify);
+  if (subscribers.size === 1) {
     window.addEventListener('storage', onStorage);
-    refresh();
-    return () => {
-      window.removeEventListener(CHANGE_EVENT, refresh);
-      window.removeEventListener('storage', onStorage);
-    };
-  }, []);
+    publish(getStoredReadingBookmarks());
+  }
+  return () => {
+    subscribers.delete(notify);
+    if (subscribers.size === 0) window.removeEventListener('storage', onStorage);
+  };
+}
+
+function updateBookmarks(bookmarks: ReadingBookmarksData) {
+  saveReadingBookmarks(bookmarks);
+  // Same-tab consumers share the object already written; no reread or reparse.
+  publish(bookmarks);
+}
+
+export function useReadingBookmark() {
+  const readingBookmarks = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const addReadingBookmark = (
     type: ReadingBookmarkType,
@@ -125,22 +145,19 @@ export function useReadingBookmark() {
       { label, url, timestamp: new Date().toISOString(), excerpt },
       ...newBookmarks[type],
     ];
-    setReadingBookmarks(newBookmarks);
-    saveReadingBookmarks(newBookmarks);
+    updateBookmarks(newBookmarks);
   };
 
   const removeReadingBookmark = (type: ReadingBookmarkType, url: string) => {
     const newBookmarks = getStoredReadingBookmarks();
     newBookmarks[type] = newBookmarks[type].filter(b => readingPosition(b.url) !== readingPosition(url));
-    setReadingBookmarks(newBookmarks);
-    saveReadingBookmarks(newBookmarks);
+    updateBookmarks(newBookmarks);
   };
 
   const clearReadingBookmark = (type: ReadingBookmarkType) => {
     const newBookmarks = getStoredReadingBookmarks();
     newBookmarks[type] = [];
-    setReadingBookmarks(newBookmarks);
-    saveReadingBookmarks(newBookmarks);
+    updateBookmarks(newBookmarks);
   };
 
   const isReadingBookmark = (type: ReadingBookmarkType, url: string): boolean => {
