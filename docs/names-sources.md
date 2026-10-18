@@ -21,4 +21,8 @@ https://sunnah.com/tirmidhi:3507
 That enumeration is graded weak; it is not cited as proof of authenticity.
 
 English spelling corrections: Forbearing and Repentance. The short meaning
-for As Samad now reflects the explanation that all turn to Him in their needs.
+for As Samad is “The Eternal Refuge”, with the description “All depend on Him;
+He depends on none.” The label is concise rather than an exhaustive definition.
+The explanation is also supported by Ibn Kathir and Ma'arif al-Qur'an on 112:2:
+https://quran.com/112:2/tafsirs/en-tafisr-ibn-kathir
+https://quran.com/112:2/tafsirs/en-tafsir-maarif-ul-quran
