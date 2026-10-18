@@ -9,7 +9,7 @@
       "found": "(1:3) (17:110) (55:1)",
       "en":{
         "meaning":"The Beneficent",
-        "desc": "He who wills goodness and mercy for all His creatures"
+        "desc": "Allah's mercy and goodness encompass His creation."
       },
       "fr":{
         "meaning":"Le Tout-Mis\u00E9ricordieux",
@@ -20,10 +20,10 @@
       "name":"\u0627\u0644\u0631\u064e\u0651\u062d\u0650\u064a\u0645\u064f",
       "transliteration":"Ar Raheem",
       "number":2,
-      "found": "(2:163) (3: 31) (4:100) (5:3)",
+      "found": "(2:163) (3:31) (4:100) (5:3)",
       "en":{
         "meaning":"The Merciful",
-        "desc": "He who acts with extreme kindness "
+        "desc": "Allah bestows mercy, kindness and forgiveness upon His creatures."
       },
       "fr":{
         "meaning":"Le Tr\u00E8s-Mis\u00E9ricordieux",
@@ -34,7 +34,7 @@
       "name":"\u0627\u0644\u0652\u0645\u064e\u0644\u0650\u0643\u064f",
       "transliteration":"Al Malik",
       "number":3,
-      "found": "(20:114)(23:116)(59:23)(62:1)",
+      "found": "(20:114) (23:116) (59:23) (62:1)",
       "en":{
         "meaning":"The King",
         "desc": "Al-Malik translates to The King or The Sovereign. This name of Allah signifies His absolute dominion and ownership over all of creation, highlighting His supreme authority."
@@ -50,8 +50,8 @@
       "number":4,
       "found": "(59:23) (62:1)",
       "en":{
-        "meaning":"The Purest",
-        "desc": "The One who is pure from any imperfection and clear from children and adversaries"
+        "meaning":"The Holy",
+        "desc": "Allah is holy and free from every imperfection and deficiency."
       },
       "fr":{
         "meaning":"Le Pur",
@@ -64,8 +64,8 @@
       "number":5,
       "found": "(59:23)",
       "en":{
-        "meaning":"The Source of Peace",
-        "desc": "The one who provides peace, calm and serenity. By citing this name, we declare peace for ourselves and for those around us."
+        "meaning":"Source of Peace",
+        "desc": "Allah is free from every defect and is the source of peace and safety."
       },
       "fr":{
         "meaning":"La Paix",
@@ -78,8 +78,8 @@
       "number":6,
       "found": "(59:23)",
       "en":{
-        "meaning":"The inspirer of faith",
-        "desc": "This name is mysterious even for Muslims because \\\"Al-Mu'min\\\" comes from the name \\\"Al-iman\\\" which means to believe, from where comes the name \\\"Al-Mu'minoune\\\" which means believers, it is is the name of the Koran for people who believe in 6 things: the oneness of God, the existence of angels, holy books (Torah, Gospel and Psalms (Zabor) unmodified and the Koran), the prophets, the last day (the day of judgment) and fate its evil and its good. The exact meaning of this name is very difficult to pin down in its original meaning but can be understood from a deeper and more mystical point of view."
+        "meaning":"Giver of Security",
+        "desc": "Allah grants security and confirms the truth of His promises and messengers."
       },
       "fr":{
         "meaning":"La Sauvegarde",
@@ -93,7 +93,7 @@
       "found": "(59:23)",
       "en":{
         "meaning":"The Guardian",
-        "desc": "Whoever dominates His creation and by His omnipotence in all aspects, no state or aspect in this world or the other escapes His will."
+        "desc": "Allah watches over His creation; nothing in its affairs escapes His knowledge."
       },
       "fr":{
         "meaning":"Le Pr\u00E9servateur",
@@ -104,7 +104,7 @@
       "name":"\u0627\u0644\u0652\u0639\u064e\u0632\u0650\u064a\u0632\u064f",
       "transliteration":"Al Azeez",
       "number":8,
-      "found": "(3:6)(4:15 8)(9:40)(4 8:7)",
+      "found": "(3:6) (4:158) (9:40) (48:7)",
       "en":{
         "meaning":"The Almighty",
         "desc": "This name signifies Allah's absolute strength, might, and dominion, emphasizing that He is the one who cannot be overcome."
@@ -121,7 +121,7 @@
       "found": "(59:23)",
       "en":{
         "meaning":"The Compeller",
-        "desc": "The grandiose, the ultimate powerful by His greatness and His unlimited strength. When He destroys the oppressors (unjust and sinners) He applies His sentence with righteousness."
+        "desc": "Allah's will cannot be overcome. He has power to restore what is broken and to set matters right."
       },
       "fr":{
         "meaning":"L'Imposant",
@@ -134,7 +134,7 @@
       "number":10,
       "found": "(59:23)",
       "en":{
-        "meaning":"The Greatest",
+        "meaning":"The Supremely Great",
         "desc": "Allah alone possesses absolute majesty and greatness; no creature can claim that greatness for itself."
       },
       "fr":{
@@ -146,10 +146,10 @@
       "name":"\u0627\u0644\u0652\u062e\u064e\u0627\u0644\u0650\u0642\u064f",
       "transliteration":"Al Khaaliq",
       "number":11,
-      "found": "(6:102)(13:16)(39:62)(40:62)(59:24)",
+      "found": "(6:102) (13:16) (39:62) (40:62) (59:24)",
       "en":{
         "meaning":"The Creator",
-        "desc": "The Creator of all existences, living or dead, mobile or frozen."
+        "desc": "Allah creates all things and brings them into existence."
       },
       "fr":{
         "meaning":"Le Cr\u00E9ateur",
@@ -162,8 +162,8 @@
       "number":12,
       "found": "(59:24)",
       "en":{
-        "meaning":"The Maker of Order",
-        "desc": "He who lifts His creation above all faults or imperfections."
+        "meaning":"The Maker",
+        "desc": "Allah brings His creation into being according to His knowledge and will."
       },
       "fr":{
         "meaning":"Le Producteur",
@@ -176,8 +176,8 @@
       "number":13,
       "found": "(59:24)",
       "en":{
-        "meaning":"The Shaper of Beauty",
-        "desc": "The one who gives the look and the appearance to each creation from the inside as well as from the outside. In lost Arabic, literally, this word means sculptor and, in modern Arabic, literally means designer."
+        "meaning":"The Fashioner",
+        "desc": "Allah gives His creatures their forms and distinctive features."
       },
       "fr":{
         "meaning":"Le Formateur",
@@ -188,10 +188,10 @@
       "name":"\u0627\u0644\u0652\u063a\u064e\u0641\u064e\u0651\u0627\u0631\u064f",
       "transliteration":"Al Ghaffaar",
       "number":14,
-      "found": "(20:82)(38:66)(39:5)(40:42)(71:10)",
+      "found": "(20:82) (38:66) (39:5) (40:42) (71:10)",
       "en":{
         "meaning":"The Forgiving",
-        "desc": "Is the One who forgives what He wants to whom He wants."
+        "desc": "Allah forgives abundantly and repeatedly, opening the way for repentance."
       },
       "fr":{
         "meaning":"L'Infini Pardonneur",
@@ -202,10 +202,10 @@
       "name":"\u0627\u0644\u0652\u0642\u064e\u0647\u064e\u0651\u0627\u0631\u064f",
       "transliteration":"Al Qahhaar",
       "number":15,
-      "found": "(13:16)(14:48)(38:65)(39:4)(40:16)",
+      "found": "(13:16) (14:48) (38:65) (39:4) (40:16)",
       "en":{
         "meaning":"The Subduer",
-        "desc": "Is the One who is almighty to submit all creation to His will."
+        "desc": "All creation is subject to Allah's irresistible authority."
       },
       "fr":{
         "meaning":"Le Tout Dominateur",
@@ -216,10 +216,10 @@
       "name":"\u0627\u0644\u0652\u0648\u064e\u0647\u064e\u0651\u0627\u0628\u064f",
       "transliteration":"Al Wahhaab",
       "number":16,
-      "found": "(3:8)(38:9)(38:35)",
+      "found": "(3:8) (38:9) (38:35)",
       "en":{
-        "meaning":"The Giver of All",
-        "desc": "Is the One who gives immensely without receiving anything in return"
+        "meaning":"The Bestower",
+        "desc": "Allah freely bestows His gifts without needing anything in return."
       },
       "fr":{
         "meaning":"Le Tr\u00E8s G\u00E9n\u00E9reux",
@@ -232,7 +232,7 @@
       "number":17,
       "found": "(51:58)",
       "en":{
-        "meaning":"The Sustainer",
+        "meaning":"The Provider",
         "desc": "Allah provides His creatures with what they need. Provision includes nourishment and other gifts."
       },
       "fr":{
@@ -247,7 +247,7 @@
       "found": "(34:26)",
       "en":{
         "meaning":"The Opener",
-        "desc": "Is He Who alone knows the keys to the future and the unknown, by His knowledge and by His wisdom. This name is often associated with the following name \"Al-‘Alīm\"."
+        "desc": "Allah opens the way to good and judges between His creatures in truth."
       },
       "fr":{
         "meaning":"Le Grand Juge",
@@ -258,10 +258,10 @@
       "name":"\u0627\u064e\u0644\u0652\u0639\u064e\u0644\u0650\u064a\u0652\u0645\u064f",
       "transliteration":"Al 'Aleem",
       "number":19,
-      "found": "(2:158)(3:92)(4:35)(24:41)(33:40)",
+      "found": "(2:158) (3:92) (4:35) (24:41) (33:40)",
       "en":{
-        "meaning":"The Knower of all",
-        "desc": "The one from whom nothing can hide, for He knows everything and is aware of everything."
+        "meaning":"The All-Knowing",
+        "desc": "Allah knows everything, both what is apparent and what is hidden."
       },
       "fr":{
         "meaning":"L'Omniscient",
@@ -273,9 +273,10 @@
       "transliteration":"Al Qaabid",
       "number":20,
       "found": "(2:245)",
+      "reference_note": "Quran 2:245 describes restricting and expanding through verbs. Al Qaabid and Al Baasit are named in Abu Dawud 3451.",
       "en":{
         "meaning":"The Constrictor",
-        "desc": "Is the One who restricts His good according to wisdom."
+        "desc": "Allah restricts provision according to His wisdom."
       },
       "fr":{
         "meaning":"Celui Qui saisit",
@@ -287,9 +288,10 @@
       "transliteration":"Al Baasit",
       "number":21,
       "found": "(2:245)",
+      "reference_note": "Quran 2:245 describes restricting and expanding through verbs. Al Qaabid and Al Baasit are named in Abu Dawud 3451.",
       "en":{
-        "meaning":"The Reliever",
-        "desc": "Is the One who frees, increases and multiplies his good according to wisdom."
+        "meaning":"The Expander",
+        "desc": "Allah expands provision according to His wisdom."
       },
       "fr":{
         "meaning":"Le G\u00E9n\u00E9reux",
@@ -301,9 +303,10 @@
       "transliteration":"Al Khaafid",
       "number":22,
       "found": "(95:5)",
+      "reference_note": "Related passage: 95:5 describes bringing low; it does not contain Al Khaafid as a divine name.",
       "en":{
         "meaning":"The Abaser",
-        "desc": "Is the One who destines the oppressors and the proud to demeanor and chastisement."
+        "desc": "Allah lowers whom He wills; worldly rank and power are subject to Him."
       },
       "fr":{
         "meaning":"Celui qui abaisse",
@@ -314,10 +317,11 @@
       "name":"\u0627\u0644\u0631\u064e\u0651\u0627\u0641\u0650\u0639\u064f",
       "transliteration":"Ar Raafi'",
       "number":23,
-      "found": "(58:11)(6:83)",
+      "found": "(58:11) (6:83)",
+      "reference_note": "Related passages: these verses describe raising in rank through verbs, rather than naming Allah Ar Raafi'.",
       "en":{
         "meaning":"The Exalter",
-        "desc": "The Breeder in the sense of raising, the one who elevates the honor, the status and the prestige of a being in this lower world and in the hereafter."
+        "desc": "Allah raises whom He wills in honour and rank."
       },
       "fr":{
         "meaning":"L'\u00C9leveur",
@@ -326,12 +330,13 @@
     },
     {
       "name":"\u0627\u0644\u0652\u0645\u064f\u0639\u0650\u0632\u064f\u0651",
-      "transliteration":"Al Mu'iz",
+      "transliteration":"Al Mu'izz",
       "number":24,
       "found": "(3:26)",
+      "reference_note": "Related passage: 3:26 describes granting honour through a verb, rather than using Al Mu'izz as a name.",
       "en":{
-        "meaning":"The Bestower of Honour",
-        "desc": "One who offers honor and precious value."
+        "meaning":"The Honourer",
+        "desc": "Allah grants honour and dignity to whom He wills."
       },
       "fr":{
         "meaning":"Celui qui rend puissant",
@@ -340,12 +345,13 @@
     },
     {
       "name":"\u0627\u0644\u0645\u064f\u0630\u0650\u0644\u064f\u0651",
-      "transliteration":"Al Mudhil",
+      "transliteration":"Al Mudhill",
       "number":25,
       "found": "(3:26)",
+      "reference_note": "Related passage: 3:26 describes bringing low through a verb, rather than using Al Mudhill as a name.",
       "en":{
         "meaning":"The Humiliator",
-        "desc": "Is the One who can humiliate and devalue any valiant."
+        "desc": "Allah brings low whom He wills; no worldly honour is independent of Him."
       },
       "fr":{
         "meaning":"Celui qui humilie les fiers",
@@ -356,10 +362,10 @@
       "name":"\u0627\u0644\u0633\u064e\u0651\u0645\u0650\u064a\u0639\u064f",
       "transliteration":"As Samee'",
       "number":26,
-      "found": "(2:127)(2:256)(8:17)(49:1)",
+      "found": "(2:127) (2:256) (8:17) (49:1)",
       "en":{
-        "meaning":"The Hearer of all",
-        "desc": "One who hears any noise or sound in His kingdom emanating from any creature and also One who listens to the invocations of His creatures to respond to their invocations."
+        "meaning":"The All-Hearing",
+        "desc": "Allah hears all things; no voice or supplication escapes His hearing."
       },
       "fr":{
         "meaning":"L'Audient",
@@ -370,10 +376,10 @@
       "name":"\u0627\u0644\u0652\u0628\u064e\u0635\u0650\u064a\u0631\u064f",
       "transliteration":"Al Baseer",
       "number":27,
-      "found": "(4:58)(17:1)(42:11)(42:27)",
+      "found": "(4:58) (17:1) (42:11) (42:27)",
       "en":{
-        "meaning":"The Seer of all",
-        "desc": "Is the One from whom nothing that exists or comes into existence can escape without the slightest use of an eye, instrument or organ."
+        "meaning":"The All-Seeing",
+        "desc": "Allah sees all things; nothing apparent or hidden escapes Him."
       },
       "fr":{
         "meaning":"Le Clairvoyant",
@@ -384,10 +390,11 @@
       "name":"\u0627\u0644\u0652\u062d\u064e\u0643\u064e\u0645\u064f",
       "transliteration":"Al Hakam",
       "number":28,
-      "found": "(22:69)",
+      "found": "(6:114) (22:69)",
+      "reference_note": "Quran 6:114 uses hakaman (judge) of Allah; 22:69 describes His judging through a verb.",
       "en":{
         "meaning":"The Judge",
-        "desc": "He is the One who judges and decides between creatures here below and in the hereafter and He who ensures equity between the creatures and no one else will and will not be able to decide between them and judge them; and the Judgment in the hereafter will be perfectly just and appropriate."
+        "desc": "Allah judges between His creatures with perfect justice."
       },
       "fr":{
         "meaning":"L'Arbitre",
@@ -398,10 +405,11 @@
       "name":"\u0627\u0644\u0652\u0639\u064e\u062f\u0652\u0644\u064f",
       "transliteration":"Al 'Adl",
       "number":29,
-      "found": "(6:115)",
+      "found": "(4:40) (6:115)",
+      "reference_note": "Related passages: 4:40 affirms that Allah does not wrong anyone; 6:115 describes the justice of His word. Neither uses Al Adl as a name.",
       "en":{
         "meaning":"The Just",
-        "desc": "Is the One who is free from all forms of injustice and / or oppression."
+        "desc": "Allah is just and does not wrong anyone in the least."
       },
       "fr":{
         "meaning":"Le Juste",
@@ -412,10 +420,10 @@
       "name":"\u0627\u0644\u0644\u064e\u0651\u0637\u0650\u064a\u0641\u064f",
       "transliteration":"Al Lateef",
       "number":30,
-      "found": "(6:103)(22:63)(31:16)(33:34)",
+      "found": "(6:103) (22:63) (31:16) (33:34)",
       "en":{
         "meaning":"The Subtle One",
-        "desc": "Is the One who grants his creatures His gentleness and His benevolence."
+        "desc": "Allah knows the subtlest details and deals graciously with His creatures."
       },
       "fr":{
         "meaning":"Le Doux",
@@ -426,10 +434,10 @@
       "name":"\u0627\u0644\u0652\u062e\u064e\u0628\u0650\u064a\u0631\u064f",
       "transliteration":"Al Khabeer",
       "number":31,
-      "found": "(6:18)(17:30)(49:13)(59:18)",
+      "found": "(6:18) (17:30) (49:13) (59:18)",
       "en":{
-        "meaning":"The All Aware",
-        "desc": "He is the One from whom cannot be hidden the reality of everything that exists, that is to say the truth of things; no detail escapes Him, neither the thing as a whole, nor each of its parts; and to claim to be able to hide things from the One who creates everything is a delusion and a disbelief."
+        "meaning":"The All-Aware",
+        "desc": "Allah is fully aware of the realities of all things; no hidden detail escapes Him."
       },
       "fr":{
         "meaning":"Le Bien-Inform\u00E9",
@@ -440,10 +448,10 @@
       "name":"\u0627\u0644\u0652\u062d\u064e\u0644\u0650\u064a\u0645\u064f",
       "transliteration":"Al Haleem",
       "number":32,
-      "found": "(2:235)(17:44)(22:59)(35:41)",
+      "found": "(2:235) (17:44) (22:59) (35:41)",
       "en":{
         "meaning":"The Forbearing",
-        "desc": "Is the One whose patience towards the disbeliefs of sinners exceeds all imagination (it is possible that forgiveness will be granted to them)."
+        "desc": "Allah does not hasten punishment despite His knowledge of wrongdoing and His power to punish."
       },
       "fr":{
         "meaning":"Le Tr\u00E8s Doux",
@@ -454,7 +462,7 @@
       "name":"\u0627\u0644\u0652\u0639\u064e\u0638\u0650\u064a\u0645\u064f",
       "transliteration":"Al 'Azeem",
       "number":33,
-      "found": "(2:255)(42:4)(56:96)",
+      "found": "(2:255) (42:4) (56:96)",
       "en":{
         "meaning":"The Magnificent",
 	"desc": "This name signifies the absolute and immeasurable greatness of God. It implies a level of grandeur and majesty that is beyond human comprehension."
@@ -468,10 +476,10 @@
       "name":"\u0627\u0644\u0652\u063a\u064e\u0641\u064f\u0648\u0631\u064f",
       "transliteration":"Al Ghafoor",
       "number":34,
-      "found": "(2:173)(8:69)(16:110)(41:32)",
+      "found": "(2:173) (8:69) (16:110) (41:32)",
       "en":{
         "meaning":"The Great Forgiver",
-        "desc": "Is the One who forgives immensely over and over again."
+        "desc": "Allah's forgiveness is abundant; He forgives and covers sins."
       },
       "fr":{
         "meaning":"Le Tr\u00E8s Pardonneur",
@@ -482,10 +490,10 @@
       "name":"\u0627\u0644\u0634\u064e\u0651\u0643\u064f\u0648\u0631\u064f",
       "transliteration":"Ash Shakoor",
       "number":35,
-      "found": "(35:30)(35:34)(42:23)(64:17)",
+      "found": "(35:30) (35:34) (42:23) (64:17)",
       "en":{
-        "meaning":"The Rewarder of Thankfulness",
-        "desc": "Is the One who shows His gratitude for worshipers, however incredibly easy to perform."
+        "meaning":"The Appreciative",
+        "desc": "Allah recognises sincere good and rewards it generously, even when the deed is small."
       },
       "fr":{
         "meaning":"Le Tr\u00E8s-Reconnaissant",
@@ -496,10 +504,10 @@
       "name":"\u0627\u0644\u0652\u0639\u064e\u0644\u0650\u064a\u064f\u0651",
       "transliteration":"Al 'Aliyy",
       "number":36,
-      "found": "(4:34)(31:30)(42:4)(42:51)",
+      "found": "(4:34) (31:30) (42:4) (42:51)",
       "en":{
         "meaning":"The Highest",
-        "desc": "Is the One who is above all that He created perfectly and unimaginably."
+        "desc": "Allah is exalted above His creation in greatness and majesty."
       },
       "fr":{
         "meaning":"Le Tr\u00E8s Haut",
@@ -510,7 +518,7 @@
       "name":"\u0627\u0644\u0652\u0643\u064e\u0628\u0650\u064a\u0631\u064f",
       "transliteration":"Al Kabeer",
       "number":37,
-      "found": "(13:9)(22:62)(31:30)",
+      "found": "(13:9) (22:62) (31:30)",
       "en":{
         "meaning":"The Greatest",
         "desc": "His greatness is the perfection of His being: His existence is eternal, and all created existence depends on Him."
@@ -524,10 +532,10 @@
       "name":"\u0627\u0644\u0652\u062d\u064e\u0641\u0650\u064a\u0638\u064f",
       "transliteration":"Al Hafeez",
       "number":38,
-      "found": "(11:57)(34:21)(42:6)",
+      "found": "(11:57) (34:21) (42:6)",
       "en":{
         "meaning":"The Preserver",
-        "desc": "Is the One who protects and preserves His good."
+        "desc": "Allah preserves His creation and watches over its deeds; nothing is lost to His knowledge."
       },
       "fr":{
         "meaning":"Le Gardien",
@@ -541,7 +549,7 @@
       "found": "(4:85)",
       "en":{
         "meaning":"The Sustainer",
-        "desc": "Allah supplies nourishment to bodies and hearts. In this sense, Al Muqeet is more specific than Ar Razzaaq, whose provision includes nourishment and other gifts."
+        "desc": "Allah sustains His creatures and supplies their nourishment. Al Muqeet also conveys power and watchfulness over all things."
       },
       "fr":{
         "meaning":"Est Celui qui ne laisse aucun d\u00E9tail lorsqu'Il juge, m\u00EAme les plus futiles.",
@@ -552,10 +560,10 @@
       "name":"\u0627\u0644\u0652\u062d\u0633\u0650\u064a\u0628\u064f",
       "transliteration":"Al Haseeb",
       "number":40,
-      "found": "(4:6)(4:86)(33:39)",
+      "found": "(4:6) (4:86) (33:39)",
       "en":{
-        "meaning":"The Reckoner, The Sufficient",
-        "desc": "He is the One who will count all the facts of His creatures without forgetting or error."
+        "meaning":"The Reckoner",
+        "desc": "Allah takes full account of all deeds and is sufficient for His servants."
       },
       "fr":{
         "meaning":"Celui qui r\u00E8gle les comptes",
@@ -566,10 +574,11 @@
       "name":"\u0627\u0644\u0652\u062c\u064e\u0644\u0650\u064a\u0644\u064f",
       "transliteration":"Al Jaleel",
       "number":41,
-      "found": "(55:27)(39:14)(7:143)",
+      "found": "(55:27)",
+      "reference_note": "Related expression: 55:27 contains Dhu al-Jalal wa al-Ikram, not Al Jaleel.",
       "en":{
         "meaning":"The Majestic",
-        "desc": "Is the One who is perfectly exempt from being compared to His creatures or from being like Him."
+        "desc": "Allah possesses majesty and greatness worthy of reverence."
       },
       "fr":{
         "meaning":"Le Sublime",
@@ -580,10 +589,10 @@
       "name":"\u0627\u0644\u0652\u0643\u064e\u0631\u0650\u064a\u0645\u064f",
       "transliteration":"Al Kareem",
       "number":42,
-      "found": "(27:40)(82:6)",
+      "found": "(27:40) (82:6)",
       "en":{
         "meaning":"The Most Generous",
-        "desc": "Is the One who flooded His creation with His generosity."
+        "desc": "Allah is generous in His gifts and noble in His attributes."
       },
       "fr":{
         "meaning":"Le G\u00E9n\u00E9reux",
@@ -594,10 +603,10 @@
       "name":"\u0627\u0644\u0631\u064e\u0651\u0642\u0650\u064a\u0628\u064f",
       "transliteration":"Ar Raqeeb",
       "number":43,
-      "found": "(4:1)(5:117)",
+      "found": "(4:1) (5:117)",
       "en":{
         "meaning":"The Watchful One",
-        "desc": "Is the One who observes and beholds all that He has created (and the actions of creatures are also creations)."
+        "desc": "Allah watches over all things; no action or intention escapes Him."
       },
       "fr":{
         "meaning":"L'Observateur",
@@ -606,12 +615,12 @@
     },
     {
       "name":"\u0627\u0644\u0652\u0645\u064f\u062c\u0650\u064a\u0628\u064f",
-      "transliteration":"Al Mujeeb ",
+      "transliteration":"Al Mujeeb",
       "number":44,
       "found": "(11:61)",
       "en":{
-        "meaning":"The Responder to Prayer",
-        "desc": "Is the One who answers the invocations of His creatures if He wills and to whom He wills."
+        "meaning":"The Responsive",
+        "desc": "Allah hears and responds to those who call upon Him."
       },
       "fr":{
         "meaning":"Celui qui exauce les pri\u00E8res",
@@ -622,10 +631,10 @@
       "name":"\u0627\u0644\u0652\u0648\u064e\u0627\u0633\u0650\u0639\u064f",
       "transliteration":"Al Waasi'",
       "number":45,
-      "found": "(2:268)(3:73)(5:54)",
+      "found": "(2:268) (3:73) (5:54)",
       "en":{
         "meaning":"The All-Encompassing",
-        "desc": "This name in Arabic means: immensely wide, but to qualify God it is understood that He has filled every void and has contained all things in a way that only He knows."
+        "desc": "Allah's knowledge, mercy and bounty encompass His creation."
       },
       "fr":{
         "meaning":"Le Vaste",
@@ -636,10 +645,10 @@
       "name":"\u0627\u0644\u0652\u062d\u064e\u0643\u0650\u064a\u0645\u064f",
       "transliteration":"Al Hakeem",
       "number":46,
-      "found": "(31:27)(46:2)(57:1)(66:2)",
+      "found": "(31:27) (46:2) (57:1) (66:2)",
       "en":{
         "meaning":"The Perfectly Wise",
-        "desc": "He whose Wisdom has dazzled, dazzled and will dazzle any conscious and intelligent mind."
+        "desc": "Allah is perfect in wisdom; His judgments and actions are never without knowledge or purpose."
       },
       "fr":{
         "meaning":"Le Sage",
@@ -650,10 +659,10 @@
       "name":"\u0627\u0644\u0652\u0648\u064e\u062f\u064f\u0648\u062f\u064f",
       "transliteration":"Al Wadood",
       "number":47,
-      "found": "(11:90)(85:14)",
+      "found": "(11:90) (85:14)",
       "en":{
         "meaning":"The Most Loving",
-        "desc": "This word in Arabic means: The one who draws near to his beloved by mercy, pity and beneficence, but when one reads this name in the \"Quran\", one feels each time different meanings which are difficult to translate into words. We can try to translate it: The one who draws near to His servants out of pity although they move away from Him and do not glorify Him."
+        "desc": "Allah loves His servants and is worthy of their love."
       },
       "fr":{
         "meaning":"Le Tout affectueux",
@@ -664,9 +673,9 @@
       "name":"\u0627\u0644\u0652\u0645\u064e\u062c\u0650\u064a\u062f\u064f",
       "transliteration":"Al Majeed",
       "number":48,
-      "found": "(11:73) ",
+      "found": "(11:73)",
       "en":{
-        "meaning":"The Glorious One, The Most Honorable",
+        "meaning":"The All-Glorious",
         "desc": "His glory encompasses nobility, excellence in deeds and generosity. Al Majeed and Al Maajid share this meaning, with a difference of emphasis."
       },
       "fr":{
@@ -679,9 +688,10 @@
       "transliteration":"Al Baa'ith",
       "number":49,
       "found": "(22:7)",
+      "reference_note": "Related passage: 22:7 describes raising the dead through a verb, rather than using Al Baa'ith as a name.",
       "en":{
         "meaning":"The Resurrector",
-        "desc": "Is the One who raises the dead and deploys life in whatever He wants, be they men, animals or simply earth."
+        "desc": "Allah will raise the dead and bring them to account."
       },
       "fr":{
         "meaning":"Celui qui ressuscite",
@@ -692,10 +702,10 @@
       "name":"\u0627\u0644\u0634\u064e\u0651\u0647\u0650\u064a\u062f\u064f",
       "transliteration":"Ash Shaheed",
       "number":50,
-      "found": "(4:166)(22:17)(41:53)(48:28)",
+      "found": "(4:166) (22:17) (41:53) (48:28)",
       "en":{
         "meaning":"The Witness",
-        "desc": "The Witness: Allah is the ultimate and perfect witness to all that has happened in His kingdom, with clear and blatant evidence, perfectly blameless."
+        "desc": "Allah witnesses all things, whether open or concealed."
       },
       "fr":{
         "meaning":"Le Grand T\u00E9moin",
@@ -706,10 +716,10 @@
       "name":"\u0627\u0644\u0652\u062d\u064e\u0642\u064f\u0651",
       "transliteration":"Al Haqq",
       "number":51,
-      "found": "(6:62)(22:6)(23:116)(24:25)",
+      "found": "(6:62) (22:6) (23:116) (24:25)",
       "en":{
         "meaning":"The Truth",
-        "desc": "Is the One who holds the absolute Truth."
+        "desc": "Allah is the Truth; His existence, words and promises are true."
       },
       "fr":{
         "meaning":"Le V\u00E9ridique",
@@ -720,10 +730,10 @@
       "name":"\u0627\u0644\u0652\u0648\u064e\u0643\u0650\u064a\u0644\u064f",
       "transliteration":"Al Wakeel",
       "number":52,
-      "found": "(3:173)(4:171)(28:28)(73:9)",
+      "found": "(3:173) (4:171) (28:28) (73:9)",
       "en":{
         "meaning":"The Trustee",
-        "desc": "Is the One who guarantees the sustenance of creatures and the One from whom nothing of their every state can be concealed"
+        "desc": "Allah is sufficient for those who entrust their affairs to Him."
       },
       "fr":{
         "meaning":"Le Tuteur",
@@ -734,10 +744,10 @@
       "name":"\u0627\u0644\u0652\u0642\u064e\u0648\u0650\u064a\u064f\u0651",
       "transliteration":"Al Qawiyy",
       "number":53,
-      "found": "(22:40)(22:74)(42:19)(57:25)",
+      "found": "(22:40) (22:74) (42:19) (57:25)",
       "en":{
-        "meaning":"The Possessor of all strength",
-        "desc": "The Mighty: Allah is the most powerful, the strongest, his strength has no limit and is not described with definitions of physical strength."
+        "meaning":"The All-Strong",
+        "desc": "Allah's strength is complete and is never overcome by weakness."
       },
       "fr":{
         "meaning":"Le Fort",
@@ -750,8 +760,8 @@
       "number":54,
       "found": "(51:58)",
       "en":{
-        "meaning":"The Forceful",
-        "desc": "The Enduring: An endurance worthy of Him, unlimited, indefatigable, and which is not marred by any weakness, without pause, without interruption and which no factor can attenuate."
+        "meaning":"The Firm",
+        "desc": "Allah's strength is firm and unfailing."
       },
       "fr":{
         "meaning":"Le Robuste",
@@ -762,10 +772,10 @@
       "name":"\u0627\u0644\u0652\u0648\u064e\u0644\u0650\u064a\u064f\u0651",
       "transliteration":"Al Waliyy",
       "number":55,
-      "found": "(4:45)(7:196)(42:28)(45:19)",
+      "found": "(4:45) (7:196) (42:28) (45:19)",
       "en":{
         "meaning":"The Protector",
-        "desc": "Is the One who preserves the believing servants, so the prophets and those who follow them are those who are the \"preserved people\" in the sense that they have been guided to the obligatory thanks to Him who makes them exist, that is, that is to say with regard to Allah"
+        "desc": "Allah protects and supports His believing servants."
       },
       "fr":{
         "meaning":"Le Protecteur",
@@ -776,10 +786,10 @@
       "name":"\u0627\u0644\u0652\u062d\u064e\u0645\u0650\u064a\u062f\u064f",
       "transliteration":"Al Hameed",
       "number":56,
-      "found": "(14:8)(31:12)(31:26)(41:42)",
+      "found": "(14:8) (31:12) (31:26) (41:42)",
       "en":{
-        "meaning":"The Praised",
-        "desc": "Is the One who deserves the thanksgiving, the glorification and the song of praise more than any other"
+        "meaning":"The Praiseworthy",
+        "desc": "Allah is worthy of all praise for His perfect attributes and acts."
       },
       "fr":{
         "meaning":"Le Lou\u00E9",
@@ -790,10 +800,11 @@
       "name":"\u0627\u0644\u0652\u0645\u064f\u062d\u0652\u0635\u0650\u064a",
       "transliteration":"Al Muhsi",
       "number":57,
-      "found": "(72:28)(78:29)(82:10-12)",
+      "found": "(72:28) (78:29)",
+      "reference_note": "Related passages: these verses use verbs of counting and recording, not Al Muhsi as a name.",
       "en":{
         "meaning":"The All-Enumerating",
-        "desc": "Literally translated as the counter but means the One who counts every creature, every act, every speck of dust in his kingdom and of whom nothing escapes his knowledge"
+        "desc": "Allah knows and counts all things; nothing is omitted from His knowledge."
       },
       "fr":{
         "meaning":"Celui qui connait les comptes",
@@ -804,10 +815,11 @@
       "name":"\u0627\u0644\u0652\u0645\u064f\u0628\u0652\u062f\u0650\u0626\u064f",
       "transliteration":"Al Mubdi",
       "number":58,
-      "found": "(10:34)(27:64)(29:19)(85:13)",
+      "found": "(10:34) (27:64) (29:19) (85:13)",
+      "reference_note": "Related passages: these verses use verbs of originating creation, not Al Mubdi as a name.",
       "en":{
         "meaning":"The Originator",
-        "desc": "Is the One who gives a beginning to what does not exist without a beginning, without a model, that is to say, the One who creates creatures"
+        "desc": "Allah originates creation and brings it into existence."
       },
       "fr":{
         "meaning":"L'Auteur",
@@ -818,10 +830,11 @@
       "name":"\u0627\u0644\u0652\u0645\u064f\u0639\u0650\u064a\u062f\u064f",
       "transliteration":"Al Mu'eed",
       "number":59,
-      "found": "(10:34)(27:64)(29:19)(85:13)",
+      "found": "(10:34) (27:64) (29:19) (85:13)",
+      "reference_note": "Related passages: these verses use verbs of restoring creation, not Al Mu'eed as a name.",
       "en":{
         "meaning":"The Restorer",
-        "desc": "Is the One who brings the living back to death after life and the One who brings the dead back to life after death"
+        "desc": "Allah restores creation and brings it back after death."
       },
       "fr":{
         "meaning":"Celui qui fait rentrer dans le n\u00E9ant",
@@ -832,10 +845,11 @@
       "name":"\u0627\u0644\u0652\u0645\u064f\u062d\u0652\u064a\u0650\u064a",
       "transliteration":"Al Muhyee",
       "number":60,
-      "found": "(7:158)(15:23)(30:50)(57:2)",
+      "found": "(7:158) (15:23) (30:50) (57:2)",
+      "reference_note": "Quran 30:50 uses muhyi (giver of life); the other passages express giving life through verbs.",
       "en":{
-        "meaning":"The Giver of life",
-        "desc": "Is the One who gives life to a mixture of maniyy, that is to say of seminal liquid, devoid of soul and makes him a living being and the One who gives life to the bodies of humans, jinns and angels by reuniting them with their souls during the resurrection"
+        "meaning":"The Life-Giver",
+        "desc": "Allah gives life and restores life to the dead."
       },
       "fr":{
         "meaning":"Celui qui donne vie",
@@ -846,10 +860,11 @@
       "name":"\u0627\u064e\u0644\u0652\u0645\u064f\u0645\u0650\u064a\u062a\u064f",
       "transliteration":"Al Mumeet",
       "number":61,
-      "found": "(3:156)(7:158)(15:23)(57:2)",
+      "found": "(3:156) (7:158) (15:23) (57:2)",
+      "reference_note": "Related passages: these verses express causing death through verbs, not Al Mumeet as a name.",
       "en":{
-        "meaning":"The Taker of life",
-        "desc": "He is the One who kills living beings and the One who cancels out the power of the powerful of this world by death"
+        "meaning":"The Life-Taker",
+        "desc": "Allah causes death; life and death are under His authority."
       },
       "fr":{
         "meaning":"Celui qui donne la mort",
@@ -860,10 +875,10 @@
       "name":"\u0627\u0644\u0652\u062d\u064e\u064a\u064f\u0651",
       "transliteration":"Al Haiyy",
       "number":62,
-      "found": "(2:255)(3:2)(25:58)(40:65)",
+      "found": "(2:255) (3:2) (25:58) (40:65)",
       "en":{
-        "meaning":"The Ever Living",
-        "desc": "The Living One: Is the One who does not come into existence and yet exists, and the One who possesses a hayah and this attribute is not a life as is the hayah of creatures made up of a combination of soul, flesh and of blood Imam At-Tahawiyy said in his treatise on belief that \"he who attributes to Allah an attribute in a sense which is among those which can be attributed to human beings is disbeliever\""
+        "meaning":"The Ever-Living",
+        "desc": "Allah lives eternally, without death, weariness or sleep."
       },
       "fr":{
         "meaning":"Le vivant",
@@ -874,10 +889,10 @@
       "name":"\u0627\u0644\u0652\u0642\u064e\u064a\u064f\u0651\u0648\u0645\u064f",
       "transliteration":"Al Qayyoom",
       "number":63,
-      "found": "(2:255)(3:2)(20:111)",
+      "found": "(2:255) (3:2) (20:111)",
       "en":{
-        "meaning":"The Self Existing",
-        "desc": "Is the One who exists, is eternal and does not change and the One who is not affected by non-existence or annihilation and is in no way affected by controlling and creating the acts of human beings"
+        "meaning":"The Self-Subsisting",
+        "desc": "Allah exists without dependence on another, while all creation depends on Him for its existence and continuance."
       },
       "fr":{
         "meaning":"La Source",
@@ -888,10 +903,11 @@
       "name":"\u0627\u0644\u0652\u0648\u064e\u0627\u062c\u0650\u062f\u064f",
       "transliteration":"Al Waajid",
       "number":64,
-      "found": "(38:44)",
+      "found": "(35:15)",
+      "reference_note": "Related attribute: 35:15 affirms Allah's self-sufficiency using Al Ghaniyy, not Al Waajid. The explanation of Al Waajid follows al-Ghazali's Al-Maqsad al-Asna.",
       "en":{
-        "meaning":"The Perceiver",
-        "desc": "Is the One who does not need anything and is not reached or concerned with want, lack or need"
+        "meaning":"The All-Sufficient",
+        "desc": "Allah lacks nothing; His attributes are perfect and He needs no support from another."
       },
       "fr":{
         "meaning":"Celui qui existe",
@@ -903,6 +919,7 @@
       "transliteration":"Al Maajid",
       "number":65,
       "found": "(11:73)",
+      "reference_note": "Related form: 11:73 contains Majeed, not Maajid. These are distinct Arabic forms with overlapping meanings.",
       "en":{
         "meaning":"The Glorious",
         "desc": "This name shares with Al Majeed the meaning of glory, nobility and generosity; it does not denote an unrelated attribute."
@@ -916,10 +933,10 @@
       "name":"\u0627\u0644\u0652\u0648\u0627\u062d\u0650\u062f\u064f",
       "transliteration":"Al Waahid",
       "number":66,
-      "found": "(2:163)(5:73)(9:31)(18:110)",
+      "found": "(2:163) (5:73) (9:31) (18:110)",
       "en":{
         "meaning":"The Only One",
-        "desc": "The Unique: Is the One who has no alter ego, whether in His Being, in His Act, or in His Attributes. Nothing is like him"
+        "desc": "Allah is One, without partner or equal."
       },
       "fr":{
         "meaning":"L'Unique",
@@ -933,7 +950,7 @@
       "found": "(112:1)",
       "en":{
         "meaning":"The One",
-        "desc": "The One: Is He Who has uniqueness as an attribute"
+        "desc": "Allah is uniquely One, without division, partner or equal."
       },
       "fr":{
         "meaning":"L'Un",
@@ -946,8 +963,8 @@
       "number":68,
       "found": "(112:2)",
       "en":{
-        "meaning":"The One to Whom All Turn",
-        "desc": "Allah is the One to whom all turn for their needs. He needs nothing, while all depend on Him."
+        "meaning":"The Eternal Refuge",
+        "desc": "Allah is wholly self-sufficient, needing nothing. All creation depends on Him and turns to Him for the fulfilment of its needs."
       },
       "fr":{
         "meaning":"L'Absolu",
@@ -958,10 +975,10 @@
       "name":"\u0627\u0644\u0652\u0642\u064e\u0627\u062f\u0650\u0631\u064f",
       "transliteration":"Al Qaadir",
       "number":69,
-      "found": "(6:65)(36:81)(46:33)(75:40)",
+      "found": "(6:65) (36:81) (46:33) (75:40)",
       "en":{
         "meaning":"The Powerful",
-        "desc": "Is the One who is unaffected by weakness, the One whose power is absolute and dominates all creatures and the One whom absolutely nothing can weaken"
+        "desc": "Allah has complete power; nothing can render Him incapable."
       },
       "fr":{
         "meaning":"Le D\u00E9terminant",
@@ -972,10 +989,10 @@
       "name":"\u0627\u0644\u0652\u0645\u064f\u0642\u0652\u062a\u064e\u062f\u0650\u0631\u064f",
       "transliteration":"Al Muqtadir",
       "number":70,
-      "found": "(18:45)(54:42)(54:55)",
+      "found": "(18:45) (54:42) (54:55)",
       "en":{
-        "meaning":"The Creator of all power",
-        "desc": "Is the One who is mighty over all things and the One whose capacities are absolutely limitless"
+        "meaning":"The All-Powerful",
+        "desc": "Allah's power is perfect, and He brings about what He wills."
       },
       "fr":{
         "meaning":"Le Tr\u00E8s Puissant",
@@ -986,10 +1003,11 @@
       "name":"\u0627\u0644\u0652\u0645\u064f\u0642\u064e\u062f\u0650\u0651\u0645\u064f",
       "transliteration":"Al Muqaddim",
       "number":71,
-      "found": "(16:61)(17:34)",
+      "found": "(16:61)",
+      "reference_note": "Related passage: 16:61 concerns appointed terms, not the name Al Muqaddim. The name occurs explicitly in the Arabic of Muslim 771a.",
       "en":{
         "meaning":"The Expediter",
-        "desc": "Is He who is free from the characteristics of creatures and better than any creature; He who fixes the speed of events, accelerates certain things in the eyes of people according to a destiny and grants each thing a value, a rank, a time and characteristics which suit Him according to wisdom"
+        "desc": "Allah brings forward whom and what He wills in accordance with His wisdom."
       },
       "fr":{
         "meaning":"Celui qui pr\u00E9c\u00E8de tous",
@@ -1001,9 +1019,10 @@
       "transliteration":"Al Mu\u2019akhkhir",
       "number":72,
       "found": "(71:4)",
+      "reference_note": "Related passage: 71:4 describes delaying through a verb. Al Mu'akhkhir occurs explicitly in the Arabic of Muslim 771a.",
       "en":{
         "meaning":"The Delayer",
-        "desc": "Is He who is free from the characteristics of creatures and better than any creature; The one who intends the slowness of events and slows down certain things in the eyes of people according to a destiny and grants each thing a value, a rank, a time and characteristics which suit it according to a wisdom (cf no 71)"
+        "desc": "Allah puts back or delays whom and what He wills in accordance with His wisdom."
       },
       "fr":{
         "meaning":"Celui qui sera apr\u00E8s tous",
@@ -1017,7 +1036,7 @@
       "found": "(57:3)",
       "en":{
         "meaning":"The First",
-        "desc": "The First: Is the One who exists without creatures, without beginning and without time; One who is exempt from being created, from the appearance of a new attribute and from change, One who exists without coming into existence"
+        "desc": "Allah has no beginning; nothing precedes Him."
       },
       "fr":{
         "meaning":"Le Premier",
@@ -1031,7 +1050,7 @@
       "found": "(57:3)",
       "en":{
         "meaning":"The Last",
-        "desc": "The Last: Is the One who exists without interruption while the creatures are annihilated at every moment; He who is eternal, He who annihilates and is exempt from being annihilated and the disappearance of one or more attributes; The one that exists without being concerned by the notion of end and annihilation"
+        "desc": "Allah has no end; nothing outlasts Him."
       },
       "fr":{
         "meaning":"Le Dernier",
@@ -1045,7 +1064,7 @@
       "found": "(57:3)",
       "en":{
         "meaning":"The Manifest",
-        "desc": "Is the One whose existence is manifested in everything by proofs, from the point of view of power and domination and not what would be present in any body from the point of view of place, image and how"
+        "desc": "Allah is manifest through His signs and supreme over all things."
       },
       "fr":{
         "meaning":"L'Apparent",
@@ -1059,7 +1078,7 @@
       "found": "(57:3)",
       "en":{
         "meaning":"The Hidden",
-        "desc": "Is the One who is preserved from the delusions of creatures attempting to attribute to the Creator human characteristics or characteristics of creatures and the One who creates the characteristics of creatures and their images"
+        "desc": "Allah is beyond the reach of human sight and comprehension, while nothing is hidden from His knowledge."
       },
       "fr":{
         "meaning":"Le Cach\u00E9",
@@ -1070,10 +1089,11 @@
       "name":"\u0627\u0644\u0652\u0648\u064e\u0627\u0644\u0650\u064a",
       "transliteration":"Al Waali",
       "number":77,
-      "found": "(13:11)(22:7)",
+      "found": "(13:11)",
+      "reference_note": "Quran 13:11 uses the corresponding indefinite form waalin (protector).",
       "en":{
         "meaning":"The Governor",
-        "desc": "Is the One who owns, manages and controls all things and the One who creates everything according to wisdom"
+        "desc": "Allah governs and protects; the affairs of His creation are under His authority."
       },
       "fr":{
         "meaning":"Le Monarque",
@@ -1087,7 +1107,7 @@
       "found": "(13:9)",
       "en":{
         "meaning":"The Supreme One",
-        "desc": "Is the One who is free from the attributes of creatures and the One whose power over creatures is boundless"
+        "desc": "Allah is supremely exalted, beyond every imperfection and comparison with His creation."
       },
       "fr":{
         "meaning":"Le Sublime",
@@ -1100,8 +1120,8 @@
       "number":79,
       "found": "(52:28)",
       "en":{
-        "meaning":"The Doer of Good",
-        "desc": "Is the One who has the ability to bestow faith and blessings on all creatures, and among them some are grateful and some are not: the former are called Muslims or believers and others are called non-Muslims or non-Muslims. -believers"
+        "meaning":"The Benevolent",
+        "desc": "Allah is abundant in goodness and kindness towards His servants."
       },
       "fr":{
         "meaning":"Le Bienfaisant",
@@ -1112,9 +1132,9 @@
       "name":"\u0627\u0644\u062a\u064e\u0651\u0648\u064e\u0627\u0628\u064f",
       "transliteration":"At Tawwaab",
       "number":80,
-      "found": "(2:128)(4:64)(49:12)(110:3)",
+      "found": "(2:128) (4:64) (49:12) (110:3)",
       "en":{
-        "meaning":"The Guide to Repentance",
+        "meaning":"Accepter of Repentance",
         "desc": "Allah repeatedly enables His servants to repent and accepts their repentance."
       },
       "fr":{
@@ -1126,10 +1146,11 @@
       "name":"\u0627\u0644\u0652\u0645\u064f\u0646\u0652\u062a\u064e\u0642\u0650\u0645\u064f",
       "transliteration":"Al Muntaqim",
       "number":81,
-      "found": "(32:22)(43:41)(44:16)",
+      "found": "(32:22) (43:41) (44:16)",
+      "reference_note": "These passages use the plural form muntaqimun in statements of divine requital, rather than the singular Al Muntaqim.",
       "en":{
         "meaning":"The Avenger",
-        "desc": "Is the avenger"
+        "desc": "Allah holds wrongdoers to account and requites wrongdoing with justice."
       },
       "fr":{
         "meaning":"Le Vengeur",
@@ -1140,9 +1161,9 @@
       "name":"\u0627\u0644\u0639\u064e\u0641\u064f\u0648\u064f\u0651",
       "transliteration":"Al Afuww",
       "number":82,
-      "found": "(4:99)(4:149)(22:60) ",
+      "found": "(4:99) (4:149) (22:60)",
       "en":{
-        "meaning":"The Forgiver",
+        "meaning":"The Pardoner",
         "desc": "Allah pardons by erasing sins. Al Ghafoor emphasises forgiveness and concealment of sins; Al Afuww emphasises their removal."
       },
       "fr":{
@@ -1154,10 +1175,10 @@
       "name":"\u0627\u0644\u0631\u064e\u0651\u0624\u064f\u0648\u0641\u064f",
       "transliteration":"Ar Ra\u2019oof",
       "number":83,
-      "found": "(3:30)(9:117)(57:9)(59:10)",
+      "found": "(3:30) (9:117) (57:9) (59:10)",
       "en":{
         "meaning":"The Most Kind",
-        "desc": "Is the One who can offer an immensity of benefits without counterpart and without necessity"
+        "desc": "Allah is deeply compassionate and kind towards His creatures."
       },
       "fr":{
         "meaning":"Le Bienveillant",
@@ -1170,7 +1191,7 @@
       "number":84,
       "found": "(3:26)",
       "en":{
-        "meaning":"Master of the Kingdom",
+        "meaning":"Sovereign of Dominion",
         "desc": "This name signifies Allah's absolute and complete control over all dominion, emphasizing that He is the sole possessor and ruler of everything that exists."
       },
       "fr":{
@@ -1182,10 +1203,11 @@
       "name":"\u0630\u064f\u0648\u0627\u0644\u0652\u062c\u064e\u0644\u0627\u064e\u0644\u0650 \u0648\u064e\u0627\u0644\u0625\u0643\u0652\u0631\u064e\u0627\u0645\u0650",
       "transliteration":"Dhu Al Jalaali Wa Al Ikraam",
       "number":85,
-      "found": "(55:27)(55:78)",
+      "found": "(55:27) (55:78)",
+      "reference_note": "The phrase appears as dhu al-jalal in 55:27 and dhi al-jalal in 55:78 because of grammatical case.",
       "en":{
-        "meaning":"Possessor of Majesty and Bounty",
-        "desc": "That is, Allah is the One who is better than any other in reality and all the evidence confirms this and denies the contrary so it is not valid to dispute this point, to deny it or to be hostile against this subject; is the One who fills with blessings those who will have understood this who will know the general holiness, will have success and will be well guided on the Day of Judgment"
+        "meaning":"Majestic and Generous",
+        "desc": "Allah possesses majesty and honour and bestows generosity upon His creation."
       },
       "fr":{
         "meaning":"Le Plein de Majest\u00E9 et de Magnificience",
@@ -1196,10 +1218,11 @@
       "name":"\u0627\u0644\u0652\u0645\u064f\u0642\u0652\u0633\u0650\u0637\u064f",
       "transliteration":"Al Muqsit",
       "number":86,
-      "found": "(7:29)(3:18)",
+      "found": "(7:29) (3:18)",
+      "reference_note": "Related passages: 3:18 describes upholding justice and 7:29 commands justice. Neither uses Al Muqsit as a divine name.",
       "en":{
         "meaning":"The Equitable One",
-        "desc": "Is the One who judges according to the greatest justice, the One who is free from all forms of injustice and tyranny, and the One who has absolutely no accountability"
+        "desc": "Allah upholds justice and deals equitably with His creatures."
       },
       "fr":{
         "meaning":"L'Equitable",
@@ -1213,7 +1236,7 @@
       "found": "(3:9)",
       "en":{
         "meaning":"The Gatherer",
-        "desc": "Is the One who gathers creatures together on a day of which there is no doubt, the Day of Judgment"
+        "desc": "Allah will gather people for the Day of Judgment, about which there is no doubt."
       },
       "fr":{
         "meaning":"Le Rassembleur",
@@ -1224,10 +1247,10 @@
       "name":"\u0627\u0644\u0652\u063a\u064e\u0646\u0650\u064a\u064f\u0651",
       "transliteration":"Al Ghaniyy",
       "number":88,
-      "found": "(3:97)(39:7)(47:38)(57:24)",
+      "found": "(3:97) (39:7) (47:38) (57:24)",
       "en":{
-        "meaning":"The Rich One",
-        "desc": "Is the One who has no need of creatures and whose creatures cannot do without al-Ghaniyy [who is the One who makes them exist and keeps them in existence and constantly changes them]"
+        "meaning":"The Self-Sufficient",
+        "desc": "Allah needs nothing from His creation; all creation depends on Him."
       },
       "fr":{
         "meaning":"Le Riche",
@@ -1238,10 +1261,11 @@
       "name":"\u0627\u0644\u0652\u0645\u064f\u063a\u0652\u0646\u0650\u064a",
       "transliteration":"Al Mughni",
       "number":89,
-      "found": "(9:28)",
+      "found": "(9:28) (53:48)",
+      "reference_note": "Related passages: these verses describe enriching through verbs, not Al Mughni as a name.",
       "en":{
         "meaning":"The Enricher",
-        "desc": "Is the One who satisfies the needs of creatures and the One who brings them their sustenance"
+        "desc": "Allah grants sufficiency and enriches whom He wills from His bounty."
       },
       "fr":{
         "meaning":"Celui qui enrichit",
@@ -1253,9 +1277,10 @@
       "transliteration":"Al Maani'",
       "number":90,
       "found": "(67:21)",
+      "reference_note": "Related passage: 67:21 describes withholding provision through a verb, not Al Maani' as a name.",
       "en":{
-        "meaning":"The Preventer of harm",
-        "desc": "Is the One who intends for each creature his victories, his protections and the One from whom they must always be preserved according to a destiny"
+        "meaning":"The Withholder",
+        "desc": "Allah withholds as He wills; provision and protection are under His authority."
       },
       "fr":{
         "meaning":"Le D\u00E9fenseur",
@@ -1264,12 +1289,13 @@
     },
     {
       "name":"\u0627\u0644\u0636\u064e\u0651\u0627\u0631\u064e\u0651",
-      "transliteration":"Ad Daaarr",
+      "transliteration":"Ad Daarr",
       "number":91,
       "found": "(6:17)",
+      "reference_note": "Related passage: 6:17 describes Allah's authority over harm and good, not Ad Daarr as a name.",
       "en":{
-        "meaning":"The Creator of the harmful",
-        "desc": "Is the One who is almighty to bring inevitably the nuisance which must reach a creature according to a destiny"
+        "meaning":"The Distresser",
+        "desc": "Hardship and harm cannot occur outside Allah's authority; He decrees with knowledge and justice."
       },
       "fr":{
         "meaning":"Celui qui peut nuire",
@@ -1280,10 +1306,11 @@
       "name":"\u0627\u0644\u0646\u064e\u0651\u0627\u0641\u0650\u0639\u064f",
       "transliteration":"An Naafi\u2019",
       "number":92,
-      "found": "(30:37)",
+      "found": "(10:107) (6:17)",
+      "reference_note": "Related passages: these verses describe Allah's authority over good and harm, not An Naafi' as a name.",
       "en":{
-        "meaning":"The Bestower of Benefits",
-        "desc": "Is the One who is almighty to bring inevitably the profit that a creature must receive according to a destiny"
+        "meaning":"The Benefactor",
+        "desc": "Allah grants benefit and good; no one can prevent the good He wills to give."
       },
       "fr":{
         "meaning":"L'Utile",
@@ -1297,7 +1324,7 @@
       "found": "(24:35)",
       "en":{
         "meaning":"The Light",
-        "desc": "The Light: Is the One who guides to their goal those who are prey to temptation and puts them in the right direction according to a destiny; Allah is the One who guides believers to the light of faith, creates light and is not a light that is only a creature"
+        "desc": "Allah is the Light of the heavens and the earth, and He guides whom He wills to His light."
       },
       "fr":{
         "meaning":"La Lumi\u00E8re",
@@ -1310,8 +1337,8 @@
       "number":94,
       "found": "(25:31)",
       "en":{
-        "meaning":"The Guider",
-        "desc": "Is the One who intends for certain creatures the benefit of being well guided and of knowing righteousness"
+        "meaning":"The Guide",
+        "desc": "Allah guides His creatures and shows the way to truth."
       },
       "fr":{
         "meaning":"Le Guide",
@@ -1322,10 +1349,10 @@
       "name":"\u0627\u0644\u0652\u0628\u064e\u062f\u0650\u064a\u0639\u064f",
       "transliteration":"Al Badi'",
       "number":95,
-      "found": "(2:117)(6:101)",
+      "found": "(2:117) (6:101)",
       "en":{
         "meaning":"The Incomparable Originator",
-        "desc": "Is the One who brings creatures and this world into existence, not from pre-existing matter or in the image of an earlier model, but on the contrary without precursor, model and unprecedented"
+        "desc": "Allah originates the heavens and the earth without a prior model."
       },
       "fr":{
         "meaning":"L'inventeur",
@@ -1337,9 +1364,10 @@
       "transliteration":"Al Baaqi",
       "number":96,
       "found": "(55:27)",
+      "reference_note": "Related passage: 55:27 expresses remaining through a verb, not Al Baaqi as a name.",
       "en":{
         "meaning":"The Everlasting One",
-        "desc": "Is the One whose existence free from annihilation and change is imposed on sound reason which cannot claim the contrary"
+        "desc": "Allah remains forever; His existence has no end."
       },
       "fr":{
         "meaning":"Le Permanent",
@@ -1350,10 +1378,11 @@
       "name":"\u0627\u0644\u0652\u0648\u064e\u0627\u0631\u0650\u062b\u064f",
       "transliteration":"Al Waarith",
       "number":97,
-      "found": "(15:23)",
+      "found": "(15:23) (19:40) (21:89)",
+      "reference_note": "Quran 15:23 and 21:89 use plural forms of inheritor; 19:40 describes inheriting through a verb.",
       "en":{
         "meaning":"The Inheritor",
-        "desc": "Is the One who exists and does not change as creatures are wiped out"
+        "desc": "Allah remains when His creatures pass away; all possessions ultimately belong to Him."
       },
       "fr":{
         "meaning":"L'H\u00E9ritier",
@@ -1364,10 +1393,11 @@
       "name":"\u0627\u0644\u0631\u064e\u0651\u0634\u0650\u064a\u062f\u064f",
       "transliteration":"Ar Rasheed",
       "number":98,
-      "found": "(2:256)",
+      "found": "(18:10)",
+      "reference_note": "Related passage: 18:10 asks Allah for right guidance. It does not name Him Ar Rasheed.",
       "en":{
-        "meaning":"The Most Righteous Guide",
-        "desc": "Is the One who guides creatures to what is in their best interests"
+        "meaning":"The Rightly-Guiding",
+        "desc": "Allah guides with wisdom to what is right; His guidance is free from error."
       },
       "fr":{
         "meaning":"Celui qui agit avec droiture",
@@ -1378,10 +1408,11 @@
       "name":"\u0627\u0644\u0635\u064e\u0651\u0628\u064f\u0648\u0631\u064f",
       "transliteration":"As Saboor",
       "number":99,
-      "found": "(2:153)(3:200)(103:3)",
+      "found": "(16:61) (35:45)",
+      "reference_note": "Related passages: these verses describe delaying punishment, not Al Saboor as a name. Bukhari 6099 describes divine patience using a comparative form.",
       "en":{
         "meaning":"The Patient One",
-        "desc": "Is the One who delays the punishment of sinners by adjusting the accounts of each until a definite day and gives them their ease and time until a time of which they all do not know the date."
+        "desc": "Allah does not hasten punishment for wrongdoing, but grants respite according to His wisdom."
       },
       "fr":{
         "meaning":"Le Patient",

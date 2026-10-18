@@ -83,8 +83,13 @@ export default function NameDetail() {
         {name.location && name.location.length > 0 && (
           <div className='p-5 sm:p-4 md:p-6 border border-gray-200 rounded-lg space-y-2 sm:space-y-4'>
             <h2 className='text-lg sm:text-xl font-semibold'>
-              Locations in Quran
+              Quran references
             </h2>
+            {name.reference_note && (
+              <p className='text-gray-700 text-sm sm:text-base'>
+                {name.reference_note}
+              </p>
+            )}
             <div className='flex flex-wrap gap-2'>
               {name.location.filter(Boolean).map((loc, index) => (
                 <Link
