@@ -586,6 +586,11 @@ func main() {
 
 		fts := search.NewFTS(filepath.Join(reminderHome, "search.db"))
 		idx = fts
+		if changed, err := syncNames(fts, n); err != nil {
+			log.Fatalf("Could not refresh names in keyword index: %v", err)
+		} else if changed {
+			log.Println("Refreshed names in keyword index")
+		}
 
 		if fts.Built() {
 			log.Printf("Keyword index loaded (%d documents)", fts.Count())
@@ -1237,6 +1242,8 @@ func main() {
 				}
 			}
 
+			res = currentNameResults(res, n)
+
 			// Report whether summarisation is possible, so clients can hide
 			// the control instead of offering one that cannot work.
 			available := LLMAvailable()
@@ -1501,6 +1508,7 @@ func main() {
 		if err != nil {
 			return "", err
 		}
+		res = currentNameResults(res, n)
 
 		var tokens int
 		var contexts []string

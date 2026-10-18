@@ -4,6 +4,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"html"
 	"strings"
 )
 
@@ -13,13 +14,14 @@ var files embed.FS
 var Description = `The "Names of Allah" (Asma al-Husna) refer to the 99 beautiful names of God. Descriptions of God's divine attributes, revealing His nature and qualities.`
 
 type Name struct {
-	Number      int      `json:"number"`
-	English     string   `json:"english"`
-	Arabic      string   `json:"arabic"`
-	Meaning     string   `json:"meaning"`
-	Description string   `json:"description"`
-	Summary     string   `json:"summary"`
-	Location    []string `json:"location"`
+	Number        int      `json:"number"`
+	English       string   `json:"english"`
+	Arabic        string   `json:"arabic"`
+	Meaning       string   `json:"meaning"`
+	Description   string   `json:"description"`
+	Summary       string   `json:"summary"`
+	Location      []string `json:"location"`
+	ReferenceNote string   `json:"reference_note,omitempty"`
 }
 
 type Names []*Name
@@ -58,6 +60,9 @@ func (name *Name) HTML() string {
 	// Location card
 	data += `<div class="mb-6 p-6 bg-white border border-gray-200 rounded-lg shadow-sm">`
 	data += `<h3 class="text-lg font-semibold mb-3">Quran References</h3>`
+	if name.ReferenceNote != "" {
+		data += `<p class="text-gray-700 mb-3">` + html.EscapeString(name.ReferenceNote) + `</p>`
+	}
 	data += `<div class="flex flex-wrap gap-2">`
 
 	for _, loc := range name.Location {
@@ -121,6 +126,11 @@ func (n *Names) Markdown() string {
 		data += fmt.Sprintln()
 		data += fmt.Sprintf(`%s`, name.Summary)
 		data += fmt.Sprintln()
+		data += "\n#### Quran references\n\n"
+		data += fmt.Sprintln(strings.Join(name.Location, ", "))
+		if name.ReferenceNote != "" {
+			data += fmt.Sprintln(name.ReferenceNote)
+		}
 	}
 
 	return data
@@ -145,7 +155,7 @@ func Load() *Names {
 		fnd := strings.Replace(n["found"].(string), " ", "", -1)
 		fnd = strings.Replace(fnd, "(", " ", -1)
 		fnd = strings.Replace(fnd, ")", " ", -1)
-		loc := strings.Split(strings.TrimSpace(fnd), " ")
+		loc := strings.Fields(fnd)
 
 		name := &Name{
 			Number:      int(n["number"].(float64)),
@@ -155,6 +165,7 @@ func Load() *Names {
 			Description: en["desc"].(string),
 			Location:    loc,
 		}
+		name.ReferenceNote, _ = n["reference_note"].(string)
 
 		// try get summary
 		fd, err := files.ReadFile(fmt.Sprintf("data/%d.json", name.Number))

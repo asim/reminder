@@ -106,6 +106,12 @@ func indexQuran(idx search.Searcher, q *quran.Quran) {
 }
 
 func indexNames(idx search.Searcher, n *names.Names) {
+	if fts, ok := idx.(*search.FTS); ok {
+		if _, err := syncNames(fts, n); err != nil {
+			log.Printf("Error indexing names: %v", err)
+		}
+		return
+	}
 	cp := loadCheckpoint()
 	if cp.NamesDone {
 		log.Println("Names already indexed, skipping")
