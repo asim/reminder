@@ -50,3 +50,24 @@ func TestArabicIntegrityAndVerseLookup(t *testing.T) {
 		t.Fatalf("Arabic corpus changed: %s", got)
 	}
 }
+
+func TestTranslationCoverage(t *testing.T) {
+	q := Load()
+	for _, ch := range q.Chapters {
+		for _, v := range ch.Verses {
+			if strings.TrimSpace(v.Translations["asad"]) == "" {
+				t.Fatalf("missing Asad translation at %d:%d", ch.Number, v.Number)
+			}
+			if strings.Contains(v.Text, "Most Beneficent") {
+				t.Fatalf("modified Khattab wording at %d:%d", ch.Number, v.Number)
+			}
+			if v.Number == 0 && v.Translations["asad"] != q.Get(1).Verse(1).Translations["asad"] {
+				t.Fatalf("incorrect Asad opening in chapter %d", ch.Number)
+			}
+		}
+	}
+	data, _ := files.ReadFile("data/asad.json")
+	if got := fmt.Sprintf("%x", sha256.Sum256(data)); got != "6d6c7544e4d83009ed45f5ba2ee3b49881bfc32724516e89199173b065eaf2e3" {
+		t.Fatalf("Asad source snapshot changed: %s", got)
+	}
+}

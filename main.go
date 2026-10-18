@@ -464,7 +464,7 @@ func loadHourlyReminders(date string) []interface{} {
 // The askLLM function panics on errors, which is why we use panic recovery here.
 func generateMessage(ctx context.Context, verse, hadith, name string) (message string) {
 	// Fallback message in case LLM fails
-	defaultMessage := "In the Name of Allah—the Most Beneficent, Most Merciful"
+	defaultMessage := "In the Name of Allah—the Most Compassionate, Most Merciful"
 	message = defaultMessage // Set default in case of panic
 
 	// Build context for the LLM
@@ -801,7 +801,7 @@ func main() {
 			resp = entry
 		} else {
 			// If today's archived daily doesn't exist yet, return the hourly updated content
-			message := "In the Name of Allah—the Most Beneficent, Most Merciful"
+			message := "In the Name of Allah—the Most Compassionate, Most Merciful"
 			resp = map[string]interface{}{
 				"name":    dailyName,
 				"hadith":  dailyHadith,
@@ -1341,7 +1341,7 @@ func main() {
 			b, _ := json.Marshal(entry)
 			return string(b), nil
 		}
-		message := "In the Name of Allah—the Most Beneficent, Most Merciful"
+		message := "In the Name of Allah—the Most Compassionate, Most Merciful"
 		resp := map[string]interface{}{
 			"name":    dailyName,
 			"hadith":  dailyHadith,

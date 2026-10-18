@@ -1,3 +1,6 @@
+import { useMemo } from 'react';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import type { Translation } from '~/components/quran/reading-settings';
 import { httpGet } from '~/utils/http';
 
 type ChapterType = {
@@ -26,6 +29,7 @@ type VerseType = {
   chapter: number;
   number: number;
   text: string;
+  translations?: Partial<Record<Translation, string>>;
   arabic: string;
   words?: WordByWord[];
   comments?: string;
@@ -49,3 +53,16 @@ export const getChapterOptions = (chapterNumber: number) => ({
     return data;
   },
 });
+
+// Both editions share the same chapter cache, so switching also works offline.
+export function useTranslatedChapter(chapterNumber: number, translation: Translation) {
+  const { data: original } = useSuspenseQuery(getChapterOptions(chapterNumber));
+  return useMemo(() => ({
+    ...original,
+    verses: original.verses.map(verse => ({
+      ...verse,
+      text: translation === 'khattab' ? verse.text :
+        verse.translations?.[translation] ?? 'This translation has not been saved yet. Reconnect to update this chapter.',
+    })),
+  }), [original, translation]);
+}

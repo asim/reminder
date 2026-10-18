@@ -1,3 +1,4 @@
+import { QuranSettingsProvider } from '~/components/quran/reading-settings';
 import { Bookmark, Download, Search } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router';
 import { usePwaInstall } from '~/hooks/use-pwa-install';
@@ -15,7 +16,7 @@ export default function AppLayout() {
     );
 
   return (
-    <div className='flex flex-col h-screen overflow-hidden'>
+    <QuranSettingsProvider><div className='flex flex-col h-screen overflow-hidden'>
       <div className='w-full text-sm py-2 px-2 bg-black text-white flex flex-row items-center gap-1 flex-shrink-0'>
         {/* Left-aligned reminder link with R logo */}
         <div className="inline-block order-1">
@@ -82,6 +83,6 @@ export default function AppLayout() {
       <div className='flex-1 overflow-y-auto'>
         <Outlet />
       </div>
-    </div>
+    </div></QuranSettingsProvider>
   );
 }

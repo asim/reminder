@@ -12,6 +12,7 @@ interface TranscriptButtonProps {
   chapterName: string;
   chapterEnglish: string;
   verses: Verse[];
+  translator?: string;
 }
 
 type TranscriptFormat = 'english' | 'arabic' | 'both';
@@ -21,6 +22,7 @@ export function TranscriptButton({
   chapterName,
   chapterEnglish,
   verses,
+  translator,
 }: TranscriptButtonProps) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -45,8 +47,8 @@ export function TranscriptButton({
       return `${v.arabic}\n${v.text} ${ref}`;
     });
 
-    return `${header}\n\n${lines.join('\n\n')}`;
-  }, [nonBismillah, fromVerse, toVerse, format, chapterNumber, chapterName, chapterEnglish]);
+    return `${header}${format !== 'arabic' && translator ? `\nTranslation: ${translator}` : ''}\n\n${lines.join('\n\n')}`;
+  }, [nonBismillah, fromVerse, toVerse, format, chapterNumber, chapterName, chapterEnglish, translator]);
 
   const handleCopy = async () => {
     try {

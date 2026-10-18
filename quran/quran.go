@@ -12,7 +12,7 @@ import (
 var files embed.FS
 
 var Bismillah = `بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ`
-var English = `In the Name of Allah—the Most Beneficent, Most Merciful.`
+var English = `In the Name of Allah—the Most Compassionate, Most Merciful.`
 
 var Description = `The word of God, as revealed to Prophet Muhammad (peace be upon him). It is a guide for Muslims (believers) on faith, morality, and life through its 114 chapters.`
 
@@ -25,14 +25,15 @@ type Chapter struct {
 }
 
 type Verse struct {
-	Chapter      int     `json:"chapter"`
-	Number       int     `json:"number"`
-	Text         string  `json:"text"`
-	Arabic       string  `json:"arabic"`
-	Words        []*Word `json:"words"`
-	Comments     string  `json:"comments"`
-	AudioArabic  string  `json:"audio_arabic,omitempty"`
-	AudioEnglish string  `json:"audio_english,omitempty"`
+	Chapter      int               `json:"chapter"`
+	Number       int               `json:"number"`
+	Text         string            `json:"text"`
+	Translations map[string]string `json:"translations,omitempty"`
+	Arabic       string            `json:"arabic"`
+	Words        []*Word           `json:"words"`
+	Comments     string            `json:"comments"`
+	AudioArabic  string            `json:"audio_arabic,omitempty"`
+	AudioEnglish string            `json:"audio_english,omitempty"`
 }
 
 type Word struct {
@@ -246,6 +247,16 @@ func Load() *Quran {
 	var arabic map[string]interface{}
 	json.Unmarshal(f, &arabic)
 
+	// The second translation travels with each chapter, including offline downloads.
+	asadFile, err := files.ReadFile("data/asad.json")
+	if err != nil {
+		panic(err)
+	}
+	var asad map[string][]string
+	if err := json.Unmarshal(asadFile, &asad); err != nil {
+		panic(err)
+	}
+
 	// load tafsir
 	fx, err := files.ReadFile("data/tafsir.json")
 	if err != nil {
@@ -276,6 +287,11 @@ func Load() *Quran {
 		name := data[0].(map[string]interface{})["name"].(map[string]interface{})["transliterated"].(string)
 		data = data[1:]
 
+		asadVerses := asad[fmt.Sprint(chapter)]
+		if len(asadVerses) != len(data) {
+			panic("Asad verse count mismatch")
+		}
+
 		var verses []*Verse
 
 		arabicText := arabic[fmt.Sprintf("%d", chapter)].([]interface{})
@@ -285,10 +301,11 @@ func Load() *Quran {
 		// without one.
 		if chapter != 1 && chapter != 9 {
 			verses = append(verses, &Verse{
-				Chapter: chapter,
-				Number:  0,
-				Text:    English,
-				Arabic:  Bismillah,
+				Chapter:      chapter,
+				Number:       0,
+				Text:         English,
+				Translations: map[string]string{"asad": asad["1"][0]},
+				Arabic:       Bismillah,
 			})
 		}
 
@@ -342,6 +359,7 @@ func Load() *Quran {
 				Chapter:      chapter,
 				Number:       num,
 				Text:         ayah.([]interface{})[1].(string),
+				Translations: map[string]string{"asad": asadVerses[i]},
 				Arabic:       ar,
 				Words:        alignWords(chapter, num, ar, wbw),
 				Comments:     text,

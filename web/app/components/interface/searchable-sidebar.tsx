@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { MenuIcon, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router';
@@ -15,10 +16,11 @@ export type SidebarItem = {
 type SearchableSidebarProps = {
   items: SidebarItem[];
   searchPlaceholder: string;
+  actions?: ReactNode;
 };
 
 export function SearchableSidebar(props: SearchableSidebarProps) {
-  const { items, searchPlaceholder } = props;
+  const { items, searchPlaceholder, actions } = props;
   const [search, setSearch] = useState('');
 
   const [isOpen, setIsOpen] = useState(false);
@@ -30,13 +32,14 @@ export function SearchableSidebar(props: SearchableSidebarProps) {
 
   return (
     <>
-      <div className='px-2 block lg:hidden border-r border-gray-200 py-2 text-sm'>
+      <div className='px-2 flex flex-col gap-5 lg:hidden border-r border-gray-200 py-2 text-sm'>
         <button
           className='flex items-center gap-2 text-gray-500 hover:text-black'
           onClick={() => setIsOpen(!isOpen)}
         >
           <MenuIcon className='size-4' />
         </button>
+        {actions}
       </div>
       <div
         onClick={() => setIsOpen(false)}
@@ -53,7 +56,7 @@ export function SearchableSidebar(props: SearchableSidebarProps) {
           }
         )}
       >
-        <div className='pl-7 pr-4 border-b border-gray-200 relative sticky top-0 bg-white'>
+        <div className='pl-7 pr-4 border-b border-gray-200 relative sticky top-0 bg-white flex items-center gap-2'>
           <Search
             size={15}
             className='absolute left-5 top-1/2 -translate-y-1/2 text-gray-500'
@@ -61,10 +64,11 @@ export function SearchableSidebar(props: SearchableSidebarProps) {
           <input
             type='text'
             placeholder={searchPlaceholder}
-            className='px-4 py-2 focus:outline-none text-sm'
+            className='px-4 py-2 focus:outline-none text-sm min-w-0 w-full'
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+          {actions}
         </div>
 
         {items
