@@ -1,3 +1,4 @@
+import { ReadingSettings } from '~/components/quran/reading-settings';
 import type { Route } from '.react-router/types/app/routes/+types/_app.quran';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
@@ -43,10 +44,12 @@ export default function Quran() {
       <SearchableSidebar
         items={sidebarItems}
         searchPlaceholder='Search surah'
+        actions={<ReadingSettings />}
       />
 
       <div
         ref={containerRef}
+        data-quran-scroll
         className='flex flex-col overflow-y-auto flex-1 px-5 py-5'
       >
         <Outlet />

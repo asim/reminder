@@ -1,6 +1,5 @@
-import { useSuspenseQuery } from '@tanstack/react-query';
-import { useParams } from 'react-router';
-import { getChapterOptions } from '~/queries/quran';
+import { useParams, useSearchParams } from 'react-router';
+import { useTranslatedChapter } from '~/queries/quran';
 
 function toArabicNumber(num: number) {
   return num
@@ -13,7 +12,9 @@ export default function EmbedQuranVerse() {
   const chapterNumber = Number(chapter);
   const verseNumber = Number(verseNum);
 
-  const { data } = useSuspenseQuery(getChapterOptions(chapterNumber));
+  const [params] = useSearchParams();
+  const translation = params.get('translation') === 'asad' ? 'asad' : 'khattab';
+  const data = useTranslatedChapter(chapterNumber, translation);
 
   const verse = data?.verses.find((v) => v.number === verseNumber);
 
@@ -37,7 +38,7 @@ export default function EmbedQuranVerse() {
       </p>
       <div className='flex items-center justify-between border-t border-gray-100 pt-2'>
         <a
-          href={`https://reminder.dev/quran/${chapterNumber}/${verseNumber}`}
+          href={`https://reminder.dev/quran/${chapterNumber}/${verseNumber}?translation=${translation}`}
           target='_blank'
           rel='noopener noreferrer'
           className='text-xs text-gray-400 hover:text-gray-600 no-underline'

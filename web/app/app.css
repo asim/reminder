@@ -101,3 +101,34 @@
     page-break-inside: avoid;
   }
 }
+/* Reader sizes keep the existing defaults and only scale when requested. */
+.quran-reader .quran-arabic {
+  font-size: calc(1.875rem * var(--quran-arabic-scale, 1));
+}
+.quran-reader .quran-translation {
+  font-size: calc(1rem * var(--quran-english-scale, 1));
+}
+@media (min-width: 640px) {
+  .quran-reader .quran-translation {
+    font-size: calc(1.125rem * var(--quran-english-scale, 1));
+  }
+}
+.reading-settings-dialog {
+  position: fixed;
+  inset: auto 0 0;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 28rem;
+  max-height: 90dvh;
+  overflow-y: auto;
+  border-radius: 1rem 1rem 0 0;
+  padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+}
+@media (min-width: 640px) {
+  .reading-settings-dialog {
+    inset: 0;
+    margin: auto;
+    height: fit-content;
+    border-radius: 0.75rem;
+  }
+}
