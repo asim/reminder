@@ -21,8 +21,13 @@ https://sunnah.com/tirmidhi:3507
 That enumeration is graded weak; it is not cited as proof of authenticity.
 
 English spelling corrections: Forbearing and Repentance. The short meaning
-for As Samad is “The Eternal Refuge”, with the description “All depend on Him;
-He depends on none.” The label is concise rather than an exhaustive definition.
+for As Samad is “The Eternal Refuge”, with the description “Allah is wholly self-sufficient,
+needing nothing. All creation depends on Him and turns to Him for the fulfilment
+of its needs.” The label is concise rather than an exhaustive definition.
 The explanation is also supported by Ibn Kathir and Ma'arif al-Qur'an on 112:2:
 https://quran.com/112:2/tafsirs/en-tafisr-ibn-kathir
 https://quran.com/112:2/tafsirs/en-tafsir-maarif-ul-quran
+
+Page composition: the short meaning and description come from `names/data/names.json`.
+The separate Summary section is loaded from the numbered file, e.g.
+`names/data/68.json`; changing the description does not change that summary.
