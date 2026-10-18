@@ -27,11 +27,18 @@ function unavailable() {
 }
 
 async function savedText(path) {
-  const current = await (await caches.open(TEXT_CACHE)).match(path);
-  if (current) return current;
-  // Keep the last downloaded corpus usable during an interrupted update.
-  for (const name of (await caches.keys()).filter(name => name.startsWith('reminder-text-') && name !== TEXT_CACHE)) {
-    const saved = await (await caches.open(name)).match(path);
+  const names = await caches.keys();
+  // Prefer the newest corpus as a whole, including names derived from its list.
+  const versions = [TEXT_CACHE, ...names.filter(name => name.startsWith('reminder-text-') && name !== TEXT_CACHE).reverse()];
+  const name = path.match(/^\/api\/names\/(\d+)$/);
+  for (const version of versions) {
+    const cache = await caches.open(version);
+    if (name) {
+      const list = await cache.match('/api/names');
+      const item = list && (await list.json()).find(item => item.number === Number(name[1]));
+      if (item) return new Response(JSON.stringify(item), { headers: { 'Content-Type': 'application/json' } });
+    }
+    const saved = await cache.match(path);
     if (saved) return saved;
   }
 }
@@ -39,13 +46,6 @@ async function savedText(path) {
 async function textResponse(path) {
   const cached = await savedText(path);
   if (cached) return cached;
-  // Name details are already included in the downloaded names list.
-  const name = path.match(/^\/api\/names\/(\d+)$/);
-  if (name) {
-    const list = await savedText('/api/names');
-    const item = list && (await list.json()).find(item => item.number === Number(name[1]));
-    if (item) return new Response(JSON.stringify(item), { headers: { 'Content-Type': 'application/json' } });
-  }
   try {
     const response = await network(path);
     if (!response.ok) return unavailable();
