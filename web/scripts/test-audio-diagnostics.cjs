@@ -1,0 +1,18 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const ts=require(process.cwd()+'/web/node_modules/typescript');
+const sw=fs.readFileSync('web/build/client/reminder.js','utf8');
+const build=JSON.parse(sw.split('\n')[0].split(' = ')[1].slice(0,-1));
+assert(build.appVersion && fs.readdirSync('web/build/client/assets').filter(x=>x.endsWith('.js')).some(x=>fs.readFileSync('web/build/client/assets/'+x,'utf8').includes(build.appVersion)));
+const handlers={};vm.runInNewContext(sw,{self:{addEventListener:(n,f)=>handlers[n]=f}});let reply;handlers.message({data:{type:'GET_VERSION'},ports:[{postMessage:v=>reply=v}]});assert.equal(reply.appVersion,build.appVersion);
+let effects=[],states=[],storage=new Map();const react={useState:v=>{const i=states.length;states.push(v);return [v,x=>states[i]=x]},useEffect:f=>effects.push(f)};
+const audio=new EventTarget();Object.assign(audio,{buffered:{length:1,start:()=>0,end:()=>12},currentTime:4,duration:12,paused:false,ended:false,readyState:4,networkState:1,currentSrc:'https://example.test/test.mp3',error:null,parentElement:new EventTarget()});
+const document=new EventTarget();document.visibilityState='visible';const window=new EventTarget();const worker=new EventTarget();worker.controller={postMessage:(data,ports)=>ports[0].postMessage({appVersion:build.appVersion})};
+let source=fs.readFileSync('web/app/components/quran/audio-diagnostics.tsx','utf8').replaceAll('import.meta.env.VITE_APP_VERSION',JSON.stringify(build.appVersion));
+const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText;
+const exported={};
+vm.runInNewContext(code,{exports:exported,require:n=>n==='react'?react:{jsx:()=>null,jsxs:()=>null},location:{search:'?audioDebug=1'},document,window,navigator:{onLine:true,userAgent:'test',serviceWorker:worker},sessionStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v)},URLSearchParams,MessageChannel,setTimeout,clearTimeout,Date});
+exported.AudioDiagnostics({audioRef:{current:audio}});const cleanup=effects[0]();audio.dispatchEvent(new Event('playing'));audio.paused=true;audio.dispatchEvent(new Event('pause'));document.visibilityState='hidden';document.dispatchEvent(new Event('visibilitychange'));
+let log=JSON.parse(storage.get('reminder_audio_diagnostics'));assert(log.some(x=>x.event==='pause' && x.time===4));assert(log.some(x=>x.event==='visibilitychange' && x.visibility==='hidden'));assert.deepEqual(log[0].buffered,[[0,12]]);
+for(let i=0;i<100;i++)audio.dispatchEvent(new Event('waiting'));assert.equal(JSON.parse(storage.get('reminder_audio_diagnostics')).length,80);
+cleanup();const before=storage.get('reminder_audio_diagnostics');audio.dispatchEvent(new Event('pause'));assert.equal(storage.get('reminder_audio_diagnostics'),before);
+console.log('PASS: build fingerprints match bundled JS and worker; version protocol; pause/visibility/buffer records; bounded storage and listener cleanup.');

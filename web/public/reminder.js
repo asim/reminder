@@ -121,6 +121,7 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('message', event => {
+  if (event.data?.type === 'GET_VERSION') event.ports[0]?.postMessage({ appVersion: BUILD?.appVersion || 'unknown' });
   if (event.data?.type === 'DOWNLOAD_TEXT' && BUILD) event.waitUntil(downloadText());
 });
 
