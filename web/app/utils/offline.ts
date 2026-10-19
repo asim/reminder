@@ -4,6 +4,13 @@ import { queryClient } from '~/utils/query-client';
 // on the next visit or reconnection; no completion flag can outlive evicted data.
 export function startOfflineDownload() {
   if (!('serviceWorker' in navigator) || !import.meta.env.PROD) return () => {};
+  let registration: ServiceWorkerRegistration | undefined;
+  let lastCheck = 0;
+  const checkForUpdate = () => {
+    if (!registration || !navigator.onLine || document.visibilityState !== 'visible' || Date.now() - lastCheck < 60000) return;
+    lastCheck = Date.now();
+    void registration.update().catch(console.error);
+  };
   const download = () => {
     if (navigator.onLine) navigator.serviceWorker.controller?.postMessage({ type: 'DOWNLOAD_TEXT' });
   };
@@ -17,11 +24,15 @@ export function startOfflineDownload() {
   navigator.serviceWorker.addEventListener('message', updated);
   navigator.serviceWorker.addEventListener('controllerchange', download);
   window.addEventListener('online', download);
+  window.addEventListener('online', checkForUpdate);
+  document.addEventListener('visibilitychange', checkForUpdate);
   navigator.serviceWorker.register('/reminder.js', { updateViaCache: 'none' })
-    .then(() => navigator.serviceWorker.ready).then(download).catch(console.error);
+    .then(reg => { registration = reg; checkForUpdate(); return navigator.serviceWorker.ready; }).then(download).catch(console.error);
   return () => {
     navigator.serviceWorker.removeEventListener('message', updated);
     navigator.serviceWorker.removeEventListener('controllerchange', download);
     window.removeEventListener('online', download);
+    window.removeEventListener('online', checkForUpdate);
+    document.removeEventListener('visibilitychange', checkForUpdate);
   };
 }

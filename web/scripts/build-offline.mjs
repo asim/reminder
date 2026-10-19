@@ -1,3 +1,4 @@
+import { appVersion } from './app-version.mjs';
 import { createHash } from 'node:crypto';
 import { readFile, readdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -26,6 +27,6 @@ for (const dir of ['quran/', 'hadith/', 'names/']) {
   }
 }
 const worker = await readFile(new URL('../public/reminder.js', import.meta.url), 'utf8');
-const build = { version: shellHash.update(worker).digest('hex').slice(0, 16), textVersion: textHash.digest('hex').slice(0, 16), assets: assets.map(path => '/' + path) };
+const build = { appVersion, version: shellHash.update(worker).digest('hex').slice(0, 16), textVersion: textHash.digest('hex').slice(0, 16), assets: assets.map(path => '/' + path) };
 await writeFile(new URL('reminder.js', output), `self.__REMINDER_BUILD__ = ${JSON.stringify(build)};\n${worker}`);
 console.log(`Offline shell: ${assets.length} files; text revision ${build.textVersion}`);

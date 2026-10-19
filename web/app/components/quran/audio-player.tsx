@@ -1,3 +1,4 @@
+import { AudioDiagnostics } from './audio-diagnostics';
 import { Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
@@ -244,6 +245,7 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist }: Aud
         onEnded={handleEnded}
         onError={() => { playbackChanged(false); setError('Audio could not be loaded. Press play to retry.'); }}
       />
+      <AudioDiagnostics audioRef={audioRef} />
       {error && <p role="status" className="text-xs text-gray-600 mt-2">{error}</p>}
     </div>
   );
