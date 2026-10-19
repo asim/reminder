@@ -12,5 +12,5 @@ function add(path) {
   }
 }
 for (const path of ['app', 'public', 'scripts']) add(path);
-for (const path of ['vite.config.ts', 'package.json', 'package-lock.json']) hash.update(path).update(readFileSync(join(root, path)));
+for (const path of ['vite.config.ts', 'package.json', 'package-lock.json', 'pnpm-lock.yaml']) hash.update(path).update(readFileSync(join(root, path)));
 export const appVersion = hash.digest('hex').slice(0, 16);
