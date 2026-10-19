@@ -1,3 +1,4 @@
+import { ContinuousAudio } from './continuous-audio';
 import { AudioDiagnostics } from './audio-diagnostics';
 import { Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
@@ -20,6 +21,7 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist }: Aud
   const queueKey = JSON.stringify(tracks);
   const audioRef = useRef<HTMLAudioElement>(null);
   const indexRef = useRef(-1);
+  const streamRef = useRef<ContinuousAudio | null>(null);
   const [index, setIndex] = useState(-1);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -49,7 +51,7 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist }: Aud
     });
   };
 
-  const startTrack = (next: number) => {
+  const updateTrack = (next: number) => {
     const audio = audioRef.current;
     const track = tracksRef.current[next];
     if (!audio || !track) return;
@@ -57,7 +59,7 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist }: Aud
     setIndex(next);
     setProgress(0);
     setDuration(0);
-    audio.src = track.url;
+
     if ('mediaSession' in navigator && typeof MediaMetadata !== 'undefined') {
       navigator.mediaSession.metadata = new MediaMetadata({
         title: track.label,
@@ -66,6 +68,33 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist }: Aud
         artwork: [{ src: '/icon-192.png', sizes: '192x192', type: 'image/png' }],
       });
     }
+  };
+
+  const startTrack = (next: number) => {
+    const audio = audioRef.current;
+    if (!audio || !tracksRef.current[next]) return;
+    const continuous = new URLSearchParams(location.search).get('continuousAudio') === '1';
+    if (continuous && !ContinuousAudio.supported()) {
+      setError('Continuous audio is not supported by this browser. Remove continuousAudio=1 from the URL to use the standard player.');
+      return;
+    }
+    updateTrack(next);
+    if (continuous) {
+      if (!streamRef.current?.seek(next)) {
+        streamRef.current?.dispose();
+        streamRef.current = new ContinuousAudio(audio, tracksRef.current.map(track => track.url), next,
+          (segment, elapsed) => {
+            if (indexRef.current !== segment.index) updateTrack(segment.index);
+            setProgress(elapsed);
+            const length = segment.end - segment.start;
+            setDuration(length);
+            try {
+              navigator.mediaSession?.setPositionState?.({ duration: length, playbackRate: audio.playbackRate,
+                position: Math.min(length, Math.max(0, elapsed)) });
+            } catch { /* optional lock-screen seek support */ }
+          }, message => { playbackChanged(false); setError(message); });
+      }
+    } else audio.src = tracksRef.current[next].url;
     // Start directly from the media event. No background timer or React render
     // is needed to advance to English or to the next verse.
     play();
@@ -74,7 +103,8 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist }: Aud
   const resume = () => {
     const audio = audioRef.current;
     if (!audio) return;
-    if (indexRef.current < 0 || audio.ended) startTrack(0);
+    if (streamRef.current?.hasFailed) startTrack(Math.max(0, indexRef.current));
+    else if (indexRef.current < 0 || audio.ended) startTrack(0);
     else play();
   };
   const pause = () => audioRef.current?.pause();
@@ -87,8 +117,14 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist }: Aud
   const skipToArabic = () => skipLanguage('arabic');
   const skipToEnglish = () => skipLanguage('english');
   const handleEnded = () => {
+    if (streamRef.current) { playbackChanged(false); return; }
     if (indexRef.current + 1 < tracksRef.current.length) startTrack(indexRef.current + 1);
     else playbackChanged(false);
+  };
+
+  const seek = (value: number) => {
+    if (streamRef.current) streamRef.current.seek(indexRef.current, value);
+    else if (audioRef.current) audioRef.current.currentTime = value;
   };
 
   useEffect(() => {
@@ -113,13 +149,18 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist }: Aud
     handler('pause', pause);
     handler('nexttrack', () => startTrack(indexRef.current + 1));
     handler('previoustrack', () => startTrack(Math.max(0, indexRef.current - 1)));
-    handler('seekto', details => { if (details.seekTime !== undefined) audio.currentTime = details.seekTime; });
+    handler('seekto', details => { if (details.seekTime !== undefined) seek(details.seekTime); });
     return () => {
+      streamRef.current?.dispose();
+      streamRef.current = null;
       audio.pause();
       audio.removeAttribute('src');
       audio.load();
       for (const action of ['play', 'pause', 'nexttrack', 'previoustrack', 'seekto'] as MediaSessionAction[]) handler(action, null);
-      if (session) { session.playbackState = 'none'; session.metadata = null; }
+      if (session) {
+        session.playbackState = 'none'; session.metadata = null;
+        try { session.setPositionState?.(); } catch { /* optional API */ }
+      }
     };
   }, [queueKey]);
 
@@ -135,7 +176,7 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist }: Aud
   };
   const handleSeek = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(event.target.value);
-    if (audioRef.current) audioRef.current.currentTime = value;
+    seek(value);
     setProgress(value);
   };
   const formatTime = (seconds: number) => {
@@ -240,8 +281,8 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist }: Aud
         preload="auto"
         onPlay={() => playbackChanged(true)}
         onPause={() => playbackChanged(false)}
-        onTimeUpdate={() => setProgress(audioRef.current?.currentTime || 0)}
-        onLoadedMetadata={() => setDuration(Number.isFinite(audioRef.current?.duration) ? audioRef.current!.duration : 0)}
+        onTimeUpdate={() => { if (!streamRef.current) setProgress(audioRef.current?.currentTime || 0); }}
+        onLoadedMetadata={() => { if (!streamRef.current) setDuration(Number.isFinite(audioRef.current?.duration) ? audioRef.current!.duration : 0); }}
         onEnded={handleEnded}
         onError={() => { playbackChanged(false); setError('Audio could not be loaded. Press play to retry.'); }}
       />
