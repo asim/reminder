@@ -1,3 +1,4 @@
+import { keepScreenAwake } from '~/utils/screen-wake-lock';
 import { ContinuousAudio } from './continuous-audio';
 import { AudioDiagnostics } from './audio-diagnostics';
 import { Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
@@ -31,6 +32,10 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist }: Aud
   const [error, setError] = useState('');
   const activeTrack = tracks[index];
   const currentTrack = activeTrack?.language || null;
+
+  useEffect(() => {
+    if (isPlaying) return keepScreenAwake();
+  }, [isPlaying]);
 
   const playbackChanged = (playing: boolean) => {
     setIsPlaying(playing);
