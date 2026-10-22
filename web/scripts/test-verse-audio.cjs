@@ -35,7 +35,9 @@ const playlist = [1, 2, 3].flatMap(v => ['arabic', 'english'].map(language => ({
 })));
 let audioNode, tree, playCalls = 0;
 const audio = {
-  paused: true, ended: false,
+  paused: true, ended: false, currentTime: 0,
+  get src() { return this.source; },
+  set src(value) { this.source = value; this.currentTime = 0; },
   play() { this.paused = false; this.ended = false; playCalls++; return Promise.resolve(); },
   pause() { this.paused = true; },
 };
@@ -81,4 +83,15 @@ find(tree, n => n.props?.['aria-label'] === 'Play audio').props.onClick();
 assert.equal(audio.src, '1-arabic');
 ended(); ended();
 assert.equal(audio.src, '2-arabic', 'Default chapter playback still advances');
+ended();
+assert.equal(audio.src, '2-english');
+audio.currentTime = 2.5;
+ref.current.toggleVerse('Quran 2:2');
+assert.equal(audio.paused, true, 'Inline control pauses chapter playback');
+ref.current.toggleVerse('Quran 2:2');
+assert.equal(audio.paused, false);
+assert.equal(audio.src, '2-english', 'Inline resume keeps the current language');
+assert.equal(audio.currentTime, 2.5, 'Inline resume preserves playback position');
+ended();
+assert.equal(audio.src, '3-arabic', 'Inline resume preserves the chapter queue');
 console.log('Verse playback: Arabic/English, pause/resume, stop, replay, switching, continuous boundaries, chapter playback passed');

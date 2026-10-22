@@ -143,7 +143,8 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist, ref, 
       if (!audio) return;
       if (tracksRef.current[indexRef.current]?.label === label && !audio.ended) {
         if (!audio.paused) { pause(); return; }
-        if (verseRangeRef.current) { resume(); return; }
+        resume();
+        return;
       }
       const start = tracksRef.current.findIndex(track => track.label === label);
       if (start < 0) return;
