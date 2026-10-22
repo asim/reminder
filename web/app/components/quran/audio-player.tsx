@@ -2,17 +2,20 @@ import { keepScreenAwake } from '~/utils/screen-wake-lock';
 import { ContinuousAudio } from './continuous-audio';
 import { AudioDiagnostics } from './audio-diagnostics';
 import { Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 export type AudioTrack = { url: string; language: 'arabic' | 'english'; label: string };
+export type AudioPlayerHandle = { toggleVerse: (label: string) => void };
 type AudioPlayerProps = {
+  ref?: React.Ref<AudioPlayerHandle>;
+  onPlayingVerseChange?: (label: string | null) => void;
   arabicUrl?: string;
   englishUrl?: string;
   verseLabel: string;
   playlist?: AudioTrack[];
 };
 
-export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist }: AudioPlayerProps) {
+export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist, ref, onPlayingVerseChange }: AudioPlayerProps) {
   const tracks = playlist || [
     ...(arabicUrl ? [{ url: arabicUrl, language: 'arabic' as const, label: verseLabel }] : []),
     ...(englishUrl ? [{ url: englishUrl, language: 'english' as const, label: verseLabel }] : []),
@@ -22,6 +25,7 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist }: Aud
   const queueKey = JSON.stringify(tracks);
   const audioRef = useRef<HTMLAudioElement>(null);
   const indexRef = useRef(-1);
+  const verseRangeRef = useRef<{ start: number; end: number } | null>(null);
   const streamRef = useRef<ContinuousAudio | null>(null);
   const [index, setIndex] = useState(-1);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -36,6 +40,10 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist }: Aud
   useEffect(() => {
     if (isPlaying) return keepScreenAwake();
   }, [isPlaying]);
+
+  useEffect(() => {
+    onPlayingVerseChange?.(isPlaying ? activeTrack?.label ?? null : null);
+  }, [isPlaying, activeTrack?.label, onPlayingVerseChange]);
 
   const playbackChanged = (playing: boolean) => {
     setIsPlaying(playing);
@@ -78,6 +86,8 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist }: Aud
   const startTrack = (next: number) => {
     const audio = audioRef.current;
     if (!audio || !tracksRef.current[next]) return;
+    const range = verseRangeRef.current;
+    if (range && (next < range.start || next > range.end)) return;
     const continuous = new URLSearchParams(location.search).get('continuousAudio') === '1';
     if (continuous && !ContinuousAudio.supported()) {
       setError('Continuous audio is not supported by this browser. Remove continuousAudio=1 from the URL to use the standard player.');
@@ -87,7 +97,7 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist }: Aud
     if (continuous) {
       if (!streamRef.current?.seek(next)) {
         streamRef.current?.dispose();
-        streamRef.current = new ContinuousAudio(audio, tracksRef.current.map(track => track.url), next,
+        streamRef.current = new ContinuousAudio(audio, tracksRef.current.slice(0, (verseRangeRef.current?.end ?? tracksRef.current.length - 1) + 1).map(track => track.url), next,
           (segment, elapsed) => {
             if (indexRef.current !== segment.index) updateTrack(segment.index);
             setProgress(elapsed);
@@ -109,7 +119,7 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist }: Aud
     const audio = audioRef.current;
     if (!audio) return;
     if (streamRef.current?.hasFailed) startTrack(Math.max(0, indexRef.current));
-    else if (indexRef.current < 0 || audio.ended) startTrack(0);
+    else if (indexRef.current < 0 || audio.ended) startTrack(verseRangeRef.current?.start ?? 0);
     else play();
   };
   const pause = () => audioRef.current?.pause();
@@ -123,9 +133,29 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist }: Aud
   const skipToEnglish = () => skipLanguage('english');
   const handleEnded = () => {
     if (streamRef.current) { playbackChanged(false); return; }
-    if (indexRef.current + 1 < tracksRef.current.length) startTrack(indexRef.current + 1);
+    if (indexRef.current < (verseRangeRef.current?.end ?? tracksRef.current.length - 1)) startTrack(indexRef.current + 1);
     else playbackChanged(false);
   };
+
+  useImperativeHandle(ref, () => ({
+    toggleVerse(label) {
+      const audio = audioRef.current;
+      if (!audio) return;
+      if (tracksRef.current[indexRef.current]?.label === label && !audio.ended) {
+        if (!audio.paused) { pause(); return; }
+        resume();
+        return;
+      }
+      const start = tracksRef.current.findIndex(track => track.label === label);
+      if (start < 0) return;
+      let end = start;
+      while (tracksRef.current[end + 1]?.label === label) end++;
+      streamRef.current?.dispose();
+      streamRef.current = null;
+      verseRangeRef.current = { start, end };
+      startTrack(start);
+    },
+  }));
 
   const seek = (value: number) => {
     if (streamRef.current) streamRef.current.seek(indexRef.current, value);
@@ -137,6 +167,7 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist }: Aud
     if (!audio) return;
     audio.pause();
     indexRef.current = -1;
+    verseRangeRef.current = null;
     setIndex(-1);
     setProgress(0);
     setDuration(0);
