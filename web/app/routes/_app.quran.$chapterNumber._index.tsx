@@ -1,13 +1,13 @@
 import type { Route } from '.react-router/types/app/routes/+types/_app.quran.$chapterNumber._index';
-import { CircleChevronLeft, CircleChevronRight } from 'lucide-react';
-import { useEffect } from 'react';
+import { CircleChevronLeft, CircleChevronRight, Play, Pause } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router';
 import { BookmarkButton } from '~/components/interface/bookmark-button';
 import { ReadingBookmarkButton } from '~/components/interface/reading-bookmark-button';
 import { ShareButton } from '~/components/interface/share-button';
 import { PageError } from '~/components/interface/page-error';
 import { PrimaryButton } from '~/components/interface/primary-button';
-import { AudioPlayer } from '~/components/quran/audio-player';
+import { AudioPlayer, type AudioPlayerHandle } from '~/components/quran/audio-player';
 import { ChapterHeader } from '~/components/quran/chapter-header';
 import { VerseArabic } from '~/components/quran/verse-arabic';
 import { TranscriptButton } from '~/components/quran/transcript-button';
@@ -42,6 +42,8 @@ export default function QuranChapter(props: Route.ComponentProps) {
   const { mode, wordByWord, transliteration: showTransliteration, commentary: showCommentary, translation } = settings;
   const data = useTranslatedChapter(Number(chapterNumber), translation);
   const location = useLocation();
+  const audioPlayerRef = useRef<AudioPlayerHandle>(null);
+  const [playingVerse, setPlayingVerse] = useState<string | null>(null);
 
   const playlist = data.verses.filter(verse => verse.number !== 0).flatMap(verse => [
     ...(verse.audio_arabic ? [{ url: verse.audio_arabic, language: 'arabic' as const, label: `Quran ${data.number}:${verse.number}` }] : []),
@@ -88,7 +90,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
         </>}
       />
       
-      <AudioPlayer playlist={playlist} verseLabel={`Quran ${data.number}:1`} />
+      <AudioPlayer ref={audioPlayerRef} onPlayingVerseChange={setPlayingVerse} playlist={playlist} verseLabel={`Quran ${data.number}:1`} />
 
       <div className='space-y-3 sm:space-y-8'>
         {data.verses.map(verse => (
@@ -100,6 +102,17 @@ export default function QuranChapter(props: Route.ComponentProps) {
               <div className='flex items-center justify-between mt-2 gap-2'>
                 <Link className='text-xs sm:text-sm text-gray-500' to={buildQuranShareUrl(`/quran/${data.number}/${verse.number}`, { mode, translation, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}>{data.number}:{verse.number}</Link>
                 <div className='flex items-center gap-1'>
+                  {(verse.audio_arabic || verse.audio_english) && (
+                    <button
+                      type='button'
+                      onClick={() => audioPlayerRef.current?.toggleVerse(`Quran ${data.number}:${verse.number}`)}
+                      className='inline-flex items-center justify-center p-1 rounded-md transition-colors hover:bg-gray-100 text-gray-400 hover:text-gray-600'
+                      title={playingVerse === `Quran ${data.number}:${verse.number}` ? 'Pause verse' : 'Play verse in Arabic, then English'}
+                      aria-label={playingVerse === `Quran ${data.number}:${verse.number}` ? `Pause verse ${data.number}:${verse.number}` : `Play verse ${data.number}:${verse.number} in Arabic, then English`}
+                    >
+                      {playingVerse === `Quran ${data.number}:${verse.number}` ? <Pause className='size-4' /> : <Play className='size-4' />}
+                    </button>
+                  )}
                   <ReadingBookmarkButton type='quran' label={`${data.english} ${data.number}:${verse.number}`} url={buildQuranShareUrl(`/quran/${data.number}`, { mode, translation, wordByWord, commentary: showCommentary, transliteration: showTransliteration }) + `#${verse.number}`} excerpt={verse.text.slice(0, 80)} />
                   <BookmarkButton type='quran' itemKey={`${data.number}:${verse.number}`} label={`${data.english} ${data.number}:${verse.number}`} url={buildQuranShareUrl(`/quran/${data.number}`, { mode, translation, wordByWord, commentary: showCommentary, transliteration: showTransliteration }) + `#${verse.number}`} excerpt={verse.text.slice(0, 80)} />
                   <ShareButton title={`Quran ${data.number}:${verse.number}`} text={verse.text} url={buildQuranShareUrl(`/quran/${data.number}/${verse.number}`, { mode, translation, wordByWord, commentary: showCommentary, transliteration: showTransliteration })} />
