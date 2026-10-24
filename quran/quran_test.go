@@ -71,3 +71,32 @@ func TestTranslationCoverage(t *testing.T) {
 		t.Fatalf("Asad source snapshot changed: %s", got)
 	}
 }
+
+func TestSaheehTranslationCoverage(t *testing.T) {
+	q := Load()
+	count := 0
+	for _, ch := range q.Chapters {
+		for _, v := range ch.Verses {
+			if strings.TrimSpace(v.Translations["sahih"]) == "" {
+				t.Fatalf("missing Saheeh translation at %d:%d", ch.Number, v.Number)
+			}
+			if v.Number == 0 {
+				if v.Translations["sahih"] != q.Get(1).Verse(1).Translations["sahih"] {
+					t.Fatalf("incorrect Saheeh opening in chapter %d", ch.Number)
+				}
+			} else {
+				count++
+			}
+		}
+	}
+	if count != 6236 {
+		t.Fatalf("got %d translated verses", count)
+	}
+	data, err := files.ReadFile("data/sahih.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := fmt.Sprintf("%x", sha256.Sum256(data)); got != "7975243db39db47de765fcb39f6f1bb5aaf819c29cc00bed0aa98b1f7c39a479" {
+		t.Fatalf("Saheeh source snapshot changed: %s", got)
+	}
+}

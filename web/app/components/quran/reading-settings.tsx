@@ -4,7 +4,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import type { ViewMode } from './view-mode';
 
-export type Translation = 'khattab' | 'asad';
+export type Translation = 'khattab' | 'asad' | 'sahih';
 type Preferences = {
   mode: ViewMode;
   translation: Translation;
@@ -20,7 +20,7 @@ const defaults: Preferences = {
 };
 const storageKey = 'quran-reading-settings';
 const validMode = (v: unknown): v is ViewMode => ['translation', 'arabic', 'english'].includes(String(v));
-const validTranslation = (v: unknown): v is Translation => v === 'khattab' || v === 'asad';
+const validTranslation = (v: unknown): v is Translation => v === 'khattab' || v === 'asad' || v === 'sahih';
 const validSize = (v: unknown) => typeof v === 'number' && [80, 100, 120, 140, 160].includes(v);
 function savedPreferences(): Preferences {
   if (typeof window === 'undefined') return defaults;
@@ -144,6 +144,7 @@ export function ReadingSettings() {
           <span className='block mb-2 font-medium'>English translation</span>
           <select aria-label='English translation' className={selectClass} value={settings.translation} onChange={e => update({ translation: e.target.value as Translation })}>
             <option value='khattab'>Mustafa Khattab · The Clear Quran</option>
+            <option value='sahih'>Saheeh International</option>
             <option value='asad'>Muhammad Asad · The Message of the Qur’an</option>
           </select>
         </label>

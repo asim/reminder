@@ -247,13 +247,22 @@ func Load() *Quran {
 	var arabic map[string]interface{}
 	json.Unmarshal(f, &arabic)
 
-	// The second translation travels with each chapter, including offline downloads.
+	// Additional translations travel with each chapter, including offline downloads.
 	asadFile, err := files.ReadFile("data/asad.json")
 	if err != nil {
 		panic(err)
 	}
 	var asad map[string][]string
 	if err := json.Unmarshal(asadFile, &asad); err != nil {
+		panic(err)
+	}
+
+	sahihFile, err := files.ReadFile("data/sahih.json")
+	if err != nil {
+		panic(err)
+	}
+	var sahih map[string][]string
+	if err := json.Unmarshal(sahihFile, &sahih); err != nil {
 		panic(err)
 	}
 
@@ -292,6 +301,11 @@ func Load() *Quran {
 			panic("Asad verse count mismatch")
 		}
 
+		sahihVerses := sahih[fmt.Sprint(chapter)]
+		if len(sahihVerses) != len(data) {
+			panic("Saheeh International verse count mismatch")
+		}
+
 		var verses []*Verse
 
 		arabicText := arabic[fmt.Sprintf("%d", chapter)].([]interface{})
@@ -304,7 +318,7 @@ func Load() *Quran {
 				Chapter:      chapter,
 				Number:       0,
 				Text:         English,
-				Translations: map[string]string{"asad": asad["1"][0]},
+				Translations: map[string]string{"asad": asad["1"][0], "sahih": sahih["1"][0]},
 				Arabic:       Bismillah,
 			})
 		}
@@ -359,7 +373,7 @@ func Load() *Quran {
 				Chapter:      chapter,
 				Number:       num,
 				Text:         ayah.([]interface{})[1].(string),
-				Translations: map[string]string{"asad": asadVerses[i]},
+				Translations: map[string]string{"asad": asadVerses[i], "sahih": sahihVerses[i]},
 				Arabic:       ar,
 				Words:        alignWords(chapter, num, ar, wbw),
 				Comments:     text,

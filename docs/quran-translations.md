@@ -19,6 +19,14 @@ Reading settings are reached from the cog in the persistent Quran navigation (be
 
 Text-size controls scale Arabic and English independently. Default sizes, font faces, spacing rules and verse-number styling are preserved. Preferences are remembered locally; explicit URL settings override them for shared links. Old view/word/transliteration preferences migrate. Shared links and embeds include the translation; transcripts use the displayed edition and name it.
 
-Both editions are included in the same chapter API response and thus in the existing background offline download. No third-party request is required to switch editions. The corpus hash changes the offline cache version. If an older saved chapter lacks the requested edition, it displays an explicit update message rather than silently labelling Khattab text as Asad.
+All editions are included in the same chapter API response and thus in the existing background offline download. No third-party request is required to switch editions. The corpus hash changes the offline cache version. If an older saved chapter lacks the requested edition, it displays an explicit update message rather than silently labelling Khattab text as Asad.
 
 Arabic text, word alignment and verse count continue to be checked by the existing integrity test. The additional translation test checks coverage, opening formulas, the source snapshot and removal of the local wording substitution.
+
+## Saheeh International
+
+Retrieved 2026-10-24 from https://tanzil.net/trans/en.sahih (edition en.sahih; upstream last update April 24, 2011). All 114 chapters and 6,236 numbered verses were checked against the existing chapter counts. Text is preserved verbatim in quran/data/sahih.json; only the chapter/verse wrapper is converted to JSON. Unnumbered openings use this edition’s 1:1.
+
+Snapshot SHA-256: 7975243db39db47de765fcb39f6f1bb5aaf819c29cc00bed0aa98b1f7c39a479.
+
+Tanzil’s translation terms (https://tanzil.net/trans/) permit non-commercial use; commercial use requires permission from the translator or publisher. Translation text is not covered by this repository’s code license. Preserve Saheeh International attribution in the selector and transcript exports.

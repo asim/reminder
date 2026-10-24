@@ -13,7 +13,7 @@ export default function EmbedQuranVerse() {
   const verseNumber = Number(verseNum);
 
   const [params] = useSearchParams();
-  const translation = params.get('translation') === 'asad' ? 'asad' : 'khattab';
+  const translation = params.get('translation') === 'sahih' ? 'sahih' : params.get('translation') === 'asad' ? 'asad' : 'khattab';
   const data = useTranslatedChapter(chapterNumber, translation);
 
   const verse = data?.verses.find((v) => v.number === verseNumber);

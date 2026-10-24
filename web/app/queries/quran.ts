@@ -54,7 +54,7 @@ export const getChapterOptions = (chapterNumber: number) => ({
   },
 });
 
-// Both editions share the same chapter cache, so switching also works offline.
+// All editions share the same chapter cache, so switching also works offline.
 export function useTranslatedChapter(chapterNumber: number, translation: Translation) {
   const { data: original } = useSuspenseQuery(getChapterOptions(chapterNumber));
   return useMemo(() => ({

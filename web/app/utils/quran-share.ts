@@ -2,7 +2,7 @@ import type { ViewMode } from '~/components/quran/view-mode';
 
 export interface QuranViewSettings {
   mode: ViewMode;
-  translation?: 'khattab' | 'asad';
+  translation?: 'khattab' | 'asad' | 'sahih';
   wordByWord: boolean;
   commentary: boolean;
   transliteration?: boolean;
