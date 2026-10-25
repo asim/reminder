@@ -81,7 +81,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
           chapterName={data.name}
           chapterEnglish={data.english}
           verses={data.verses}
-          translator={translation === 'asad' ? 'Muhammad Asad' : 'Mustafa Khattab'}
+          translator={translation === 'sahih' ? 'Saheeh International' : translation === 'asad' ? 'Muhammad Asad' : 'Mustafa Khattab'}
         />
         <ShareButton
           title={`${data.english} (${data.name}) - Quran Chapter ${data.number}`}
