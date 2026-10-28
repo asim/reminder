@@ -767,33 +767,17 @@ func main() {
 		w.Write(b)
 	})
 
-	http.HandleFunc("/api/quran/{chapter}/{verse}", func(w http.ResponseWriter, r *http.Request) {
-		ch := r.PathValue("chapter")
-		if len(ch) == 0 {
-			return
+	api.RegisterQuranVerseRoute(http.DefaultServeMux, func(chapter, verse int) ([]byte, bool) {
+		if chapter > len(q.Chapters) {
+			return nil, false
 		}
 
-		chapter, _ := strconv.Atoi(ch)
-		if chapter < 1 || chapter > 114 {
-			return
+		vee := q.Get(chapter).Verse(verse)
+		if vee == nil {
+			return nil, false
 		}
 
-		ve := r.PathValue("verse")
-		if len(ch) == 0 {
-			return
-		}
-
-		cc := q.Get(chapter)
-
-		verse, _ := strconv.Atoi(ve)
-		if cc.Verse(verse) == nil {
-			return
-		}
-
-		vee := cc.Verse(verse)
-		b := vee.JSON()
-
-		w.Write(b)
+		return vee.JSON(), true
 	})
 
 	http.HandleFunc("/api/daily", func(w http.ResponseWriter, r *http.Request) {
