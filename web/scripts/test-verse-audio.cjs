@@ -46,9 +46,10 @@ function find(node, predicate) {
   if (predicate(node)) return node;
   return [node.props?.children].flat(2).map(n => find(n, predicate)).find(Boolean);
 }
+let playerProps = { playlist, verseLabel: 'Quran 2:1' };
 function render() {
   cursor = 0;
-  tree = AudioPlayer({ ref, playlist, verseLabel: 'Quran 2:1' });
+  tree = AudioPlayer({ ref, ...playerProps });
   audioNode = find(tree, n => n.type === 'audio');
   audioNode.props.ref.current = audio;
 }
@@ -63,21 +64,25 @@ ref.current.toggleVerse('Quran 2:2');
 assert.equal(audio.paused, false);
 ended();
 assert.equal(audio.src, '2-english');
+ended();
+assert.equal(audio.src, '3-arabic', 'Continue to the next verse in Arabic');
+ended();
+assert.equal(audio.src, '3-english');
 const beforeEnd = playCalls;
 ended();
-assert.equal(playCalls, beforeEnd, 'Must stop after selected English verse');
+assert.equal(playCalls, beforeEnd, 'Stop at the end of the chapter');
 ref.current.toggleVerse('Quran 2:2');
 assert.equal(audio.src, '2-arabic', 'Replay starts in Arabic');
 ref.current.toggleVerse('Quran 2:3');
 assert.equal(audio.src, '3-arabic', 'Another verse replaces playback');
 continuous = true;
 ref.current.toggleVerse('Quran 2:1');
-assert.equal(streams.at(-1).urls.join(','), '1-arabic,1-english');
+assert.equal(streams.at(-1).urls.join(','), '1-arabic,1-english,2-arabic,2-english,3-arabic,3-english');
 const oldStream = streams.at(-1);
 ref.current.toggleVerse('Quran 2:2');
 assert.equal(oldStream.disposed, true);
 assert.equal(streams.at(-1).first, 2);
-assert.equal(streams.at(-1).urls.at(-1), '2-english');
+assert.equal(streams.at(-1).urls.at(-1), '3-english');
 slots = []; continuous = false; audio.paused = true; audio.ended = false; render();
 find(tree, n => n.props?.['aria-label'] === 'Play audio').props.onClick();
 assert.equal(audio.src, '1-arabic');
@@ -94,4 +99,18 @@ assert.equal(audio.src, '2-english', 'Inline resume keeps the current language')
 assert.equal(audio.currentTime, 2.5, 'Inline resume preserves playback position');
 ended();
 assert.equal(audio.src, '3-arabic', 'Inline resume preserves the chapter queue');
+// A single-verse route supplies only that verse's URLs, never a chapter playlist.
+slots = []; continuous = false; audio.paused = true; audio.ended = false;
+playerProps = { arabicUrl: '2-arabic', englishUrl: '2-english', verseLabel: 'Quran 1:2' };
+render();
+find(tree, n => n.props?.['aria-label'] === 'Play audio').props.onClick();
+assert.equal(audio.src, '2-arabic');
+ended();
+assert.equal(audio.src, '2-english');
+const singleEnd = playCalls;
+ended();
+assert.equal(playCalls, singleEnd, 'Single-verse page stops after English');
+continuous = true;
+ref.current.toggleVerse('Quran 1:2');
+assert.equal(streams.at(-1).urls.join(','), '2-arabic,2-english', 'Continuous single-verse queue is also bounded');
 console.log('Verse playback: Arabic/English, pause/resume, stop, replay, switching, continuous boundaries, chapter playback passed');

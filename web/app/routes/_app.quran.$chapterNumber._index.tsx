@@ -44,6 +44,23 @@ export default function QuranChapter(props: Route.ComponentProps) {
   const location = useLocation();
   const audioPlayerRef = useRef<AudioPlayerHandle>(null);
   const [playingVerse, setPlayingVerse] = useState<string | null>(null);
+  const lastScrolledVerse = useRef<string | null>(null);
+
+  useEffect(() => { lastScrolledVerse.current = null; }, [chapterNumber]);
+
+  useEffect(() => {
+    // Follow new verses, without jumping again between languages or on resume.
+    if (!playingVerse || playingVerse === lastScrolledVerse.current) return;
+    const [chapter, verse] = playingVerse.replace('Quran ', '').split(':');
+    if (chapter !== String(chapterNumber)) return;
+    const element = document.getElementById(verse);
+    if (!element) return;
+    lastScrolledVerse.current = playingVerse;
+    element.scrollIntoView({
+      block: 'start',
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+    });
+  }, [playingVerse, chapterNumber]);
 
   const playlist = data.verses.filter(verse => verse.number !== 0).flatMap(verse => [
     ...(verse.audio_arabic ? [{ url: verse.audio_arabic, language: 'arabic' as const, label: `Quran ${data.number}:${verse.number}` }] : []),
@@ -107,8 +124,8 @@ export default function QuranChapter(props: Route.ComponentProps) {
                       type='button'
                       onClick={() => audioPlayerRef.current?.toggleVerse(`Quran ${data.number}:${verse.number}`)}
                       className='inline-flex items-center justify-center p-1 rounded-md transition-colors hover:bg-gray-100 text-gray-400 hover:text-gray-600'
-                      title={playingVerse === `Quran ${data.number}:${verse.number}` ? 'Pause verse' : 'Play verse in Arabic, then English'}
-                      aria-label={playingVerse === `Quran ${data.number}:${verse.number}` ? `Pause verse ${data.number}:${verse.number}` : `Play verse ${data.number}:${verse.number} in Arabic, then English`}
+                      title={playingVerse === `Quran ${data.number}:${verse.number}` ? 'Pause verse' : 'Play from this verse in Arabic, then English'}
+                      aria-label={playingVerse === `Quran ${data.number}:${verse.number}` ? `Pause verse ${data.number}:${verse.number}` : `Play from verse ${data.number}:${verse.number} in Arabic, then English`}
                     >
                       {playingVerse === `Quran ${data.number}:${verse.number}` ? <Pause className='size-4' /> : <Play className='size-4' />}
                     </button>

@@ -25,7 +25,6 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist, ref, 
   const queueKey = JSON.stringify(tracks);
   const audioRef = useRef<HTMLAudioElement>(null);
   const indexRef = useRef(-1);
-  const verseRangeRef = useRef<{ start: number; end: number } | null>(null);
   const streamRef = useRef<ContinuousAudio | null>(null);
   const [index, setIndex] = useState(-1);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -86,8 +85,6 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist, ref, 
   const startTrack = (next: number) => {
     const audio = audioRef.current;
     if (!audio || !tracksRef.current[next]) return;
-    const range = verseRangeRef.current;
-    if (range && (next < range.start || next > range.end)) return;
     const continuous = new URLSearchParams(location.search).get('continuousAudio') === '1';
     if (continuous && !ContinuousAudio.supported()) {
       setError('Continuous audio is not supported by this browser. Remove continuousAudio=1 from the URL to use the standard player.');
@@ -97,7 +94,7 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist, ref, 
     if (continuous) {
       if (!streamRef.current?.seek(next)) {
         streamRef.current?.dispose();
-        streamRef.current = new ContinuousAudio(audio, tracksRef.current.slice(0, (verseRangeRef.current?.end ?? tracksRef.current.length - 1) + 1).map(track => track.url), next,
+        streamRef.current = new ContinuousAudio(audio, tracksRef.current.map(track => track.url), next,
           (segment, elapsed) => {
             if (indexRef.current !== segment.index) updateTrack(segment.index);
             setProgress(elapsed);
@@ -119,7 +116,7 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist, ref, 
     const audio = audioRef.current;
     if (!audio) return;
     if (streamRef.current?.hasFailed) startTrack(Math.max(0, indexRef.current));
-    else if (indexRef.current < 0 || audio.ended) startTrack(verseRangeRef.current?.start ?? 0);
+    else if (indexRef.current < 0 || audio.ended) startTrack(0);
     else play();
   };
   const pause = () => audioRef.current?.pause();
@@ -133,7 +130,7 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist, ref, 
   const skipToEnglish = () => skipLanguage('english');
   const handleEnded = () => {
     if (streamRef.current) { playbackChanged(false); return; }
-    if (indexRef.current < (verseRangeRef.current?.end ?? tracksRef.current.length - 1)) startTrack(indexRef.current + 1);
+    if (indexRef.current + 1 < tracksRef.current.length) startTrack(indexRef.current + 1);
     else playbackChanged(false);
   };
 
@@ -148,11 +145,8 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist, ref, 
       }
       const start = tracksRef.current.findIndex(track => track.label === label);
       if (start < 0) return;
-      let end = start;
-      while (tracksRef.current[end + 1]?.label === label) end++;
       streamRef.current?.dispose();
       streamRef.current = null;
-      verseRangeRef.current = { start, end };
       startTrack(start);
     },
   }));
@@ -167,7 +161,6 @@ export function AudioPlayer({ arabicUrl, englishUrl, verseLabel, playlist, ref, 
     if (!audio) return;
     audio.pause();
     indexRef.current = -1;
-    verseRangeRef.current = null;
     setIndex(-1);
     setProgress(0);
     setDuration(0);
