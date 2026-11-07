@@ -155,15 +155,10 @@ export default function SearchIndex() {
     enabled: !!submittedQuery,
   });
 
-  // The server reports whether it has an LLM. Treat an absent flag as
-  // available so the control still appears against older builds; only an
-  // explicit false hides it.
-  const summariseAvailable = searchResults?.summarise_available !== false;
-
   const { data: summaryResults, isLoading: isSummaryLoading, error: summaryError } = useQuery({
     ...searchSummaryOptions(submittedQuery),
     enabled:
-      !!submittedQuery && mode === 'ask' && !!searchResults && summariseAvailable,
+      !!submittedQuery && mode === 'ask' && !!searchResults,
   });
 
   const mergedResults = useMemo<SearchResponseType | null>(() => {
@@ -266,7 +261,7 @@ export default function SearchIndex() {
               <SearchIcon className='size-3.5' />
               Search
             </button>
-            {summariseAvailable && (
+            {(
               <button
                 type='button'
                 onClick={() => doSubmit('ask')}
@@ -309,7 +304,7 @@ export default function SearchIndex() {
               <div className='mb-2 sm:mb-3 text-lg sm:text-xl font-medium'>
                 {mergedResults.q}
               </div>
-              {summaryError ? <p className='text-sm'>AI explanations need a connection. The references remain available below.</p> : isSummaryLoading ? (
+              {summaryError ? <p className='text-sm'>{summaryError.message || "AI summary unavailable. The references remain available below."}</p> : isSummaryLoading ? (
                 <div className='flex items-center gap-2 text-sm sm:text-base text-gray-500'>
                   <Loader2 className='animate-spin h-4 w-4' />
                   <span>Generating AI summary...</span>

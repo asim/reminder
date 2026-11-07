@@ -183,18 +183,13 @@ File an issue to discuss
 
 ## Offline reading
 
-The web app automatically saves the Quran (including Arabic, translation,
-word-by-word text, transliteration and stored commentary), Bukhari and names
-on this device in the background while online. The initial download needs a
-connection and resumes after an interruption. Texts and the app shell survive reloads and browser restarts, subject
-to the browser's storage limits and eviction policy.
+Quran, Bukhari and names are saved for offline reading after the initial download.
+Audio, search and AI require a connection. Use `make build` to include the service worker.
 
-Saved reading modes, bookmarks and unopened chapters work offline. Audio,
-server search and AI features need a connection. Unsaved content shows a reconnect message
-instead of waiting indefinitely. Previously viewed daily reminders are cached,
-but new reminders require a connection.
+## AI limits
 
-`npm run build` generates the versioned service worker after building all route
-bundles. Deploy the complete `web/build/client` output (as `make web`/`make build`
-already do). Development mode does not install an offline cache. Production must
-use HTTPS (or localhost) for service workers.
+Summaries require `summarise: true`. Public defaults: 100 requests/day,
+20 per IP, two concurrent generations and 1,024 output tokens. Configure with
+`AI_DAILY_LIMIT`, `AI_IP_DAILY_LIMIT`, `AI_CONCURRENCY_LIMIT` and `AI_MAX_OUTPUT_TOKENS`.
+Daily/hourly generation is exempt. Counters persist across restarts for a single server.
+Nginx's `X-Real-IP` is trusted from loopback; set `TRUSTED_PROXY_CIDRS` for other proxy addresses.

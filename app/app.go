@@ -206,6 +206,25 @@ document.addEventListener('DOMContentLoaded', function(){
 
     xhr.send(null);
 
+    window.summarise = async function(button, encodedQuery) {
+        var slot = button.parentElement;
+        button.disabled = true;
+        button.textContent = 'Generating...';
+        try {
+            var response = await fetch('/api/search', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({q: decodeURIComponent(encodedQuery), summarise: true})
+            });
+            var result = await response.json();
+            if (!response.ok) throw new Error(result.message || 'Summary unavailable');
+            if (result.answer) slot.innerHTML = result.answer;
+            else slot.textContent = 'No AI summary is available.';
+        } catch (error) {
+            slot.textContent = error.message || 'AI summary unavailable. Please try again later.';
+        }
+    };
+
     var form = document.getElementById("question");
     form.addEventListener("submit", function(ev) {
         ev.preventDefault();
@@ -228,8 +247,8 @@ document.addEventListener('DOMContentLoaded', function(){
                 var text = "<div id='" + resultId + "' class='p-6 bg-white border border-gray-200 rounded-lg shadow-sm mb-6'>";
                 text += "<div class='font-semibold text-gray-900 mb-3'>" + json.q + "</div>";
 
-                // Summary placeholder — only offered when a model is configured
-                if (json.summarise_available) {
+                // Summary is requested explicitly by the reader.
+                {
                     text += "<div class='summary-slot text-gray-500 text-sm mb-4'>";
                     text += "<button class='summarise-btn px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700 text-sm' onclick='summarise(this, \"" + encodeURIComponent(json.q) + "\")'>Summarise with AI</button>";
                     text += "</div>";

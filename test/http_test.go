@@ -126,8 +126,7 @@ func TestLitePagesAndSearch(t *testing.T) {
 			continue
 		}
 		var result struct {
-			References         []json.RawMessage
-			SummariseAvailable bool
+			References []json.RawMessage
 		}
 		if code != 200 {
 			t.Fatalf("search: %d %s", code, data)
@@ -135,9 +134,37 @@ func TestLitePagesAndSearch(t *testing.T) {
 		if err := json.Unmarshal(data, &result); err != nil {
 			t.Fatal(err)
 		}
-		if len(result.References) == 0 || result.SummariseAvailable {
+		if len(result.References) == 0 {
 			t.Fatalf("search: %s", data)
 		}
 		break
+	}
+}
+
+func TestSearchSummaryOptIn(t *testing.T) {
+	for _, body := range []string{`{"q":"patience"}`, `{"q":"patience","summarise":false}`} {
+		status, _, data := request(t, "POST", "/api/search", []byte(body))
+		if status != 200 {
+			t.Fatalf("status %d: %s", status, data)
+		}
+		var result struct {
+			Answer     string        `json:"answer"`
+			References []interface{} `json:"references"`
+		}
+		if err := json.Unmarshal(data, &result); err != nil {
+			t.Fatal(err)
+		}
+		if bytes.Contains(data, []byte("summarise_available")) || bytes.Contains(data, []byte("summary_error")) {
+			t.Fatalf("unexpected API fields: %s", data)
+		}
+		if result.Answer != "" || len(result.References) == 0 {
+			t.Fatalf("unexpected search response %s", data)
+		}
+	}
+	for _, value := range []string{`"true"`, `1`, `null`} {
+		status, _, _ := request(t, "POST", "/api/search", []byte(`{"q":"patience","summarise":`+value+`}`))
+		if status != 400 {
+			t.Fatalf("summarise=%s got %d", value, status)
+		}
 	}
 }

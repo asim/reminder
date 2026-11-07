@@ -54,7 +54,7 @@ func generateMessage(ctx context.Context, verse, hadith, name string) (message s
 		}
 	}()
 
-	llmMessage := model.Ask(ctx, contexts, question)
+	llmMessage := model.AskInternal(ctx, contexts, question)
 
 	// If message is not empty, use it
 	if len(strings.TrimSpace(llmMessage)) > 0 {

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -94,7 +95,7 @@ type ToolHandler func(args map[string]interface{}) (string, error)
 type Server struct {
 	info     ServerInfo
 	tools    []Tool
-	handlers map[string]ToolHandler
+	handlers map[string]func(context.Context, map[string]interface{}) (string, error)
 	mu       sync.RWMutex
 }
 
@@ -102,12 +103,16 @@ type Server struct {
 func NewServer(name, version string) *Server {
 	return &Server{
 		info:     ServerInfo{Name: name, Version: version},
-		handlers: make(map[string]ToolHandler),
+		handlers: make(map[string]func(context.Context, map[string]interface{}) (string, error)),
 	}
 }
 
 // AddTool registers a tool with the server.
 func (s *Server) AddTool(name, description string, schema InputSchema, handler ToolHandler) {
+	s.AddContextTool(name, description, schema, func(_ context.Context, args map[string]interface{}) (string, error) { return handler(args) })
+}
+
+func (s *Server) AddContextTool(name, description string, schema InputSchema, handler func(context.Context, map[string]interface{}) (string, error)) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -166,7 +171,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "tools/list":
 		s.handleToolsList(w, &req)
 	case "tools/call":
-		s.handleToolsCall(w, &req)
+		s.handleToolsCall(r.Context(), w, &req)
 	case "ping":
 		writeResult(w, req.ID, map[string]interface{}{})
 	default:
@@ -195,7 +200,7 @@ func (s *Server) handleToolsList(w http.ResponseWriter, req *Request) {
 	writeResult(w, req.ID, result)
 }
 
-func (s *Server) handleToolsCall(w http.ResponseWriter, req *Request) {
+func (s *Server) handleToolsCall(ctx context.Context, w http.ResponseWriter, req *Request) {
 	var params ToolCallParams
 	if err := json.Unmarshal(req.Params, &params); err != nil {
 		writeError(w, req.ID, -32602, "Invalid params")
@@ -211,7 +216,7 @@ func (s *Server) handleToolsCall(w http.ResponseWriter, req *Request) {
 		return
 	}
 
-	result, err := handler(params.Arguments)
+	result, err := handler(ctx, params.Arguments)
 	if err != nil {
 		writeResult(w, req.ID, ToolCallResult{
 			Content: []TextContent{{Type: "text", Text: err.Error()}},
