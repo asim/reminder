@@ -1,6 +1,6 @@
-// Package integration checks the real routes registered by main.go.
+// Package test checks the real routes registered by main.go.
 // Run scripts/test-http.sh to build and start an isolated server for these tests.
-package integration
+package test
 
 import (
 	"bytes"
