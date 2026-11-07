@@ -28,7 +28,7 @@ for _ in range(300):
 else: raise SystemExit('server did not become ready')
 PY
 then cat "$test_dir/server.log"; exit 1; fi
-if ! REMINDER_TEST_URL=http://127.0.0.1:8080 go test -count=1 ./internal/integration; then
+if ! REMINDER_TEST_URL=http://127.0.0.1:8080 go test -count=1 ./test; then
  cat "$test_dir/server.log"
  exit 1
 fi
