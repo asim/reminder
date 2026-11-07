@@ -206,6 +206,25 @@ document.addEventListener('DOMContentLoaded', function(){
 
     xhr.send(null);
 
+    window.summarise = async function(button, encodedQuery) {
+        var slot = button.parentElement;
+        button.disabled = true;
+        button.textContent = 'Generating...';
+        try {
+            var response = await fetch('/api/search', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({q: decodeURIComponent(encodedQuery), summarise: true})
+            });
+            if (!response.ok) throw new Error('Summary unavailable');
+            var result = await response.json();
+            if (result.answer) slot.innerHTML = result.answer;
+            else slot.textContent = result.summary_error || 'No AI summary is available.';
+        } catch (error) {
+            slot.textContent = 'AI summary unavailable. Please try again later.';
+        }
+    };
+
     var form = document.getElementById("question");
     form.addEventListener("submit", function(ev) {
         ev.preventDefault();

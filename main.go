@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"math/rand"
 	"net/http"
@@ -245,6 +245,13 @@ func main() {
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	flag.Parse()
+	if err := model.ConfigureLimits(api.ReminderDir); err != nil {
+		log.Fatal(err)
+	}
+	clientMiddleware, err := api.ClientMiddleware(os.Getenv("TRUSTED_PROXY_CIDRS"))
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	reminders := daily.NewStore(api.ReminderDir)
 	var history search.History
@@ -661,11 +668,16 @@ func main() {
 	})
 
 	http.HandleFunc("/api/explain", func(w http.ResponseWriter, r *http.Request) {
-		b, _ := io.ReadAll(r.Body)
 		var data map[string]interface{}
-		json.Unmarshal(b, &data)
-
-		q := data["q"].(string)
+		if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+			http.Error(w, "Invalid JSON request", 400)
+			return
+		}
+		q, ok := data["q"].(string)
+		if !ok || strings.TrimSpace(q) == "" {
+			http.Error(w, "q is required", 400)
+			return
+		}
 
 		prompt := `Generate a detailed summary for the following with it's meaning and origin, output the response as JSON with the fields: 
 		text, context, summary. Each field itself should be a string. Text is the text that was provided. Context is contextual information 
@@ -674,16 +686,31 @@ func main() {
 		%s
 		`
 
-		answer := model.Ask(r.Context(), nil, fmt.Sprintf(prompt, q))
+		answer, err := model.AskSafe(r.Context(), nil, fmt.Sprintf(prompt, q))
+		if err != nil {
+			var limit *model.LimitError
+			if errors.As(err, &limit) {
+				http.Error(w, limit.Error(), http.StatusTooManyRequests)
+			} else {
+				log.Printf("AI generation failed: %v", err)
+				http.Error(w, "AI generation unavailable", http.StatusServiceUnavailable)
+			}
+			return
+		}
 		w.Write([]byte(answer))
 	})
 
 	http.HandleFunc("/api/translate", func(w http.ResponseWriter, r *http.Request) {
-		b, _ := io.ReadAll(r.Body)
 		var data map[string]interface{}
-		json.Unmarshal(b, &data)
-
-		q := data["q"].(string)
+		if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+			http.Error(w, "Invalid JSON request", 400)
+			return
+		}
+		q, ok := data["q"].(string)
+		if !ok || strings.TrimSpace(q) == "" {
+			http.Error(w, "q is required", 400)
+			return
+		}
 
 		prompt := `Translate the following into a modern interpretation, transliterate and then word by word. 
 		For each word provide 3 alternatives and a transliteration in english. Generate the output as JSON. 
@@ -694,7 +721,17 @@ func main() {
 
 		%s`
 
-		answer := model.Ask(r.Context(), nil, fmt.Sprintf(prompt, q))
+		answer, err := model.AskSafe(r.Context(), nil, fmt.Sprintf(prompt, q))
+		if err != nil {
+			var limit *model.LimitError
+			if errors.As(err, &limit) {
+				http.Error(w, limit.Error(), http.StatusTooManyRequests)
+			} else {
+				log.Printf("AI generation failed: %v", err)
+				http.Error(w, "AI generation unavailable", http.StatusServiceUnavailable)
+			}
+			return
+		}
 		w.Write([]byte(answer))
 	})
 
@@ -736,20 +773,25 @@ func main() {
 		}
 
 		if r.Method == "POST" {
-			b, _ := io.ReadAll(r.Body)
 			var data map[string]interface{}
-			json.Unmarshal(b, &data)
+			if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+				http.Error(w, "Invalid JSON request", 400)
+				return
+			}
 
 			q, _ := data["q"].(string)
+			if strings.TrimSpace(q) == "" {
+				http.Error(w, "q is required", 400)
+				return
+			}
 
-			// summarise defaults to true when absent for backward compat.
-			// The new web UI explicitly sets summarise=false for the fast
-			// path that only returns references, then issues a second call
-			// with summarise=true to fetch the LLM answer.
-			summarise := true
-			if v, ok := data["summarise"]; ok {
-				if bv, ok := v.(bool); ok {
-					summarise = bv
+			summarise := false
+			if value, present := data["summarise"]; present {
+				var ok bool
+				summarise, ok = value.(bool)
+				if !ok {
+					http.Error(w, "summarise must be true or false", http.StatusBadRequest)
+					return
 				}
 			}
 
@@ -765,16 +807,21 @@ func main() {
 
 			// References alone are useful, and are all we can return when the
 			// caller opted out or no model is configured.
+			summaryError := ""
 			writeRefs := func() {
-				output, _ := json.Marshal(map[string]interface{}{
-					"q":                   q,
-					"answer":              "",
-					"references":          res,
-					"summarise_available": available,
-				})
+				response := map[string]interface{}{
+					"q": q, "answer": "", "references": res, "summarise_available": available,
+				}
+				if summaryError != "" {
+					response["summary_error"] = summaryError
+				}
+				output, _ := json.Marshal(response)
 				w.Write(output)
 			}
 
+			if summarise && !available {
+				summaryError = "AI summaries are not configured."
+			}
 			if !summarise || !available {
 				writeRefs()
 				return
@@ -782,7 +829,12 @@ func main() {
 
 			answer, err := search.Summarise(r.Context(), res, q)
 			if err != nil {
-				log.Printf("Summarisation failed for %q: %v", q, err)
+				log.Printf("Summarisation failed: %v", err)
+				summaryError = "AI summary unavailable. Please try again later."
+				var limit *model.LimitError
+				if errors.As(err, &limit) {
+					summaryError = err.Error()
+				}
 				writeRefs()
 				return
 			}
@@ -954,13 +1006,14 @@ func main() {
 		return string(byt), nil
 	})
 
-	mcpServer.AddTool("search", "Search Islamic content and get AI-summarised answers from the Quran, Hadith and Names of Allah", api.InputSchema{
+	mcpServer.AddContextTool("search", "Search Islamic content and get AI-summarised answers from the Quran, Hadith and Names of Allah", api.InputSchema{
 		Type: "object",
 		Properties: map[string]api.Property{
-			"q": {Type: "string", Description: "The question to ask"},
+			"summarise": {Type: "boolean", Description: "Generate an AI summary; defaults to false"},
+			"q":         {Type: "string", Description: "The question to ask"},
 		},
 		Required: []string{"q"},
-	}, func(args map[string]interface{}) (string, error) {
+	}, func(ctx context.Context, args map[string]interface{}) (string, error) {
 		select {
 		case <-indexed:
 		default:
@@ -976,7 +1029,19 @@ func main() {
 		if err != nil {
 			return "", err
 		}
-		answer := model.Ask(context.Background(), search.Context(res), question)
+		answer := ""
+		if value, present := args["summarise"]; present {
+			enabled, ok := value.(bool)
+			if !ok {
+				return "", fmt.Errorf("summarise must be true or false")
+			}
+			if enabled {
+				answer, err = model.AskSafe(ctx, search.Context(res), question)
+				if err != nil {
+					return "", err
+				}
+			}
+		}
 
 		output, _ := json.Marshal(map[string]interface{}{
 			"q":          question,
@@ -1007,6 +1072,7 @@ func main() {
 
 		log.Println("Starting server :8080")
 		if err := http.ListenAndServe(":8080", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			r.Body = http.MaxBytesReader(w, r.Body, 16384)
 			// CORS for API routes — allow any origin
 			if strings.HasPrefix(r.URL.Path, "/api/") || r.URL.Path == "/mcp" {
 				w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -1044,7 +1110,7 @@ func main() {
 				})
 			}
 
-			http.DefaultServeMux.ServeHTTP(w, r)
+			clientMiddleware(http.DefaultServeMux).ServeHTTP(w, r)
 		})); err != nil {
 			log.Printf("Server error: %v\n", err)
 		}

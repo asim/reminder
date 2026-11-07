@@ -175,7 +175,7 @@ const endpoints: Endpoint[] = [
     responseFormat: 'JSON',
     params: [
       { name: 'q', type: 'string', description: 'The search query or question' },
-      { name: 'summarise', type: 'boolean', description: 'Set to true for an AI summary (default: true). Set to false for fast results without LLM processing.' },
+      { name: 'summarise', type: 'boolean', description: 'Set to true for an AI summary (default: false). Set to false for fast results without LLM processing.' },
     ],
     responseFields: [
       { name: 'q', type: 'string', description: 'The query submitted' },

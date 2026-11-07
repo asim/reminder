@@ -67,7 +67,11 @@ func ollamaReachable() bool {
 func AskSafe(ctx context.Context, contexts []string, question string) (answer string, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = fmt.Errorf("llm: %v", r)
+			if e, ok := r.(error); ok {
+				err = e
+			} else {
+				err = fmt.Errorf("llm: %v", r)
+			}
 		}
 	}()
 
@@ -98,7 +102,34 @@ Anything between the following 'context' XML blocks is retrieved from the knowle
 Don't mention the knowledge base, context or search results in your answer.
 `))
 
+type internalKey struct{}
+
+func outputLimit(ctx context.Context) int {
+	if internal, _ := ctx.Value(internalKey{}).(bool); internal {
+		return 8192
+	}
+	return budget.output
+}
+
+// AskInternal is reserved for scheduled server-owned generation, never request handlers.
+// It does not consume or wait on the public AI quota.
+func AskInternal(ctx context.Context, contexts []string, question string) string {
+	return Ask(context.WithValue(ctx, internalKey{}, true), contexts, question)
+}
+
 func Ask(ctx context.Context, contexts []string, question string) string {
+	if budget == nil {
+		panic("AI limits are not configured")
+	}
+	if internal, _ := ctx.Value(internalKey{}).(bool); !internal {
+		release, err := budget.acquire(ctx, time.Now())
+		if err != nil {
+			panic(err)
+		}
+		defer release()
+	}
+	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
+	defer cancel()
 	sb := &strings.Builder{}
 	if err := systemPromptTpl.Execute(sb, contexts); err != nil {
 		panic(err)
@@ -118,11 +149,11 @@ func Ask(ctx context.Context, contexts []string, question string) string {
 }
 
 func askClaude(ctx context.Context, apiKey, systemPrompt, question string) string {
-	client := anthropic.NewClient(option.WithAPIKey(apiKey))
+	client := anthropic.NewClient(option.WithAPIKey(apiKey), option.WithMaxRetries(0))
 
 	resp, err := client.Messages.New(ctx, anthropic.MessageNewParams{
 		Model:     anthropic.ModelClaudeHaiku4_5,
-		MaxTokens: 8192,
+		MaxTokens: int64(outputLimit(ctx)),
 		System: []anthropic.TextBlockParam{
 			{Text: systemPrompt},
 		},
@@ -184,7 +215,7 @@ func askOpenAICompat(ctx context.Context, systemPrompt, question string) string 
 	res, err := openAIClient.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
 		Model:               model,
 		Messages:            messages,
-		MaxCompletionTokens: 8192,
+		MaxCompletionTokens: outputLimit(ctx),
 	})
 	if err != nil {
 		panic(err)

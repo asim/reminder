@@ -314,7 +314,7 @@ export default function SearchIndex() {
                   <Loader2 className='animate-spin h-4 w-4' />
                   <span>Generating AI summary...</span>
                 </div>
-              ) : !mergedResults.answer ? <p className='text-sm'>No AI explanation is available. Read the references below.</p> : (
+              ) : !mergedResults.answer ? <p className='text-sm'>{summaryResults?.summary_error || "No AI explanation is available. Read the references below."}</p> : (
                 <div
                   className='text-sm sm:text-base prose prose-sm sm:prose-base max-w-none'
                   dangerouslySetInnerHTML={{ __html: mergedResults.answer }}

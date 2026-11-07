@@ -10,6 +10,7 @@ type SearchReference = {
 export type SearchResponseType = {
   q: string;
   answer: string;
+  summary_error?: string;
   references: SearchReference[];
   /**
    * False when the server has no LLM configured. Search works without one,
@@ -44,6 +45,10 @@ export const searchOptions = (query: string) => ({
 // Slow search: triggers LLM summarisation for the given query.
 export const searchSummaryOptions = (query: string) => ({
   queryKey: ['search-summary', query],
+  retry: false,
+  refetchOnWindowFocus: false,
+  refetchOnReconnect: false,
+  refetchOnMount: false,
   queryFn: async () => {
     if (!query.trim()) {
       return null;
