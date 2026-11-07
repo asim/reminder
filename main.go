@@ -13,14 +13,13 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
-	"unicode"
 
 	"github.com/asim/reminder/api"
 	"github.com/asim/reminder/app"
 	"github.com/asim/reminder/daily"
 	"github.com/asim/reminder/hadith"
+	"github.com/asim/reminder/model"
 	"github.com/asim/reminder/names"
 	"github.com/asim/reminder/quran"
 	"github.com/asim/reminder/search"
@@ -36,38 +35,6 @@ var (
 	WebFlag    = flag.Bool("web", false, "Without this flag, the lite version will be served")
 )
 
-var mtx sync.RWMutex
-var history = map[string][]string{}
-var dailyName, dailyVerse, dailyHadith, dailyMessage string
-var links = map[string]string{}
-var dailyUpdated = time.Time{}
-var reminderDir = api.ReminderDir
-var lastPushDateFile = api.ReminderPath("last_push_date.txt")
-var lastPushDate = loadLastPushDate()
-var dailyIndex = loadDailyIndex()
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func isCapital(s string) bool {
-	if len(s) == 0 {
-		return false // An empty string doesn't have a capitalized first letter
-	}
-
-	firstChar := []rune(s)[0] // Convert string to slice of runes to handle Unicode characters
-
-	// Check if the first character is a letter
-	if !unicode.IsLetter(firstChar) {
-		return false // If it's not a letter, it can't be capitalized
-	}
-
-	return unicode.IsUpper(firstChar)
-}
-
 func isAPIClient(r *http.Request) bool {
 	userAgent := r.Header.Get("User-Agent")
 	accept := r.Header.Get("Accept")
@@ -79,24 +46,9 @@ func isAPIClient(r *http.Request) bool {
 		(accept != "" && !strings.Contains(accept, "text/html") && !strings.Contains(accept, "*/*"))
 }
 
-func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Collection, a *api.Api) {
+func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Collection, a *api.Api, reminders *daily.Store) {
 	http.HandleFunc("/home", func(w http.ResponseWriter, r *http.Request) {
-		mtx.RLock()
-		verseLink := links["verse"]
-		hadithLink := links["hadith"]
-		nameLink := links["name"]
-		verse := dailyVerse
-		hadith := dailyHadith
-		name := dailyName
-		mtx.RUnlock()
-
-		// Populate Index template with actual data
-		indexContent := strings.ReplaceAll(app.Index, "{verse_link}", verseLink)
-		indexContent = strings.ReplaceAll(indexContent, "{verse_text}", verse)
-		indexContent = strings.ReplaceAll(indexContent, "{hadith_link}", hadithLink)
-		indexContent = strings.ReplaceAll(indexContent, "{hadith_text}", hadith)
-		indexContent = strings.ReplaceAll(indexContent, "{name_link}", nameLink)
-		indexContent = strings.ReplaceAll(indexContent, "{name_text}", name)
+		indexContent := app.HomeContent(reminders.Latest())
 
 		if isAPIClient(r) {
 			w.Write([]byte(app.RenderSimpleHTML("Home", "Quran, hadith, and more as an app and API", indexContent)))
@@ -106,92 +58,7 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Collection, a 
 	})
 
 	http.HandleFunc("/bookmarks", func(w http.ResponseWriter, r *http.Request) {
-		bookmarksContent := `
-<div id="quran-bookmarks" class="mb-8">
-  <h2 class="text-2xl font-semibold mb-4">Quran</h2>
-  <div id="quran-list" class="space-y-3"></div>
-</div>
-
-<div id="hadith-bookmarks" class="mb-8">
-  <h2 class="text-2xl font-semibold mb-4">Hadith</h2>
-  <div id="hadith-list" class="space-y-3"></div>
-</div>
-
-<div id="names-bookmarks" class="mb-8">
-  <h2 class="text-2xl font-semibold mb-4">Names</h2>
-  <div id="names-list" class="space-y-3"></div>
-</div>
-
-<script>
-  function loadBookmarks() {
-    const bookmarks = JSON.parse(localStorage.getItem('reminder_bookmarks') || '{"quran":{},"hadith":{},"names":{}}');
-    
-    // Quran bookmarks
-    const quranList = document.getElementById('quran-list');
-    const quranKeys = Object.keys(bookmarks.quran || {});
-    if (quranKeys.length > 0) {
-      quranList.innerHTML = quranKeys.map(key => {
-        const bookmark = bookmarks.quran[key];
-        return ` + "`" + `
-        <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">
-          <a href="${bookmark.url}" class="flex-grow text-blue-600 hover:text-blue-800">${bookmark.label}</a>
-          <button onclick="removeBookmark('quran', '${key}')" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm">Remove</button>
-        </div>
-      ` + "`" + `;
-      }).join('');
-    } else {
-      quranList.innerHTML = '<p class="text-gray-500">No bookmarks yet</p>';
-    }
-    
-    // Hadith bookmarks
-    const hadithList = document.getElementById('hadith-list');
-    const hadithKeys = Object.keys(bookmarks.hadith || {});
-    if (hadithKeys.length > 0) {
-      hadithList.innerHTML = hadithKeys.map(key => {
-        const bookmark = bookmarks.hadith[key];
-        return ` + "`" + `
-        <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">
-          <a href="${bookmark.url}" class="flex-grow text-blue-600 hover:text-blue-800">${bookmark.label}</a>
-          <button onclick="removeBookmark('hadith', '${key}')" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm">Remove</button>
-        </div>
-      ` + "`" + `;
-      }).join('');
-    } else {
-      hadithList.innerHTML = '<p class="text-gray-500">No bookmarks yet</p>';
-    }
-    
-    // Names bookmarks
-    const namesList = document.getElementById('names-list');
-    const namesKeys = Object.keys(bookmarks.names || {});
-    if (namesKeys.length > 0) {
-      namesList.innerHTML = namesKeys.map(key => {
-        const bookmark = bookmarks.names[key];
-        return ` + "`" + `
-        <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors">
-          <a href="${bookmark.url}" class="flex-grow text-blue-600 hover:text-blue-800">${bookmark.label}</a>
-          <button onclick="removeBookmark('names', '${key}')" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm">Remove</button>
-        </div>
-      ` + "`" + `;
-      }).join('');
-    } else {
-      namesList.innerHTML = '<p class="text-gray-500">No bookmarks yet</p>';
-    }
-  }
-  
-  function removeBookmark(type, key) {
-    const bookmarks = JSON.parse(localStorage.getItem('reminder_bookmarks') || '{"quran":{},"hadith":{},"names":{}}');
-    if (bookmarks[type] && bookmarks[type][key]) {
-      delete bookmarks[type][key];
-      localStorage.setItem('reminder_bookmarks', JSON.stringify(bookmarks));
-      loadBookmarks();
-    }
-  }
-  
-  loadBookmarks();
-</script>
-`
-
-		w.Write([]byte(app.RenderHTML("Bookmarks", "", bookmarksContent)))
+		w.Write([]byte(app.RenderHTML("Bookmarks", "", app.Bookmarks)))
 	})
 
 	http.HandleFunc("/quran", func(w http.ResponseWriter, r *http.Request) {
@@ -233,25 +100,8 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Collection, a 
 	})
 
 	http.HandleFunc("/daily", func(w http.ResponseWriter, r *http.Request) {
-		template := `
-<h3 class="text-lg font-semibold mt-6 mb-2">Verse</h3>
-<a href="%s" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors mb-4">%s</a>
-<h3 class="text-lg font-semibold mt-6 mb-2">Hadith</h3>
-<a href="%s" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors mb-4">%s</a>
-<h3 class="text-lg font-semibold mt-6 mb-2">Name</h3>
-<a href="%s" class="block p-4 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors mb-4">%s</a>
-<p class="text-sm text-gray-500 mt-4">Updated %s</p>
-`
-		mtx.RLock()
-		verseLink := links["verse"]
-		hadithLink := links["hadith"]
-		nameLink := links["name"]
-
-		data := fmt.Sprintf(template, verseLink, dailyVerse, hadithLink, dailyHadith, nameLink, dailyName, dailyUpdated.Format(time.RFC3339))
-		mtx.RUnlock()
-
-		html := app.RenderHTML("Daily Reminder", "Daily reminder from the quran, hadith and names of Allah", data)
-		w.Write([]byte(html))
+		content := app.DailyContent(reminders.Latest())
+		w.Write([]byte(app.RenderHTML("Daily Reminder", "Daily reminder from the quran, hadith and names of Allah", content)))
 	})
 
 	http.HandleFunc("/quran/{id}", func(w http.ResponseWriter, r *http.Request) {
@@ -390,117 +240,14 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Collection, a 
 	})
 }
 
-func loadLastPushDate() string {
-	log.Println("Load last pushdate")
-	b, err := os.ReadFile(lastPushDateFile)
-	if err != nil {
-		return ""
-	}
-	return strings.TrimSpace(string(b))
-}
-
-func saveLastPushDate(date string) {
-	_ = os.MkdirAll(reminderDir, 0700)
-	_ = os.WriteFile(lastPushDateFile, []byte(date), 0644)
-}
-
-// On startup, load daily index
-func loadDailyIndex() map[string]interface{} {
-	log.Println("Load daily index")
-	dailyFile := api.ReminderPath("daily.json")
-	var idx map[string]interface{}
-	if b, err := os.ReadFile(dailyFile); err == nil {
-		json.Unmarshal(b, &idx)
-	}
-	if idx == nil {
-		idx = make(map[string]interface{})
-	}
-	return idx
-}
-
-func saveDaily(date string, data map[string]interface{}) {
-	// Save to daily.json
-	dailyFile := api.ReminderPath("daily.json")
-	var allDaily map[string]interface{}
-	if b, err := os.ReadFile(dailyFile); err == nil {
-		json.Unmarshal(b, &allDaily)
-	}
-	if allDaily == nil {
-		allDaily = make(map[string]interface{})
-	}
-	allDaily[date] = data
-	b, _ := json.MarshalIndent(allDaily, "", "  ")
-	_ = os.MkdirAll(api.ReminderDir, 0700)
-	_ = os.WriteFile(dailyFile, b, 0644)
-	dailyIndex = allDaily // update in-memory index
-}
-
-func saveHourlyReminder(date, timestamp string, data map[string]interface{}) {
-	// Save to hourly reminders file
-	hourlyFile := api.ReminderPath(fmt.Sprintf("hourly_%s.json", date))
-	var hourlyReminders []interface{}
-	if b, err := os.ReadFile(hourlyFile); err == nil {
-		json.Unmarshal(b, &hourlyReminders)
-	}
-	if hourlyReminders == nil {
-		hourlyReminders = make([]interface{}, 0)
-	}
-	hourlyReminders = append(hourlyReminders, data)
-	b, _ := json.MarshalIndent(hourlyReminders, "", "  ")
-	_ = os.MkdirAll(api.ReminderDir, 0700)
-	_ = os.WriteFile(hourlyFile, b, 0644)
-}
-
-func loadHourlyReminders(date string) []interface{} {
-	hourlyFile := api.ReminderPath(fmt.Sprintf("hourly_%s.json", date))
-	var hourlyReminders []interface{}
-	if b, err := os.ReadFile(hourlyFile); err == nil {
-		json.Unmarshal(b, &hourlyReminders)
-	}
-	return hourlyReminders
-}
-
-// generateMessage generates an LLM-based message using the verse, hadith, and name
-// The askLLM function panics on errors, which is why we use panic recovery here.
-func generateMessage(ctx context.Context, verse, hadith, name string) (message string) {
-	// Fallback message in case LLM fails
-	defaultMessage := "In the Name of Allah—the Most Compassionate, Most Merciful"
-	message = defaultMessage // Set default in case of panic
-
-	// Build context for the LLM
-	contexts := []string{
-		fmt.Sprintf("Verse from the Quran: %s", verse),
-		fmt.Sprintf("Hadith: %s", hadith),
-		fmt.Sprintf("Name of Allah: %s", name),
-	}
-
-	// Create a question that asks the LLM to generate a beneficial message
-	question := "Based on the provided Quranic verse, Hadith, and name of Allah, generate a short, beneficial, and factual message (2-3 sentences) that provides spiritual guidance and reflection for the reader."
-
-	// Use the LLM to generate the message
-	// Wrap in a recover to handle panics from askLLM (which panics on errors)
-	defer func() {
-		if r := recover(); r != nil {
-			log.Printf("Failed to generate contextual message via LLM: %v\n", r)
-			message = defaultMessage // Ensure we return default on panic
-		}
-	}()
-
-	llmMessage := askLLM(ctx, contexts, question)
-
-	// If message is not empty, use it
-	if len(strings.TrimSpace(llmMessage)) > 0 {
-		message = llmMessage
-	}
-
-	return message
-}
-
 func main() {
 	log.Println("New rand source")
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	flag.Parse()
+
+	reminders := daily.NewStore(api.ReminderDir)
+	var history search.History
 
 	// Load push subscriptions
 	log.Println("Loading subscriptions")
@@ -570,10 +317,10 @@ func main() {
 
 		log.Println("Indexing data")
 		go func() {
-			indexQuran(sidx, q)
-			indexNames(sidx, n)
-			indexHadith(sidx, b)
-			indexTafsir(sidx, q)
+			search.IndexQuran(sidx, q)
+			search.IndexNames(sidx, n)
+			search.IndexHadith(sidx, b)
+			search.IndexTafsir(sidx, q)
 			// done
 			close(indexed)
 		}()
@@ -586,7 +333,7 @@ func main() {
 
 		fts := search.NewFTS(filepath.Join(reminderHome, "search.db"))
 		idx = fts
-		if changed, err := syncNames(fts, n); err != nil {
+		if changed, err := search.SyncNames(fts, n); err != nil {
 			log.Fatalf("Could not refresh names in keyword index: %v", err)
 		} else if changed {
 			log.Println("Refreshed names in keyword index")
@@ -598,10 +345,10 @@ func main() {
 		} else {
 			log.Println("Building keyword index")
 			go func() {
-				indexQuran(fts, q)
-				indexNames(fts, n)
-				indexHadith(fts, b)
-				indexTafsir(fts, q)
+				search.IndexQuran(fts, q)
+				search.IndexNames(fts, n)
+				search.IndexHadith(fts, b)
+				search.IndexTafsir(fts, q)
 
 				// Only now is the corpus complete. If the process dies before
 				// this the index is rebuilt next start, rather than serving a
@@ -733,10 +480,35 @@ func main() {
 		http.Handle("/", app.ServeWeb())
 	} else {
 		log.Println("Registering lite handler")
-		registerLiteRoutes(q, n, b, a)
+		registerLiteRoutes(q, n, b, a, reminders)
 	}
 
-	registerExplanationRoute(http.DefaultServeMux, q)
+	http.HandleFunc("POST /api/quran/{chapter}/{verse}/explain", func(w http.ResponseWriter, r *http.Request) {
+		chapter, _ := strconv.Atoi(r.PathValue("chapter"))
+		number, _ := strconv.Atoi(r.PathValue("verse"))
+		if chapter < 1 || chapter > len(q.Chapters) {
+			http.Error(w, "Chapter not found", http.StatusNotFound)
+			return
+		}
+		verse := q.Get(chapter).Verse(number)
+		if verse == nil {
+			http.Error(w, "Verse not found", http.StatusNotFound)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		// Commentary remains available without a configured model.
+		answer, generated := verse.Comments, false
+		if model.Available() {
+			ctx, cancel := context.WithTimeout(r.Context(), 45*time.Second)
+			defer cancel()
+			context := []string{fmt.Sprintf("Quran %d:%d\nArabic: %s\nTranslation: %s\nStored commentary: %s", chapter, number, verse.Arabic, verse.Text, verse.Comments)}
+			question := fmt.Sprintf("Explain Quran %d:%d in plain English using only the supplied verse, translation and commentary. Cite the verse number. Distinguish the translation from interpretation. Do not invent historical circumstances, scholarly attributions or rulings. Do not generate or rewrite Arabic. Use plain text, at most three short paragraphs.", chapter, number)
+			if result, err := model.AskSafe(ctx, context, question); err == nil && result != "" {
+				answer, generated = result, true
+			}
+		}
+		json.NewEncoder(w).Encode(map[string]interface{}{"text": answer, "generated": generated, "reference": fmt.Sprintf("%d:%d", chapter, number)})
+	})
 
 	http.HandleFunc("/api/quran", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(qjson))
@@ -767,68 +539,47 @@ func main() {
 		w.Write(b)
 	})
 
-	http.HandleFunc("/api/quran/{chapter}/{verse}", quranVerseHandler(func(chapter, verse int) ([]byte, bool) {
-		if chapter > len(q.Chapters) {
-			return nil, false
+	http.HandleFunc("/api/quran/{chapter}/{verse}", func(w http.ResponseWriter, r *http.Request) {
+		chapter, err := strconv.Atoi(r.PathValue("chapter"))
+		if err != nil || chapter < 1 {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("{}"))
+			return
 		}
 
-		vee := q.Get(chapter).Verse(verse)
-		if vee == nil {
-			return nil, false
+		verse, err := strconv.Atoi(r.PathValue("verse"))
+		if err != nil || verse < 1 {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("{}"))
+			return
 		}
 
-		return vee.JSON(), true
-	}))
-
-	http.HandleFunc("/api/daily", func(w http.ResponseWriter, r *http.Request) {
-		// GET: today's archived daily (saved at midnight UTC)
-		today := time.Now().UTC().Format("2006-01-02")
-
-		mtx.RLock()
-		var resp interface{}
-		if entry, ok := dailyIndex[today]; ok {
-			resp = entry
-		} else {
-			// If today's archived daily doesn't exist yet, return the hourly updated content
-			message := "In the Name of Allah—the Most Compassionate, Most Merciful"
-			resp = map[string]interface{}{
-				"name":    dailyName,
-				"hadith":  dailyHadith,
-				"verse":   dailyVerse,
-				"links":   links,
-				"updated": dailyUpdated.Format(time.RFC3339),
-				"message": message,
-				"hijri":   daily.Date().Display,
-				"date":    today,
-			}
+		var found *quran.Verse
+		if chapter <= len(q.Chapters) {
+			found = q.Get(chapter).Verse(verse)
 		}
-		mtx.RUnlock()
+		if found == nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("{}"))
+			return
+		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_, _ = w.Write(found.JSON())
+	})
+
+	http.HandleFunc("/api/daily", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(reminders.Today())
 	})
 
 	// Add /api/latest endpoint for the hourly updated reminder
 	http.HandleFunc("/api/latest", func(w http.ResponseWriter, r *http.Request) {
-		mtx.RLock()
-		verse := dailyVerse
-		hadith := dailyHadith
-		name := dailyName
-		message := dailyMessage
-		updated := dailyUpdated
-		currentLinks := links
-		mtx.RUnlock()
-
-		resp := map[string]interface{}{
-			"name":    name,
-			"hadith":  hadith,
-			"verse":   verse,
-			"links":   currentLinks,
-			"updated": updated.Format(time.RFC3339),
-			"message": message,
-		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		json.NewEncoder(w).Encode(reminders.Latest())
 	})
 
 	http.HandleFunc("/api/daily/{date}", func(w http.ResponseWriter, r *http.Request) {
@@ -837,234 +588,26 @@ func main() {
 			date = time.Now().Format("2006-01-02")
 		}
 
-		mtx.RLock()
-
-		var resp interface{}
-		if entry, ok := dailyIndex[date]; ok {
-			resp = entry
-		} else {
+		entry, ok := reminders.Get(date)
+		if !ok {
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte(`{"error":"Not found"}`))
-			mtx.RUnlock()
 			return
 		}
-
-		mtx.RUnlock()
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		json.NewEncoder(w).Encode(entry)
 	})
 
 	// Add daily index API endpoint
 	http.HandleFunc("/api/daily/index", func(w http.ResponseWriter, r *http.Request) {
-		mtx.RLock()
-		b, _ := json.MarshalIndent(dailyIndex, "", "  ")
-		mtx.RUnlock()
 		w.Header().Set("Content-Type", "application/json")
-		w.Write(b)
+		w.Write(reminders.IndexJSON())
 	})
 
 	// RSS feed for daily content
 	http.HandleFunc("/rss", func(w http.ResponseWriter, r *http.Request) {
-		mtx.RLock()
-		defer mtx.RUnlock()
-
 		w.Header().Set("Content-Type", "application/rss+xml; charset=utf-8")
-
-		// Get all dates and sort them
-		var dates []string
-		for date := range dailyIndex {
-			if date == "latest" {
-				continue
-			}
-			dates = append(dates, date)
-		}
-
-		// Sort dates in descending order (newest first)
-		for i := 0; i < len(dates); i++ {
-			for j := i + 1; j < len(dates); j++ {
-				if dates[i] < dates[j] {
-					dates[i], dates[j] = dates[j], dates[i]
-				}
-			}
-		}
-
-		// Start RSS feed
-		fmt.Fprintf(w, `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>Daily Reminder</title>
-    <link>https://reminder.dev</link>
-    <description>Daily reminders from the Quran, Hadith, and Names of Allah</description>
-    <language>en-us</language>
-    <lastBuildDate>%s</lastBuildDate>
-    <atom:link href="https://reminder.dev/rss" rel="self" type="application/rss+xml" />
-`, time.Now().Format(time.RFC1123Z))
-
-		// Add items for each date (limit to most recent 30 days)
-		maxDays := 30
-		if len(dates) < maxDays {
-			maxDays = len(dates)
-		}
-
-		for i := 0; i < maxDays; i++ {
-			date := dates[i]
-
-			// Parse date for pubDate base
-			basePubDate := date
-			if t, err := time.Parse("2006-01-02", date); err == nil {
-				basePubDate = t.Format(time.RFC1123Z)
-			}
-
-			// First, add hourly reminders for this date (most recent first)
-			hourlyReminders := loadHourlyReminders(date)
-
-			// Process each hourly reminder in reverse order (newest first)
-			for i := len(hourlyReminders) - 1; i >= 0; i-- {
-				reminderData := hourlyReminders[i]
-				reminder, ok := reminderData.(map[string]interface{})
-				if !ok {
-					continue
-				}
-
-				// Get timestamp for pubDate
-				pubDate := basePubDate
-				if ts, ok := reminder["timestamp"].(string); ok {
-					if t, err := time.Parse(time.RFC3339, ts); err == nil {
-						pubDate = t.Format(time.RFC1123Z)
-					}
-				}
-
-				// Extract verse metadata
-				if verseMeta, ok := reminder["verse_meta"].(map[string]interface{}); ok {
-					chapterName, _ := verseMeta["chapter_name"].(string)
-					chapter, _ := verseMeta["chapter"].(float64)
-					verseStart, _ := verseMeta["verse_start"].(float64)
-					verseEnd, _ := verseMeta["verse_end"].(float64)
-					text, _ := verseMeta["text"].(string)
-
-					verseTitle := ""
-					if verseStart == verseEnd {
-						verseTitle = fmt.Sprintf("%s %d:%d", chapterName, int(chapter), int(verseStart))
-					} else {
-						verseTitle = fmt.Sprintf("%s %d:%d-%d", chapterName, int(chapter), int(verseStart), int(verseEnd))
-					}
-
-					verseLink := fmt.Sprintf("https://reminder.dev/quran/%d#%d", int(chapter), int(verseStart))
-
-					fmt.Fprintf(w, `    <item>
-      <title>%s</title>
-      <link>%s</link>
-      <guid>%s</guid>
-      <pubDate>%s</pubDate>
-      <description><![CDATA[%s]]></description>
-    </item>
-`, verseTitle, verseLink, verseLink, pubDate, text)
-				}
-
-				// Extract hadith metadata
-				if hadithMeta, ok := reminder["hadith_meta"].(map[string]interface{}); ok {
-					bookName, _ := hadithMeta["book_name"].(string)
-					book, _ := hadithMeta["book"].(float64)
-					info, _ := hadithMeta["info"].(string)
-					text, _ := hadithMeta["text"].(string)
-
-					// Get number as string
-					number := "1"
-					if num, ok := hadithMeta["number"].(string); ok {
-						number = num
-					}
-
-					hadithTitle := fmt.Sprintf("%s - %s", bookName, info)
-					hadithLink := fmt.Sprintf("https://reminder.dev/hadith/%d#%s", int(book), number)
-
-					fmt.Fprintf(w, `    <item>
-      <title>%s</title>
-      <link>%s</link>
-      <guid>%s</guid>
-      <pubDate>%s</pubDate>
-      <description><![CDATA[%s]]></description>
-    </item>
-`, hadithTitle, hadithLink, hadithLink, pubDate, text)
-				}
-
-				// Extract name metadata
-				if nameMeta, ok := reminder["name_meta"].(map[string]interface{}); ok {
-					number, _ := nameMeta["number"].(float64)
-					english, _ := nameMeta["english"].(string)
-					arabic, _ := nameMeta["arabic"].(string)
-					meaning, _ := nameMeta["meaning"].(string)
-					summary, _ := nameMeta["summary"].(string)
-
-					nameTitle := fmt.Sprintf("%s - %s - %s", english, arabic, meaning)
-					nameLink := fmt.Sprintf("https://reminder.dev/names/%d", int(number))
-
-					fmt.Fprintf(w, `    <item>
-      <title>%s</title>
-      <link>%s</link>
-      <guid>%s</guid>
-      <pubDate>%s</pubDate>
-      <description><![CDATA[%s]]></description>
-    </item>
-`, nameTitle, nameLink, nameLink, pubDate, summary)
-				}
-			}
-
-			// Then, add daily summary at the end (for single daily consumption)
-			entry, hasDaily := dailyIndex[date]
-			if hasDaily {
-				entryMap, ok := entry.(map[string]interface{})
-				if ok {
-					verse := ""
-					hadith := ""
-					name := ""
-					hijri := ""
-
-					if v, ok := entryMap["verse"].(string); ok {
-						verse = v
-					}
-					if h, ok := entryMap["hadith"].(string); ok {
-						hadith = h
-					}
-					if n, ok := entryMap["name"].(string); ok {
-						name = n
-					}
-					if hj, ok := entryMap["hijri"].(string); ok {
-						hijri = hj
-					}
-
-					title := fmt.Sprintf("Daily Reminder - %s", date)
-					if hijri != "" {
-						title = fmt.Sprintf("Daily Reminder - %s (%s)", date, hijri)
-					}
-
-					// Combine all three into one item description
-					description := ""
-					if verse != "" {
-						description += "<h3>Verse</h3>\n" + verse + "\n\n"
-					}
-					if hadith != "" {
-						description += "<h3>Hadith</h3>\n" + hadith + "\n\n"
-					}
-					if name != "" {
-						description += "<h3>Name</h3>\n" + name
-					}
-
-					if description != "" {
-						fmt.Fprintf(w, `    <item>
-      <title>%s</title>
-      <link>https://reminder.dev/daily/%s</link>
-      <guid>https://reminder.dev/daily/%s</guid>
-      <pubDate>%s</pubDate>
-      <description><![CDATA[%s]]></description>
-    </item>
-`, title, date, date, basePubDate, description)
-					}
-				}
-			}
-		}
-
-		fmt.Fprintf(w, `  </channel>
-</rss>`)
+		reminders.WriteRSS(w)
 	})
 
 	http.HandleFunc("/api/names", func(w http.ResponseWriter, r *http.Request) {
@@ -1131,7 +674,7 @@ func main() {
 		%s
 		`
 
-		answer := askLLM(r.Context(), nil, fmt.Sprintf(prompt, q))
+		answer := model.Ask(r.Context(), nil, fmt.Sprintf(prompt, q))
 		w.Write([]byte(answer))
 	})
 
@@ -1151,7 +694,7 @@ func main() {
 
 		%s`
 
-		answer := askLLM(r.Context(), nil, fmt.Sprintf(prompt, q))
+		answer := model.Ask(r.Context(), nil, fmt.Sprintf(prompt, q))
 		w.Write([]byte(answer))
 	})
 
@@ -1181,10 +724,7 @@ func main() {
 			}
 
 			// pull the context which we only store in memory for now
-			h, ok := history[ctx]
-			if !ok {
-				h = []string{}
-			}
+			h := history.Get(ctx)
 
 			out, _ := json.Marshal(map[string]interface{}{
 				"session": ctx,
@@ -1213,24 +753,15 @@ func main() {
 				}
 			}
 
-			res, err := idx.Query(q)
+			res, err := search.References(idx, n, q)
 			if err != nil {
 				http.Error(w, err.Error(), 500)
 				return
 			}
 
-			for _, r := range res {
-				for k, v := range r.Metadata {
-					delete(r.Metadata, k)
-					r.Metadata[strings.ToLower(k)] = v
-				}
-			}
-
-			res = currentNameResults(res, n)
-
 			// Report whether summarisation is possible, so clients can hide
 			// the control instead of offering one that cannot work.
-			available := LLMAvailable()
+			available := model.Available()
 
 			// References alone are useful, and are all we can return when the
 			// caller opted out or no model is configured.
@@ -1249,21 +780,7 @@ func main() {
 				return
 			}
 
-			var tokens int
-			var contexts []string
-
-			for _, r := range res {
-				if tokens >= 8000 {
-					break
-				}
-
-				b, _ := json.Marshal(r)
-				tokens += len(b)
-				// TODO: maybe just provide text
-				contexts = append(contexts, string(b))
-			}
-
-			answer, err := askLLMSafe(r.Context(), contexts, q)
+			answer, err := search.Summarise(r.Context(), res, q)
 			if err != nil {
 				log.Printf("Summarisation failed for %q: %v", q, err)
 				writeRefs()
@@ -1286,12 +803,7 @@ func main() {
 			c, err := r.Cookie("session")
 			if err == nil {
 				ctx = c.Value
-				h, ok := history[ctx]
-				if !ok {
-					h = []string{}
-				}
-				h = append([]string{q, answerMD}, h...)
-				history[ctx] = h
+				history.Add(ctx, q, answerMD)
 			}
 
 			return
@@ -1308,16 +820,7 @@ func main() {
 	mcpServer.AddTool("get_latest", "Get the latest reminder (updated hourly) with a verse, hadith and name of Allah", api.InputSchema{
 		Type: "object",
 	}, func(args map[string]interface{}) (string, error) {
-		mtx.RLock()
-		resp := map[string]interface{}{
-			"name":    dailyName,
-			"hadith":  dailyHadith,
-			"verse":   dailyVerse,
-			"links":   links,
-			"updated": dailyUpdated.Format(time.RFC3339),
-			"message": dailyMessage,
-		}
-		mtx.RUnlock()
+		resp := reminders.Latest()
 		b, _ := json.Marshal(resp)
 		return string(b), nil
 	})
@@ -1325,24 +828,7 @@ func main() {
 	mcpServer.AddTool("get_daily", "Get today's daily reminder with a verse, hadith and name of Allah", api.InputSchema{
 		Type: "object",
 	}, func(args map[string]interface{}) (string, error) {
-		today := time.Now().UTC().Format("2006-01-02")
-		mtx.RLock()
-		defer mtx.RUnlock()
-		if entry, ok := dailyIndex[today]; ok {
-			b, _ := json.Marshal(entry)
-			return string(b), nil
-		}
-		message := "In the Name of Allah—the Most Compassionate, Most Merciful"
-		resp := map[string]interface{}{
-			"name":    dailyName,
-			"hadith":  dailyHadith,
-			"verse":   dailyVerse,
-			"links":   links,
-			"updated": dailyUpdated.Format(time.RFC3339),
-			"message": message,
-			"hijri":   daily.Date().Display,
-			"date":    today,
-		}
+		resp := reminders.Today()
 		b, _ := json.Marshal(resp)
 		return string(b), nil
 	})
@@ -1358,9 +844,7 @@ func main() {
 		if date == "" {
 			return "", fmt.Errorf("date is required")
 		}
-		mtx.RLock()
-		defer mtx.RUnlock()
-		if entry, ok := dailyIndex[date]; ok {
+		if entry, ok := reminders.Get(date); ok {
 			b, _ := json.Marshal(entry)
 			return string(b), nil
 		}
@@ -1488,28 +972,11 @@ func main() {
 			return "", fmt.Errorf("q is required")
 		}
 
-		res, err := idx.Query(question)
+		res, err := search.References(idx, n, question)
 		if err != nil {
 			return "", err
 		}
-		res = currentNameResults(res, n)
-
-		var tokens int
-		var contexts []string
-		for _, r := range res {
-			if tokens >= 8000 {
-				break
-			}
-			for k, v := range r.Metadata {
-				delete(r.Metadata, k)
-				r.Metadata[strings.ToLower(k)] = v
-			}
-			b, _ := json.Marshal(r)
-			tokens += len(b)
-			contexts = append(contexts, string(b))
-		}
-
-		answer := askLLM(context.Background(), contexts, question)
+		answer := model.Ask(context.Background(), search.Context(res), question)
 
 		output, _ := json.Marshal(map[string]interface{}{
 			"q":          question,
@@ -1521,238 +988,22 @@ func main() {
 
 	http.Handle("/mcp", mcpServer)
 
-	getVerse := func(ch *quran.Chapter, ve *quran.Verse) (string, int, int, string) {
-		verseText := ve.Text
-		verseStart := ve.Number
-		verseEnd := ve.Number
-
-		for i := 0; i < 10; i++ {
-			// done
-			if x := verseText[len(verseText)-1]; x == '.' || x == '!' || x == '"' {
-				break
-			}
-
-			idx := ve.Number + 1
-
-			if ch.Number == 1 || ch.Number == 9 {
-				idx = ve.Number
-			}
-
-			// bail out - check bounds
-			if idx < 0 || idx >= len(ch.Verses) {
-				break
-			}
-
-			// increment
-			ve = ch.Verses[idx]
-
-			if v := verseText[len(verseText)-1]; v == ',' || string(v) == "—" || unicode.IsLetter(rune(v)) || v == ';' {
-				verseText += " " + ve.Text
-			} else {
-				verseText += "\n\n" + ve.Text
-			}
-			verseEnd = ve.Number
-		}
-
-		verseNumber := fmt.Sprintf("%d", verseStart)
-
-		if verseStart != verseEnd {
-			verseNumber += fmt.Sprintf("-%d", verseEnd)
-		}
-
-		formatted := fmt.Sprintf("%s - %s - %d:%s\n\n%s", ch.Name, ch.English, ch.Number, verseNumber, verseText)
-		return formatted, verseStart, verseEnd, verseText
-	}
-
-	daily := func() {
-		// Check if we're within the first 5 minutes after midnight UTC
-		// This handles server restarts that happen right at midnight
-		isWithinGracePeriod := func() bool {
-			now := time.Now().UTC()
-			midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
-			sinceMidnight := now.Sub(midnight)
-			return sinceMidnight >= 0 && sinceMidnight < 5*time.Minute
-		}
-
-		for {
-			func() {
-				defer func() {
-					if r := recover(); r != nil {
-						log.Printf("Daily loop recovered from panic: %v\n", r)
-					}
-				}()
-			log.Println("Running daily")
-
-			mtx.Lock()
-
-			var nam *names.Name
-			var book *hadith.Book
-			var chap *quran.Chapter
-			var ver *quran.Verse
-			var had *hadith.Hadith
-
-			// Retry random selection up to 50 times to avoid skipping
-			// an entire hour when we pick a bad combination.
-			found := false
-			for attempt := 0; attempt < 50; attempt++ {
-				nam = (*n)[rnd.Int()%len((*n))]
-				bookIdx := rnd.Int() % len(b.Books)
-				book = b.Books[bookIdx]
-
-				if len(book.Hadiths) == 0 {
-					continue
-				}
-
-				chap = q.Chapters[rnd.Int()%len(q.Chapters)]
-
-				if len(chap.Verses) == 0 {
-					continue
-				}
-
-				ver = chap.Verses[rnd.Int()%len(chap.Verses)]
-				had = book.Hadiths[rnd.Int()%len(book.Hadiths)]
-
-				if ver.Number == 0 || !isCapital(ver.Text) {
-					continue
-				}
-
-				found = true
-				break
-			}
-
-			if !found {
-				log.Println("Could not find valid content after 50 attempts, will retry next hour")
-				mtx.Unlock()
-				return
-			}
-
-			dailyName = fmt.Sprintf("%s - %s - %s\n\n%s", nam.English, nam.Arabic, nam.Meaning, nam.Summary)
-			verseFormatted, verseStart, verseEnd, verseText := getVerse(chap, ver)
-			dailyVerse = verseFormatted
-			// Use new hadith format fields with fallback to legacy
-			hadithNarrator := had.Narrator
-			if hadithNarrator == "" {
-				hadithNarrator = had.By
-			}
-			hadithText := had.English
-			if hadithText == "" {
-				hadithText = had.Text
-			}
-			hadithNum := had.Number
-			if hadithNum == 0 {
-				hadithNum = 1
-			}
-			dailyHadith = fmt.Sprintf("%s - %s\n\n%s", book.Name, hadithNarrator, hadithText)
-
-			// Generate the contextual message once and cache it with the daily data
-			dailyMessage = generateMessage(context.Background(), dailyVerse, dailyHadith, dailyName)
-
-			links = map[string]string{
-				"verse":  fmt.Sprintf("/quran/%d#%d", chap.Number, verseStart),
-				"hadith": fmt.Sprintf("/hadith/%d#%d", book.Number, hadithNum),
-				"name":   fmt.Sprintf("/names/%d", nam.Number),
-			}
-
-			dailyUpdated = time.Now()
-			hijriDate := daily.Date().Display
-			today := time.Now().UTC().Format("2006-01-02")
-			timestamp := time.Now().UTC().Format(time.RFC3339)
-
-			// Save hourly reminder with metadata
-			hourlyData := map[string]interface{}{
-				"timestamp": timestamp,
-				"verse_meta": map[string]interface{}{
-					"chapter":      chap.Number,
-					"chapter_name": chap.English,
-					"verse_start":  verseStart,
-					"verse_end":    verseEnd,
-					"text":         verseText,
-				},
-				"hadith_meta": map[string]interface{}{
-					"book":      book.Number,
-					"book_name": book.Name,
-					"narrator":  hadithNarrator,
-					"number":    hadithNum,
-					"text":      hadithText,
-				},
-				"name_meta": map[string]interface{}{
-					"number":  nam.Number,
-					"english": nam.English,
-					"arabic":  nam.Arabic,
-					"meaning": nam.Meaning,
-					"summary": nam.Summary,
-				},
-			}
-			saveHourlyReminder(today, timestamp, hourlyData)
-
-			mtx.Unlock()
-
-			// Check if we should send push notification (new day or within grace period after midnight)
-			if lastPushDate != today || (lastPushDate == today && isWithinGracePeriod()) {
-				mtx.Lock()
-
-				// Compose a user-friendly notification message
-				notifyVerse := dailyVerse
-
-				if len(dailyVerse) > 250 {
-					notifyVerse = notifyVerse[:250] + "..."
-				}
-
-				dailyData := map[string]interface{}{
-					"verse":   dailyVerse,
-					"hadith":  dailyHadith,
-					"name":    dailyName,
-					"hijri":   hijriDate,
-					"date":    today,
-					"links":   links,
-					"updated": dailyUpdated.Format(time.RFC3339),
-					"message": dailyMessage,
-				}
-
-				// Save to daily.json
-				saveDaily(today, dailyData)
-
-				payload := map[string]interface{}{
-					"title": "Reminder",
-					"body":  notifyVerse,
-					"data": map[string]interface{}{
-						"url": "/daily/" + today,
-					},
-				}
-
-				b, _ := json.Marshal(payload)
-
-				// Only send if we haven't already sent today
-				if lastPushDate != today {
-					log.Println("Sending push notification at midnight UTC")
-
-					errors := api.SendPushToAll(string(b))
-					if len(errors) > 0 {
-						log.Println("Push notification errors:")
-						for _, err := range errors {
-							log.Println(err)
-						}
-					}
-
-					lastPushDate = today
-					saveLastPushDate(today)
-				} else {
-					log.Println("Push notification already sent today, skipping")
-				}
-
-				mtx.Unlock()
-			}
-
-			}() // end of panic-recovery wrapper
-
-			// Update hourly for /api/latest
-			time.Sleep(time.Hour)
-		}
-	}
-
 	if *ServerFlag {
 		log.Println("Starting daily")
-		go daily()
+		go func() {
+			for {
+				func() {
+					defer func() {
+						if err := recover(); err != nil {
+							log.Printf("Daily loop recovered from panic: %v", err)
+						}
+					}()
+					log.Println("Running daily")
+					reminders.Update(context.Background(), q, n, b, rnd, api.SendPushToAll)
+				}()
+				time.Sleep(time.Hour)
+			}
+		}()
 
 		log.Println("Starting server :8080")
 		if err := http.ListenAndServe(":8080", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

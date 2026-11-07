@@ -1,17 +1,16 @@
-package main
+package search
 
 import (
 	"strings"
 	"testing"
 
 	"github.com/asim/reminder/names"
-	"github.com/asim/reminder/search"
 )
 
 func TestOldNameSearchResultsUseCurrentCorpus(t *testing.T) {
 	corpus := names.Load()
 	name := corpus.Get(68)
-	results := currentNameResults([]*search.Result{
+	results := CurrentNameResults([]*Result{
 		{Text: "old meaning", Score: 0.8, Metadata: map[string]string{"Source": "names", "Arabic": name.Arabic, "Meaning": "old meaning"}},
 		{Text: "unrelated", Metadata: map[string]string{"source": "quran"}},
 		{Text: "unknown name", Metadata: map[string]string{"source": "names", "arabic": "unknown"}},
