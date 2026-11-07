@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -90,8 +91,27 @@ func TestQuotaFailsClosed(t *testing.T) {
 	}
 	dir := t.TempDir()
 	os.WriteFile(filepath.Join(dir, "ai-usage.json"), []byte("broken"), 0600)
-	if err := ConfigureLimits(dir); err == nil {
-		t.Fatal("ignored corrupt counters")
+	old := budget
+	defer func() { budget = old }()
+	if err := ConfigureLimits(dir); err != nil {
+		t.Fatalf("storage error blocked startup: %v", err)
+	}
+	if _, err := budget.acquire(context.Background(), time.Now()); err == nil {
+		t.Fatal("allowed public generation with corrupt counters")
+	}
+	data, _ := os.ReadFile(filepath.Join(dir, "ai-usage.json"))
+	if string(data) != "broken" {
+		t.Fatal("overwrote corrupt counters")
+	}
+	if err := ConfigureLimits(filepath.Join(dir, "ai-usage.json", "child")); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := budget.acquire(context.Background(), time.Now()); err == nil {
+		t.Fatal("allowed public generation with inaccessible storage")
+	}
+	t.Setenv("AI_DAILY_LIMIT", "invalid")
+	if err := ConfigureLimits(t.TempDir()); err == nil {
+		t.Fatal("accepted invalid configuration")
 	}
 }
 
@@ -111,6 +131,11 @@ func TestInternalGenerationBypassesPublicLimits(t *testing.T) {
 	if got := AskInternal(context.Background(), nil, "daily reflection"); got != "reflection" {
 		t.Fatal(got)
 	}
+	budget.accountingErr = fmt.Errorf("corrupt usage counters")
+	if got := AskInternal(context.Background(), nil, "hourly reflection"); got != "reflection" {
+		t.Fatal(got)
+	}
+
 	// Public HTTP/MCP calls use Ask/AskSafe and cannot set the internal context key.
 	func() {
 		defer func() {
@@ -120,7 +145,7 @@ func TestInternalGenerationBypassesPublicLimits(t *testing.T) {
 		}()
 		Ask(context.Background(), nil, "public")
 	}()
-	if calls != 1 || budget.usage.Total != 0 {
+	if calls != 2 || budget.usage.Total != 0 {
 		t.Fatalf("calls=%d usage=%d", calls, budget.usage.Total)
 	}
 }

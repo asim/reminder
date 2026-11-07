@@ -164,8 +164,9 @@ var Endpoints = []*Endpoint{
 	{
 		Name:        "Search",
 		Path:        "/api/search",
-		Description: "Get summarised answers via an LLM",
+		Description: "Search the Quran, Hadith and Names of Allah, with an optional AI summary",
 		Params: []*Param{
+			{Name: "summarise", Value: "boolean", Description: "Generate an AI summary only when true (default: false)"},
 			{
 				Name:        "q",
 				Value:       "string",

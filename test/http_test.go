@@ -168,3 +168,36 @@ func TestSearchSummaryOptIn(t *testing.T) {
 		}
 	}
 }
+
+func TestMCPContentTools(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		args map[string]interface{}
+	}{
+		{"get_latest", nil}, {"get_daily", nil}, {"get_daily_by_date", map[string]interface{}{"date": "2000-01-01"}},
+		{"get_quran_chapters", nil}, {"get_quran_chapter", map[string]interface{}{"chapter": 1}},
+		{"get_quran_verse", map[string]interface{}{"chapter": 1, "verse": 1}},
+		{"get_hadith_books", nil}, {"get_hadith_book", map[string]interface{}{"book": 1}},
+		{"get_names", nil}, {"get_name", map[string]interface{}{"id": 1}},
+		{"search", map[string]interface{}{"q": "patience", "summarise": false}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			body, _ := json.Marshal(map[string]interface{}{"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": map[string]interface{}{"name": tc.name, "arguments": tc.args}})
+			status, _, data := request(t, "POST", "/mcp", body)
+			var result struct {
+				Result struct {
+					IsError bool `json:"isError"`
+					Content []struct {
+						Text string `json:"text"`
+					} `json:"content"`
+				} `json:"result"`
+			}
+			if err := json.Unmarshal(data, &result); err != nil {
+				t.Fatal(err)
+			}
+			if status != 200 || result.Result.IsError || len(result.Result.Content) != 1 || !json.Valid([]byte(result.Result.Content[0].Text)) {
+				t.Fatalf("%d %s", status, data)
+			}
+		})
+	}
+}
