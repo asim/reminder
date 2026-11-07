@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -35,6 +36,7 @@ type limits struct {
 	path                                 string
 	daily, perClient, concurrent, output int
 	active                               int
+	accountingErr                        error
 	usage                                usage
 }
 
@@ -64,15 +66,17 @@ func ConfigureLimits(dir string) error {
 		*setting.target = value
 	}
 	if err := os.MkdirAll(dir, 0700); err != nil {
-		return err
-	}
-	data, err := os.ReadFile(l.path)
-	if err == nil {
-		if err = json.Unmarshal(data, &l.usage); err != nil {
-			return fmt.Errorf("invalid AI usage file: %w", err)
+		l.accountingErr = err
+	} else {
+		data, err := os.ReadFile(l.path)
+		if err == nil {
+			l.accountingErr = json.Unmarshal(data, &l.usage)
+		} else if !os.IsNotExist(err) {
+			l.accountingErr = err
 		}
-	} else if !os.IsNotExist(err) {
-		return err
+	}
+	if l.accountingErr != nil {
+		log.Printf("Public AI disabled: cannot load usage counters: %v", l.accountingErr)
 	}
 	budget = l
 	return nil
@@ -81,6 +85,9 @@ func ConfigureLimits(dir string) error {
 func (l *limits) acquire(ctx context.Context, now time.Time) (func(), error) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
+	if l.accountingErr != nil {
+		return nil, fmt.Errorf("AI usage accounting unavailable")
+	}
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
