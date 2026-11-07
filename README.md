@@ -183,52 +183,13 @@ File an issue to discuss
 
 ## Offline reading
 
-The web app automatically saves the Quran (including Arabic, translation,
-word-by-word text, transliteration and stored commentary), Bukhari and names
-on this device in the background while online. The initial download needs a
-connection and resumes after an interruption. Texts and the app shell survive reloads and browser restarts, subject
-to the browser's storage limits and eviction policy.
+Quran, Bukhari and names are saved for offline reading after the initial download.
+Audio, search and AI require a connection. Use `make build` to include the service worker.
 
-Saved reading modes, bookmarks and unopened chapters work offline. Audio,
-server search and AI features need a connection. Unsaved content shows a reconnect message
-instead of waiting indefinitely. Previously viewed daily reminders are cached,
-but new reminders require a connection.
+## AI limits
 
-`npm run build` generates the versioned service worker after building all route
-bundles. Deploy the complete `web/build/client` output (as `make web`/`make build`
-already do). Development mode does not install an offline cache. Production must
-use HTTPS (or localhost) for service workers.
-
-## Public AI limits
-
-Search generates an AI summary only when `summarise` is explicitly `true`.
-Missing or `false` returns references without generation; other values return 400.
-The existing `answer` and `references` fields are unchanged. When a summary cannot
-be generated, search still returns references and supplies a `summary_error`
-message for the UI. MCP search also requires `summarise: true`.
-
-Public generation through HTTP and MCP shares these environment settings:
-
-| Variable | Default | Purpose |
-| --- | --- | --- |
-| `AI_DAILY_LIMIT` | `100` | Total public generation attempts per UTC day |
-| `AI_IP_DAILY_LIMIT` | `20` | Public generation attempts per client IP per UTC day |
-| `AI_CONCURRENCY_LIMIT` | `2` | Simultaneous public generations |
-| `AI_MAX_OUTPUT_TOKENS` | `1024` | Maximum output tokens per public generation |
-| `TRUSTED_PROXY_CIDRS` | `127.0.0.0/8,::1/128` | Comma-separated trusted nginx peer networks |
-
-Zero disables the corresponding request allowance; output tokens must be positive.
-Attempts are reserved before contacting the provider, and failures still count.
-Counters persist in `$HOME/.reminder/ai-usage.json`; client addresses are hashed
-with the UTC date. This file and concurrency accounting are for a single server
-process, not a shared multi-instance deployment. These are request/token bounds,
-not a currency-denominated spending cap; embedding searches are not covered.
-
-Scheduled daily/hourly reflections use an explicit internal model call and are
-exempt from public quotas and concurrency limits. HTTP headers and request bodies
-cannot select that path. Internal generation retains its previous output allowance.
-
-For nginx on the same host, use `proxy_set_header X-Real-IP $remote_addr;`.
-For a separate proxy, set `TRUSTED_PROXY_CIDRS` to its exact IP/CIDR. Only these
-peers may supply X-Real-IP; other requests are identified by their connection IP.
-Restrict direct access to the application port. Do not trust arbitrary networks.
+Summaries require `summarise: true`. Public defaults: 100 requests/day,
+20 per IP, two concurrent generations and 1,024 output tokens. Configure with
+`AI_DAILY_LIMIT`, `AI_IP_DAILY_LIMIT`, `AI_CONCURRENCY_LIMIT` and `AI_MAX_OUTPUT_TOKENS`.
+Daily/hourly generation is exempt. Counters persist across restarts for a single server.
+Nginx's `X-Real-IP` is trusted from loopback; set `TRUSTED_PROXY_CIDRS` for other proxy addresses.

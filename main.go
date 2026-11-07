@@ -801,51 +801,30 @@ func main() {
 				return
 			}
 
-			// Report whether summarisation is possible, so clients can hide
-			// the control instead of offering one that cannot work.
-			available := model.Available()
-
-			// References alone are useful, and are all we can return when the
-			// caller opted out or no model is configured.
-			summaryError := ""
-			writeRefs := func() {
-				response := map[string]interface{}{
-					"q": q, "answer": "", "references": res, "summarise_available": available,
-				}
-				if summaryError != "" {
-					response["summary_error"] = summaryError
-				}
-				output, _ := json.Marshal(response)
-				w.Write(output)
-			}
-
-			if summarise && !available {
-				summaryError = "AI summaries are not configured."
-			}
-			if !summarise || !available {
-				writeRefs()
+			if !summarise {
+				json.NewEncoder(w).Encode(map[string]interface{}{"q": q, "answer": "", "references": res})
 				return
 			}
-
 			answer, err := search.Summarise(r.Context(), res, q)
 			if err != nil {
-				log.Printf("Summarisation failed: %v", err)
-				summaryError = "AI summary unavailable. Please try again later."
+				status, message := http.StatusServiceUnavailable, "AI summary unavailable. Please try again later."
 				var limit *model.LimitError
 				if errors.As(err, &limit) {
-					summaryError = err.Error()
+					status, message = http.StatusTooManyRequests, limit.Error()
 				}
-				writeRefs()
+				log.Printf("Summarisation failed: %v", err)
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(status)
+				json.NewEncoder(w).Encode(map[string]string{"message": message})
 				return
 			}
 
 			answerMD := string(app.Render([]byte(answer)))
 
 			output, _ := json.Marshal(map[string]interface{}{
-				"q":                   q,
-				"answer":              answerMD,
-				"references":          res,
-				"summarise_available": available,
+				"q":          q,
+				"answer":     answerMD,
+				"references": res,
 			})
 			w.Write(output)
 

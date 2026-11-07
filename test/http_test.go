@@ -126,8 +126,7 @@ func TestLitePagesAndSearch(t *testing.T) {
 			continue
 		}
 		var result struct {
-			References         []json.RawMessage
-			SummariseAvailable bool
+			References []json.RawMessage
 		}
 		if code != 200 {
 			t.Fatalf("search: %d %s", code, data)
@@ -135,7 +134,7 @@ func TestLitePagesAndSearch(t *testing.T) {
 		if err := json.Unmarshal(data, &result); err != nil {
 			t.Fatal(err)
 		}
-		if len(result.References) == 0 || result.SummariseAvailable {
+		if len(result.References) == 0 {
 			t.Fatalf("search: %s", data)
 		}
 		break
@@ -154,6 +153,9 @@ func TestSearchSummaryOptIn(t *testing.T) {
 		}
 		if err := json.Unmarshal(data, &result); err != nil {
 			t.Fatal(err)
+		}
+		if bytes.Contains(data, []byte("summarise_available")) || bytes.Contains(data, []byte("summary_error")) {
+			t.Fatalf("unexpected API fields: %s", data)
 		}
 		if result.Answer != "" || len(result.References) == 0 {
 			t.Fatalf("unexpected search response %s", data)
