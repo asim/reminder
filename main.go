@@ -767,7 +767,7 @@ func main() {
 		w.Write(b)
 	})
 
-	api.RegisterQuranVerseRoute(http.DefaultServeMux, func(chapter, verse int) ([]byte, bool) {
+	http.HandleFunc("/api/quran/{chapter}/{verse}", quranVerseHandler(func(chapter, verse int) ([]byte, bool) {
 		if chapter > len(q.Chapters) {
 			return nil, false
 		}
@@ -778,7 +778,7 @@ func main() {
 		}
 
 		return vee.JSON(), true
-	})
+	}))
 
 	http.HandleFunc("/api/daily", func(w http.ResponseWriter, r *http.Request) {
 		// GET: today's archived daily (saved at midnight UTC)
