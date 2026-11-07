@@ -1,4 +1,4 @@
-package main
+package model
 
 import (
 	"context"
@@ -20,14 +20,14 @@ var (
 	llmReachable bool
 )
 
-// LLMAvailable reports whether summarisation can actually run. Search itself
+// Available reports whether summarisation can actually run. Search itself
 // never needs an LLM, so when none is configured the UI hides the summarise
 // controls rather than offering a button that cannot work.
 //
 // An explicit key or model is taken at face value. Otherwise the local Ollama
 // endpoint is probed once, so that someone running Ollama without setting
 // OLLAMA_LLM_MODEL is still offered summaries.
-func LLMAvailable() bool {
+func Available() bool {
 	llmOnce.Do(func() { llmReachable = detectLLM() })
 	return llmReachable
 }
@@ -61,20 +61,20 @@ func ollamaReachable() bool {
 	return resp.StatusCode == http.StatusOK
 }
 
-// askLLMSafe calls askLLM, turning its panics into errors. The underlying
+// AskSafe calls Ask, turning its panics into errors. The underlying
 // clients panic on failure, which in an HTTP handler drops the connection and
 // logs a stack trace instead of returning something the caller can act on.
-func askLLMSafe(ctx context.Context, contexts []string, question string) (answer string, err error) {
+func AskSafe(ctx context.Context, contexts []string, question string) (answer string, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("llm: %v", r)
 		}
 	}()
 
-	if !LLMAvailable() {
+	if !Available() {
 		return "", fmt.Errorf("llm: no model configured")
 	}
-	return askLLM(ctx, contexts, question), nil
+	return Ask(ctx, contexts, question), nil
 }
 
 var systemPromptTpl = template.Must(template.New("system_prompt").Parse(`
@@ -98,7 +98,7 @@ Anything between the following 'context' XML blocks is retrieved from the knowle
 Don't mention the knowledge base, context or search results in your answer.
 `))
 
-func askLLM(ctx context.Context, contexts []string, question string) string {
+func Ask(ctx context.Context, contexts []string, question string) string {
 	sb := &strings.Builder{}
 	if err := systemPromptTpl.Execute(sb, contexts); err != nil {
 		panic(err)

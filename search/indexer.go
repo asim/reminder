@@ -1,4 +1,4 @@
-package main
+package search
 
 import (
 	"encoding/json"
@@ -11,7 +11,6 @@ import (
 	"github.com/asim/reminder/hadith"
 	"github.com/asim/reminder/names"
 	"github.com/asim/reminder/quran"
-	"github.com/asim/reminder/search"
 )
 
 // Checkpoint tracks indexing progress for resumption
@@ -50,7 +49,7 @@ func clearCheckpoint() {
 	os.Remove(getCheckpointPath())
 }
 
-func indexContent(idx search.Searcher, md map[string]string, text string) {
+func indexContent(idx Searcher, md map[string]string, text string) {
 	// index the documents
 	lines := strings.Split(text, "\n")
 
@@ -61,7 +60,7 @@ func indexContent(idx search.Searcher, md map[string]string, text string) {
 	}
 }
 
-func indexQuran(idx search.Searcher, q *quran.Quran) {
+func IndexQuran(idx Searcher, q *quran.Quran) {
 	cp := loadCheckpoint()
 	if cp.QuranDone {
 		log.Println("Quran already indexed, skipping")
@@ -105,9 +104,9 @@ func indexQuran(idx search.Searcher, q *quran.Quran) {
 	saveCheckpoint(cp)
 }
 
-func indexNames(idx search.Searcher, n *names.Names) {
-	if fts, ok := idx.(*search.FTS); ok {
-		if _, err := syncNames(fts, n); err != nil {
+func IndexNames(idx Searcher, n *names.Names) {
+	if fts, ok := idx.(*FTS); ok {
+		if _, err := SyncNames(fts, n); err != nil {
 			log.Printf("Error indexing names: %v", err)
 		}
 		return
@@ -133,7 +132,7 @@ func indexNames(idx search.Searcher, n *names.Names) {
 	saveCheckpoint(cp)
 }
 
-func indexTafsir(idx search.Searcher, q *quran.Quran) {
+func IndexTafsir(idx Searcher, q *quran.Quran) {
 	cp := loadCheckpoint()
 	if cp.TafsirDone {
 		log.Println("Tafsir already indexed, skipping")
@@ -154,7 +153,7 @@ func indexTafsir(idx search.Searcher, q *quran.Quran) {
 	saveCheckpoint(cp)
 }
 
-func indexHadith(idx search.Searcher, b *hadith.Collection) {
+func IndexHadith(idx Searcher, b *hadith.Collection) {
 	cp := loadCheckpoint()
 	if cp.HadithDone {
 		log.Println("Hadith already indexed, skipping")

@@ -1,4 +1,4 @@
-package main
+package model
 
 import (
 	"context"
@@ -54,7 +54,7 @@ func TestAskLLMSafeErrorsInsteadOfPanicking(t *testing.T) {
 	llmOnce = sync.Once{}
 	llmReachable = false
 
-	answer, err := askLLMSafe(context.Background(), nil, "what is patience")
+	answer, err := AskSafe(context.Background(), nil, "what is patience")
 	if err == nil {
 		t.Fatal("expected an error when no model is configured, got nil")
 	}
