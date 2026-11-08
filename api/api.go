@@ -29,6 +29,12 @@ type Value struct {
 
 var Endpoints = []*Endpoint{
 	{
+		Name:        "MCP",
+		Path:        "/mcp",
+		Description: "Connect MCP clients to https://reminder.dev/mcp using HTTP POST (JSON-RPC 2.0) for Quran, hadith, names, reminders and search tools. Search summaries require summarise: true (default: false).",
+		Response:    []*Value{{Type: "JSON-RPC 2.0"}},
+	},
+	{
 		Name:        "Latest reminder (updated hourly)",
 		Path:        "/api/latest",
 		Params:      nil,

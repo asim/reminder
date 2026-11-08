@@ -134,6 +134,10 @@ All queries are returned as JSON
 
 See [`/api`](https://reminder.dev/api) for more details 
 
+MCP clients can connect to `https://reminder.dev/mcp` using HTTP POST for
+Quran, hadith, names, reminders and search tools. Search summaries are opt-in
+with `summarise: true` (default: `false`).
+
 ## App
 
 The reminder bakes in a "lite" app by default. This can be replaced by a featureful react app.
