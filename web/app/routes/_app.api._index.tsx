@@ -31,6 +31,13 @@ export function meta() {
 
 const endpoints: Endpoint[] = [
   {
+    title: 'MCP',
+    description: "Connect MCP clients to https://reminder.dev/mcp using HTTP POST (JSON-RPC 2.0) for Quran, hadith, names, reminders and search tools. Search summaries require summarise: true (default: false).",
+    url: 'https://reminder.dev/mcp',
+    method: 'POST',
+    responseFormat: 'JSON-RPC 2.0',
+  },
+  {
     title: 'Latest Reminder',
     description: 'Returns the latest verse, hadith, and name of Allah (updated hourly)',
     url: '/api/latest',
