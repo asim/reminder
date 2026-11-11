@@ -1,7 +1,7 @@
-import { ReadingSettings } from '~/components/quran/reading-settings';
+import { ReadingSettings, useQuranSettings } from '~/components/quran/reading-settings';
 import type { Route } from '.react-router/types/app/routes/+types/_app.quran';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { Outlet, useLocation } from 'react-router';
 import {
   SearchableSidebar,
@@ -9,6 +9,7 @@ import {
 } from '~/components/interface/searchable-sidebar';
 import { listSurahsOptions } from '~/queries/quran';
 import { queryClient } from '~/utils/query-client';
+import { orderChapters } from '~/utils/chapter-order';
 
 export async function clientLoader(props: Route.LoaderArgs) {
   await queryClient.ensureQueryData(listSurahsOptions());
@@ -16,6 +17,8 @@ export async function clientLoader(props: Route.LoaderArgs) {
 
 export default function Quran() {
   const { data: chapters } = useSuspenseQuery(listSurahsOptions());
+  const { settings } = useQuranSettings();
+  const orderedChapters = useMemo(() => orderChapters(chapters ?? [], settings.chapterOrder), [chapters, settings.chapterOrder]);
   const location = useLocation();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -26,7 +29,7 @@ export default function Quran() {
   }, [location.pathname]);
 
   const sidebarItems: SidebarItem[] =
-    chapters?.map((chapter) => ({
+    orderedChapters.map((chapter) => ({
       key: chapter.number,
       text: chapter.name,
       path: `/quran/${chapter.number}`,

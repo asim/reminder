@@ -1,0 +1,22 @@
+// Run with: node web/scripts/test-chapter-order.cjs
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const vm = require('node:vm');
+const ts = require('typescript');
+const source = fs.readFileSync(path.join(__dirname, '../app/utils/chapter-order.ts'), 'utf8');
+const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
+const context = { exports: {} };
+vm.runInNewContext(code, context);
+const { revelationOrder, orderChapters } = context.exports;
+const standard = Array.from({ length: 114 }, (_, i) => i + 1);
+assert.deepEqual([...revelationOrder].sort((a, b) => a - b), standard, 'every chapter appears exactly once');
+assert.deepEqual([...revelationOrder].slice(0, 5), [96, 68, 73, 74, 1]);
+assert.deepEqual([...revelationOrder].slice(-5), [62, 48, 5, 9, 110]);
+const chapters = Object.freeze(standard.map(number => Object.freeze({ number, path: `/quran/${number}` })));
+const reordered = orderChapters(chapters, 'revelation');
+assert.deepEqual(Array.from(reordered, chapter => chapter.number), [...revelationOrder]);
+assert.deepEqual(chapters.map(chapter => chapter.number), standard, 'cached chapter data is unchanged');
+assert.ok(reordered.every(chapter => chapter === chapters[chapter.number - 1]), 'chapter identity and links are unchanged');
+assert.deepEqual(Array.from(orderChapters(reordered, 'standard'), chapter => chapter.number), standard);
+console.log('Chapter ordering checks passed');
