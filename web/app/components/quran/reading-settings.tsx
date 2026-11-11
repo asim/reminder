@@ -3,10 +3,12 @@ import { createContext, useContext, useRef, useState, useId, useEffect, useLayou
 import type { CSSProperties, ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import type { ViewMode } from './view-mode';
+import type { ChapterOrder } from '~/utils/chapter-order';
 
 export type Translation = 'khattab' | 'asad' | 'sahih';
 type Preferences = {
   mode: ViewMode;
+  chapterOrder: ChapterOrder;
   translation: Translation;
   wordByWord: boolean;
   transliteration: boolean;
@@ -15,7 +17,7 @@ type Preferences = {
   englishSize: number;
 };
 const defaults: Preferences = {
-  mode: 'translation', translation: 'khattab', wordByWord: false,
+  chapterOrder: 'standard', mode: 'translation', translation: 'khattab', wordByWord: false,
   transliteration: false, commentary: false, arabicSize: 100, englishSize: 100,
 };
 const storageKey = 'quran-reading-settings';
@@ -28,6 +30,7 @@ function savedPreferences(): Preferences {
     const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
     const oldMode = localStorage.getItem('quran-view-mode');
     return {
+      chapterOrder: saved.chapterOrder === 'revelation' ? 'revelation' : 'standard',
       mode: validMode(saved.mode) ? saved.mode : validMode(oldMode) ? oldMode : defaults.mode,
       translation: validTranslation(saved.translation) ? saved.translation : defaults.translation,
       wordByWord: typeof saved.wordByWord === 'boolean' ? saved.wordByWord : localStorage.getItem('quran-word-by-word-toggle') === 'true',
@@ -79,6 +82,14 @@ export function QuranSettingsProvider({ children }: { children: ReactNode }) {
     return () => cancelAnimationFrame(frame);
   }, [location.key]);
   function update(patch: Partial<Preferences>) {
+    // List ordering is a local preference; changing it must not navigate the reader.
+    if (Object.keys(patch).length === 1 && patch.chapterOrder !== undefined) {
+      const next = { ...settings, ...patch };
+      setSaved(next);
+      if (pending) setPending({ ...pending, settings: next });
+      try { localStorage.setItem(storageKey, JSON.stringify(next)); } catch { /* Still works without storage. */ }
+      return;
+    }
     const scroller = document.querySelector<HTMLElement>('[data-quran-scroll]');
     if (scroller) {
       const top = scroller.getBoundingClientRect().top;
@@ -114,7 +125,7 @@ export function ReadingSettings() {
   const location = useLocation();
   const dialog = useRef<HTMLDialogElement>(null);
   const titleId = useId();
-  if (!/^\/quran\/\d+(?:\/\d+)?\/?$/.test(location.pathname)) return null;
+  if (!/^\/quran(?:\/\d+(?:\/\d+)?)?\/?$/.test(location.pathname)) return null;
   const selectClass = 'w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm';
   return <>
     <button type='button' onClick={() => dialog.current?.showModal()} aria-label='Reading settings' title='Reading settings'
@@ -132,6 +143,19 @@ export function ReadingSettings() {
         <button type='button' aria-label='Close reading settings' onClick={() => dialog.current?.close()} className='p-2 rounded hover:bg-gray-100'><X className='size-5' /></button>
       </div>
       <div className='space-y-5'>
+        <div>
+          <label className='block text-sm'>
+            <span className='block mb-2 font-medium'>Chapter order</span>
+            <select aria-label='Chapter order' aria-describedby={`${titleId}-order-note`} className={selectClass} value={settings.chapterOrder} onChange={e => update({ chapterOrder: e.target.value as ChapterOrder })}>
+              <option value='standard'>Standard</option>
+              <option value='revelation'>Revelation</option>
+            </select>
+          </label>
+          <p id={`${titleId}-order-note`} className='mt-2 text-xs text-gray-500 leading-relaxed'>
+            Applies to the chapter list only.
+            {settings.chapterOrder === 'revelation' && <> Uses <a href='https://tanzil.net/docs/revelation_order' target='_blank' rel='noreferrer' className='underline'>Tanzil’s traditional chronology</a>, based on the first revealed verses. Chronologies differ.</>}
+          </p>
+        </div>
         <label className='block text-sm'>
           <span className='block mb-2 font-medium'>Display</span>
           <select aria-label='Display' className={selectClass} value={settings.mode} onChange={e => update({ mode: e.target.value as ViewMode })}>
@@ -169,7 +193,7 @@ export function ReadingSettings() {
         </fieldset>
         <p className='text-xs text-gray-500 leading-relaxed'>
           Translation applies to verse text. Word meanings and stored tafsir are separate sources. English audio uses Sahih International.
-          {settings.translation === 'asad' && <> Asad’s explanatory notes are available <a className='underline' href={`https://www.alim.org/translation/asad/${location.pathname.split('/')[2]}/`} target='_blank' rel='noreferrer'>on Alim</a>.</>}
+          {settings.translation === 'asad' && <> Asad’s explanatory notes are available <a className='underline' href={`https://www.alim.org/translation/asad/${location.pathname.split('/')[2] ? location.pathname.split('/')[2] + '/' : ''}`} target='_blank' rel='noreferrer'>on Alim</a>.</>}
         </p>
         <button type='button' onClick={() => update(defaults)} className='text-sm underline underline-offset-4'>Reset reading settings</button>
       </div>
