@@ -241,6 +241,13 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Collection, a 
 }
 
 func main() {
+	if len(os.Args) > 1 && os.Args[1] == "keys" {
+		if err := api.RunKeys(api.ReminderDir, os.Args[2:], os.Stdout); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
+
 	log.Println("New rand source")
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 
@@ -844,6 +851,13 @@ func main() {
 	log.Println("Registering routes")
 	httpMux := http.DefaultServeMux
 	api.RegisterRoutes(httpMux)
+
+	keys, err := api.OpenKeys(api.ReminderDir)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer keys.Close()
+	http.Handle("/api/model/ask", api.ModelHandler(keys, idx, n, indexed))
 
 	http.Handle("/mcp", api.NewMCP(q, n, b, reminders, idx, indexed))
 

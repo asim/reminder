@@ -190,6 +190,11 @@ File an issue to discuss
 Quran, Bukhari and names are saved for offline reading after the initial download.
 Audio, search and AI require a connection. Use `make build` to include the service worker.
 
+## Model API
+
+`POST /api/model/ask` requires authorisation: `Authorization: Bearer <key>`.
+Operators issue keys on the CLI; see [model access and usage](docs/model.md).
+
 ## AI limits
 
 Summaries require `summarise: true`. Public defaults: 100 requests/day,
