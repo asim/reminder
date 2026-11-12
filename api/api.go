@@ -11,6 +11,8 @@ type Api struct {
 type Endpoint struct {
 	Name        string
 	Path        string
+	Method      string
+	Example     *Example
 	Params      []*Param
 	Response    []*Value
 	Description string
@@ -31,7 +33,8 @@ var Endpoints = []*Endpoint{
 	{
 		Name:        "Model",
 		Path:        "/api/model/ask",
-		Description: `POST. Requires authorisation: Authorization: Bearer <key>. Access to reminder.dev is by approval; request a key through a GitHub issue at github.com/asim/reminder. Answers from Quran, hadith and Names sources, using optional caller-managed history. Example body: {"prompt":"Explain patience","history":[]}. History contains alternating user/assistant messages with role and content fields. See docs/model.md for CLI key management and limits.`,
+		Method:      "POST",
+		Description: `POST. Requires authorisation: Authorization: Bearer <key>. Access to reminder.dev is by approval; request a key through a GitHub issue at github.com/asim/reminder. Answers from Quran, hadith and Names sources, using optional caller-managed history. History contains alternating user/assistant messages with role and content fields. See docs/model.md for CLI key management and limits.`,
 		Params: []*Param{
 			{Name: "prompt", Value: "string", Description: "Required prompt (up to 32 KiB UTF-8 by default)"},
 			{Name: "history", Value: "array", Description: "Optional alternating user/assistant messages; prompt plus history up to 128 KiB UTF-8 by default"},
@@ -44,12 +47,14 @@ var Endpoints = []*Endpoint{
 	{
 		Name:        "MCP",
 		Path:        "/mcp",
+		Method:      "POST",
 		Description: "Connect MCP clients to https://reminder.dev/mcp using HTTP POST (JSON-RPC 2.0) for Quran, hadith, names, reminders and search tools. Search summaries require summarise: true (default: false).",
 		Response:    []*Value{{Type: "JSON-RPC 2.0"}},
 	},
 	{
 		Name:        "Latest reminder (updated hourly)",
 		Path:        "/api/latest",
+		Method:      "GET",
 		Params:      nil,
 		Description: "Returns the latest verse, hadith and name of Allah (updated every hour)",
 		Response: []*Value{{
@@ -67,6 +72,7 @@ var Endpoints = []*Endpoint{
 	{
 		Name:        "Daily verse, hadith and name of Allah",
 		Path:        "/api/daily",
+		Method:      "GET",
 		Params:      nil,
 		Description: "Returns today's daily reminder (updated once per day at midnight)",
 		Response: []*Value{{
@@ -86,6 +92,7 @@ var Endpoints = []*Endpoint{
 	{
 		Name:        "Daily reminder by date",
 		Path:        "/api/daily/{date}",
+		Method:      "GET",
 		Params:      nil,
 		Description: "Returns a verse of the quran, hadith and name of Allah for the date",
 		Response: []*Value{{
@@ -103,6 +110,7 @@ var Endpoints = []*Endpoint{
 	{
 		Name:        "Quran",
 		Path:        "/api/quran",
+		Method:      "GET",
 		Params:      nil,
 		Response:    []*Value{{Type: "JSON"}},
 		Description: "Returns the entire Quran",
@@ -110,6 +118,7 @@ var Endpoints = []*Endpoint{
 	{
 		Name:        "List of Quran Chapters",
 		Path:        "/api/quran/chapters",
+		Method:      "GET",
 		Params:      nil,
 		Description: "Returns a list of Quran chapters",
 		Response: []*Value{{
@@ -125,6 +134,7 @@ var Endpoints = []*Endpoint{
 	{
 		Name:        "Quran by Chapter",
 		Path:        "/api/quran/{chapter}",
+		Method:      "GET",
 		Params:      nil,
 		Description: "Returns a chapter of the quran",
 		Response: []*Value{{
@@ -140,6 +150,7 @@ var Endpoints = []*Endpoint{
 	{
 		Name:        "Quran by Verse",
 		Path:        "/api/quran/{chapter}/{verse}",
+		Method:      "GET",
 		Params:      nil,
 		Description: "Returns a verse of the quran",
 		Response: []*Value{{
@@ -156,6 +167,7 @@ var Endpoints = []*Endpoint{
 	{
 		Name:        "Hadith",
 		Path:        "/api/hadith",
+		Method:      "GET",
 		Params:      nil,
 		Response:    []*Value{{Type: "JSON"}},
 		Description: "Returns the entire Hadith",
@@ -163,6 +175,7 @@ var Endpoints = []*Endpoint{
 	{
 		Name:        "Hadith by Book",
 		Path:        "/api/hadith/{book}",
+		Method:      "GET",
 		Params:      nil,
 		Description: "Returns a book from the hadith",
 		Response: []*Value{{
@@ -176,6 +189,7 @@ var Endpoints = []*Endpoint{
 	{
 		Name:        "Names",
 		Path:        "/api/names",
+		Method:      "GET",
 		Params:      nil,
 		Response:    []*Value{{Type: "JSON"}},
 		Description: "Returns the names of Allah",
@@ -183,6 +197,7 @@ var Endpoints = []*Endpoint{
 	{
 		Name:        "Search",
 		Path:        "/api/search",
+		Method:      "POST",
 		Description: "Search the Quran, Hadith and Names of Allah, with an optional AI summary",
 		Params: []*Param{
 			{Name: "summarise", Value: "boolean", Description: "Generate an AI summary only when true (default: false)"},
@@ -198,27 +213,6 @@ var Endpoints = []*Endpoint{
 				{Name: "q", Value: "string", Description: "The question asked"},
 				{Name: "answer", Value: "string", Description: "Answer to the question"},
 				{Name: "references", Value: "array", Description: "A list of references used"},
-			},
-		}},
-	},
-	{
-		Name: "Daily verse, hadith and name of Allah (by Date)",
-		Path: "/api/daily",
-		Params: []*Param{
-			{Name: "date", Value: "string", Description: "(POST only) Date in YYYY-MM-DD format. Optional. If omitted, returns today's entry."},
-		},
-		Description: "Returns a verse of the Quran, hadith, and name of Allah for the given date (POST) or today (GET). POST with a JSON body containing an optional 'date' field. If the date is not found, returns 404.",
-		Response: []*Value{{
-			Type: "JSON",
-			Params: []*Param{
-				{Name: "name", Value: "string", Description: "Name of Allah"},
-				{Name: "hadith", Value: "string", Description: "Hadith from Sahih Bukhari"},
-				{Name: "verse", Value: "string", Description: "A verse of the Quran"},
-				{Name: "links", Value: "map", Description: "Links to relevant content"},
-				{Name: "updated", Value: "string", Description: "Time of last update"},
-				{Name: "message", Value: "string", Description: "Salam, today is ... (Hijri date)"},
-				{Name: "date", Value: "string", Description: "Gregorian date (YYYY-MM-DD)"},
-				{Name: "hijri", Value: "string", Description: "Hijri date (display format)"},
 			},
 		}},
 	},
@@ -239,7 +233,7 @@ func (a *Api) Markdown() string {
 		data += fmt.Sprintln()
 		data += fmt.Sprintln(endpoint.Description)
 		data += fmt.Sprintln()
-		data += fmt.Sprintf("**URL:** [`%s`](%s)", endpoint.Path, endpoint.Path)
+		data += fmt.Sprintf("**%s URL:** [`%s`](%s)", endpoint.Method, endpoint.Path, endpoint.Path)
 		data += fmt.Sprintln()
 		data += fmt.Sprintln()
 
@@ -269,8 +263,14 @@ func (a *Api) Markdown() string {
 			data += fmt.Sprintln()
 		}
 
-		data += fmt.Sprintln()
-		data += fmt.Sprintln()
+		if endpoint.Example != nil {
+			data += "### Example request\n\n```sh\n" + endpoint.Example.Request + "\n```\n\n"
+			data += "### Example response\n\n"
+			if endpoint.Example.Note != "" {
+				data += endpoint.Example.Note + "\n\n"
+			}
+			data += "```json\n" + endpoint.Example.ResponseJSON() + "\n```\n\n"
+		}
 	}
 
 	return data
@@ -284,6 +284,8 @@ func (a *Api) HTML(renderFunc func(string) string) string {
 .api-content h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; }
 .api-content p { margin-bottom: 1rem; }
 .api-content ul { margin-bottom: 1rem; }
+.api-content pre { max-width: 100%; overflow-x: auto; background-color: #f3f4f6; padding: 1rem; margin-bottom: 1rem; border-radius: 0.25rem; direction: ltr; text-align: left; }
+.api-content pre code { padding: 0; }
 .api-content code { background-color: #f3f4f6; padding: 0.125rem 0.25rem; border-radius: 0.25rem; }
 </style>`
 	return content
@@ -291,6 +293,10 @@ func (a *Api) HTML(renderFunc func(string) string) string {
 
 func Load() *Api {
 	a := new(Api)
-	a.Endpoints = Endpoints
+	for _, endpoint := range Endpoints {
+		copy := *endpoint
+		copy.Example = examples[copy.Method+" "+copy.Path]
+		a.Endpoints = append(a.Endpoints, &copy)
+	}
 	return a
 }

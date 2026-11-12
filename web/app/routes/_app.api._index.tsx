@@ -1,3 +1,18 @@
+import examples from '../../../api/examples.json';
+
+function EndpointExamples({ method, url }: { method: string; url: string }) {
+  const key = `${method} ${url.replace('https://reminder.dev', '')}` as keyof typeof examples;
+  const example = examples[key];
+  if (!example) return null;
+  return <div className='mt-4 space-y-3 min-w-0'>
+    <h3 className='font-semibold text-sm sm:text-base'>Example request</h3>
+    <pre dir='ltr' className='bg-gray-50 rounded p-3 text-xs sm:text-sm overflow-x-auto text-left'><code>{example.request}</code></pre>
+    <h3 className='font-semibold text-sm sm:text-base'>Example response</h3>
+    <p className='text-xs sm:text-sm text-gray-600'>{example.note}</p>
+    <pre dir='ltr' className='bg-gray-50 rounded p-3 text-xs sm:text-sm overflow-x-auto text-left'><code>{JSON.stringify(example.response, null, 2)}</code></pre>
+  </div>;
+}
+
 interface Param {
   name: string;
   type: string;
@@ -32,7 +47,7 @@ export function meta() {
 const endpoints: Endpoint[] = [
   {
     title: 'Model',
-    description: 'Requires authorisation: Authorization: Bearer <key>. Access to reminder.dev is by approval; request a key through a GitHub issue at github.com/asim/reminder. Responds to prompts using Quran, hadith and Names sources. History is supplied by the caller and is not stored. Example body: {"prompt":"Explain patience","history":[]}.',
+    description: 'Requires authorisation: Authorization: Bearer <key>. Access to reminder.dev is by approval; request a key through a GitHub issue at github.com/asim/reminder. Responds to prompts using Quran, hadith and Names sources. History is supplied by the caller and is not stored.',
     url: '/api/model/ask',
     method: 'POST',
     requestFormat: 'JSON',
@@ -326,6 +341,7 @@ export default function Api() {
                   </div>
                 )}
               </div>
+              <EndpointExamples method={endpoint.method || 'GET'} url={endpoint.url} />
             </div>
           ))}
         </div>
