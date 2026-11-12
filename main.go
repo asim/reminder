@@ -378,6 +378,8 @@ func main() {
 		close(indexed)
 	}
 
+	lookup := search.WithQuran(idx, q)
+
 	// Export and import operate on the vector index only. They are maintainer
 	// operations for rebuilding the index that ships in the binary.
 	if *ExportFlag {
@@ -802,7 +804,7 @@ func main() {
 				}
 			}
 
-			res, err := search.References(idx, n, q)
+			res, err := search.References(lookup, n, q)
 			if err != nil {
 				http.Error(w, err.Error(), 500)
 				return
@@ -859,7 +861,7 @@ func main() {
 	defer keys.Close()
 	http.Handle("/api/model/ask", api.ModelHandler(keys, idx, n, indexed))
 
-	http.Handle("/mcp", api.NewMCP(q, n, b, reminders, idx, indexed))
+	http.Handle("/mcp", api.NewMCP(q, n, b, reminders, lookup, indexed))
 
 	if *ServerFlag {
 		log.Println("Starting daily")

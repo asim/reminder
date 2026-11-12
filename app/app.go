@@ -163,6 +163,20 @@ function expand(el) {
 }
 
 function reference(el) {
+    var meta = el.metadata || {};
+    if (meta.source === 'quran' && /^[0-9]+$/.test(meta.chapter) && (!meta.verse || /^[0-9]+$/.test(meta.verse))) {
+        var card = document.createElement('div');
+        card.className = 'p-3 bg-gray-50 rounded text-sm';
+        var link = document.createElement('a');
+        link.href = '/quran/' + meta.chapter + (meta.verse ? '/' + meta.verse : '');
+        link.className = 'text-blue-700 underline font-medium';
+        link.textContent = (meta.name || 'Chapter ' + meta.chapter) + (meta.verse ? ' ' + meta.chapter + ':' + meta.verse : ' — Chapter ' + meta.chapter);
+        card.appendChild(link);
+        var text = document.createElement('p');
+        text.textContent = el.text;
+        card.appendChild(text);
+        return card.outerHTML;
+    }
 	return "<div class='p-3 bg-gray-50 rounded text-sm'><strong>Text:</strong> " + el.text + "<br><strong>Metadata:</strong> " + JSON.stringify(el.metadata) + "<br><strong>Score:</strong> " + el.score + "</div>";
 }
 
