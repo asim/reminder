@@ -31,27 +31,6 @@ type Value struct {
 
 var Endpoints = []*Endpoint{
 	{
-		Name:        "Model",
-		Path:        "/api/model/ask",
-		Method:      "POST",
-		Description: `POST. Requires authorisation: Authorization: Bearer <key>. Access to reminder.dev is by approval; request a key through a GitHub issue at github.com/asim/reminder. Answers from Quran, hadith and Names sources, using optional caller-managed history. History contains alternating user/assistant messages with role and content fields. See docs/model.md for CLI key management and limits.`,
-		Params: []*Param{
-			{Name: "prompt", Value: "string", Description: "Required prompt (up to 32 KiB UTF-8 by default)"},
-			{Name: "history", Value: "array", Description: "Optional alternating user/assistant messages; prompt plus history up to 128 KiB UTF-8 by default"},
-		},
-		Response: []*Value{{Type: "JSON", Params: []*Param{
-			{Name: "answer", Value: "string", Description: "Plain text / Markdown response with numbered source citations"},
-			{Name: "references", Value: "array", Description: "Retrieved source records, in citation order"},
-		}}},
-	},
-	{
-		Name:        "MCP",
-		Path:        "/mcp",
-		Method:      "POST",
-		Description: "Connect MCP clients to https://reminder.dev/mcp using HTTP POST (JSON-RPC 2.0) for Quran, hadith, names, reminders and search tools. Search summaries require summarise: true (default: false).",
-		Response:    []*Value{{Type: "JSON-RPC 2.0"}},
-	},
-	{
 		Name:        "Latest reminder (updated hourly)",
 		Path:        "/api/latest",
 		Method:      "GET",
@@ -193,6 +172,27 @@ var Endpoints = []*Endpoint{
 		Params:      nil,
 		Response:    []*Value{{Type: "JSON"}},
 		Description: "Returns the names of Allah",
+	},
+	{
+		Name:        "Model",
+		Path:        "/api/model/ask",
+		Method:      "POST",
+		Description: `POST. Requires authorisation: Authorization: Bearer <key>. Access to reminder.dev is by approval; request a key through a GitHub issue at github.com/asim/reminder. Answers from Quran, hadith and Names sources, using optional caller-managed history. History contains alternating user/assistant messages with role and content fields. See docs/model.md for CLI key management and limits.`,
+		Params: []*Param{
+			{Name: "prompt", Value: "string", Description: "Required prompt (up to 32 KiB UTF-8 by default)"},
+			{Name: "history", Value: "array", Description: "Optional alternating user/assistant messages; prompt plus history up to 128 KiB UTF-8 by default"},
+		},
+		Response: []*Value{{Type: "JSON", Params: []*Param{
+			{Name: "answer", Value: "string", Description: "Plain text / Markdown response with numbered source citations"},
+			{Name: "references", Value: "array", Description: "Retrieved source records, in citation order"},
+		}}},
+	},
+	{
+		Name:        "MCP",
+		Path:        "/mcp",
+		Method:      "POST",
+		Description: "Connect MCP clients to https://reminder.dev/mcp using HTTP POST (JSON-RPC 2.0) for Quran, hadith, names, reminders and search tools. Search summaries require summarise: true (default: false).",
+		Response:    []*Value{{Type: "JSON-RPC 2.0"}},
 	},
 	{
 		Name:        "Search",
