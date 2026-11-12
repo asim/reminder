@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Loader2, MessageSquare, Search as SearchIcon } from 'lucide-react';
+import { Loader2, Search as SearchIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import {
@@ -41,7 +41,7 @@ function getResultTitle(meta: Record<string, string>): string {
   const source = meta.source || '';
   if (source === 'quran') {
     const name = meta.name || `Chapter ${meta.chapter}`;
-    return `${name} ${meta.chapter}:${meta.verse}`;
+    return meta.verse ? `${name} ${meta.chapter}:${meta.verse}` : `${name} — Chapter ${meta.chapter}`;
   }
   if (source === 'bukhari') {
     const book = meta.book || `Book ${meta.book_num}`;
@@ -58,8 +58,8 @@ function getResultTitle(meta: Record<string, string>): string {
 
 function getResultLink(meta: Record<string, string>): string | null {
   const source = meta.source || '';
-  if (source === 'quran' && meta.chapter && meta.verse) {
-    return `/quran/${meta.chapter}/${meta.verse}`;
+  if (source === 'quran' && meta.chapter) {
+    return meta.verse ? `/quran/${meta.chapter}/${meta.verse}` : `/quran/${meta.chapter}`;
   }
   if (source === 'bukhari' && meta.book_num) {
     return meta.number
@@ -253,25 +253,17 @@ export default function SearchIndex() {
           </div>
           <div className='flex gap-2 mt-2'>
             <button
-              type='button'
-              onClick={() => doSubmit('search')}
+              type='submit'
               disabled={isLoading || !query.trim()}
               className='flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-black text-white text-xs sm:text-sm hover:bg-gray-800 disabled:opacity-60 transition-colors'
             >
               <SearchIcon className='size-3.5' />
               Search
             </button>
-            {(
-              <button
-                type='button'
-                onClick={() => doSubmit('ask')}
-                disabled={isLoading || !query.trim()}
-                className='flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-300 text-gray-700 text-xs sm:text-sm hover:bg-gray-100 disabled:opacity-60 transition-colors'
-              >
-                <MessageSquare className='size-3.5' />
-                Ask AI
-              </button>
-            )}
+            <label className='flex items-center gap-2 text-xs sm:text-sm text-gray-700'>
+              <input type='checkbox' checked={mode === 'ask'} onChange={e => setMode(e.target.checked ? 'ask' : 'search')} />
+              Summarise with AI
+            </label>
           </div>
         </form>
 
@@ -297,7 +289,7 @@ export default function SearchIndex() {
           </div>
         )}
 
-        {/* Ask AI mode: show summary + references */}
+        {/* Optional summary with references */}
         {mergedResults && mode === 'ask' && (
           <div className='mb-6 sm:mb-8'>
             <div className='border border-gray-200 rounded-md p-3 sm:p-4 mb-4'>
