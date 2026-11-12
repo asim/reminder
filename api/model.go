@@ -9,13 +9,15 @@ import (
 	"strings"
 	"time"
 
+	"github.com/asim/reminder/hadith"
 	"github.com/asim/reminder/model"
 	"github.com/asim/reminder/names"
+	"github.com/asim/reminder/quran"
 	"github.com/asim/reminder/search"
 )
 
 // ModelHandler exposes grounded prompting independently of search summaries.
-func ModelHandler(keys *KeyStore, idx search.Searcher, corpus *names.Names, indexed <-chan bool) http.Handler {
+func ModelHandler(keys *KeyStore, idx search.Searcher, corpus *names.Names, q *quran.Quran, b *hadith.Collection, indexed <-chan bool) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Cache-Control", "no-store")
@@ -82,7 +84,9 @@ func ModelHandler(keys *KeyStore, idx search.Searcher, corpus *names.Names, inde
 		// Key allowances replace the anonymous per-IP allowance, not the global cap.
 		ctx := model.WithClient(r.Context(), "")
 		ctx = model.WithTokenAllowance(ctx, func(units int) error { return keys.ReserveTokens(id, units, time.Now()) })
-		result, err := model.Respond(ctx, request, func(query string) ([]*model.Reference, error) { return search.References(idx, corpus, query) })
+		result, err := model.Respond(ctx, request, func(query string) ([]*model.Reference, error) {
+			return search.ModelReferences(idx, corpus, q, b, query)
+		})
 		if err != nil {
 			var limit *model.LimitError
 			if errors.As(err, &limit) {
