@@ -42,8 +42,46 @@ type limits struct {
 
 var budget *limits
 
+// Content limits are independent of anonymous search's generation allowance.
+var contentLimits = struct{ Prompt, Input, Evidence, SearchEvidence, Output int }{32768, 131072, 65536, 32768, 4096}
+
+func ModelBodyLimit() int64    { return int64(contentLimits.Input)*6 + 65536 }
+func SearchEvidenceLimit() int { return contentLimits.SearchEvidence }
+
+type tokenAllowanceKey struct{}
+
+// WithTokenAllowance installs the authenticated caller's persistent preflight budget.
+func WithTokenAllowance(ctx context.Context, charge func(int) error) context.Context {
+	return context.WithValue(ctx, tokenAllowanceKey{}, charge)
+}
+
+type groundedKey struct{}
+
 // ConfigureLimits must run once at startup. Counters are owned by one server process.
 func ConfigureLimits(dir string) error {
+	for name, setting := range map[string]struct {
+		target   *int
+		fallback int
+	}{
+		"MODEL_MAX_PROMPT_BYTES":    {&contentLimits.Prompt, 32768},
+		"MODEL_MAX_INPUT_BYTES":     {&contentLimits.Input, 131072},
+		"MODEL_MAX_EVIDENCE_BYTES":  {&contentLimits.Evidence, 65536},
+		"SEARCH_MAX_EVIDENCE_BYTES": {&contentLimits.SearchEvidence, 32768},
+		"MODEL_MAX_OUTPUT_TOKENS":   {&contentLimits.Output, 4096},
+	} {
+		value := setting.fallback
+		if raw, ok := os.LookupEnv(name); ok {
+			var err error
+			value, err = strconv.Atoi(raw)
+			if err != nil || value < 1 || value > 16*1024*1024 {
+				return fmt.Errorf("%s must be between 1 and 16777216", name)
+			}
+		}
+		*setting.target = value
+	}
+	if contentLimits.Prompt > contentLimits.Input {
+		return fmt.Errorf("MODEL_MAX_PROMPT_BYTES must not exceed MODEL_MAX_INPUT_BYTES")
+	}
 	l := &limits{path: filepath.Join(dir, "ai-usage.json")}
 	for name, setting := range map[string]struct {
 		target   *int

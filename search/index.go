@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/asim/reminder/model"
 	"github.com/google/uuid"
 	"github.com/philippgille/chromem-go"
 )
@@ -24,11 +25,7 @@ type Index struct {
 	Col  *chromem.Collection
 }
 
-type Result struct {
-	Text     string            `json:"text"`
-	Score    float32           `json:"score"`
-	Metadata map[string]string `json:"metadata"`
-}
+type Result = model.Reference
 
 // getEmbeddingFunc returns an embedding function based on environment configuration.
 // Priority: 1. OpenAI (fast, requires API key), 2. Ollama (local, slower)

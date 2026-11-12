@@ -190,9 +190,14 @@ File an issue to discuss
 Quran, Bukhari and names are saved for offline reading after the initial download.
 Audio, search and AI require a connection. Use `make build` to include the service worker.
 
+## Model API
+
+`POST /api/model/ask` requires authorisation: `Authorization: Bearer <key>`.
+Operators issue keys on the CLI; see [model access and usage](docs/model.md).
+
 ## AI limits
 
-Summaries require `summarise: true`. Public defaults: 100 requests/day,
+Summaries require `summarise: true`. Public search defaults: 100 requests/day,
 20 per IP, two concurrent generations and 1,024 output tokens. Configure with
 `AI_DAILY_LIMIT`, `AI_IP_DAILY_LIMIT`, `AI_CONCURRENCY_LIMIT` and `AI_MAX_OUTPUT_TOKENS`.
 Daily/hourly generation is exempt. Counters persist across restarts for a single server.
