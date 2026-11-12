@@ -64,7 +64,7 @@ func ollamaReachable() bool {
 // AskSafe calls Ask, turning its panics into errors. The underlying
 // clients panic on failure, which in an HTTP handler drops the connection and
 // logs a stack trace instead of returning something the caller can act on.
-func AskSafe(ctx context.Context, contexts []string, question string) (answer string, err error) {
+func AskSafe(ctx context.Context, contexts []string, prompt string) (answer string, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			if e, ok := r.(error); ok {
@@ -78,7 +78,7 @@ func AskSafe(ctx context.Context, contexts []string, question string) (answer st
 	if !Available() {
 		return "", fmt.Errorf("llm: no model configured")
 	}
-	return Ask(ctx, contexts, question), nil
+	return Ask(ctx, contexts, prompt), nil
 }
 
 var systemPromptTpl = template.Must(template.New("system_prompt").Parse(`
@@ -108,16 +108,40 @@ func outputLimit(ctx context.Context) int {
 	if internal, _ := ctx.Value(internalKey{}).(bool); internal {
 		return 8192
 	}
+	if grounded, _ := ctx.Value(groundedKey{}).(bool); grounded {
+		return contentLimits.Output
+	}
 	return budget.output
 }
 
 // AskInternal is reserved for scheduled server-owned generation, never request handlers.
 // It does not consume or wait on the public AI quota.
-func AskInternal(ctx context.Context, contexts []string, question string) string {
-	return Ask(context.WithValue(ctx, internalKey{}, true), contexts, question)
+func AskInternal(ctx context.Context, contexts []string, prompt string) string {
+	return Ask(context.WithValue(ctx, internalKey{}, true), contexts, prompt)
 }
 
-func Ask(ctx context.Context, contexts []string, question string) string {
+func Ask(ctx context.Context, contexts []string, prompt string) string {
+	sb := &strings.Builder{}
+	if err := systemPromptTpl.Execute(sb, contexts); err != nil {
+		panic(err)
+	}
+	systemPrompt := sb.String()
+
+	return complete(ctx, systemPrompt, []Message{{Role: "user", Content: prompt}})
+}
+
+func complete(ctx context.Context, systemPrompt string, history []Message) string {
+	if charge, ok := ctx.Value(tokenAllowanceKey{}).(func(int) error); ok {
+		// Conservative preflight units: one per UTF-8 byte plus framing and maximum output.
+		// This bounds usage without depending on a provider-specific tokenizer.
+		units := len(systemPrompt) + outputLimit(ctx) + 256
+		for _, message := range history {
+			units += len(message.Content) + 64
+		}
+		if err := charge(units); err != nil {
+			panic(err)
+		}
+	}
 	if budget == nil {
 		panic("AI limits are not configured")
 	}
@@ -130,38 +154,37 @@ func Ask(ctx context.Context, contexts []string, question string) string {
 	}
 	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
-	sb := &strings.Builder{}
-	if err := systemPromptTpl.Execute(sb, contexts); err != nil {
-		panic(err)
-	}
-	systemPrompt := sb.String()
-
 	// Prefer explicit local configuration, then OpenAI, then Anthropic.
 	if os.Getenv("OLLAMA_LLM_MODEL") != "" || os.Getenv("OPENAI_API_KEY") != "" {
-		return askOpenAICompat(ctx, systemPrompt, question)
+		return askOpenAICompat(ctx, systemPrompt, history)
 	}
 	anthropicKey := os.Getenv("ANTHROPIC_API_KEY")
 	if len(anthropicKey) > 0 {
-		return askClaude(ctx, anthropicKey, systemPrompt, question)
+		return askClaude(ctx, anthropicKey, systemPrompt, history)
 	}
 
-	return askOpenAICompat(ctx, systemPrompt, question)
+	return askOpenAICompat(ctx, systemPrompt, history)
 }
 
-func askClaude(ctx context.Context, apiKey, systemPrompt, question string) string {
+func askClaude(ctx context.Context, apiKey, systemPrompt string, history []Message) string {
 	client := anthropic.NewClient(option.WithAPIKey(apiKey), option.WithMaxRetries(0))
 
+	var messages []anthropic.MessageParam
+	for _, message := range history {
+		block := anthropic.NewTextBlock(message.Content)
+		if message.Role == "assistant" {
+			messages = append(messages, anthropic.NewAssistantMessage(block))
+		} else {
+			messages = append(messages, anthropic.NewUserMessage(block))
+		}
+	}
 	resp, err := client.Messages.New(ctx, anthropic.MessageNewParams{
 		Model:     anthropic.ModelClaudeHaiku4_5,
 		MaxTokens: int64(outputLimit(ctx)),
 		System: []anthropic.TextBlockParam{
 			{Text: systemPrompt},
 		},
-		Messages: []anthropic.MessageParam{
-			anthropic.NewUserMessage(
-				anthropic.NewTextBlock("Question: " + question),
-			),
-		},
+		Messages: messages,
 	})
 	if err != nil {
 		panic(err)
@@ -176,7 +199,7 @@ func askClaude(ctx context.Context, apiKey, systemPrompt, question string) strin
 	return strings.TrimSpace(strings.Join(parts, ""))
 }
 
-func askOpenAICompat(ctx context.Context, systemPrompt, question string) string {
+func askOpenAICompat(ctx context.Context, systemPrompt string, history []Message) string {
 	var model string
 	var config openai.ClientConfig
 
@@ -203,14 +226,9 @@ func askOpenAICompat(ctx context.Context, systemPrompt, question string) string 
 	}
 
 	openAIClient := openai.NewClientWithConfig(config)
-	messages := []openai.ChatCompletionMessage{
-		{
-			Role:    openai.ChatMessageRoleSystem,
-			Content: systemPrompt,
-		}, {
-			Role:    openai.ChatMessageRoleUser,
-			Content: "Question: " + question,
-		},
+	messages := []openai.ChatCompletionMessage{{Role: openai.ChatMessageRoleSystem, Content: systemPrompt}}
+	for _, message := range history {
+		messages = append(messages, openai.ChatCompletionMessage{Role: message.Role, Content: message.Content})
 	}
 	res, err := openAIClient.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
 		Model:               model,

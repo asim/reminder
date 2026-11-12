@@ -17,15 +17,15 @@ func References(index Searcher, corpus *names.Names, question string) ([]*Result
 	return CurrentNameResults(results, corpus), nil
 }
 
-// Context preserves the existing 8000-byte context budget for summaries.
+// Context includes complete records within the configured summary evidence budget.
 func Context(results []*Result) []string {
 	var size int
 	var contexts []string
 	for _, result := range results {
-		if size >= 8000 {
-			break
+		data, err := json.Marshal(result)
+		if err != nil || size+len(data) > model.SearchEvidenceLimit() {
+			continue
 		}
-		data, _ := json.Marshal(result)
 		size += len(data)
 		contexts = append(contexts, string(data))
 	}

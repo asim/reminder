@@ -31,6 +31,22 @@ export function meta() {
 
 const endpoints: Endpoint[] = [
   {
+    title: 'Model',
+    description: 'Requires authorisation: Authorization: Bearer <key>. Access to reminder.dev is by approval; request a key through a GitHub issue at github.com/asim/reminder. Responds to prompts using Quran, hadith and Names sources. History is supplied by the caller and is not stored. Example body: {"prompt":"Explain patience","history":[]}.',
+    url: '/api/model/ask',
+    method: 'POST',
+    requestFormat: 'JSON',
+    responseFormat: 'JSON',
+    params: [
+      { name: 'prompt', type: 'string', description: 'Required prompt (up to 32 KiB UTF-8 by default)' },
+      { name: 'history', type: 'array', description: 'Optional alternating user/assistant messages with role and content fields. Prompt plus history up to 128 KiB UTF-8 by default; no fixed turn count.' },
+    ],
+    responseFields: [
+      { name: 'answer', type: 'string', description: 'Plain text / Markdown response with numbered source citations' },
+      { name: 'references', type: 'array', description: 'Retrieved source records (text, score and metadata), in citation order' },
+    ],
+  },
+  {
     title: 'MCP',
     description: "Connect MCP clients to https://reminder.dev/mcp using HTTP POST (JSON-RPC 2.0) for Quran, hadith, names, reminders and search tools. Search summaries require summarise: true (default: false).",
     url: 'https://reminder.dev/mcp',

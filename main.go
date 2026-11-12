@@ -241,6 +241,13 @@ func registerLiteRoutes(q *quran.Quran, n *names.Names, b *hadith.Collection, a 
 }
 
 func main() {
+	if len(os.Args) > 1 && os.Args[1] == "keys" {
+		if err := api.RunKeys(api.ReminderDir, os.Args[2:], os.Stdout); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
+
 	log.Println("New rand source")
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 
@@ -847,6 +854,13 @@ func main() {
 	httpMux := http.DefaultServeMux
 	api.RegisterRoutes(httpMux)
 
+	keys, err := api.OpenKeys(api.ReminderDir)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer keys.Close()
+	http.Handle("/api/model/ask", api.ModelHandler(keys, idx, n, indexed))
+
 	http.Handle("/mcp", api.NewMCP(q, n, b, reminders, lookup, indexed))
 
 	if *ServerFlag {
@@ -868,12 +882,19 @@ func main() {
 
 		log.Println("Starting server :8080")
 		if err := http.ListenAndServe(":8080", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			r.Body = http.MaxBytesReader(w, r.Body, 16384)
+			bodyLimit := int64(16384)
+			if r.URL.Path == "/api/model/ask" {
+				bodyLimit = model.ModelBodyLimit()
+			}
+			r.Body = http.MaxBytesReader(w, r.Body, bodyLimit)
 			// CORS for API routes — allow any origin
 			if strings.HasPrefix(r.URL.Path, "/api/") || r.URL.Path == "/mcp" {
 				w.Header().Set("Access-Control-Allow-Origin", "*")
 				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 				w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+				if r.URL.Path == "/api/model/ask" {
+					w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+				}
 
 				if r.Method == "OPTIONS" {
 					w.WriteHeader(http.StatusOK)
@@ -883,6 +904,9 @@ func main() {
 				w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
 				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 				w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+				if r.URL.Path == "/api/model/ask" {
+					w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+				}
 				w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 				if r.Method == "OPTIONS" {
