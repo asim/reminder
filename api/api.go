@@ -33,8 +33,8 @@ var Endpoints = []*Endpoint{
 		Path:        "/api/model/ask",
 		Description: `POST. Requires authorisation: Authorization: Bearer <key>. Access to reminder.dev is by approval; request a key through a GitHub issue at github.com/asim/reminder. Answers from Quran, hadith and Names sources, using optional caller-managed history. Example body: {"prompt":"Explain patience","history":[]}. History contains alternating user/assistant messages with role and content fields. See docs/model.md for CLI key management and limits.`,
 		Params: []*Param{
-			{Name: "prompt", Value: "string", Description: "Required prompt (up to 4,000 UTF-8 bytes)"},
-			{Name: "history", Value: "array", Description: "Optional history: up to six user/assistant pairs; prompt plus history up to 12,000 UTF-8 bytes"},
+			{Name: "prompt", Value: "string", Description: "Required prompt (up to 32 KiB UTF-8 by default)"},
+			{Name: "history", Value: "array", Description: "Optional alternating user/assistant messages; prompt plus history up to 128 KiB UTF-8 by default"},
 		},
 		Response: []*Value{{Type: "JSON", Params: []*Param{
 			{Name: "answer", Value: "string", Description: "Plain text / Markdown response with numbered source citations"},

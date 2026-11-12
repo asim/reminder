@@ -10,7 +10,7 @@ Self-hosted installations issue their own keys; no accounts or admin UI are requ
 Run as the same operating-system user as the server (same `HOME`):
 
 ```sh
-reminder keys create --name "my-app" --daily-limit 20
+reminder keys create --name "my-app" --daily-limit 20 --daily-tokens 1000000
 reminder keys list
 reminder keys revoke <id>
 ```
@@ -58,16 +58,34 @@ existing search summaries continue to use `model.AskSafe`.
 
 ## Limits and operation
 
-The prompt is limited to 4,000 UTF-8 bytes; prompt plus history to 12,000 bytes;
-history to six complete user/assistant pairs; and the JSON body to 16 KiB.
-Retrieved evidence is bounded to 8,000 bytes. Output uses `AI_MAX_OUTPUT_TOKENS`
-(default 1,024). Longer conversations must be shortened by the caller.
+Defaults (configurable on the server):
 
-Each key defaults to 20 admitted requests per UTC day. Attempts that fail after
-admission still count, including provider failures or a full global allowance.
+| Setting | Default |
+| --- | --- |
+| `MODEL_MAX_PROMPT_BYTES` | 32 KiB |
+| `MODEL_MAX_INPUT_BYTES` (prompt + history) | 128 KiB |
+| `MODEL_MAX_EVIDENCE_BYTES` | 64 KiB |
+| `MODEL_MAX_OUTPUT_TOKENS` | 4,096 tokens |
+| `SEARCH_MAX_EVIDENCE_BYTES` | 32 KiB |
+
+History must contain complete user/assistant pairs, with no fixed turn count.
+The JSON body allows six times the input budget plus 64 KiB for escaping and
+structure. Evidence includes complete records only; records that do not fit
+are skipped. Public search summaries retain `AI_MAX_OUTPUT_TOKENS` (1,024).
+Choose lower limits if your configured model has a smaller context window.
+
+Each key defaults to 20 admitted requests and 1,000,000 **budgeted tokens** per
+UTC day. `--daily-tokens` sets the latter when issuing a key. This is conservative
+preflight accounting, not provider billing: one unit per UTF-8 input byte
+(including sources), framing overhead, plus the maximum output allowance.
+Longer conversations consume more allowance. Reservations are atomic, persist
+across restarts and are not refunded after failures or shorter responses.
+Existing key databases receive the default token allowance automatically.
+
 Keys replace the anonymous per-IP allowance for this endpoint, but share
 `AI_DAILY_LIMIT` and `AI_CONCURRENCY_LIMIT` with public search summaries.
-Key counters persist across restarts; global accounting supports one server process.
+Admitted requests count even when later blocked by token/global limits or
+provider failures. Global accounting supports one server process.
 Scheduled internal generation remains exempt from public limits.
 
 Missing/invalid/revoked keys return 401; malformed requests 400; exhausted

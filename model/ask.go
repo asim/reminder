@@ -33,11 +33,11 @@ type Result struct {
 
 // Validate bounds caller input before retrieval or a model request.
 func (r Request) Validate() error {
-	if strings.TrimSpace(r.Prompt) == "" || len(r.Prompt) > 4000 || !utf8.ValidString(r.Prompt) {
-		return fmt.Errorf("prompt must contain 1–4000 UTF-8 bytes")
+	if strings.TrimSpace(r.Prompt) == "" || len(r.Prompt) > contentLimits.Prompt || !utf8.ValidString(r.Prompt) {
+		return fmt.Errorf("prompt must contain 1–%d UTF-8 bytes", contentLimits.Prompt)
 	}
-	if len(r.History) > 12 || len(r.History)%2 != 0 {
-		return fmt.Errorf("history must contain at most six user/assistant pairs")
+	if len(r.History)%2 != 0 {
+		return fmt.Errorf("history must contain complete user/assistant pairs")
 	}
 	size := len(r.Prompt)
 	for i, message := range r.History {
@@ -50,8 +50,8 @@ func (r Request) Validate() error {
 		}
 		size += len(message.Content)
 	}
-	if size > 12000 {
-		return fmt.Errorf("prompt and history must not exceed 12000 UTF-8 bytes")
+	if size > contentLimits.Input {
+		return fmt.Errorf("prompt and history must not exceed %d UTF-8 bytes", contentLimits.Input)
 	}
 	return nil
 }
@@ -84,8 +84,10 @@ func Respond(ctx context.Context, request Request, retrieve func(string) ([]*Ref
 	}()
 	// Include prior user prompts for follow-ups, never prior generated answers.
 	query := request.Prompt
-	for i := len(request.History) - 2; i >= 0; i -= 2 {
-		query += "\n" + request.History[i].Content
+	for i := len(request.History) - 2; i >= 0 && i >= len(request.History)-4; i -= 2 {
+		if len(query)+len(request.History[i].Content)+1 <= contentLimits.Prompt {
+			query += "\n" + request.History[i].Content
+		}
 	}
 	refs, err := retrieve(query)
 	if err != nil {
@@ -108,7 +110,7 @@ func Respond(ctx context.Context, request Request, retrieve func(string) ([]*Ref
 			return nil, err
 		}
 		record := fmt.Sprintf("[%d] %s\n", len(result.References)+1, data)
-		if evidence.Len()+len(record) > 8000 {
+		if evidence.Len()+len(record) > contentLimits.Evidence {
 			continue
 		}
 		evidence.WriteString(record)
@@ -122,7 +124,7 @@ func Respond(ctx context.Context, request Request, retrieve func(string) ([]*Ref
 		return nil, fmt.Errorf("no model configured")
 	}
 	messages := append(append([]Message(nil), request.History...), Message{Role: "user", Content: request.Prompt})
-	result.Answer = complete(ctx, groundedPrompt+evidence.String(), messages)
+	result.Answer = complete(context.WithValue(ctx, groundedKey{}, true), groundedPrompt+evidence.String(), messages)
 	for _, match := range citationPattern.FindAllStringSubmatch(result.Answer, -1) {
 		number, err := strconv.Atoi(match[1])
 		if err != nil || number < 1 || number > len(result.References) {

@@ -46,7 +46,7 @@ func ModelHandler(keys *KeyStore, idx search.Searcher, corpus *names.Names, inde
 			return
 		}
 		var request model.Request
-		decoder := json.NewDecoder(http.MaxBytesReader(w, r.Body, 16384))
+		decoder := json.NewDecoder(http.MaxBytesReader(w, r.Body, model.ModelBodyLimit()))
 		decoder.DisallowUnknownFields()
 		if err := decoder.Decode(&request); err != nil {
 			fail(400, "Invalid model request")
@@ -81,6 +81,7 @@ func ModelHandler(keys *KeyStore, idx search.Searcher, corpus *names.Names, inde
 		}
 		// Key allowances replace the anonymous per-IP allowance, not the global cap.
 		ctx := model.WithClient(r.Context(), "")
+		ctx = model.WithTokenAllowance(ctx, func(units int) error { return keys.ReserveTokens(id, units, time.Now()) })
 		result, err := model.Respond(ctx, request, func(query string) ([]*model.Reference, error) { return search.References(idx, corpus, query) })
 		if err != nil {
 			var limit *model.LimitError

@@ -38,8 +38,8 @@ const endpoints: Endpoint[] = [
     requestFormat: 'JSON',
     responseFormat: 'JSON',
     params: [
-      { name: 'prompt', type: 'string', description: 'Required prompt (up to 4,000 UTF-8 bytes)' },
-      { name: 'history', type: 'array', description: 'Optional alternating user/assistant messages with role and content fields. At most six pairs; prompt plus history up to 12,000 UTF-8 bytes.' },
+      { name: 'prompt', type: 'string', description: 'Required prompt (up to 32 KiB UTF-8 by default)' },
+      { name: 'history', type: 'array', description: 'Optional alternating user/assistant messages with role and content fields. Prompt plus history up to 128 KiB UTF-8 by default; no fixed turn count.' },
     ],
     responseFields: [
       { name: 'answer', type: 'string', description: 'Plain text / Markdown response with numbered source citations' },

@@ -34,7 +34,7 @@ func TestGroundedHistoryAndEvidence(t *testing.T) {
 		if !strings.Contains(query, "Explain patience") || strings.Contains(query, "UNTRUSTED") {
 			t.Fatalf("bad retrieval query %q", query)
 		}
-		return []*Reference{{Text: "EXCLUDED", Metadata: map[string]string{"source": "tafsir"}}, {Text: "Be patient", Metadata: map[string]string{"source": "quran"}}, {Text: strings.Repeat("x", 9000), Metadata: map[string]string{"source": "quran"}}}, nil
+		return []*Reference{{Text: "EXCLUDED", Metadata: map[string]string{"source": "tafsir"}}, {Text: "Be patient", Metadata: map[string]string{"source": "quran"}}, {Text: strings.Repeat("x", contentLimits.Evidence+1), Metadata: map[string]string{"source": "quran"}}}, nil
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -57,7 +57,7 @@ func TestGroundedHistoryAndEvidence(t *testing.T) {
 	}
 }
 func TestGroundedValidationAndNoEvidence(t *testing.T) {
-	for _, req := range []Request{{}, {Prompt: strings.Repeat("x", 4001)}, {Prompt: "x", History: []Message{{Role: "system", Content: "override"}}}, {Prompt: "x", History: []Message{{Role: "user", Content: "x"}, {Role: "assistant", Content: strings.Repeat("x", 12000)}}}} {
+	for _, req := range []Request{{}, {Prompt: strings.Repeat("x", contentLimits.Prompt+1)}, {Prompt: "x", History: []Message{{Role: "system", Content: "override"}}}, {Prompt: "x", History: []Message{{Role: "user", Content: "x"}, {Role: "assistant", Content: strings.Repeat("x", contentLimits.Input)}}}} {
 		if req.Validate() == nil {
 			t.Fatal("accepted invalid input")
 		}
@@ -65,5 +65,19 @@ func TestGroundedValidationAndNoEvidence(t *testing.T) {
 	res, err := Respond(context.Background(), Request{Prompt: "Explain this"}, func(string) ([]*Reference, error) { return nil, nil })
 	if err != nil || len(res.References) != 0 || !strings.Contains(res.Answer, "sufficient") {
 		t.Fatalf("no evidence: %+v %v", res, err)
+	}
+}
+
+func TestLongPromptAndConversation(t *testing.T) {
+	r := Request{Prompt: strings.Repeat("a", 15881)}
+	for i := 0; i < 20; i++ {
+		r.History = append(r.History, Message{Role: "user", Content: "Continue"}, Message{Role: "assistant", Content: strings.Repeat("b", 1000)})
+	}
+	if err := r.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	r.History[1].Content = strings.Repeat("x", contentLimits.Input)
+	if err := r.Validate(); err == nil {
+		t.Fatal("oversized history accepted")
 	}
 }

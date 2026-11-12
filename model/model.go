@@ -108,6 +108,9 @@ func outputLimit(ctx context.Context) int {
 	if internal, _ := ctx.Value(internalKey{}).(bool); internal {
 		return 8192
 	}
+	if grounded, _ := ctx.Value(groundedKey{}).(bool); grounded {
+		return contentLimits.Output
+	}
 	return budget.output
 }
 
@@ -128,6 +131,17 @@ func Ask(ctx context.Context, contexts []string, prompt string) string {
 }
 
 func complete(ctx context.Context, systemPrompt string, history []Message) string {
+	if charge, ok := ctx.Value(tokenAllowanceKey{}).(func(int) error); ok {
+		// Conservative preflight units: one per UTF-8 byte plus framing and maximum output.
+		// This bounds usage without depending on a provider-specific tokenizer.
+		units := len(systemPrompt) + outputLimit(ctx) + 256
+		for _, message := range history {
+			units += len(message.Content) + 64
+		}
+		if err := charge(units); err != nil {
+			panic(err)
+		}
+	}
 	if budget == nil {
 		panic("AI limits are not configured")
 	}

@@ -17,7 +17,7 @@ func TestModelRequiresBearerAndValidBody(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer keys.Close()
-	id, secret, err := keys.Create("test", 1)
+	id, secret, err := keys.Create("test", 1, 1000000)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,11 +77,11 @@ func TestModelKeyAllowanceAndGlobalLimit(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer keys.Close()
-	_, secret, err := keys.Create("one", 1)
+	_, secret, err := keys.Create("one", 1, 1000000)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, second, err := keys.Create("two", 5)
+	_, second, err := keys.Create("two", 5, 1000000)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -92,7 +92,7 @@ func TestModelKeyAllowanceAndGlobalLimit(t *testing.T) {
 		secret string
 		status int
 	}{{secret, 200}, {secret, 429}, {second, 200}, {second, 429}} {
-		r := httptest.NewRequest("POST", "/api/model/ask", strings.NewReader(`{"prompt":"Explain patience"}`))
+		r := httptest.NewRequest("POST", "/api/model/ask", strings.NewReader(`{"prompt":"`+strings.Repeat("a", 20000)+`"}`))
 		r = r.WithContext(model.WithClient(r.Context(), "127.0.0.1"))
 		r.Header.Set("Authorization", "Bearer "+tc.secret)
 		w := httptest.NewRecorder()

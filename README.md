@@ -197,7 +197,7 @@ Operators issue keys on the CLI; see [model access and usage](docs/model.md).
 
 ## AI limits
 
-Summaries require `summarise: true`. Public defaults: 100 requests/day,
+Summaries require `summarise: true`. Public search defaults: 100 requests/day,
 20 per IP, two concurrent generations and 1,024 output tokens. Configure with
 `AI_DAILY_LIMIT`, `AI_IP_DAILY_LIMIT`, `AI_CONCURRENCY_LIMIT` and `AI_MAX_OUTPUT_TOKENS`.
 Daily/hourly generation is exempt. Counters persist across restarts for a single server.
