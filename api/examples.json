@@ -1,0 +1,221 @@
+{
+  "GET /api/daily": {
+    "request": "curl 'https://reminder.dev/api/daily'",
+    "response": {
+      "date": "2026-11-12",
+      "hadith": "I heard Allah's Messenger (ﷺ) saying, \"The reward of deeds depends upon the intentions and every person will get the reward according to what he has intended. So whoever emigrated for worldly benefits or for a woman to marry, his emigration was for what he emigrated for.\"",
+      "links": {
+        "hadith": "/hadith/1#1",
+        "name": "/names/1",
+        "verse": "/quran/112/1"
+      },
+      "message": "In the Name of Allah—the Most Compassionate, Most Merciful.",
+      "name": "The Beneficent",
+      "updated": "2026-11-12T09:00:00Z",
+      "verse": "Say, ˹O Prophet,˺ “He is Allah—One ˹and Indivisible˺;"
+    },
+    "note": "Illustrative daily response; selected fields shown. Content and dates vary."
+  },
+  "GET /api/daily/{date}": {
+    "request": "curl 'https://reminder.dev/api/daily/2026-11-12'",
+    "response": {
+      "date": "2026-11-12",
+      "hadith": "I heard Allah's Messenger (ﷺ) saying, \"The reward of deeds depends upon the intentions and every person will get the reward according to what he has intended. So whoever emigrated for worldly benefits or for a woman to marry, his emigration was for what he emigrated for.\"",
+      "links": {
+        "hadith": "/hadith/1#1",
+        "name": "/names/1",
+        "verse": "/quran/112/1"
+      },
+      "message": "In the Name of Allah—the Most Compassionate, Most Merciful.",
+      "name": "The Beneficent",
+      "updated": "2026-11-12T09:00:00Z",
+      "verse": "Say, ˹O Prophet,˺ “He is Allah—One ˹and Indivisible˺;"
+    },
+    "note": "Illustrative archived response; selected fields shown. The date must exist in the archive; otherwise the server returns HTTP 404."
+  },
+  "GET /api/hadith": {
+    "request": "curl 'https://reminder.dev/api/hadith'",
+    "response": {
+      "arabic": "صحيح البخاري",
+      "books": [
+        {
+          "hadiths": [
+            {
+              "arabic": "إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى، فَمَنْ كَانَتْ هِجْرَتُهُ إِلَى دُنْيَا يُصِيبُهَا أَوْ إِلَى امْرَأَةٍ يَنْكِحُهَا، فَهِجْرَتُهُ إِلَى مَا هَاجَرَ إِلَيْهِ \"",
+              "english": "I heard Allah's Messenger (ﷺ) saying, \"The reward of deeds depends upon the intentions and every person will get the reward according to what he has intended. So whoever emigrated for worldly benefits or for a woman to marry, his emigration was for what he emigrated for.\"",
+              "narrator": "Narrated 'Umar bin Al-Khattab:",
+              "number": 1
+            }
+          ],
+          "name": "Revelation",
+          "number": 1
+        }
+      ],
+      "name": "Sahih al-Bukhari"
+    },
+    "note": "Response excerpt: one book and one hadith; some fields omitted."
+  },
+  "GET /api/hadith/{book}": {
+    "request": "curl 'https://reminder.dev/api/hadith/1'",
+    "response": {
+      "hadiths": [
+        {
+          "arabic": "إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى، فَمَنْ كَانَتْ هِجْرَتُهُ إِلَى دُنْيَا يُصِيبُهَا أَوْ إِلَى امْرَأَةٍ يَنْكِحُهَا، فَهِجْرَتُهُ إِلَى مَا هَاجَرَ إِلَيْهِ \"",
+          "english": "I heard Allah's Messenger (ﷺ) saying, \"The reward of deeds depends upon the intentions and every person will get the reward according to what he has intended. So whoever emigrated for worldly benefits or for a woman to marry, his emigration was for what he emigrated for.\"",
+          "narrator": "Narrated 'Umar bin Al-Khattab:",
+          "number": 1
+        }
+      ],
+      "name": "Revelation",
+      "number": 1
+    },
+    "note": "Response excerpt: one hadith; some fields omitted."
+  },
+  "GET /api/latest": {
+    "request": "curl 'https://reminder.dev/api/latest'",
+    "response": {
+      "hadith": "I heard Allah's Messenger (ﷺ) saying, \"The reward of deeds depends upon the intentions and every person will get the reward according to what he has intended. So whoever emigrated for worldly benefits or for a woman to marry, his emigration was for what he emigrated for.\"",
+      "links": {
+        "hadith": "/hadith/1#1",
+        "name": "/names/1",
+        "verse": "/quran/112/1"
+      },
+      "message": "In the Name of Allah—the Most Compassionate, Most Merciful.",
+      "name": "The Beneficent",
+      "updated": "2026-11-12T09:00:00Z",
+      "verse": "Say, ˹O Prophet,˺ “He is Allah—One ˹and Indivisible˺;"
+    },
+    "note": "Illustrative reminder; content and timestamp change hourly."
+  },
+  "GET /api/names": {
+    "request": "curl 'https://reminder.dev/api/names'",
+    "response": [
+      {
+        "arabic": "الرَّحْمَنُ",
+        "english": "Ar Rahmaan",
+        "meaning": "The Beneficent",
+        "number": 1
+      }
+    ],
+    "note": "Response excerpt: one name; descriptions, summaries and Quran locations omitted."
+  },
+  "GET /api/quran": {
+    "request": "curl 'https://reminder.dev/api/quran'",
+    "response": {
+      "chapters": [
+        {
+          "english": "The Sincerity",
+          "name": "Al-Ikhlas",
+          "number": 112,
+          "verse_count": 4,
+          "verses": [
+            {
+              "arabic": "قُلۡ هُوَ ٱللَّهُ أَحَدٌ",
+              "chapter": 112,
+              "number": 1,
+              "text": "Say, ˹O Prophet,˺ “He is Allah—One ˹and Indivisible˺;"
+            }
+          ]
+        }
+      ]
+    },
+    "note": "Response excerpt: one chapter and one verse shown; commentary and other fields omitted."
+  },
+  "GET /api/quran/chapters": {
+    "request": "curl 'https://reminder.dev/api/quran/chapters'",
+    "response": [
+      {
+        "name": "Al-Fatihah",
+        "number": 1,
+        "english": "The Opener",
+        "verse_count": 7
+      }
+    ],
+    "note": "Response excerpt: the first of 114 chapters."
+  },
+  "GET /api/quran/{chapter}": {
+    "request": "curl 'https://reminder.dev/api/quran/112'",
+    "response": {
+      "english": "The Sincerity",
+      "name": "Al-Ikhlas",
+      "number": 112,
+      "verse_count": 4,
+      "verses": [
+        {
+          "arabic": "قُلۡ هُوَ ٱللَّهُ أَحَدٌ",
+          "chapter": 112,
+          "number": 1,
+          "text": "Say, ˹O Prophet,˺ “He is Allah—One ˹and Indivisible˺;"
+        }
+      ]
+    },
+    "note": "Response excerpt: one of four verses; verse fields abbreviated."
+  },
+  "GET /api/quran/{chapter}/{verse}": {
+    "request": "curl 'https://reminder.dev/api/quran/112/1'",
+    "response": {
+      "arabic": "قُلۡ هُوَ ٱللَّهُ أَحَدٌ",
+      "chapter": 112,
+      "number": 1,
+      "text": "Say, ˹O Prophet,˺ “He is Allah—One ˹and Indivisible˺;"
+    },
+    "note": "Selected fields shown; the full verse also includes translations, word meanings, commentary and audio URLs."
+  },
+  "POST /api/model/ask": {
+    "request": "curl 'https://reminder.dev/api/model/ask' \\\n  -H 'Content-Type: application/json' \\\n  -H \"Authorization: Bearer $REMINDER_API_KEY\" \\\n  -d '{\"history\":[],\"prompt\":\"What does Quran 112:1 say?\"}'",
+    "response": {
+      "answer": "Say, ˹O Prophet,˺ “He is Allah—One ˹and Indivisible˺; [1]",
+      "references": [
+        {
+          "metadata": {
+            "chapter": "112",
+            "name": "Al-Ikhlas",
+            "source": "quran",
+            "verse": "1"
+          },
+          "score": 0.9,
+          "text": "Say, ˹O Prophet,˺ “He is Allah—One ˹and Indivisible˺;"
+        }
+      ]
+    },
+    "note": "Illustrative model response; wording, retrieved sources and scores vary. Requires an issued bearer key. Answer is plain text/Markdown; [1] refers to the first reference."
+  },
+  "POST /api/search": {
+    "request": "curl 'https://reminder.dev/api/search' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"q\":\"Al Hashr\",\"summarise\":false}'",
+    "response": {
+      "answer": "",
+      "q": "Al Hashr",
+      "references": [
+        {
+          "text": "Al-Hashr — The Exile. Chapter 59, 24 verses.",
+          "score": 1,
+          "metadata": {
+            "chapter": "59",
+            "kind": "chapter",
+            "name": "Al-Hashr",
+            "source": "quran"
+          }
+        }
+      ]
+    },
+    "note": "Set summarise to true for an AI summary in answer (rendered HTML). Without summarisation, answer is empty."
+  },
+  "POST /mcp": {
+    "request": "curl 'https://reminder.dev/mcp' \\\n  -H 'Content-Type: application/json' \\\n  -d '{\"id\":1,\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"params\":{\"capabilities\":{},\"clientInfo\":{\"name\":\"example\",\"version\":\"1.0.0\"},\"protocolVersion\":\"2025-03-26\"}}'",
+    "response": {
+      "id": 1,
+      "jsonrpc": "2.0",
+      "result": {
+        "capabilities": {
+          "tools": {}
+        },
+        "protocolVersion": "2025-03-26",
+        "serverInfo": {
+          "name": "reminder",
+          "version": "1.0.0"
+        }
+      }
+    },
+    "note": "MCP initialization example. Subsequent JSON-RPC calls use the same endpoint."
+  }
+}

@@ -1,3 +1,18 @@
+import examples from '../../../api/examples.json';
+
+function EndpointExamples({ method, url }: { method: string; url: string }) {
+  const key = `${method} ${url.replace('https://reminder.dev', '')}` as keyof typeof examples;
+  const example = examples[key];
+  if (!example) return null;
+  return <div className='mt-4 space-y-3 min-w-0'>
+    <h3 className='font-semibold text-sm sm:text-base'>Example request</h3>
+    <pre dir='ltr' className='bg-gray-50 rounded p-3 text-xs sm:text-sm overflow-x-auto text-left'><code>{example.request}</code></pre>
+    <h3 className='font-semibold text-sm sm:text-base'>Example response</h3>
+    <p className='text-xs sm:text-sm text-gray-600'>{example.note}</p>
+    <pre dir='ltr' className='bg-gray-50 rounded p-3 text-xs sm:text-sm overflow-x-auto text-left'><code>{JSON.stringify(example.response, null, 2)}</code></pre>
+  </div>;
+}
+
 interface Param {
   name: string;
   type: string;
@@ -30,29 +45,6 @@ export function meta() {
 }
 
 const endpoints: Endpoint[] = [
-  {
-    title: 'Model',
-    description: 'Requires authorisation: Authorization: Bearer <key>. Access to reminder.dev is by approval; request a key through a GitHub issue at github.com/asim/reminder. Responds to prompts using Quran, hadith and Names sources. History is supplied by the caller and is not stored. Example body: {"prompt":"Explain patience","history":[]}.',
-    url: '/api/model/ask',
-    method: 'POST',
-    requestFormat: 'JSON',
-    responseFormat: 'JSON',
-    params: [
-      { name: 'prompt', type: 'string', description: 'Required prompt (up to 32 KiB UTF-8 by default)' },
-      { name: 'history', type: 'array', description: 'Optional alternating user/assistant messages with role and content fields. Prompt plus history up to 128 KiB UTF-8 by default; no fixed turn count.' },
-    ],
-    responseFields: [
-      { name: 'answer', type: 'string', description: 'Plain text / Markdown response with numbered source citations' },
-      { name: 'references', type: 'array', description: 'Retrieved source records (text, score and metadata), in citation order' },
-    ],
-  },
-  {
-    title: 'MCP',
-    description: "Connect MCP clients to https://reminder.dev/mcp using HTTP POST (JSON-RPC 2.0) for Quran, hadith, names, reminders and search tools. Search summaries require summarise: true (default: false).",
-    url: 'https://reminder.dev/mcp',
-    method: 'POST',
-    responseFormat: 'JSON-RPC 2.0',
-  },
   {
     title: 'Latest Reminder',
     description: 'Returns the latest verse, hadith, and name of Allah (updated hourly)',
@@ -188,6 +180,29 @@ const endpoints: Endpoint[] = [
     url: '/api/names',
     method: 'GET',
     responseFormat: 'JSON',
+  },
+  {
+    title: 'Model',
+    description: 'Requires authorisation: Authorization: Bearer <key>. Access to reminder.dev is by approval; request a key through a GitHub issue at github.com/asim/reminder. Responds to prompts using Quran, hadith and Names sources. History is supplied by the caller and is not stored.',
+    url: '/api/model/ask',
+    method: 'POST',
+    requestFormat: 'JSON',
+    responseFormat: 'JSON',
+    params: [
+      { name: 'prompt', type: 'string', description: 'Required prompt (up to 32 KiB UTF-8 by default)' },
+      { name: 'history', type: 'array', description: 'Optional alternating user/assistant messages with role and content fields. Prompt plus history up to 128 KiB UTF-8 by default; no fixed turn count.' },
+    ],
+    responseFields: [
+      { name: 'answer', type: 'string', description: 'Plain text / Markdown response with numbered source citations' },
+      { name: 'references', type: 'array', description: 'Retrieved source records (text, score and metadata), in citation order' },
+    ],
+  },
+  {
+    title: 'MCP',
+    description: "Connect MCP clients to https://reminder.dev/mcp using HTTP POST (JSON-RPC 2.0) for Quran, hadith, names, reminders and search tools. Search summaries require summarise: true (default: false).",
+    url: 'https://reminder.dev/mcp',
+    method: 'POST',
+    responseFormat: 'JSON-RPC 2.0',
   },
   {
     title: 'Search',
@@ -326,6 +341,7 @@ export default function Api() {
                   </div>
                 )}
               </div>
+              <EndpointExamples method={endpoint.method || 'GET'} url={endpoint.url} />
             </div>
           ))}
         </div>
