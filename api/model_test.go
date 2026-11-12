@@ -6,8 +6,10 @@ import (
 	"strings"
 	"testing"
 
+	"encoding/json"
 	"github.com/asim/reminder/model"
 	"github.com/asim/reminder/names"
+	"github.com/asim/reminder/quran"
 	"github.com/asim/reminder/search"
 )
 
@@ -22,7 +24,7 @@ func TestModelRequiresBearerAndValidBody(t *testing.T) {
 		t.Fatal(err)
 	}
 	ready := make(chan bool)
-	handler := ModelHandler(keys, nil, &names.Names{}, ready)
+	handler := ModelHandler(keys, nil, &names.Names{}, quran.Load(), nil, ready)
 	cases := []struct {
 		auth, body string
 		status     int
@@ -57,10 +59,19 @@ type modelIndex struct{}
 
 func (modelIndex) Store(map[string]string, ...string) error { return nil }
 func (modelIndex) Query(string) ([]*search.Result, error) {
-	return []*search.Result{{Text: "Be patient", Metadata: map[string]string{"source": "quran"}}}, nil
+	return []*search.Result{{Text: "Be patient", Metadata: map[string]string{"source": "quran", "chapter": "1", "verse": "2"}}}, nil
 }
 func TestModelKeyAllowanceAndGlobalLimit(t *testing.T) {
 	provider := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var body struct {
+			Messages []model.Message `json:"messages"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Error(err)
+		}
+		if len(body.Messages) == 0 || !strings.Contains(body.Messages[0].Content, quran.Load().Get(1).Verse(2).Arabic) {
+			t.Error("provider did not receive canonical Arabic")
+		}
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"choices":[{"message":{"role":"assistant","content":"Be patient [1]."}}]}`))
 	}))
@@ -87,7 +98,7 @@ func TestModelKeyAllowanceAndGlobalLimit(t *testing.T) {
 	}
 	ready := make(chan bool)
 	close(ready)
-	handler := ModelHandler(keys, modelIndex{}, &names.Names{}, ready)
+	handler := ModelHandler(keys, modelIndex{}, &names.Names{}, quran.Load(), nil, ready)
 	for _, tc := range []struct {
 		secret string
 		status int

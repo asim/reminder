@@ -34,7 +34,9 @@ curl https://reminder.dev/api/model/ask \
 
 Returns `{"answer":"...","references":[...]}`. The answer is plain text/Markdown,
 not rendered HTML; numbered citations refer to the returned reference array.
-Each reference contains `text`, `score` and `metadata`, as in search.
+Each reference contains `text`, `score` and `metadata`, as in search. Quran and
+hadith references resolve to the bundled English and Arabic texts; the Arabic is
+in `metadata.arabic` and is included in the model’s evidence alongside the English.
 
 For follow-ups, supply earlier turns in chronological order:
 

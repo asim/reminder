@@ -859,7 +859,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer keys.Close()
-	http.Handle("/api/model/ask", api.ModelHandler(keys, idx, n, indexed))
+	http.Handle("/api/model/ask", api.ModelHandler(keys, idx, n, q, b, indexed))
 
 	http.Handle("/mcp", api.NewMCP(q, n, b, reminders, lookup, indexed))
 
