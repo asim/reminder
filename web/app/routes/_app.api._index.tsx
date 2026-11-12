@@ -6,10 +6,10 @@ function EndpointExamples({ method, url }: { method: string; url: string }) {
   if (!example) return null;
   return <div className='mt-4 space-y-3 min-w-0'>
     <h3 className='font-semibold text-sm sm:text-base'>Example request</h3>
-    <pre dir='ltr' className='bg-gray-50 rounded p-3 text-xs sm:text-sm overflow-x-auto text-left'><code>{example.request}</code></pre>
+    <pre dir='ltr' className='bg-gray-50 rounded p-3 text-xs sm:text-sm overflow-x-auto whitespace-pre-wrap [overflow-wrap:anywhere] text-left'><code>{example.request}</code></pre>
     <h3 className='font-semibold text-sm sm:text-base'>Example response</h3>
     <p className='text-xs sm:text-sm text-gray-600'>{example.note}</p>
-    <pre dir='ltr' className='bg-gray-50 rounded p-3 text-xs sm:text-sm overflow-x-auto text-left'><code>{JSON.stringify(example.response, null, 2)}</code></pre>
+    <pre dir='ltr' className='bg-gray-50 rounded p-3 text-xs sm:text-sm overflow-x-auto whitespace-pre-wrap [overflow-wrap:anywhere] text-left'><code>{JSON.stringify(example.response, null, 2)}</code></pre>
   </div>;
 }
 
@@ -229,8 +229,8 @@ const endpoints: Endpoint[] = [
 
 export default function Api() {
   return (
-    <div className='flex flex-col h-full overflow-y-auto'>
-      <div className='max-w-4xl mx-auto px-4 py-4 sm:py-6 lg:py-8 w-full p-0 lg:p-8'>
+    <div className='flex flex-col h-full min-w-0 overflow-y-auto'>
+      <div className='max-w-4xl mx-auto px-4 py-4 sm:py-6 lg:py-8 w-full min-w-0 lg:p-8'>
         <h1 className='text-xl sm:text-2xl md:text-3xl font-bold mb-4 sm:mb-6 lg:mb-8'>
           Endpoints
         </h1>
@@ -240,7 +240,7 @@ export default function Api() {
 
         <div className='space-y-6 sm:space-y-8 lg:space-y-12'>
           {endpoints.map((endpoint, index) => (
-            <div key={index} className='border-t pt-4 sm:pt-6 lg:pt-8'>
+            <div key={index} className='border-t pt-4 sm:pt-6 lg:pt-8 min-w-0 [overflow-wrap:anywhere]'>
               <h2 className='text-lg sm:text-xl font-semibold mb-2 sm:mb-4'>
                 {endpoint.title}
               </h2>
@@ -267,13 +267,13 @@ export default function Api() {
                     <table className='w-full border-collapse min-w-full'>
                       <thead>
                         <tr className='border-b'>
-                          <th className='text-left py-1 sm:py-2 text-xs sm:text-sm'>
+                          <th className='text-left py-1 sm:py-2 pr-3 last:pr-0 align-top text-xs sm:text-sm'>
                             Field
                           </th>
-                          <th className='text-left py-1 sm:py-2 text-xs sm:text-sm'>
+                          <th className='text-left py-1 sm:py-2 pr-3 last:pr-0 align-top text-xs sm:text-sm'>
                             Type
                           </th>
-                          <th className='text-left py-1 sm:py-2 text-xs sm:text-sm'>
+                          <th className='text-left py-1 sm:py-2 pr-3 last:pr-0 align-top text-xs sm:text-sm'>
                             Description
                           </th>
                         </tr>
@@ -281,13 +281,13 @@ export default function Api() {
                       <tbody>
                         {endpoint.params.map((param, idx) => (
                           <tr key={idx} className='border-b'>
-                            <td className='py-1 sm:py-2 text-xs sm:text-sm'>
+                            <td className='py-1 sm:py-2 pr-3 last:pr-0 align-top text-xs sm:text-sm'>
                               {param.name}
                             </td>
-                            <td className='py-1 sm:py-2 text-xs sm:text-sm'>
+                            <td className='py-1 sm:py-2 pr-3 last:pr-0 align-top text-xs sm:text-sm'>
                               {param.type}
                             </td>
-                            <td className='py-1 sm:py-2 text-xs sm:text-sm'>
+                            <td className='py-1 sm:py-2 pr-3 last:pr-0 align-top text-xs sm:text-sm'>
                               {param.description}
                             </td>
                           </tr>
@@ -311,13 +311,13 @@ export default function Api() {
                     <table className='w-full border-collapse min-w-full'>
                       <thead>
                         <tr className='border-b'>
-                          <th className='text-left py-1 sm:py-2 text-xs sm:text-sm'>
+                          <th className='text-left py-1 sm:py-2 pr-3 last:pr-0 align-top text-xs sm:text-sm'>
                             Field
                           </th>
-                          <th className='text-left py-1 sm:py-2 text-xs sm:text-sm'>
+                          <th className='text-left py-1 sm:py-2 pr-3 last:pr-0 align-top text-xs sm:text-sm'>
                             Type
                           </th>
-                          <th className='text-left py-1 sm:py-2 text-xs sm:text-sm'>
+                          <th className='text-left py-1 sm:py-2 pr-3 last:pr-0 align-top text-xs sm:text-sm'>
                             Description
                           </th>
                         </tr>
@@ -325,13 +325,13 @@ export default function Api() {
                       <tbody>
                         {endpoint.responseFields.map((field, idx) => (
                           <tr key={idx} className='border-b'>
-                            <td className='py-1 sm:py-2 text-xs sm:text-sm'>
+                            <td className='py-1 sm:py-2 pr-3 last:pr-0 align-top text-xs sm:text-sm'>
                               {field.name}
                             </td>
-                            <td className='py-1 sm:py-2 text-xs sm:text-sm'>
+                            <td className='py-1 sm:py-2 pr-3 last:pr-0 align-top text-xs sm:text-sm'>
                               {field.type}
                             </td>
-                            <td className='py-1 sm:py-2 text-xs sm:text-sm'>
+                            <td className='py-1 sm:py-2 pr-3 last:pr-0 align-top text-xs sm:text-sm'>
                               {field.description}
                             </td>
                           </tr>
