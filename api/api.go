@@ -280,12 +280,13 @@ func (a *Api) HTML(renderFunc func(string) string) string {
 	markdown := renderFunc(a.Markdown())
 	content := `<div class="api-content">` + markdown + `</div>`
 	content += `<style>
+.api-content { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
 .api-content h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; }
 .api-content h3 { font-size: 1.25rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; }
 .api-content p { margin-bottom: 1rem; }
 .api-content ul { margin-bottom: 1rem; }
-.api-content pre { max-width: 100%; overflow-x: auto; background-color: #f3f4f6; padding: 1rem; margin-bottom: 1rem; border-radius: 0.25rem; direction: ltr; text-align: left; }
-.api-content pre code { padding: 0; }
+.api-content pre { max-width: 100%; overflow-x: auto; background-color: #f3f4f6; padding: 1rem; margin-bottom: 1rem; border-radius: 0.25rem; direction: ltr; text-align: left; white-space: pre-wrap; overflow-wrap: anywhere; }
+.api-content pre code { padding: 0; white-space: inherit; }
 .api-content code { background-color: #f3f4f6; padding: 0.125rem 0.25rem; border-radius: 0.25rem; }
 </style>`
 	return content
