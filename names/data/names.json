@@ -273,7 +273,6 @@
       "transliteration":"Al Qaabid",
       "number":20,
       "found": "(2:245)",
-      "reference_note": "Quran 2:245 describes restricting and expanding through verbs. Al Qaabid and Al Baasit are named in Abu Dawud 3451.",
       "en":{
         "meaning":"The Constrictor",
         "desc": "Allah restricts provision according to His wisdom."
@@ -288,7 +287,6 @@
       "transliteration":"Al Baasit",
       "number":21,
       "found": "(2:245)",
-      "reference_note": "Quran 2:245 describes restricting and expanding through verbs. Al Qaabid and Al Baasit are named in Abu Dawud 3451.",
       "en":{
         "meaning":"The Expander",
         "desc": "Allah expands provision according to His wisdom."
@@ -303,7 +301,6 @@
       "transliteration":"Al Khaafid",
       "number":22,
       "found": "(95:5)",
-      "reference_note": "Related passage: 95:5 describes bringing low; it does not contain Al Khaafid as a divine name.",
       "en":{
         "meaning":"The Abaser",
         "desc": "Allah lowers whom He wills; worldly rank and power are subject to Him."
@@ -318,7 +315,6 @@
       "transliteration":"Ar Raafi'",
       "number":23,
       "found": "(58:11) (6:83)",
-      "reference_note": "Related passages: these verses describe raising in rank through verbs, rather than naming Allah Ar Raafi'.",
       "en":{
         "meaning":"The Exalter",
         "desc": "Allah raises whom He wills in honour and rank."
@@ -333,7 +329,6 @@
       "transliteration":"Al Mu'izz",
       "number":24,
       "found": "(3:26)",
-      "reference_note": "Related passage: 3:26 describes granting honour through a verb, rather than using Al Mu'izz as a name.",
       "en":{
         "meaning":"The Honourer",
         "desc": "Allah grants honour and dignity to whom He wills."
@@ -348,7 +343,6 @@
       "transliteration":"Al Mudhill",
       "number":25,
       "found": "(3:26)",
-      "reference_note": "Related passage: 3:26 describes bringing low through a verb, rather than using Al Mudhill as a name.",
       "en":{
         "meaning":"The Humiliator",
         "desc": "Allah brings low whom He wills; no worldly honour is independent of Him."
@@ -391,7 +385,6 @@
       "transliteration":"Al Hakam",
       "number":28,
       "found": "(6:114) (22:69)",
-      "reference_note": "Quran 6:114 uses hakaman (judge) of Allah; 22:69 describes His judging through a verb.",
       "en":{
         "meaning":"The Judge",
         "desc": "Allah judges between His creatures with perfect justice."
@@ -406,7 +399,6 @@
       "transliteration":"Al 'Adl",
       "number":29,
       "found": "(4:40) (6:115)",
-      "reference_note": "Related passages: 4:40 affirms that Allah does not wrong anyone; 6:115 describes the justice of His word. Neither uses Al Adl as a name.",
       "en":{
         "meaning":"The Just",
         "desc": "Allah is just and does not wrong anyone in the least."
@@ -575,7 +567,6 @@
       "transliteration":"Al Jaleel",
       "number":41,
       "found": "(55:27)",
-      "reference_note": "Related expression: 55:27 contains Dhu al-Jalal wa al-Ikram, not Al Jaleel.",
       "en":{
         "meaning":"The Majestic",
         "desc": "Allah possesses majesty and greatness worthy of reverence."
@@ -688,7 +679,6 @@
       "transliteration":"Al Baa'ith",
       "number":49,
       "found": "(22:7)",
-      "reference_note": "Related passage: 22:7 describes raising the dead through a verb, rather than using Al Baa'ith as a name.",
       "en":{
         "meaning":"The Resurrector",
         "desc": "Allah will raise the dead and bring them to account."
@@ -801,7 +791,6 @@
       "transliteration":"Al Muhsi",
       "number":57,
       "found": "(72:28) (78:29)",
-      "reference_note": "Related passages: these verses use verbs of counting and recording, not Al Muhsi as a name.",
       "en":{
         "meaning":"The All-Enumerating",
         "desc": "Allah knows and counts all things; nothing is omitted from His knowledge."
@@ -816,7 +805,6 @@
       "transliteration":"Al Mubdi",
       "number":58,
       "found": "(10:34) (27:64) (29:19) (85:13)",
-      "reference_note": "Related passages: these verses use verbs of originating creation, not Al Mubdi as a name.",
       "en":{
         "meaning":"The Originator",
         "desc": "Allah originates creation and brings it into existence."
@@ -831,7 +819,6 @@
       "transliteration":"Al Mu'eed",
       "number":59,
       "found": "(10:34) (27:64) (29:19) (85:13)",
-      "reference_note": "Related passages: these verses use verbs of restoring creation, not Al Mu'eed as a name.",
       "en":{
         "meaning":"The Restorer",
         "desc": "Allah restores creation and brings it back after death."
@@ -846,7 +833,6 @@
       "transliteration":"Al Muhyee",
       "number":60,
       "found": "(7:158) (15:23) (30:50) (57:2)",
-      "reference_note": "Quran 30:50 uses muhyi (giver of life); the other passages express giving life through verbs.",
       "en":{
         "meaning":"The Life-Giver",
         "desc": "Allah gives life and restores life to the dead."
@@ -861,7 +847,6 @@
       "transliteration":"Al Mumeet",
       "number":61,
       "found": "(3:156) (7:158) (15:23) (57:2)",
-      "reference_note": "Related passages: these verses express causing death through verbs, not Al Mumeet as a name.",
       "en":{
         "meaning":"The Life-Taker",
         "desc": "Allah causes death; life and death are under His authority."
@@ -904,7 +889,6 @@
       "transliteration":"Al Waajid",
       "number":64,
       "found": "(35:15)",
-      "reference_note": "Related attribute: 35:15 affirms Allah's self-sufficiency using Al Ghaniyy, not Al Waajid. The explanation of Al Waajid follows al-Ghazali's Al-Maqsad al-Asna.",
       "en":{
         "meaning":"The All-Sufficient",
         "desc": "Allah lacks nothing; His attributes are perfect and He needs no support from another."
@@ -919,7 +903,6 @@
       "transliteration":"Al Maajid",
       "number":65,
       "found": "(11:73)",
-      "reference_note": "Related form: 11:73 contains Majeed, not Maajid. These are distinct Arabic forms with overlapping meanings.",
       "en":{
         "meaning":"The Glorious",
         "desc": "This name shares with Al Majeed the meaning of glory, nobility and generosity; it does not denote an unrelated attribute."
@@ -1004,7 +987,6 @@
       "transliteration":"Al Muqaddim",
       "number":71,
       "found": "(16:61)",
-      "reference_note": "Related passage: 16:61 concerns appointed terms, not the name Al Muqaddim. The name occurs explicitly in the Arabic of Muslim 771a.",
       "en":{
         "meaning":"The Expediter",
         "desc": "Allah brings forward whom and what He wills in accordance with His wisdom."
@@ -1019,7 +1001,6 @@
       "transliteration":"Al Mu\u2019akhkhir",
       "number":72,
       "found": "(71:4)",
-      "reference_note": "Related passage: 71:4 describes delaying through a verb. Al Mu'akhkhir occurs explicitly in the Arabic of Muslim 771a.",
       "en":{
         "meaning":"The Delayer",
         "desc": "Allah puts back or delays whom and what He wills in accordance with His wisdom."
@@ -1090,7 +1071,6 @@
       "transliteration":"Al Waali",
       "number":77,
       "found": "(13:11)",
-      "reference_note": "Quran 13:11 uses the corresponding indefinite form waalin (protector).",
       "en":{
         "meaning":"The Governor",
         "desc": "Allah governs and protects; the affairs of His creation are under His authority."
@@ -1147,7 +1127,6 @@
       "transliteration":"Al Muntaqim",
       "number":81,
       "found": "(32:22) (43:41) (44:16)",
-      "reference_note": "These passages use the plural form muntaqimun in statements of divine requital, rather than the singular Al Muntaqim.",
       "en":{
         "meaning":"The Avenger",
         "desc": "Allah holds wrongdoers to account and requites wrongdoing with justice."
@@ -1204,7 +1183,6 @@
       "transliteration":"Dhu Al Jalaali Wa Al Ikraam",
       "number":85,
       "found": "(55:27) (55:78)",
-      "reference_note": "The phrase appears as dhu al-jalal in 55:27 and dhi al-jalal in 55:78 because of grammatical case.",
       "en":{
         "meaning":"Majestic and Generous",
         "desc": "Allah possesses majesty and honour and bestows generosity upon His creation."
@@ -1219,7 +1197,6 @@
       "transliteration":"Al Muqsit",
       "number":86,
       "found": "(7:29) (3:18)",
-      "reference_note": "Related passages: 3:18 describes upholding justice and 7:29 commands justice. Neither uses Al Muqsit as a divine name.",
       "en":{
         "meaning":"The Equitable One",
         "desc": "Allah upholds justice and deals equitably with His creatures."
@@ -1262,7 +1239,6 @@
       "transliteration":"Al Mughni",
       "number":89,
       "found": "(9:28) (53:48)",
-      "reference_note": "Related passages: these verses describe enriching through verbs, not Al Mughni as a name.",
       "en":{
         "meaning":"The Enricher",
         "desc": "Allah grants sufficiency and enriches whom He wills from His bounty."
@@ -1277,7 +1253,6 @@
       "transliteration":"Al Maani'",
       "number":90,
       "found": "(67:21)",
-      "reference_note": "Related passage: 67:21 describes withholding provision through a verb, not Al Maani' as a name.",
       "en":{
         "meaning":"The Withholder",
         "desc": "Allah withholds as He wills; provision and protection are under His authority."
@@ -1292,7 +1267,6 @@
       "transliteration":"Ad Daarr",
       "number":91,
       "found": "(6:17)",
-      "reference_note": "Related passage: 6:17 describes Allah's authority over harm and good, not Ad Daarr as a name.",
       "en":{
         "meaning":"The Distresser",
         "desc": "Hardship and harm cannot occur outside Allah's authority; He decrees with knowledge and justice."
@@ -1307,7 +1281,6 @@
       "transliteration":"An Naafi\u2019",
       "number":92,
       "found": "(10:107) (6:17)",
-      "reference_note": "Related passages: these verses describe Allah's authority over good and harm, not An Naafi' as a name.",
       "en":{
         "meaning":"The Benefactor",
         "desc": "Allah grants benefit and good; no one can prevent the good He wills to give."
@@ -1364,7 +1337,6 @@
       "transliteration":"Al Baaqi",
       "number":96,
       "found": "(55:27)",
-      "reference_note": "Related passage: 55:27 expresses remaining through a verb, not Al Baaqi as a name.",
       "en":{
         "meaning":"The Everlasting One",
         "desc": "Allah remains forever; His existence has no end."
@@ -1379,7 +1351,6 @@
       "transliteration":"Al Waarith",
       "number":97,
       "found": "(15:23) (19:40) (21:89)",
-      "reference_note": "Quran 15:23 and 21:89 use plural forms of inheritor; 19:40 describes inheriting through a verb.",
       "en":{
         "meaning":"The Inheritor",
         "desc": "Allah remains when His creatures pass away; all possessions ultimately belong to Him."
@@ -1394,7 +1365,6 @@
       "transliteration":"Ar Rasheed",
       "number":98,
       "found": "(18:10)",
-      "reference_note": "Related passage: 18:10 asks Allah for right guidance. It does not name Him Ar Rasheed.",
       "en":{
         "meaning":"The Rightly-Guiding",
         "desc": "Allah guides with wisdom to what is right; His guidance is free from error."
@@ -1409,7 +1379,6 @@
       "transliteration":"As Saboor",
       "number":99,
       "found": "(16:61) (35:45)",
-      "reference_note": "Related passages: these verses describe delaying punishment, not Al Saboor as a name. Bukhari 6099 describes divine patience using a comparative form.",
       "en":{
         "meaning":"The Patient One",
         "desc": "Allah does not hasten punishment for wrongdoing, but grants respite according to His wisdom."
