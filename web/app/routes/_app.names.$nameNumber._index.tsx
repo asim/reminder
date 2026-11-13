@@ -85,11 +85,6 @@ export default function NameDetail() {
             <h2 className='text-lg sm:text-xl font-semibold'>
               Quran references
             </h2>
-            {name.reference_note && (
-              <p className='text-gray-700 text-sm sm:text-base'>
-                {name.reference_note}
-              </p>
-            )}
             <div className='flex flex-wrap gap-2'>
               {name.location.filter(Boolean).map((loc, index) => (
                 <Link

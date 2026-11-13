@@ -8,7 +8,6 @@ type NameType = {
   description: string;
   summary: string;
   location: string[];
-  reference_note?: string;
 };
 
 type ListNamesResponseType = NameType[];

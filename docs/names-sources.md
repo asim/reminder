@@ -18,7 +18,7 @@ that can be derived from it as a divine name.
 
 The primary source for the Quran references is the Arabic verse itself in
 `quran/data/arabic.json`. The table below links every retained reference. The
-reference note distinguishes nominal forms, inflection, plurals, verbs and
+editorial table below distinguishes nominal forms, inflection, plurals, verbs and
 related passages. This is a curated reference list, not a concordance of every
 occurrence. New English explanations are editorial paraphrases, not translations
 quoted from a particular published edition.
@@ -38,12 +38,14 @@ Additional interpretation and hadith sources:
 ## Page composition and updates
 
 `names/data/names.json` supplies Arabic, transliteration, short meaning,
-description, Quran references and `reference_note`. The numbered files supply
-summaries. Their duplicate name/description fields now match the main records,
-with a regression check to prevent drift. The modern detail page, share text and
-bookmark excerpts use the corrected summary; the legacy HTML also displays the
-description. Quran-reference notes appear in the API, modern page, legacy HTML
-and Markdown output. Existing typography and controls are preserved.
+description and Quran references. The numbered files supply summaries. Their
+duplicate name/description fields match the main records, with a regression
+check to prevent drift. Descriptions and summaries focus on each name's meaning
+and reflection: do not include editorial corrections, grammatical qualifications,
+or repeated verse numbers. Citations belong in the reference section below.
+Source qualifications remain in this editorial document, outside the reading
+experience. The API, modern page, legacy HTML and Markdown output follow this
+separation. Existing typography and controls are preserved.
 
 Names in the persistent keyword index are replaced transactionally when a hash
 of their indexed content changes. The other sources are untouched. Existing

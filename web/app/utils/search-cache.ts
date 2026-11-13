@@ -1,7 +1,7 @@
 import type { SearchResponseType } from '~/queries/search';
 
 const SEARCH_CACHE_KEY = 'reminder_search_cache';
-const NAMES_REVISION = '2026-10-18-combined-audit';
+const NAMES_REVISION = '2026-11-13-meaning-focused';
 
 export type CachedSearch = {
     query: string;

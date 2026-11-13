@@ -3,7 +3,6 @@ package names
 import (
 	"encoding/json"
 	"fmt"
-	"html"
 	"os"
 	"regexp"
 	"strconv"
@@ -60,16 +59,13 @@ func TestComposedNamesAndReferences(t *testing.T) {
 				t.Fatalf("nonexistent verse %q", ref)
 			}
 		}
-		if name.ReferenceNote != "" && !strings.Contains(name.HTML(), html.EscapeString(name.ReferenceNote)) {
-			t.Fatalf("missing references in legacy page %d", name.Number)
+		if regexp.MustCompile(`\d+:\d+`).MatchString(name.Description + " " + name.Summary) {
+			t.Fatalf("verse citation in reading text for name %d", name.Number)
 		}
-	}
-	for _, number := range []int{20, 21, 22, 23, 24, 25, 29, 41, 49, 57, 58, 59, 61, 64, 65, 71, 72, 81, 86, 89, 90, 91, 92, 96, 98, 99} {
-		if corpus.Get(number).ReferenceNote == "" {
-			t.Errorf("name %d presents related evidence without qualification", number)
+		for _, ref := range name.Location {
+			if !strings.Contains(name.HTML(), ">"+ref+"</a>") {
+				t.Fatalf("missing reference link %s for name %d", ref, name.Number)
+			}
 		}
-	}
-	if !strings.Contains(corpus.Markdown(), corpus.Get(64).ReferenceNote) {
-		t.Fatal("markdown omitted reference distinction")
 	}
 }
