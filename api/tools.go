@@ -177,6 +177,7 @@ func NewMCP(q *quran.Quran, n *names.Names, b *hadith.Collection, reminders *dai
 		if err != nil {
 			return "", err
 		}
+		res = search.CurrentTafsirResults(res, q)
 		answer := ""
 		if value, present := args["summarise"]; present {
 			enabled, ok := value.(bool)
@@ -184,10 +185,11 @@ func NewMCP(q *quran.Quran, n *names.Names, b *hadith.Collection, reminders *dai
 				return "", fmt.Errorf("summarise must be true or false")
 			}
 			if enabled {
-				answer, err = model.AskSafe(ctx, search.Context(res), question)
+				result, err := model.RespondPublic(ctx, model.Request{Prompt: question}, func(query string) ([]*model.Reference, error) { return search.ModelReferences(idx, n, q, b, query) })
 				if err != nil {
 					return "", err
 				}
+				answer, res = result.Answer, result.References
 			}
 		}
 

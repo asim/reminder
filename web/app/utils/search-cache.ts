@@ -1,7 +1,7 @@
 import type { SearchResponseType } from '~/queries/search';
 
 const SEARCH_CACHE_KEY = 'reminder_search_cache';
-const NAMES_REVISION = '2026-11-13-meaning-focused';
+const NAMES_REVISION = '2026-11-14-grounded-translations-tafsir';
 
 export type CachedSearch = {
     query: string;
@@ -32,7 +32,7 @@ export function getSearchCache(): SearchCache {
             cache.searches = cache.searches.filter(search =>
                 !search.result.references.some(reference =>
                     Object.entries(reference.metadata).some(([key, value]) =>
-                        key.toLowerCase() === 'source' && value === 'names'
+                        key.toLowerCase() === 'source' && ['names', 'quran', 'quran_translation', 'tafsir'].includes(value)
                     )
                 )
             );

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Loader2, Search as SearchIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import {
   getSearchHistoryOptions,
   searchOptions,
@@ -39,9 +39,9 @@ type SearchReference = {
 
 function getResultTitle(meta: Record<string, string>): string {
   const source = meta.source || '';
-  if (source === 'quran') {
+  if (source === 'quran' || source === 'quran_translation') {
     const name = meta.name || `Chapter ${meta.chapter}`;
-    return meta.verse ? `${name} ${meta.chapter}:${meta.verse}` : `${name} — Chapter ${meta.chapter}`;
+    return meta.verse ? `${name} ${meta.chapter}:${meta.verse}${meta.translator ? ` · ${meta.translator}` : ""}` : `${name} — Chapter ${meta.chapter}`;
   }
   if (source === 'bukhari') {
     const book = meta.book || `Book ${meta.book_num}`;
@@ -51,14 +51,14 @@ function getResultTitle(meta: Record<string, string>): string {
     return meta.meaning || meta.english || 'Name of Allah';
   }
   if (source === 'tafsir') {
-    return `Tafsir - ${meta.chapter}:${meta.verse}`;
+    return `${meta.title || "Tafsir"} — ${meta.ayahs || `${meta.chapter}:${meta.verse}`}`;
   }
   return 'Result';
 }
 
 function getResultLink(meta: Record<string, string>): string | null {
   const source = meta.source || '';
-  if (source === 'quran' && meta.chapter) {
+  if ((source === 'quran' || source === 'quran_translation') && meta.chapter) {
     return meta.verse ? `/quran/${meta.chapter}/${meta.verse}` : `/quran/${meta.chapter}`;
   }
   if (source === 'bukhari' && meta.book_num) {
@@ -78,9 +78,10 @@ function getResultLink(meta: Record<string, string>): string | null {
 function getSourceLabel(meta: Record<string, string>): string {
   const source = meta.source || '';
   if (source === 'quran') return 'Quran';
+  if (source === 'quran_translation') return 'Translation';
   if (source === 'bukhari') return 'Hadith';
   if (source === 'names') return 'Names of Allah';
-  if (source === 'tafsir') return 'Commentary';
+  if (source === 'tafsir') return 'Tafsir';
   return 'Source';
 }
 
@@ -99,7 +100,7 @@ function RelevanceBadge({ score }: { score: number }) {
   );
 }
 
-function ResultCard({ ref: r, compact }: { ref: SearchReference; compact?: boolean }) {
+function ResultCard({ ref: r, compact, number }: { ref: SearchReference; compact?: boolean; number?: number }) {
   const title = getResultTitle(r.metadata);
   const link = getResultLink(r.metadata);
   const sourceLabel = getSourceLabel(r.metadata);
@@ -109,7 +110,7 @@ function ResultCard({ ref: r, compact }: { ref: SearchReference; compact?: boole
       <div className='flex items-start justify-between gap-2 mb-1.5'>
         <div className='flex items-center gap-2 min-w-0'>
           <span className='text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 font-medium flex-shrink-0'>
-            {sourceLabel}
+            {number ? `[${number}] ` : ""}{sourceLabel}
           </span>
           {link ? (
             <Link
@@ -137,9 +138,10 @@ function ResultCard({ ref: r, compact }: { ref: SearchReference; compact?: boole
 }
 
 export default function SearchIndex() {
-  const [query, setQuery] = useState('');
+  const [params] = useSearchParams();
+  const [query, setQuery] = useState(params.get('q') || '');
   const [submittedQuery, setSubmittedQuery] = useState('');
-  const [mode, setMode] = useState<SearchMode>('search');
+  const [mode, setMode] = useState<SearchMode>(params.get('mode') === 'ask' ? 'ask' : 'search');
   const [cachedSearches, setCachedSearches] = useState<CachedSearch[]>([]);
 
   useEffect(() => {
@@ -165,9 +167,10 @@ export default function SearchIndex() {
     if (!searchResults) return null;
     return {
       ...searchResults,
-      answer: summaryResults?.answer ?? '',
+      answer: mode === 'ask' ? summaryResults?.answer ?? '' : '',
+      references: mode === 'ask' ? summaryResults?.references ?? searchResults.references : searchResults.references,
     };
-  }, [searchResults, summaryResults]);
+  }, [searchResults, summaryResults, mode]);
 
   useEffect(() => {
     if (mergedResults && submittedQuery && mergedResults.answer) {
@@ -232,7 +235,7 @@ export default function SearchIndex() {
           Search
         </h1>
         <div className='text-sm sm:text-base text-gray-700 mb-2'>
-          Seek knowledge from the Quran, Hadith and Names of Allah
+          Search or ask a question about the Quran, Hadith and Names of Allah
         </div>
         <form onSubmit={handleSubmit} className='mb-4 sm:mb-6'>
           <div className='relative flex'>
@@ -258,11 +261,11 @@ export default function SearchIndex() {
               className='flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-black text-white text-xs sm:text-sm hover:bg-gray-800 disabled:opacity-60 transition-colors'
             >
               <SearchIcon className='size-3.5' />
-              Search
+              {mode === 'ask' ? 'Ask' : 'Search'}
             </button>
             <label className='flex items-center gap-2 text-xs sm:text-sm text-gray-700'>
               <input type='checkbox' checked={mode === 'ask'} onChange={e => setMode(e.target.checked ? 'ask' : 'search')} />
-              Summarise with AI
+              Answer with sources
             </label>
           </div>
         </form>
@@ -299,7 +302,7 @@ export default function SearchIndex() {
               {summaryError ? <p className='text-sm'>{summaryError.message || "AI summary unavailable. The references remain available below."}</p> : isSummaryLoading ? (
                 <div className='flex items-center gap-2 text-sm sm:text-base text-gray-500'>
                   <Loader2 className='animate-spin h-4 w-4' />
-                  <span>Generating AI summary...</span>
+                  <span>Preparing a sourced answer...</span>
                 </div>
               ) : !mergedResults.answer ? <p className='text-sm'>No AI explanation is available. Read the references below.</p> : (
                 <div
@@ -316,7 +319,7 @@ export default function SearchIndex() {
                 </div>
                 <div className='space-y-2'>
                   {mergedResults.references.map((ref, index) => (
-                    <ResultCard key={index} ref={ref} compact />
+                    <ResultCard key={index} ref={ref} compact number={index + 1} />
                   ))}
                 </div>
               </div>
@@ -350,7 +353,7 @@ export default function SearchIndex() {
                       {result.references && result.references.length > 0 && (
                         <div className='space-y-2'>
                           {result.references.slice(0, 3).map((ref, refIdx) => (
-                            <ResultCard key={refIdx} ref={ref} compact />
+                            <ResultCard key={refIdx} ref={ref} compact number={refIdx + 1} />
                           ))}
                           {result.references.length > 3 && (
                             <div className='text-xs text-gray-500'>

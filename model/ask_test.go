@@ -13,7 +13,8 @@ import (
 func TestGroundedHistoryAndEvidence(t *testing.T) {
 	reply := "Be patient [1]."
 	var received struct {
-		Messages []Message `json:"messages"`
+		Messages            []Message `json:"messages"`
+		MaxCompletionTokens int       `json:"max_completion_tokens"`
 	}
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if err := json.NewDecoder(r.Body).Decode(&received); err != nil {
@@ -34,7 +35,7 @@ func TestGroundedHistoryAndEvidence(t *testing.T) {
 		if !strings.Contains(query, "Explain patience") || strings.Contains(query, "UNTRUSTED") {
 			t.Fatalf("bad retrieval query %q", query)
 		}
-		return []*Reference{{Text: "EXCLUDED", Metadata: map[string]string{"source": "tafsir"}}, {Text: "Be patient", Metadata: map[string]string{"source": "quran"}}, {Text: strings.Repeat("x", contentLimits.Evidence+1), Metadata: map[string]string{"source": "quran"}}}, nil
+		return []*Reference{{Text: "EXCLUDED", Metadata: map[string]string{"source": "untrusted"}}, {Text: "Be patient", Metadata: map[string]string{"source": "quran"}}, {Text: strings.Repeat("x", contentLimits.Evidence+1), Metadata: map[string]string{"source": "quran"}}}, nil
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -48,6 +49,18 @@ func TestGroundedHistoryAndEvidence(t *testing.T) {
 	system := received.Messages[0].Content
 	if strings.Contains(system, "UNTRUSTED") || strings.Contains(system, "EXCLUDED") || !strings.Contains(system, "[1]") {
 		t.Fatal("evidence leaked or missing")
+	}
+	public, err := RespondPublic(context.Background(), Request{Prompt: "Explain the wording"}, func(string) ([]*Reference, error) {
+		return []*Reference{
+			{Text: "Published translation", Metadata: map[string]string{"source": "quran_translation", "translator": "Test translator"}},
+			{Text: "Scholarly explanation", Metadata: map[string]string{"source": "tafsir", "title": "Test commentary"}},
+		}, nil
+	})
+	if err != nil || len(public.References) != 2 {
+		t.Fatalf("missing attributed evidence: %+v %v", public, err)
+	}
+	if received.MaxCompletionTokens != budget.output {
+		t.Fatalf("public output budget changed: %d", received.MaxCompletionTokens)
 	}
 	reply = "Unsupported citation [99]."
 	if _, err := Respond(context.Background(), Request{Prompt: "Explain patience"}, func(string) ([]*Reference, error) {
