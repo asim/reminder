@@ -52,9 +52,9 @@ For follow-ups, supply earlier turns in chronological order:
 
 The server does not store conversations. History helps interpret the prompt;
 it is not evidence. Each call retrieves sources from the Quran, Bukhari and
-Names material. Quran evidence includes three attributed translations and, once
-the bundled edition is verified, matching tafsir passages. Unrelated index
-records and the unverified legacy commentary are excluded. See [tafsir.md](tafsir.md). The model is
+Names material. Quran evidence includes three attributed translations and matching
+English Al-Jalalayn tafsir passages from QUL. Unrelated index records and
+unverified editions are excluded. See [tafsir.md](tafsir.md). The model is
 instructed to distinguish sources from interpretation and acknowledge missing
 evidence. This is retrieval-grounded generation, not a trained religious model
 or a guarantee of correct interpretation. The reusable operation is `model.Respond`;

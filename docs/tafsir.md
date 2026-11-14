@@ -2,19 +2,16 @@
 
 ## Status
 
-The package and model/UI integration are implemented. **The Al-Jalalayn corpus
-replacement is pending the authenticated QUL download. Do not merge this draft
-as a completed Al-Jalalayn migration.**
+English Tafsir Al-Jalalayn from QUL is bundled for all 6,236 verses. It replaces
+the previous unattributed commentary in the reader and is available as attributed
+evidence to the model through the shared tafsir package.
 
 QUL resource: https://qul.tarteel.ai/resources/tafsir/english-tafsir-al-jalalayn
 The download requires sign-in. Its licence tab reports no copyright information;
 the text is not covered by this repository's software licence.
 
-Until the actual download is imported, `tafsir/data/commentary.json` retains the
-previous commentary verbatim, moved from `quran/data/tafsir.json`.
-`edition.json` explicitly labels it unattributed and unverified. It remains
-available to readers but is excluded from grounded model evidence. It must not
-be silently relabelled as Al-Jalalayn (or Al-Mukhtasar based on spot checks).
+The imported archive is `tafsir-al-jalalayn.json.zip`; its SHA-256 is recorded in
+`tafsir/data/edition.json`. The imported 73:4 passage matches the resource preview.
 
 ## Import
 
@@ -59,7 +56,7 @@ A retrieved Quran verse supplies:
 
 - The canonical Arabic and Mustafa Khattab translation.
 - Separately attributed Saheeh International and Muhammad Asad translations.
-- The matching tafsir passage once the edition is verified, with its author/work,
+- The matching Al-Jalalayn tafsir passage, with its author/work,
   source URL and complete shared-verse coverage.
 
 Only the sources that fit the evidence budget receive citation numbers. The UI

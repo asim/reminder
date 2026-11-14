@@ -33,16 +33,19 @@ func TestModelReferencesResolveBundledArabic(t *testing.T) {
 	}
 	refs := []*Result{verse, verse, {Text: "old hadith", Metadata: map[string]string{"source": "bukhari", "book_num": "1", "number": "1"}}, {Metadata: map[string]string{"source": "names", "arabic": (*n)[0].Arabic}}}
 	out, err := ModelReferences(evidenceIndex{results: refs}, n, q, b, "test")
-	if err != nil || len(out) != 5 {
+	if err != nil || len(out) != 6 {
 		t.Fatalf("results %v, %v", out, err)
 	}
 	if out[0].Text != q.Get(2).Verse(1).Text || out[0].Metadata["arabic"] != q.Get(2).Verse(1).Arabic || out[0].Score != verse.Score {
 		t.Fatal("Quran evidence differs from numbered verse")
 	}
-	if out[3].Text != h.English || out[3].Metadata["arabic"] != h.Arabic || h.Arabic == "" {
+	if out[3].Metadata["edition"] != "jalalayn-en" || out[3].Text != q.Tafsir.Get(2, 1).Text {
+		t.Fatal("missing bundled Al-Jalalayn evidence")
+	}
+	if out[4].Text != h.English || out[4].Metadata["arabic"] != h.Arabic || h.Arabic == "" {
 		t.Fatal("hadith evidence differs from source")
 	}
-	if out[4].Metadata["arabic"] != (*n)[0].Arabic {
+	if out[5].Metadata["arabic"] != (*n)[0].Arabic {
 		t.Fatal("missing Arabic name")
 	}
 	if verse.Text != "stale excerpt" || verse.Metadata["arabic"] != "wrong" {
