@@ -7,6 +7,7 @@ import { PrimaryButton } from '~/components/interface/primary-button';
 import { ShareButton } from '~/components/interface/share-button';
 import { AudioPlayer } from '~/components/quran/audio-player';
 import { ChapterHeader } from '~/components/quran/chapter-header';
+import { VerseExplanation } from '~/components/quran/verse-explanation';
 import { VerseArabic } from '~/components/quran/verse-arabic';
 import { useTranslatedChapter } from '~/queries/quran';
 import { useQuranSettings } from '~/components/quran/reading-settings';
@@ -73,8 +74,9 @@ export default function QuranVerse(props: Route.ComponentProps) {
       <section data-chapter-verse={`${data.number}:${verse.number}`}>
         {mode !== 'english' && <VerseArabic verse={verse} wordByWord={wordByWord} transliteration={showTransliteration} />}
         {mode !== 'arabic' && <p className='quran-translation text-base sm:text-lg leading-relaxed'>{verse.text}</p>}
-        {showCommentary && verse.comments && <div className='mt-3 p-3 bg-yellow-50 text-sm leading-relaxed'><strong>Tafsir (stored commentary):</strong> {verse.comments}</div>}
+        {showCommentary && verse.comments && <div className='mt-3 p-3 bg-yellow-50 text-sm leading-relaxed'><strong>{verse.commentary_source || "Stored commentary"}:</strong> {verse.comments}</div>}
       </section>
+      <VerseExplanation key={`${data.number}:${verse.number}`} chapter={data.number} verse={verse.number} />
       <Link className='my-4 text-sm underline underline-offset-4' to={buildQuranShareUrl(`/quran/${data.number}`, { mode, translation, wordByWord, commentary: showCommentary, transliteration: showTransliteration }) + `#${verse.number}`}>Read full chapter at {data.number}:{verse.number}</Link>
       <div className='flex justify-between mt-6 sm:mt-8 mb-8 sm:mb-12'>
         {hasPreviousVerse ? (

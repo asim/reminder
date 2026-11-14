@@ -108,6 +108,9 @@ func outputLimit(ctx context.Context) int {
 	if internal, _ := ctx.Value(internalKey{}).(bool); internal {
 		return 8192
 	}
+	if public, _ := ctx.Value(publicGroundedKey{}).(bool); public {
+		return budget.output
+	}
 	if grounded, _ := ctx.Value(groundedKey{}).(bool); grounded {
 		return contentLimits.Output
 	}

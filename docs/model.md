@@ -52,11 +52,15 @@ For follow-ups, supply earlier turns in chronological order:
 
 The server does not store conversations. History helps interpret the prompt;
 it is not evidence. Each call retrieves sources from the Quran, Bukhari and
-Names material. Tafsir and unrelated index records are excluded. The model is
+Names material. Quran evidence includes three attributed translations and, once
+the bundled edition is verified, matching tafsir passages. Unrelated index
+records and the unverified legacy commentary are excluded. See [tafsir.md](tafsir.md). The model is
 instructed to distinguish sources from interpretation and acknowledge missing
 evidence. This is retrieval-grounded generation, not a trained religious model
 or a guarantee of correct interpretation. The reusable operation is `model.Respond`;
-existing search summaries continue to use `model.AskSafe`.
+Search → Ask, MCP summaries and the verse page’s Explain action use the same
+operation through `model.RespondPublic`, retaining public usage limits. No API
+key is embedded in the browser; the keyed API remains separately authenticated.
 
 ## Limits and operation
 
