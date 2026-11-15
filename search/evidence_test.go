@@ -90,6 +90,13 @@ func TestAttributedTranslationsAndTafsir(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	textRefs := []*Result{}
+	for _, ref := range refs {
+		if ref.Metadata["source"] != "lexicon" && ref.Metadata["source"] != "morphology" {
+			textRefs = append(textRefs, ref)
+		}
+	}
+	refs = textRefs
 	if len(refs) != 7 {
 		t.Fatalf("want six translations and one shared tafsir, got %d", len(refs))
 	}

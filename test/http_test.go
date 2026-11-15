@@ -63,31 +63,24 @@ func TestQuranVerseRoute(t *testing.T) {
 	}
 }
 
-func TestExplanationUsesRequestedVerseWithoutModel(t *testing.T) {
+func TestExplanationRequiresModelAndPreservesStoredCommentary(t *testing.T) {
 	for _, path := range []string{"/api/quran/0/1/explain", "/api/quran/2/0/explain", "/api/quran/2/287/explain"} {
 		code, _, _ := request(t, "POST", path, nil)
-		if code != 404 {
+		if code != 400 && code != 404 {
 			t.Fatalf("%s: %d", path, code)
 		}
 	}
-	code, _, data := request(t, "POST", "/api/quran/2/255/explain", nil)
-	if code != 200 {
-		t.Fatalf("status %d", code)
+	code, _, _ := request(t, "POST", "/api/quran/2/255/explain", nil)
+	if code != 503 {
+		t.Fatalf("expected unavailable model, got %d", code)
 	}
-	var result struct {
-		Text, Reference, Source string
-		Generated               bool
-	}
-	if err := json.Unmarshal(data, &result); err != nil {
-		t.Fatal(err)
-	}
-	_, _, data = request(t, "GET", "/api/quran/2/255", nil)
+	_, _, data := request(t, "GET", "/api/quran/2/255", nil)
 	var verse struct{ Comments string }
 	if err := json.Unmarshal(data, &verse); err != nil {
 		t.Fatal(err)
 	}
-	if result.Source != "Tafsir Al-Jalalayn (English)" || result.Generated || result.Reference != "2:255" || result.Text != verse.Comments || result.Text == "" {
-		t.Fatalf("wrong explanation: %+v", result)
+	if verse.Comments == "" {
+		t.Fatal("stored commentary missing")
 	}
 }
 
@@ -233,5 +226,14 @@ func TestMuslimRoutesAndSearch(t *testing.T) {
 	}
 	if code != 200 || !found {
 		t.Fatalf("Muslim missing from search: %d %s", code, data)
+	}
+}
+
+func TestArabicLearningRoutes(t *testing.T) {
+	for _, path := range []string{"/api/arabic/dictionary?q=%D8%B5%D8%A8%D8%B1", "/api/arabic/roots?q=%D8%B1%D8%AD", "/api/arabic/quran/1/2"} {
+		code, _, data := request(t, "GET", path, nil)
+		if code != http.StatusOK || !json.Valid(data) {
+			t.Fatalf("%s: %d %s", path, code, data)
+		}
 	}
 }

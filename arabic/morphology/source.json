@@ -1,0 +1,9 @@
+{
+  "title": "Quranic Arabic Corpus morphology 0.4",
+  "source": "https://corpus.quran.com/download/",
+  "mirror": "https://github.com/cltk/arabic_morphology_quranic-corpus",
+  "commit": "b5abd4d8fadd775f3329f34cbe10531fac71e391",
+  "path": "quranic-corpus-morphology-0.4.txt",
+  "sha256": "a1d12923815341face765083805d2148ed2d9f5cc3f7d6665219d887675d8c46",
+  "transformation": "Original file bytes compressed with gzip; annotations and copyright notices unchanged."
+}

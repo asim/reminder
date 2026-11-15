@@ -30,6 +30,9 @@ type Value struct {
 }
 
 var Endpoints = []*Endpoint{
+	{Name: "Arabic dictionary", Path: "/api/arabic/dictionary", Method: "GET", Description: "Look up a Lane headword or root using q; limit 1–25 (default 10), offset 0–5000. Returns attributed lexical entries, not verse interpretations."},
+	{Name: "Arabic roots", Path: "/api/arabic/roots", Method: "GET", Description: "List up to 100 Lane roots with optional Arabic prefix q."},
+	{Name: "Quran word morphology", Path: "/api/arabic/quran/{chapter}/{verse}", Method: "GET", Description: "Returns Quranic Arabic Corpus words, segments, roots, lemmas and grammar alongside canonical Arabic. Check aligned before using source positions as reader positions."},
 	{
 		Name:        "Latest reminder (updated hourly)",
 		Path:        "/api/latest",
@@ -190,6 +193,21 @@ var Endpoints = []*Endpoint{
 		Response: []*Value{{Type: "JSON", Params: []*Param{
 			{Name: "answer", Value: "string", Description: "Plain text / Markdown response with numbered source citations"},
 			{Name: "references", Value: "array", Description: "Retrieved source records, in citation order"},
+		}}},
+	},
+	{
+		Name:        "Explain",
+		Path:        "/api/model/explain",
+		Method:      "POST",
+		Description: "Grounded passage explanations with contextual follow-up questions. Requires Authorization: Bearer <key>. Uses the same model implementation as the Quran reader. See docs/model.md.",
+		Params: []*Param{
+			{Name: "context", Value: "object", Description: "Quran context: source=quran, chapter, optional verse, translation (khattab/sahih/asad), selection"},
+			{Name: "question", Value: "string", Description: "Optional question; defaults to explaining the passage"},
+			{Name: "history", Value: "array", Description: "Optional complete user/assistant pairs for this passage"},
+		},
+		Response: []*Value{{Type: "JSON", Params: []*Param{
+			{Name: "answer", Value: "string", Description: "Generated explanation with numbered citations"},
+			{Name: "references", Value: "array", Description: "Source records used as evidence, in citation order"},
 		}}},
 	},
 	{

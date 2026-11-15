@@ -25,10 +25,10 @@ The index retains source filename, entry ID, root, headword, text and XML.
 The returned plain text is a lookup aid; the original XML retains typography
 and sense boundaries needed for a future reader interface.
 
-This is the dictionary foundation, not yet part of the model evidence pipeline.
+The Go `arabic` package now loads and verifies this archive for dictionary API/MCP lookup and bounded model evidence. Plain Search remains unchanged.
 Lane gives lexical senses and historical examples; those do not establish the
-meaning of a particular verse. Future model integration must cite entry IDs,
-retain distinctions between senses, and consider grammar, verse context,
+meaning of a particular verse. Model evidence carries entry IDs and must
+retain distinctions between senses and consider grammar, verse context,
 translations and attributed tafsir. Generated English should be labelled an
 explanation or interpretation, never a replacement for the Quranic Arabic.
 
@@ -38,7 +38,6 @@ explanation or interpretation, never a replacement for the Quranic Arabic.
 ayah roots, lemmas and stems. Those annotations provide the bridge from a
 specific Quran word to dictionary candidates. They are not an English dictionary.
 The earlier user-uploaded morphology dataset has not been identified in this
-checkout; do not claim it has been imported or aligned. Before integration,
-record its provenance and licence, and verify word positions against the
-canonical Quran and the existing grouped word-by-word annotations. Do not infer
-word-position equivalence merely from matching counts.
+checkout. The current integration instead uses the attributed Quranic Arabic
+Corpus 0.4 with per-token verification; see [Arabic evidence](../README.md).
+Do not infer word-position equivalence merely from matching counts.

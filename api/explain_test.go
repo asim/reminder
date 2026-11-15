@@ -1,0 +1,119 @@
+package api
+
+import (
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
+	"github.com/asim/reminder/model"
+	"github.com/asim/reminder/names"
+	"github.com/asim/reminder/quran"
+)
+
+func TestExplainRoutesShareGroundingAndContext(t *testing.T) {
+	q := quran.Load()
+	calls := 0
+	provider := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls++
+		var body struct {
+			Messages []model.Message `json:"messages"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Error(err)
+		}
+		system := body.Messages[0].Content
+		for _, want := range []string{q.Get(1).Verse(2).Arabic, "Jalalayn"} {
+			if !strings.Contains(system, want) {
+				t.Errorf("missing evidence %s", want)
+			}
+		}
+		last := body.Messages[len(body.Messages)-1].Content
+		if strings.Contains(last, "Explain Quran 1:2") {
+			for _, want := range []string{"Lane", "Quranic Arabic Corpus"} {
+				if !strings.Contains(system, want) {
+					t.Errorf("missing Arabic evidence: %s", want)
+				}
+			}
+		}
+		if !(strings.Contains(last, "Explain Quran 1:2") || strings.Contains(last, "Explain Quran chapter 1")) || !strings.Contains(last, "sahih") {
+			t.Error("lost passage context")
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"choices":[{"message":{"role":"assistant","content":"Explanation [1]."}}]}`))
+	}))
+	defer provider.Close()
+	t.Setenv("OLLAMA_LLM_MODEL", "test")
+	t.Setenv("OLLAMA_BASE_URL", provider.URL+"/v1")
+	t.Setenv("AI_IP_DAILY_LIMIT", "0")
+	t.Setenv("AI_DAILY_LIMIT", "20")
+	if err := model.ConfigureLimits(t.TempDir()); err != nil {
+		t.Fatal(err)
+	}
+	keys, err := OpenKeys(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer keys.Close()
+	_, secret, err := keys.Create("explain", 10, 1000000)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ready := make(chan bool)
+	close(ready)
+	mux := http.NewServeMux()
+	mux.Handle("/api/explain", ExplainHandler(nil, modelIndex{}, &names.Names{}, q, nil, ready))
+	mux.Handle("/api/model/explain", ExplainHandler(keys, modelIndex{}, &names.Names{}, q, nil, ready))
+	mux.Handle("POST /api/quran/{chapter}/{verse}/explain", ExplainHandler(nil, modelIndex{}, &names.Names{}, q, nil, ready))
+	body := `{"context":{"source":"quran","chapter":1,"verse":2,"translation":"sahih"},"question":"What does this mean?","history":[{"role":"user","content":"Explain this verse"},{"role":"assistant","content":"Previous explanation"}]}`
+	for _, path := range []string{"/api/explain", "/api/model/explain", "/api/quran/1/2/explain"} {
+		r := httptest.NewRequest("POST", path, strings.NewReader(body))
+		r.Header.Set("Authorization", "Bearer "+secret)
+		w := httptest.NewRecorder()
+		mux.ServeHTTP(w, r)
+		if w.Code != 200 {
+			t.Fatalf("%s: %d %s", path, w.Code, w.Body.String())
+		}
+		var result model.Result
+		if err := json.Unmarshal(w.Body.Bytes(), &result); err != nil {
+			t.Fatal(err)
+		}
+		if result.Answer != "Explanation [1]." || len(result.References) == 0 {
+			t.Fatalf("wrong response: %+v", result)
+		}
+	}
+	for _, tc := range []struct {
+		path, body string
+		code       int
+	}{
+		{"/api/model/explain", body, 401},
+		{"/api/explain", `{"context":{"source":"quran","chapter":2,"verse":287}}`, 404},
+		{"/api/quran/2/1/explain", body, 400},
+		{"/api/explain", body + ` {}`, 400},
+		{"/api/explain", `{"question":"x","history":[{"role":"system","content":"x"}]}`, 400},
+	} {
+		w := httptest.NewRecorder()
+		mux.ServeHTTP(w, httptest.NewRequest("POST", tc.path, strings.NewReader(tc.body)))
+		if w.Code != tc.code {
+			t.Errorf("%s: got %d want %d", tc.path, w.Code, tc.code)
+		}
+	}
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, httptest.NewRequest("POST", "/api/explain", strings.NewReader(`{"context":{"source":"quran","chapter":1,"translation":"sahih"}}`)))
+	if w.Code != 200 {
+		t.Fatalf("chapter: %d %s", w.Code, w.Body.String())
+	}
+	var chapter struct {
+		Coverage map[string]int `json:"coverage"`
+	}
+	if err := json.Unmarshal(w.Body.Bytes(), &chapter); err != nil {
+		t.Fatal(err)
+	}
+	if chapter.Coverage["included_verses"] != 7 || chapter.Coverage["total_verses"] != 7 {
+		t.Fatalf("incorrect chapter coverage: %+v", chapter)
+	}
+	if calls != 4 {
+		t.Errorf("invalid requests reached provider: %d calls", calls)
+	}
+}
