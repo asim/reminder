@@ -442,23 +442,6 @@ func main() {
 		registerLiteRoutes(q, n, b, a, reminders)
 	}
 
-	http.HandleFunc("POST /api/quran/{chapter}/{verse}/explain", func(w http.ResponseWriter, r *http.Request) {
-		chapter, _ := strconv.Atoi(r.PathValue("chapter"))
-		number, _ := strconv.Atoi(r.PathValue("verse"))
-		if chapter < 1 || chapter > len(q.Chapters) {
-			http.Error(w, "Chapter not found", http.StatusNotFound)
-			return
-		}
-		verse := q.Get(chapter).Verse(number)
-		if verse == nil {
-			http.Error(w, "Verse not found", http.StatusNotFound)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		// Compatibility endpoint: return the stored tafsir without model generation.
-		json.NewEncoder(w).Encode(map[string]interface{}{"text": verse.Comments, "generated": false, "reference": fmt.Sprintf("%d:%d", chapter, number), "source": verse.CommentarySource})
-	})
-
 	http.HandleFunc("/api/quran", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(qjson))
 	})
@@ -585,39 +568,6 @@ func main() {
 
 	api.RegisterHadithRoutes(http.DefaultServeMux, b)
 	api.RegisterArabicRoutes(http.DefaultServeMux, q)
-
-	http.HandleFunc("/api/explain", func(w http.ResponseWriter, r *http.Request) {
-		var data map[string]interface{}
-		if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
-			http.Error(w, "Invalid JSON request", 400)
-			return
-		}
-		q, ok := data["q"].(string)
-		if !ok || strings.TrimSpace(q) == "" {
-			http.Error(w, "q is required", 400)
-			return
-		}
-
-		prompt := `Generate a detailed summary for the following with it's meaning and origin, output the response as JSON with the fields: 
-		text, context, summary. Each field itself should be a string. Text is the text that was provided. Context is contextual information 
-		for the origin of the text or background information required. Summary is a more detailed summary in relation to the text and context.
-
-		%s
-		`
-
-		answer, err := model.AskSafe(r.Context(), nil, fmt.Sprintf(prompt, q))
-		if err != nil {
-			var limit *model.LimitError
-			if errors.As(err, &limit) {
-				http.Error(w, limit.Error(), http.StatusTooManyRequests)
-			} else {
-				log.Printf("AI generation failed: %v", err)
-				http.Error(w, "AI generation unavailable", http.StatusServiceUnavailable)
-			}
-			return
-		}
-		w.Write([]byte(answer))
-	})
 
 	http.HandleFunc("/api/translate", func(w http.ResponseWriter, r *http.Request) {
 		var data map[string]interface{}
@@ -774,6 +724,9 @@ func main() {
 	}
 	defer keys.Close()
 	http.Handle("/api/model/ask", api.ModelHandler(keys, idx, n, q, b, indexed))
+	http.Handle("/api/model/explain", api.ExplainHandler(keys, idx, n, q, b, indexed))
+	http.Handle("/api/explain", api.ExplainHandler(nil, idx, n, q, b, indexed))
+	http.Handle("POST /api/quran/{chapter}/{verse}/explain", api.ExplainHandler(nil, idx, n, q, b, indexed))
 
 	http.Handle("/mcp", api.NewMCP(q, n, b, reminders, lookup, indexed))
 
@@ -797,7 +750,7 @@ func main() {
 		log.Println("Starting server :8080")
 		if err := http.ListenAndServe(":8080", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			bodyLimit := int64(16384)
-			if r.URL.Path == "/api/model/ask" {
+			if r.URL.Path == "/api/model/ask" || r.URL.Path == "/api/model/explain" || r.URL.Path == "/api/explain" || strings.HasSuffix(r.URL.Path, "/explain") {
 				bodyLimit = model.ModelBodyLimit()
 			}
 			r.Body = http.MaxBytesReader(w, r.Body, bodyLimit)
@@ -806,7 +759,7 @@ func main() {
 				w.Header().Set("Access-Control-Allow-Origin", "*")
 				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 				w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-				if r.URL.Path == "/api/model/ask" {
+				if r.URL.Path == "/api/model/ask" || r.URL.Path == "/api/model/explain" {
 					w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 				}
 
@@ -818,7 +771,7 @@ func main() {
 				w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
 				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 				w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-				if r.URL.Path == "/api/model/ask" {
+				if r.URL.Path == "/api/model/ask" || r.URL.Path == "/api/model/explain" {
 					w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 				}
 				w.Header().Set("Access-Control-Allow-Credentials", "true")

@@ -1,3 +1,4 @@
+import { ExplainButton } from '~/components/quran/explain-button';
 import { readingMeta } from '~/utils/reading-meta';
 import { readingData } from '~/utils/prerender.server';
 import type { Route } from '.react-router/types/app/routes/+types/_app.quran.$chapterNumber.$verseNumber';
@@ -51,6 +52,7 @@ export default function QuranVerse(props: Route.ComponentProps) {
         translation={data.english}
         subtitle={`Verse ${data.number}:${verseNumber}`}
         actions={<>
+        <ExplainButton key={`${data.number}:${translation}`} chapter={data.number} verse={Number(verseNumber)} translation={translation} />
         <EmbedButton path={`/quran/${data.number}/${verseNumber}?translation=${translation}`} />
         <ShareButton
           title={`Quran ${data.number}:${verseNumber} - ${data.english}`}

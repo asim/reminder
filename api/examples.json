@@ -312,5 +312,25 @@
       "aligned": true
     },
     "note": "Response also includes canonical_arabic and words with source positions and grammatical segments. An unaligned verse is explicitly flagged; its positions must not be attached to reader words."
+  },
+  "POST /api/model/explain": {
+    "request": "curl -X POST 'https://reminder.dev/api/model/explain' -H 'Authorization: Bearer YOUR_API_KEY' -H 'Content-Type: application/json' -d '{\"context\":{\"source\":\"quran\",\"chapter\":2,\"verse\":153,\"translation\":\"sahih\"},\"question\":\"What does patience mean here?\"}'",
+    "response": {
+      "answer": "An explanation grounded in the passage and cited sources [1].",
+      "references": [
+        {
+          "text": "O you who have believed, seek help through patience and prayer. Indeed, Allah is with the patient.",
+          "score": 1,
+          "metadata": {
+            "source": "quran_translation",
+            "chapter": "2",
+            "verse": "153",
+            "edition": "sahih",
+            "translator": "Saheeh International"
+          }
+        }
+      ]
+    },
+    "note": "Illustrative response structure; generated wording and retrieved sources vary. History uses complete user/assistant pairs."
   }
 }

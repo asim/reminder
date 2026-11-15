@@ -1,3 +1,4 @@
+import { ExplainButton } from '~/components/quran/explain-button';
 import { readingMeta } from '~/utils/reading-meta';
 import { readingLoader } from '~/utils/prerender.server';
 import type { Route } from '.react-router/types/app/routes/+types/_app.quran.$chapterNumber._index';
@@ -83,6 +84,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
         translation={data.english}
         subtitle={`Chapter ${data.number}`}
         actions={<>
+        <ExplainButton key={`${data.number}:${translation}`} chapter={data.number} translation={translation} />
         <TranscriptButton
           chapterNumber={data.number}
           chapterName={data.name}
@@ -109,6 +111,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
               <div className='flex items-center justify-between mt-2 gap-2'>
                 <Link className='text-xs sm:text-sm text-gray-500' to={buildQuranShareUrl(`/quran/${data.number}/${verse.number}`, { mode, translation, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}>{data.number}:{verse.number}</Link>
                 <div className='flex items-center gap-1'>
+                  <ExplainButton chapter={data.number} verse={verse.number} translation={translation} />
                   {(verse.audio_arabic || verse.audio_english) && (
                     <button
                       type='button'

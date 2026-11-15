@@ -127,3 +127,53 @@ QUL exports now provide separately attributed comparisons of roots, lemmas and
 stems. The model receives them only when their source positions and the reader
 text both align. It must acknowledge relevant conflicts; a conflicting field
 cannot silently select a dictionary entry. See `arabic/README.md` for coverage.
+
+## Contextual Explain
+
+`POST /api/model/explain` uses the same API-key authentication and allowances as
+`/api/model/ask`. It shares `model.Explain` with the reader's `POST /api/explain`
+and `POST /api/quran/{chapter}/{verse}/explain` routes. Reader requests use the
+anonymous per-IP and global model allowances. All return `{answer, references}`
+with numbered citations. No conversation is stored on the server.
+
+```json
+{
+  "context": {
+    "source": "quran",
+    "chapter": 2,
+    "verse": 153,
+    "translation": "sahih",
+    "selection": "الصبر"
+  },
+  "question": "What does patience mean here?",
+  "history": []
+}
+```
+
+The context is resolved from the bundled Quran, independently of search ranking.
+Translations, verified tafsir, Arabic morphology and Lane evidence supplement it.
+Follow-ups resend the same context and complete user/assistant pairs. History and
+selected text are user input, not source evidence. The reader keeps the most recent
+four pairs; changing passage or translation resets the discussion.
+
+Omit `verse` for a chapter overview. Chapter text is placed before supplementary
+commentary, within the existing evidence budget. Long chapters may be only partly
+represented; the model is instructed to state that limitation and explain only
+what the supplied verses support. Chapter responses also include `coverage` with
+`included_verses` and `total_verses`, computed from the source text actually sent
+to the model; the reader displays these counts. This is not an exhaustive chapter
+analysis.
+
+The verse URL supplies chapter/verse automatically and accepts an empty body;
+conflicting body context is rejected. `/api/explain` also accepts legacy `{ "q":
+"Explain Quran 2:153" }` input, now grounded in retrieved sources. Its old ungrounded
+JSON output and the verse endpoint's stored-tafsir response are replaced by the
+consistent `{answer, references}` response. Missing model configuration returns
+503 rather than presenting stored tafsir as a generated explanation. Stored tafsir
+remains in the verse's `comments` and `commentary_source` fields and the reader's
+commentary toggle.
+
+Reader Explain is available at chapter and verse level, including selected text
+within a single verse. The panel labels its passage, keeps follow-up questions
+there, and exposes the evidence behind numbered citations. This first reader
+integration covers Quran; hadith and Names retain their existing reading UI.

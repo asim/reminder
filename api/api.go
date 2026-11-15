@@ -196,6 +196,21 @@ var Endpoints = []*Endpoint{
 		}}},
 	},
 	{
+		Name:        "Explain",
+		Path:        "/api/model/explain",
+		Method:      "POST",
+		Description: "Grounded passage explanations with contextual follow-up questions. Requires Authorization: Bearer <key>. Uses the same model implementation as the Quran reader. See docs/model.md.",
+		Params: []*Param{
+			{Name: "context", Value: "object", Description: "Quran context: source=quran, chapter, optional verse, translation (khattab/sahih/asad), selection"},
+			{Name: "question", Value: "string", Description: "Optional question; defaults to explaining the passage"},
+			{Name: "history", Value: "array", Description: "Optional complete user/assistant pairs for this passage"},
+		},
+		Response: []*Value{{Type: "JSON", Params: []*Param{
+			{Name: "answer", Value: "string", Description: "Generated explanation with numbered citations"},
+			{Name: "references", Value: "array", Description: "Source records used as evidence, in citation order"},
+		}}},
+	},
+	{
 		Name:        "MCP",
 		Path:        "/mcp",
 		Method:      "POST",
