@@ -165,6 +165,11 @@ var Endpoints = []*Endpoint{
 			},
 		}},
 	},
+	{Name: "Hadith Collections", Path: "/api/hadith/collections", Method: "GET", Description: "Available collections: bukhari and muslim", Response: []*Value{{Type: "JSON"}}},
+	{Name: "Muslim Books", Path: "/api/hadith/muslim/books", Method: "GET", Description: "Books in Sahih Muslim, including Introduction (book 0)", Response: []*Value{{Type: "JSON"}}},
+	{Name: "Sahih Muslim", Path: "/api/hadith/muslim", Method: "GET", Description: "Entire Sahih Muslim collection in Arabic and English. Record numbers preserve the source dataset idInBook, not Sunnah.com reference numbering.", Response: []*Value{{Type: "JSON"}}},
+	{Name: "Muslim by Book", Path: "/api/hadith/muslim/{book}", Method: "GET", Description: "One book in Sahih Muslim; book 0 is the Introduction. number is the source dataset idInBook; source_id is the original dataset ID.", Response: []*Value{{Type: "JSON"}}},
+
 	{
 		Name:        "Names",
 		Path:        "/api/names",

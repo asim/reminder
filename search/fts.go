@@ -12,13 +12,13 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-// FTS is a keyword search index backed by SQLite FTS5. It is used when no
-// OpenAI key is configured, so that search works without any external service.
+// FTS is the complete local corpus index backed by SQLite FTS5.
+// Its coverage does not depend on model keys or prebuilt embeddings.
 type FTS struct {
-	mu       sync.RWMutex
-	db       *sql.DB
-	count    int
-	built    bool
+	mu    sync.RWMutex
+	db    *sql.DB
+	count int
+	built bool
 }
 
 // synonyms maps common Islamic terms to related words so that a search
@@ -332,6 +332,7 @@ func (i *FTS) Store(md map[string]string, content ...string) error {
 
 // queryFTS performs a full-text search and returns up to N results ranked by BM25.
 func (i *FTS) queryFTS(q string, limit int) ([]*Result, error) {
+	source, q := collectionQuery(q)
 	words := tokenize(q)
 	if len(words) == 0 {
 		return nil, nil
@@ -349,10 +350,10 @@ func (i *FTS) queryFTS(q string, limit int) ([]*Result, error) {
 		SELECT d.text, d.metadata, bm25(docs_fts) AS rank
 		FROM docs_fts f
 		JOIN docs d ON d.id = f.rowid
-		WHERE docs_fts MATCH ?
+		WHERE docs_fts MATCH ? AND (? = '' OR json_extract(d.metadata, '$.source') = ?)
 		ORDER BY rank
 		LIMIT ?
-	`, ftsQuery, limit)
+	`, ftsQuery, source, source, limit)
 	if err != nil {
 		return nil, fmt.Errorf("search: query: %w", err)
 	}
@@ -399,4 +400,15 @@ func (i *FTS) DB() *sql.DB {
 // Close closes the underlying database connection.
 func (i *FTS) Close() error {
 	return i.db.Close()
+}
+
+// A collection prefix is an explicit search scope; ordinary queries cover all sources.
+func collectionQuery(query string) (string, string) {
+	trimmed := strings.TrimSpace(query)
+	for _, source := range []string{"bukhari", "muslim"} {
+		if strings.HasPrefix(strings.ToLower(trimmed), source+":") {
+			return source, strings.TrimSpace(trimmed[len(source)+1:])
+		}
+	}
+	return "", query
 }

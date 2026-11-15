@@ -57,7 +57,7 @@ export default function HadithIndex() {
           Dawood, Jami at-Tirmidhi, Sunan an-Nasa'i, and Sunan Ibn Majah.
         </p>
         <p className='text-sm sm:text-base text-gray-700'>
-          Hadith collection shown on this website are from Sahih Bukhari.
+          Read Sahih Bukhari and Sahih Muslim. Choose a collection in Hadith settings.
         </p>
       </section>
 

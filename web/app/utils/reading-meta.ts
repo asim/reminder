@@ -10,8 +10,9 @@ export function readingMeta(kind: string, { data, params }: any) {
     title = `${record?.english || 'Names of Allah'} — ${record?.meaning || params.nameNumber} - Reminder`;
     description = record?.summary || record?.description;
   } else {
-    title = `${record?.name || `Book ${params.book}`} - Sahih Bukhari - Reminder`;
-    description = `Read ${record?.name || 'this book'} from Sahih Bukhari in Arabic and English.`;
+    const collection = data?.readingQueries?.[0]?.queryKey?.[1] === 'muslim' ? 'Sahih Muslim' : 'Sahih Bukhari';
+    title = `${record?.name || `Book ${params.book}`} - ${collection} - Reminder`;
+    description = `Read ${record?.name || 'this book'} from ${collection} in Arabic and English.`;
   }
   return [{ title }, { name: 'description', content: description || title }, { property: 'og:title', content: title }];
 }

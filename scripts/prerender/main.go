@@ -31,6 +31,8 @@ func main() {
 	q, b, n := quran.Load(), hadith.Load(), names.Load()
 	write("chapters", q.Index().Chapters)
 	write("books", b.Index().Books)
+	muslim := hadith.Muslim()
+	write("muslim-books", muslim.Index().Books)
 	write("names", n)
 	embeds := []string{}
 	paths := []string{"/", "/quran", "/hadith", "/names", "/api"}
@@ -47,6 +49,11 @@ func main() {
 	for _, book := range b.Books {
 		write(fmt.Sprintf("hadith-%d", book.Number), book)
 		paths = append(paths, fmt.Sprintf("/hadith/%d", book.Number))
+	}
+	paths = append(paths, "/hadith/muslim")
+	for _, book := range muslim.Books {
+		write(fmt.Sprintf("muslim-%d", book.Number), book)
+		paths = append(paths, fmt.Sprintf("/hadith/muslim/%d", book.Number))
 	}
 	for _, name := range *n {
 		write(fmt.Sprintf("name-%d", name.Number), name)

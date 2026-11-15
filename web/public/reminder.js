@@ -3,7 +3,7 @@ const BUILD = self.__REMINDER_BUILD__;
 const SHELL_CACHE = 'reminder-shell-' + (BUILD?.version || 'dev');
 const TEXT_CACHE = 'reminder-text-' + (BUILD?.textVersion || 'dev');
 const RECENT_CACHE = 'reminder-recent-v2';
-const INDEXES = ['/api/quran/chapters', '/api/hadith/books', '/api/names'];
+const INDEXES = ['/api/quran/chapters', '/api/hadith/books', '/api/names', '/api/hadith/muslim/books'];
 const SHELL = BUILD?.assets || [];
 const FALLBACK = '/__spa-fallback.html';
 let downloading;
@@ -74,8 +74,10 @@ async function saveAllText() {
     const chapters = await (await save(INDEXES[0])).json();
     const books = await (await save(INDEXES[1])).json();
     await save(INDEXES[2]);
+    const muslimBooks = await (await save(INDEXES[3])).json();
+    if (!Array.isArray(muslimBooks) || !muslimBooks.length) throw new Error('muslim index');
     if (!Array.isArray(chapters) || chapters.length !== 114 || !Array.isArray(books) || !books.length) throw new Error('index');
-    const paths = [...chapters.map(ch => '/api/quran/' + ch.number), ...books.map(book => '/api/hadith/' + book.number)];
+    const paths = [...chapters.map(ch => '/api/quran/' + ch.number), ...books.map(book => '/api/hadith/' + book.number), ...muslimBooks.map(book => '/api/hadith/muslim/' + book.number)];
     total += paths.length;
     await notify({ state: 'saving', completed, total });
     // Bound concurrency and resume from successful entries after interruption.
@@ -129,7 +131,7 @@ self.addEventListener('fetch', event => {
   const request = event.request;
   const url = new URL(request.url);
   if (!BUILD || request.method !== 'GET' || url.origin !== self.location.origin) return;
-  if (/^\/api\/(quran\/(chapters|\d+)|hadith\/(books|\d+)|names(?:\/\d+)?)$/.test(url.pathname)) {
+  if (/^\/api\/(quran\/(chapters|\d+)|hadith\/(?:muslim\/)?(books|\d+)|names(?:\/\d+)?)$/.test(url.pathname)) {
     event.respondWith(textResponse(url.pathname));
     return;
   }

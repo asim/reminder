@@ -39,13 +39,14 @@ type SearchReference = {
 
 function getResultTitle(meta: Record<string, string>): string {
   const source = meta.source || '';
+  if (source === 'quran_translation') return `${meta.translator || meta.edition} — ${meta.chapter}:${meta.verse}`;
   if (source === 'quran') {
     const name = meta.name || `Chapter ${meta.chapter}`;
     return meta.verse ? `${name} ${meta.chapter}:${meta.verse}` : `${name} — Chapter ${meta.chapter}`;
   }
-  if (source === 'bukhari') {
+  if ((source === 'bukhari' || source === 'muslim')) {
     const book = meta.book || `Book ${meta.book_num}`;
-    return `${book} - Hadith ${meta.number}`;
+    return `${meta.collection_name || (source === 'muslim' ? 'Sahih Muslim' : 'Sahih Bukhari')} · ${book} - ${source === 'muslim' ? 'Record' : 'Hadith'} ${meta.number}`;
   }
   if (source === 'names') {
     return meta.meaning || meta.english || 'Name of Allah';
@@ -58,13 +59,13 @@ function getResultTitle(meta: Record<string, string>): string {
 
 function getResultLink(meta: Record<string, string>): string | null {
   const source = meta.source || '';
-  if (source === 'quran' && meta.chapter) {
+  if ((source === 'quran' || source === 'quran_translation') && meta.chapter) {
     return meta.verse ? `/quran/${meta.chapter}/${meta.verse}` : `/quran/${meta.chapter}`;
   }
-  if (source === 'bukhari' && meta.book_num) {
+  if ((source === 'bukhari' || source === 'muslim') && meta.book_num) {
     return meta.number
-      ? `/hadith/${meta.book_num}#${meta.number}`
-      : `/hadith/${meta.book_num}`;
+      ? `/hadith${source === 'muslim' ? '/muslim' : ''}/${meta.book_num}#${meta.number}`
+      : `/hadith${source === 'muslim' ? '/muslim' : ''}/${meta.book_num}`;
   }
   if (source === 'names' && meta.english) {
     return null;
@@ -78,25 +79,11 @@ function getResultLink(meta: Record<string, string>): string | null {
 function getSourceLabel(meta: Record<string, string>): string {
   const source = meta.source || '';
   if (source === 'quran') return 'Quran';
-  if (source === 'bukhari') return 'Hadith';
+  if (source === 'quran_translation') return 'Translation';
+  if ((source === 'bukhari' || source === 'muslim')) return 'Hadith';
   if (source === 'names') return 'Names of Allah';
   if (source === 'tafsir') return 'Commentary';
   return 'Source';
-}
-
-function RelevanceBadge({ score }: { score: number }) {
-  const pct = Math.round(score * 100);
-  const color =
-    pct >= 70
-      ? 'bg-green-100 text-green-800'
-      : pct >= 40
-        ? 'bg-yellow-100 text-yellow-800'
-        : 'bg-gray-100 text-gray-600';
-  return (
-    <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${color}`}>
-      {pct}% match
-    </span>
-  );
 }
 
 function ResultCard({ ref: r, compact }: { ref: SearchReference; compact?: boolean }) {
@@ -124,7 +111,7 @@ function ResultCard({ ref: r, compact }: { ref: SearchReference; compact?: boole
             </span>
           )}
         </div>
-        <RelevanceBadge score={r.score} />
+
       </div>
       <p className='text-sm text-gray-700 leading-relaxed'>
         {compact ? (r.text.length > 200 ? r.text.slice(0, 200) + '...' : r.text) : r.text}
@@ -165,9 +152,10 @@ export default function SearchIndex() {
     if (!searchResults) return null;
     return {
       ...searchResults,
-      answer: summaryResults?.answer ?? '',
+      answer: mode === 'ask' ? summaryResults?.answer ?? '' : '',
+      references: mode === 'ask' ? summaryResults?.references ?? searchResults.references : searchResults.references,
     };
-  }, [searchResults, summaryResults]);
+  }, [searchResults, summaryResults, mode]);
 
   useEffect(() => {
     if (mergedResults && submittedQuery && mergedResults.answer) {
@@ -186,7 +174,7 @@ export default function SearchIndex() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    doSubmit(mode);
+    doSubmit('search');
   };
 
   const mergedHistory = useMemo(() => {
@@ -260,10 +248,14 @@ export default function SearchIndex() {
               <SearchIcon className='size-3.5' />
               Search
             </button>
-            <label className='flex items-center gap-2 text-xs sm:text-sm text-gray-700'>
-              <input type='checkbox' checked={mode === 'ask'} onChange={e => setMode(e.target.checked ? 'ask' : 'search')} />
-              Summarise with AI
-            </label>
+            <button
+              type='button'
+              onClick={() => doSubmit('ask')}
+              disabled={isLoading || !query.trim()}
+              className='flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-300 text-xs sm:text-sm hover:bg-gray-100 disabled:opacity-60 transition-colors'
+            >
+              Ask AI
+            </button>
           </div>
         </form>
 
@@ -299,7 +291,7 @@ export default function SearchIndex() {
               {summaryError ? <p className='text-sm'>{summaryError.message || "AI summary unavailable. The references remain available below."}</p> : isSummaryLoading ? (
                 <div className='flex items-center gap-2 text-sm sm:text-base text-gray-500'>
                   <Loader2 className='animate-spin h-4 w-4' />
-                  <span>Generating AI summary...</span>
+                  <span>Preparing an answer...</span>
                 </div>
               ) : !mergedResults.answer ? <p className='text-sm'>No AI explanation is available. Read the references below.</p> : (
                 <div
@@ -316,7 +308,7 @@ export default function SearchIndex() {
                 </div>
                 <div className='space-y-2'>
                   {mergedResults.references.map((ref, index) => (
-                    <ResultCard key={index} ref={ref} compact />
+                    <div key={index}><span className="text-xs text-gray-500">[{index + 1}]</span><ResultCard ref={ref} compact /></div>
                   ))}
                 </div>
               </div>

@@ -5,3 +5,5 @@ index.md
 node_modules
 .pnpm-store
 web/.generated/
+
+arabic/dict/*.sqlite

@@ -102,19 +102,22 @@ func EnrichReferences(refs []*Result, n *names.Names, q *quran.Quran, b *hadith.
 			for _, r := range VerseReferences(q, ch, v, ref.Score) {
 				add(r)
 			}
-		case "bukhari":
+		case "bukhari", "muslim":
 			book, _ := strconv.Atoi(md["book_num"])
 			number, _ := strconv.Atoi(md["number"])
-			if b == nil || book < 1 || number < 1 {
+			corpus := hadith.Select(md["source"], b)
+			if corpus == nil || book < 0 || number < 1 {
 				continue
 			}
-			ch := b.Get(book)
+			ch := corpus.Get(book)
 			if ch == nil {
 				continue
 			}
 			for _, h := range ch.Hadiths {
 				if h.Number == number {
-					add(&Result{Text: h.English, Score: ref.Score, Metadata: map[string]string{"source": "bukhari", "book_num": strconv.Itoa(book), "number": strconv.Itoa(number), "arabic": h.Arabic, "book": ch.Name, "narrator": h.Narrator}})
+					doc := hadithDocument(corpus, ch, h)
+					doc.Score = ref.Score
+					add(doc)
 					break
 				}
 			}

@@ -25,7 +25,7 @@ into a single app and API, providing helpful daily reminders using web push noti
 - Quran in English & Arabic
 - Quran Audio Recitation (Arabic & English)
 - Names of Allah & Meaning
-- Hadith (Bukhari) in English
+- Sahih Bukhari and Sahih Muslim in Arabic and English
 - Index & Search with RAG and LLMs
 - Optional Claude, Ollama or OpenAI integration
 - API to query Quran, hadith, names
@@ -43,23 +43,14 @@ go install github.com/asim/reminder@latest
 
 ## Usage
 
-**Quick Start** (requires OpenAI API key for fast embeddings):
+**Quick Start** (reading and SQLite search need no model API key):
 
 ```bash
-export OPENAI_API_KEY=xxx
-reminder --serve
+reminder --serve --web
 ```
 
-**Alternative: Fully Local** (slower, requires Ollama):
-
-```bash
-# Install and start Ollama (https://ollama.ai/)
-ollama pull nomic-embed-text  # For embeddings
-ollama pull gemma3:1b          # For LLM responses
-
-# Don't set OPENAI_API_KEY - will use Ollama for both
-reminder --serve
-```
+Search refreshes the bundled Quran, tafsir, Names, Bukhari and Muslim sources in
+`~/.reminder/search.db` at startup. Collection updates do not require embeddings.
 
 **LLM Configuration** (optional) - used for answer summaries:
 
@@ -83,30 +74,18 @@ The reader links back to the full chapter at the selected verse.
 Summaries are optional. With no model configured the summarise controls are
 hidden and search still returns references.
 
-**Embedding Configuration**:
-
-For **best performance**, use OpenAI embeddings (fast & cheap - $0.02/1M tokens):
+**Optional semantic search supplement**:
 
 ```bash
-export OPENAI_API_KEY=xxx  # Uses text-embedding-3-small (fast, 1536 dims)
+export OPENAI_API_KEY=xxx
+ # Enabled automatically; set SEARCH_SEMANTIC=false to disable
 ```
 
-For **local/offline** (slower, but no API costs):
-
-```bash
-# Install Ollama first: https://ollama.ai/
-ollama pull nomic-embed-text
-
-# Optional: use different model or instance
-export OLLAMA_EMBED_MODEL=nomic-embed-text  # default
-export OLLAMA_BASE_URL=http://localhost:11434/api  # default
-```
-
-**Migration Note**: If switching embedding providers, delete the old index cache:
-
-```bash
-rm -rf ~/.reminder/data/reminder.idx.gob.gz
-```
+This combines the existing vector and current SQLite rankings using reciprocal
+rank fusion. It is enabled automatically when an OpenAI key is configured. SQLite coverage is retained if embeddings are unavailable;
+new collections do not need a vector rebuild to appear in search or model evidence.
+`--index`, `--export` and `--import` remain explicit vector maintenance commands.
+See [hadith collections](docs/hadith.md) for source numbering and collection URLs.
 
 Run the server 
 
@@ -179,6 +158,7 @@ The sources used for data
 - [English Quran](https://github.com/asim/quran-json)
 - [Names of Allah](https://github.com/asim/99-Names-Of-Allah)
 - [Sahih Bukhari](https://github.com/asim/bukhari)
+- [Sahih Muslim JSON](https://github.com/asim/hadith-json)
 - [Word by word](https://github.com/asim/quranwbw)
 
 ## Development
@@ -187,7 +167,7 @@ File an issue to discuss
 
 ## Offline reading
 
-Quran, Bukhari and names are saved for offline reading after the initial download.
+Quran, Bukhari, Muslim and names are saved for offline reading after the initial download.
 Audio, search and AI require a connection. Use `make build` to include the service worker.
 
 ## Model API
