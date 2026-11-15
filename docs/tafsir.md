@@ -47,10 +47,10 @@ includes the tafsir package, so a new corpus refreshes saved chapters.
 
 ## Model and UI
 
-The keyed model API, public Search → Ask, MCP summaries and verse explanations
-share `model.Respond` (public requests use `RespondPublic` to retain the existing
-public evidence/output budgets). The API key requirement on `/api/model/ask`
-is unchanged. Public entry points retain IP/global/concurrency allowances.
+The keyed model API uses `model.Respond`. It remains an internal integration
+capability while its user-facing placement is decided. Search retains its
+**Summarise with AI** checkbox and existing summarisation operation; MCP summaries
+use that same existing generation path. Neither is converted into an Ask feature.
 
 A retrieved Quran verse supplies:
 
@@ -59,13 +59,14 @@ A retrieved Quran verse supplies:
 - The matching Al-Jalalayn tafsir passage, with its author/work,
   source URL and complete shared-verse coverage.
 
-Only the sources that fit the evidence budget receive citation numbers. The UI
-shows the references returned with the answer, in exactly that order. Differences
-between translations are not treated as proof of alternative lexical meanings.
-Dictionary/lemma integration remains separate future work.
+Only the sources that fit the model evidence budget receive citation numbers.
+Exact verse matches are merged with topical search results, then canonicalised
+and deduplicated. This preserves relevant hadith and other evidence in mixed
+questions and conversation follow-ups.
 
-On a verse page, **Explain verse** requests a short grounded answer with expandable
-sources. **Ask about this verse** prefills Search in Ask mode; it does not issue a
-paid model request until submitted. With no model configured, Explain returns the
-stored commentary with its actual source label. Provider and quota errors remain
-visible; they are not silently presented as a generated explanation.
+The existing reader commentary displays Al-Jalalayn directly with attribution.
+There is no new Explain or Ask button. The existing verse explanation endpoint
+returns stored tafsir with `generated: false`, without calling a model.
+
+Differences between translations are not proof of alternative lexical meanings.
+Dictionary/lemma integration remains separate future work.

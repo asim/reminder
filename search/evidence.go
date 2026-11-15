@@ -22,13 +22,11 @@ func ModelReferences(idx Searcher, n *names.Names, q *quran.Quran, b *hadith.Col
 	for _, match := range explicitVerse.FindAllStringSubmatch(query, 8) {
 		refs = append(refs, &Result{Score: 1, Metadata: map[string]string{"source": "quran", "chapter": match[1], "verse": match[2]}})
 	}
-	if len(refs) == 0 {
-		var err error
-		refs, err = References(WithQuran(idx, q), n, query)
-		if err != nil {
-			return nil, err
-		}
+	topical, err := References(WithQuran(idx, q), n, query)
+	if err != nil {
+		return nil, err
 	}
+	refs = append(refs, topical...)
 	return EnrichReferences(refs, n, q, b), nil
 }
 
@@ -41,7 +39,7 @@ func tafsirDocument(c *tafsir.Collection, p *tafsir.Passage, score float32) *Res
 	}}
 }
 
-// VerseReferences is also used by the reading page without a search/index call.
+// VerseReferences returns attributed evidence for an exact verse.
 func VerseReferences(q *quran.Quran, chapter, number int, score float32) []*Result {
 	if q == nil || chapter < 1 || chapter > len(q.Chapters) || number < 1 {
 		return nil

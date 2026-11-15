@@ -503,7 +503,22 @@ func main() {
 		registerLiteRoutes(q, n, b, a, reminders)
 	}
 
-	http.Handle("POST /api/quran/{chapter}/{verse}/explain", api.VerseExplainHandler(q))
+	http.HandleFunc("POST /api/quran/{chapter}/{verse}/explain", func(w http.ResponseWriter, r *http.Request) {
+		chapter, _ := strconv.Atoi(r.PathValue("chapter"))
+		number, _ := strconv.Atoi(r.PathValue("verse"))
+		if chapter < 1 || chapter > len(q.Chapters) {
+			http.Error(w, "Chapter not found", http.StatusNotFound)
+			return
+		}
+		verse := q.Get(chapter).Verse(number)
+		if verse == nil {
+			http.Error(w, "Verse not found", http.StatusNotFound)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		// Compatibility endpoint: return the stored tafsir without model generation.
+		json.NewEncoder(w).Encode(map[string]interface{}{"text": verse.Comments, "generated": false, "reference": fmt.Sprintf("%d:%d", chapter, number), "source": verse.CommentarySource})
+	})
 
 	http.HandleFunc("/api/quran", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(qjson))
@@ -783,23 +798,19 @@ func main() {
 				}
 			}
 
-			if err := (model.Request{Prompt: question}).Validate(); err != nil {
-				http.Error(w, err.Error(), 400)
+			res, err := search.References(lookup, n, question)
+			if err != nil {
+				http.Error(w, err.Error(), 500)
 				return
 			}
 
+			res = search.CurrentTafsirResults(res, q)
+
 			if !summarise {
-				res, err := search.References(lookup, n, question)
-				if err != nil {
-					http.Error(w, err.Error(), 500)
-					return
-				}
-				res = search.CurrentTafsirResults(res, q)
 				json.NewEncoder(w).Encode(map[string]interface{}{"q": question, "answer": "", "references": res})
 				return
 			}
-
-			result, err := model.RespondPublic(r.Context(), model.Request{Prompt: question}, func(query string) ([]*model.Reference, error) { return search.ModelReferences(lookup, n, q, b, query) })
+			answer, err := search.Summarise(r.Context(), res, question)
 			if err != nil {
 				status, message := http.StatusServiceUnavailable, "AI summary unavailable. Please try again later."
 				var limit *model.LimitError
@@ -813,8 +824,7 @@ func main() {
 				return
 			}
 
-			answerMD := string(app.Render([]byte(result.Answer)))
-			res := result.References
+			answerMD := string(app.Render([]byte(answer)))
 
 			output, _ := json.Marshal(map[string]interface{}{
 				"q":          question,

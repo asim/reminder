@@ -86,7 +86,7 @@ func TestAttributedTranslationsAndTafsir(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	refs, err := ModelReferences(evidenceIndex{err: errors.New("must not query index")}, names.Load(), q, nil, "Compare Quran 1:1 and 1:2")
+	refs, err := ModelReferences(evidenceIndex{}, names.Load(), q, nil, "Compare Quran 1:1 and 1:2")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,5 +114,34 @@ func TestAttributedTranslationsAndTafsir(t *testing.T) {
 	q.Tafsir.Edition.Verified = false
 	if got := VerseReferences(q, 1, 1, 1); len(got) != 3 {
 		t.Fatal("unverified tafsir included as model evidence")
+	}
+}
+
+func TestExplicitVerseKeepsTopicalEvidence(t *testing.T) {
+	q, b, n := quran.Load(), hadith.Load(), names.Load()
+	idx := evidenceIndex{results: []*Result{
+		{Metadata: map[string]string{"source": "quran", "chapter": "2", "verse": "183"}},
+		{Metadata: map[string]string{"source": "bukhari", "book_num": "1", "number": "1"}},
+	}}
+	for _, query := range []string{"Compare Quran 2:183 with Bukhari", "Earlier: Quran 2:183. What does Bukhari teach?"} {
+		refs, err := ModelReferences(idx, n, q, b, query)
+		if err != nil {
+			t.Fatal(err)
+		}
+		verses, hadiths := 0, 0
+		for _, ref := range refs {
+			if ref.Metadata["source"] == "quran" {
+				verses++
+			}
+			if ref.Metadata["source"] == "bukhari" {
+				hadiths++
+			}
+		}
+		if verses != 1 || hadiths != 1 {
+			t.Fatalf("lost or duplicated evidence: verses=%d hadiths=%d", verses, hadiths)
+		}
+	}
+	if _, err := ModelReferences(evidenceIndex{err: errors.New("unavailable")}, n, q, b, "Quran 2:183 and hadith"); err == nil {
+		t.Fatal("ignored topical retrieval failure")
 	}
 }

@@ -68,14 +68,6 @@ Sources (JSON records):
 
 var citationPattern = regexp.MustCompile(`\[(\d+)\]`)
 
-type publicGroundedKey struct{}
-
-// RespondPublic shares the grounded answer path while retaining public search
-// evidence/output budgets and the caller's anonymous quota context.
-func RespondPublic(ctx context.Context, request Request, retrieve func(string) ([]*Reference, error)) (*Result, error) {
-	return Respond(context.WithValue(ctx, publicGroundedKey{}, true), request, retrieve)
-}
-
 // Respond is the reusable grounded model operation. The caller supplies trusted
 // corpus retrieval; users cannot supply source records or a system prompt.
 func Respond(ctx context.Context, request Request, retrieve func(string) ([]*Reference, error)) (result *Result, err error) {
@@ -105,10 +97,6 @@ func Respond(ctx context.Context, request Request, retrieve func(string) ([]*Ref
 	}
 	result = &Result{References: make([]*Reference, 0)}
 	var evidence strings.Builder
-	evidenceLimit := contentLimits.Evidence
-	if public, _ := ctx.Value(publicGroundedKey{}).(bool); public && contentLimits.SearchEvidence < evidenceLimit {
-		evidenceLimit = contentLimits.SearchEvidence
-	}
 	for _, ref := range refs {
 		if ref == nil {
 			continue
@@ -124,7 +112,7 @@ func Respond(ctx context.Context, request Request, retrieve func(string) ([]*Ref
 			return nil, err
 		}
 		record := fmt.Sprintf("[%d] %s\n", len(result.References)+1, data)
-		if evidence.Len()+len(record) > evidenceLimit {
+		if evidence.Len()+len(record) > contentLimits.Evidence {
 			continue
 		}
 		evidence.WriteString(record)

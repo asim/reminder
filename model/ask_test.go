@@ -50,7 +50,7 @@ func TestGroundedHistoryAndEvidence(t *testing.T) {
 	if strings.Contains(system, "UNTRUSTED") || strings.Contains(system, "EXCLUDED") || !strings.Contains(system, "[1]") {
 		t.Fatal("evidence leaked or missing")
 	}
-	public, err := RespondPublic(context.Background(), Request{Prompt: "Explain the wording"}, func(string) ([]*Reference, error) {
+	public, err := Respond(context.Background(), Request{Prompt: "Explain the wording"}, func(string) ([]*Reference, error) {
 		return []*Reference{
 			{Text: "Published translation", Metadata: map[string]string{"source": "quran_translation", "translator": "Test translator"}},
 			{Text: "Scholarly explanation", Metadata: map[string]string{"source": "tafsir", "title": "Test commentary"}},
@@ -59,8 +59,8 @@ func TestGroundedHistoryAndEvidence(t *testing.T) {
 	if err != nil || len(public.References) != 2 {
 		t.Fatalf("missing attributed evidence: %+v %v", public, err)
 	}
-	if received.MaxCompletionTokens != budget.output {
-		t.Fatalf("public output budget changed: %d", received.MaxCompletionTokens)
+	if received.MaxCompletionTokens != contentLimits.Output {
+		t.Fatalf("model output budget changed: %d", received.MaxCompletionTokens)
 	}
 	reply = "Unsupported citation [99]."
 	if _, err := Respond(context.Background(), Request{Prompt: "Explain patience"}, func(string) ([]*Reference, error) {

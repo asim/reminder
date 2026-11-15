@@ -185,11 +185,10 @@ func NewMCP(q *quran.Quran, n *names.Names, b *hadith.Collection, reminders *dai
 				return "", fmt.Errorf("summarise must be true or false")
 			}
 			if enabled {
-				result, err := model.RespondPublic(ctx, model.Request{Prompt: question}, func(query string) ([]*model.Reference, error) { return search.ModelReferences(idx, n, q, b, query) })
+				answer, err = model.AskSafe(ctx, search.Context(res), question)
 				if err != nil {
 					return "", err
 				}
-				answer, res = result.Answer, result.References
 			}
 		}
 

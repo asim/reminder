@@ -58,9 +58,10 @@ unverified editions are excluded. See [tafsir.md](tafsir.md). The model is
 instructed to distinguish sources from interpretation and acknowledge missing
 evidence. This is retrieval-grounded generation, not a trained religious model
 or a guarantee of correct interpretation. The reusable operation is `model.Respond`;
-Search → Ask, MCP summaries and the verse page’s Explain action use the same
-operation through `model.RespondPublic`, retaining public usage limits. No API
-key is embedded in the browser; the keyed API remains separately authenticated.
+it remains an internal integration capability exposed through the existing keyed
+API, without a new Ask UI. Search and MCP retain their existing summarisation
+path. Exact verse references supplement topical retrieval rather than replacing
+it, including when earlier conversation turns contain verse references.
 
 ## Limits and operation
 
