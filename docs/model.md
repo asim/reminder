@@ -51,7 +51,7 @@ For follow-ups, supply earlier turns in chronological order:
 ```
 
 The server does not store conversations. History helps interpret the prompt;
-it is not evidence. Each call retrieves sources from the Quran, Bukhari and
+it is not evidence. Each call retrieves sources from the Quran, Bukhari, Muslim and
 Names material. Quran evidence includes three attributed translations and matching
 English Al-Jalalayn tafsir passages from QUL. Unrelated index records and
 unverified editions are excluded. See [tafsir.md](tafsir.md). The model is
@@ -100,3 +100,12 @@ allowances or busy generation 429; unavailable indexing/model/storage 503.
 Errors use `{"message":"..."}`. Use HTTPS and keep keys in a server-side client,
 not embedded in a public website or app bundle. Configure the existing model
 provider on the server as usual; keys grant access but do not supply inference.
+
+## Hadith collections
+
+Both collections are available through the complete SQLite index, independent of
+provider keys. `SEARCH_SEMANTIC=true` enables optional additional vector matches;
+a missing Muslim embedding never excludes Muslim from retrieval. Model evidence
+resolves each result by collection, book and record number against the bundled
+corpus, including Muslim's Introduction (book 0). Muslim references identify the
+source dataset numbering rather than claiming standard Sunnah.com references.

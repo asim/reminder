@@ -201,3 +201,37 @@ func TestMCPContentTools(t *testing.T) {
 		})
 	}
 }
+
+func TestMuslimRoutesAndSearch(t *testing.T) {
+	code, _, data := request(t, "GET", "/api/hadith/muslim/0", nil)
+	var book struct {
+		Name    string
+		Hadiths []json.RawMessage
+	}
+	if err := json.Unmarshal(data, &book); err != nil {
+		t.Fatal(err)
+	}
+	if code != 200 || book.Name != "Introduction" || len(book.Hadiths) != 91 {
+		t.Fatalf("Muslim introduction: %d %+v", code, book)
+	}
+	code, _, _ = request(t, "GET", "/api/hadith/muslim/999", nil)
+	if code != 404 {
+		t.Fatalf("invalid Muslim book %d", code)
+	}
+	code, _, data = request(t, "POST", "/api/search", []byte(`{"q":"muslim: decree","summarise":false}`))
+	var results struct {
+		References []struct{ Metadata map[string]string }
+	}
+	if err := json.Unmarshal(data, &results); err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, r := range results.References {
+		if r.Metadata["source"] == "muslim" {
+			found = true
+		}
+	}
+	if code != 200 || !found {
+		t.Fatalf("Muslim missing from search: %d %s", code, data)
+	}
+}

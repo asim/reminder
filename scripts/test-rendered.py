@@ -26,8 +26,9 @@ for route in paths:
     elif parts[0] == 'names' and len(parts) == 2:
         name = json.loads((root / f'.generated/name-{parts[1]}.json').read_text())
         assert normal(name['summary']) in text, f'{route}: missing name summary'
-    elif parts[0] == 'hadith' and len(parts) == 2:
-        book = json.loads((root / f'.generated/hadith-{parts[1]}.json').read_text())
+    elif parts[0] == 'hadith' and (len(parts) == 3 or (len(parts) == 2 and parts[1] != 'muslim')):
+        prefix, number = ('muslim', parts[2]) if len(parts) == 3 else ('hadith', parts[1])
+        book = json.loads((root / f'.generated/{prefix}-{number}.json').read_text())
         assert normal(book['hadiths'][0]['english']) in text, f'{route}: missing hadith'
 print(f'Validated content, titles and canonical URLs for {len(paths)} HTML pages without JavaScript.')
 

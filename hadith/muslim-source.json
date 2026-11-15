@@ -1,0 +1,9 @@
+{
+  "repository": "https://github.com/asim/hadith-json",
+  "path": "db/by_book/the_9_books/muslim.json",
+  "git_blob": "7941fc29ab2eb780406d4d9142da623f89466a5d",
+  "sha256": "12e3cbe8e2c83acc787b3e1e644877eff0feab11f1b32493386c60703d9076ae",
+  "records": 7459,
+  "numbering": "number preserves dataset idInBook; source_id preserves dataset id. Neither is asserted to be Sunnah.com numbering.",
+  "chapter_zero": "91 Introduction records retained as source chapter 0."
+}

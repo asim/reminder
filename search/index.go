@@ -9,6 +9,7 @@ import (
 	"os/user"
 	"path/filepath"
 	"runtime"
+	"time"
 
 	"github.com/asim/reminder/model"
 	"github.com/google/uuid"
@@ -154,7 +155,9 @@ func (i *Index) Store(md map[string]string, content ...string) error {
 }
 
 func (i *Index) Query(v string) ([]*Result, error) {
-	res, err := i.Col.Query(context.TODO(), v, 25, nil, nil)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	res, err := i.Col.Query(ctx, v, 25, nil, nil)
 	if err != nil {
 		return nil, err
 	}

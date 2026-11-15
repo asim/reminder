@@ -1,7 +1,7 @@
 import type { SearchResponseType } from '~/queries/search';
 
 const SEARCH_CACHE_KEY = 'reminder_search_cache';
-const NAMES_REVISION = '2026-11-14-grounded-translations-tafsir';
+const NAMES_REVISION = '2026-11-15-muslim-sqlite';
 
 export type CachedSearch = {
     query: string;
@@ -27,15 +27,8 @@ export function getSearchCache(): SearchCache {
         }
         const cache: SearchCache = JSON.parse(cached);
         if (cache.namesRevision !== NAMES_REVISION) {
-            // Old generated answers can contain superseded names text too.
-            // Keep unrelated search history, but require a fresh names result.
-            cache.searches = cache.searches.filter(search =>
-                !search.result.references.some(reference =>
-                    Object.entries(reference.metadata).some(([key, value]) =>
-                        key.toLowerCase() === 'source' && ['names', 'quran', 'quran_translation', 'tafsir'].includes(value)
-                    )
-                )
-            );
+            // New collections change the evidence available to every search.
+            cache.searches = [];
             cache.namesRevision = NAMES_REVISION;
             localStorage.setItem(SEARCH_CACHE_KEY, JSON.stringify(cache));
         }

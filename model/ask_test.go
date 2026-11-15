@@ -54,9 +54,10 @@ func TestGroundedHistoryAndEvidence(t *testing.T) {
 		return []*Reference{
 			{Text: "Published translation", Metadata: map[string]string{"source": "quran_translation", "translator": "Test translator"}},
 			{Text: "Scholarly explanation", Metadata: map[string]string{"source": "tafsir", "title": "Test commentary"}},
+			{Text: "Muslim narration", Metadata: map[string]string{"source": "muslim", "collection_name": "Sahih Muslim", "numbering": "dataset idInBook"}},
 		}, nil
 	})
-	if err != nil || len(public.References) != 2 {
+	if err != nil || len(public.References) != 3 {
 		t.Fatalf("missing attributed evidence: %+v %v", public, err)
 	}
 	if received.MaxCompletionTokens != contentLimits.Output {

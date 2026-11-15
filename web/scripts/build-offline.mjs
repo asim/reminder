@@ -23,7 +23,7 @@ for (const path of assets) shellHash.update(path).update(await readFile(new URL(
 const textHash = createHash('sha256');
 for (const dir of ['quran/', 'hadith/', 'names/', 'tafsir/']) {
   for (const path of await files(new URL(dir, source))) {
-    if (path.endsWith('.json') || path.endsWith('.go')) textHash.update(dir + path).update(await readFile(new URL(dir + path, source)));
+    if (path.endsWith('.json') || path.endsWith('.json.gz') || path.endsWith('.go')) textHash.update(dir + path).update(await readFile(new URL(dir + path, source)));
   }
 }
 const worker = await readFile(new URL('../public/reminder.js', import.meta.url), 'utf8');

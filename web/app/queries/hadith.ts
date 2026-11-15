@@ -1,3 +1,4 @@
+import { hadithPath, type HadithCollection } from '~/utils/hadith-collection';
 import { httpGet } from '~/utils/http';
 
 type BookType = {
@@ -8,10 +9,10 @@ type BookType = {
 
 type ListBooksResponseType = BookType[];
 
-export const listBooksOptions = () => ({
-  queryKey: ['list-hadith-books'],
+export const listBooksOptions = (collection: HadithCollection = 'bukhari') => ({
+  queryKey: ['list-hadith-books', collection],
   queryFn: async () => {
-    const data = await httpGet<ListBooksResponseType>('/api/hadith/books');
+    const data = await httpGet<ListBooksResponseType>(`/api${hadithPath(collection)}/books`);
     return data;
   },
 });
@@ -35,10 +36,10 @@ type BookResponseType = {
   hadith_count: number;
 };
 
-export const getBookOptions = (bookNumber: number) => ({
-  queryKey: ['get-hadith-book', bookNumber],
+export const getBookOptions = (bookNumber: number, collection: HadithCollection = 'bukhari') => ({
+  queryKey: ['get-hadith-book', collection, bookNumber],
   queryFn: async () => {
-    const data = await httpGet<BookResponseType>(`/api/hadith/${bookNumber}`);
+    const data = await httpGet<BookResponseType>(`/api${hadithPath(collection)}/${bookNumber}`);
     return data;
   },
 });

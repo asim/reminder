@@ -59,11 +59,13 @@ export default function BookmarksPage() {
       for (const [key, bookmark] of Object.entries(bookmarks.hadith)) {
         if (bookmark.excerpt) continue;
 
-        const [book, hadithNum] = key.split(':').map(Number);
-        if (!book || !hadithNum) continue;
+        const parts = key.split(':');
+        const muslim = parts[0] === 'muslim';
+        const [book, hadithNum] = (muslim ? parts.slice(1) : parts).map(Number);
+        if (!Number.isInteger(book) || book < (muslim ? 0 : 1) || !hadithNum) continue;
 
         try {
-          const data = await httpGet<{ hadiths: { number: number; text: string }[] }>(`/api/hadith/${book}`);
+          const data = await httpGet<{ hadiths: { number: number; text: string }[] }>(`/api/hadith${muslim ? '/muslim' : ''}/${book}`);
           const hadith = data.hadiths.find(h => h.number === hadithNum);
           if (hadith) {
             const excerpt = hadith.text.length > 80 ? hadith.text.slice(0, 80) + '...' : hadith.text;

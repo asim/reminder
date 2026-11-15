@@ -104,29 +104,45 @@ func NewMCP(q *quran.Quran, n *names.Names, b *hadith.Collection, reminders *dai
 		return string(cc.Verse(verse).JSON()), nil
 	})
 
-	mcpServer.AddTool("get_hadith_books", "Get a list of all hadith books in Sahih Bukhari", InputSchema{
-		Type: "object",
+	collectionFor := func(args map[string]interface{}) (*hadith.Collection, error) {
+		id, _ := args["collection"].(string)
+		if value, present := args["collection"]; present {
+			if _, ok := value.(string); !ok {
+				return nil, fmt.Errorf("collection must be a string")
+			}
+		}
+		c := hadith.Select(id, b)
+		if c == nil {
+			return nil, fmt.Errorf("collection must be bukhari or muslim")
+		}
+		return c, nil
+	}
+	mcpServer.AddTool("get_hadith_books", "List books in Bukhari or Muslim", InputSchema{
+		Type: "object", Properties: map[string]Property{"collection": {Type: "string", Description: "bukhari (default) or muslim"}},
 	}, func(args map[string]interface{}) (string, error) {
-		bks, _ := json.Marshal(b.Index().Books)
-		return string(bks), nil
+		c, err := collectionFor(args)
+		if err != nil {
+			return "", err
+		}
+		data, _ := json.Marshal(c.Index().Books)
+		return string(data), nil
 	})
-
-	mcpServer.AddTool("get_hadith_book", "Get a specific book from Sahih Bukhari with all its hadiths", InputSchema{
-		Type: "object",
-		Properties: map[string]Property{
-			"book": {Type: "number", Description: "Book number"},
-		},
-		Required: []string{"book"},
+	mcpServer.AddTool("get_hadith_book", "Read a book from Bukhari or Muslim", InputSchema{
+		Type: "object", Properties: map[string]Property{"collection": {Type: "string", Description: "bukhari (default) or muslim"}, "book": {Type: "number", Description: "Book number; Muslim introduction is 0"}}, Required: []string{"book"},
 	}, func(args map[string]interface{}) (string, error) {
-		bkNum, ok := args["book"].(float64)
-		if !ok {
-			return "", fmt.Errorf("book is required")
+		c, err := collectionFor(args)
+		if err != nil {
+			return "", err
 		}
-		book := int(bkNum)
-		if book < 1 || book > len(b.Books) {
-			return "", fmt.Errorf("book out of range")
+		number, ok := args["book"].(float64)
+		if !ok || number != float64(int(number)) {
+			return "", fmt.Errorf("book must be an integer")
 		}
-		return string(b.Get(book).JSON()), nil
+		book := c.Get(int(number))
+		if book == nil {
+			return "", fmt.Errorf("book not found")
+		}
+		return string(book.JSON()), nil
 	})
 
 	mcpServer.AddTool("get_names", "Get all 99 Names of Allah", InputSchema{
@@ -173,23 +189,32 @@ func NewMCP(q *quran.Quran, n *names.Names, b *hadith.Collection, reminders *dai
 			return "", fmt.Errorf("q is required")
 		}
 
-		res, err := search.References(idx, n, question)
-		if err != nil {
-			return "", err
-		}
-		res = search.CurrentTafsirResults(res, q)
-		answer := ""
+		summarise := false
 		if value, present := args["summarise"]; present {
-			enabled, ok := value.(bool)
+			var ok bool
+			summarise, ok = value.(bool)
 			if !ok {
 				return "", fmt.Errorf("summarise must be true or false")
 			}
-			if enabled {
-				answer, err = model.AskSafe(ctx, search.Context(res), question)
-				if err != nil {
-					return "", err
-				}
+		}
+		var res []*model.Reference
+		answer := ""
+		if summarise {
+			result, err := model.Respond(ctx, model.Request{Prompt: question}, func(query string) ([]*model.Reference, error) {
+				return search.ModelReferences(idx, n, q, b, query)
+			})
+			if err != nil {
+				return "", err
 			}
+			answer, res = result.Answer, result.References
+		} else {
+			var err error
+			res, err = search.References(search.WithQuran(idx, q), n, question)
+			if err != nil {
+				return "", err
+			}
+			res = search.CurrentTafsirResults(res, q)
+			res = search.CurrentHadithResults(res, b)
 		}
 
 		output, _ := json.Marshal(map[string]interface{}{

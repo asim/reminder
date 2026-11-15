@@ -1,10 +1,11 @@
+import { collectionFromPath, collectionTitle, hadithPath } from '~/utils/hadith-collection';
 import { readingMeta } from '~/utils/reading-meta';
 import { readingLoader } from '~/utils/prerender.server';
 import type { Route } from '.react-router/types/app/routes/+types/_app.hadith.$book';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router';
+import { useLocation, useParams } from 'react-router';
 import { BookmarkButton } from '~/components/interface/bookmark-button';
 import { ReadingBookmarkButton } from '~/components/interface/reading-bookmark-button';
 import { ShareButton } from '~/components/interface/share-button';
@@ -23,22 +24,26 @@ export async function clientLoader(props: Route.LoaderArgs) {
   const bookNumber = parseInt(props.params.book);
   if (isNaN(bookNumber)) return;
 
-  const options = getBookOptions(bookNumber);
+  const options = getBookOptions(bookNumber, collectionFromPath(new URL(props.request.url).pathname));
   const data = await queryClient.ensureQueryData(options);
   return { readingQueries: [{ queryKey: options.queryKey, data }] };
 }
 
 export default function HadithBook() {
   const params = useParams();
+  const collection = collectionFromPath(useLocation().pathname);
+  const prefix = hadithPath(collection);
+  const title = collectionTitle(collection);
+  const recordLabel = collection === 'muslim' ? 'Record' : 'Hadith';
   const bookNumber = parseInt(params.book || '');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data: book } = useSuspenseQuery(getBookOptions(bookNumber));
+  const { data: book } = useSuspenseQuery(getBookOptions(bookNumber, collection));
 
   // Reset filter when book changes
   useEffect(() => {
     setSearchQuery('');
-  }, [bookNumber]);
+  }, [bookNumber, collection]);
 
   // Scroll to hash if present
   useEffect(() => {
@@ -91,8 +96,8 @@ export default function HadithBook() {
     <div className='max-w-4xl mx-auto w-full mb-8 sm:mb-12 flex-grow p-0 lg:p-8'>
       <div className='flex justify-end mt-0 sm:mt-6 md:mt-8'>
         <ShareButton
-          title={`${book.name} - Sahih Bukhari`}
-          url={`/hadith/${bookNumber}`}
+          title={`${book.name} - ${title}`}
+          url={`${prefix}/${bookNumber}`}
         />
       </div>
       <div className='text-center mb-4 sm:mb-8 md:mb-12'>
@@ -100,10 +105,11 @@ export default function HadithBook() {
           {book.name}
         </h1>
         <div className='text-base sm:text-lg md:text-xl text-gray-600'>
-          Total Ahadith — {book.hadith_count}
+          {title} · {book.hadith_count} narrations
         </div>
       </div>
 
+      {collection === 'muslim' && <p className='mb-4 text-xs text-gray-500'>Source: <a className='underline' href='https://github.com/asim/hadith-json'>hadith-json</a>. Record numbers follow this dataset.</p>}
       {/* Search filter */}
       <div className='flex mb-4 sm:mb-6 justify-start w-full'>
         <div className='relative w-full'>
@@ -134,41 +140,15 @@ export default function HadithBook() {
           const narrator = hadith.narrator || hadith.by || '';
           const englishText = hadith.english || hadith.text || '';
           const arabicText = hadith.arabic || '';
+          const excerptText = englishText || arabicText;
 
           return (
             <div
-              key={`${bookNumber}-${hadithNumber}`}
+              key={`${collection}-${bookNumber}-${hadithNumber}`}
               id={String(hadithNumber)}
-              className='p-3 sm:p-4 md:p-6 border border-gray-200 rounded-lg space-y-2 sm:space-y-4 hover:border-gray-300 transition-colors'
+              className='border-b border-gray-100 pb-3 sm:pb-8 space-y-2 sm:space-y-4 scroll-mt-4'
             >
-              <div className='flex gap-2 lg:mb-0 mb-4 lg:gap-0 lg:flex-row flex-col justify-start lg:justify-between items-start lg:items-center'>
-                <span className='text-sm sm:text-base font-medium text-gray-700'>
-                  Hadith {hadithNumber}
-                </span>
-                <div className='flex items-center gap-2'>
-                  <span className='text-sm text-balance sm:text-base font-medium text-gray-700'>
-                    {narrator}
-                  </span>
-                  <ReadingBookmarkButton
-                    type='hadith'
-                    label={`${book.name} - Hadith ${hadithNumber}`}
-                    url={`/hadith/${bookNumber}#${hadithNumber}`}
-                    excerpt={englishText.length > 80 ? englishText.slice(0, 80) + '...' : englishText}
-                  />
-                  <BookmarkButton
-                    type='hadith'
-                    itemKey={`${bookNumber}:${hadithNumber}`}
-                    label={`${book.name} - Hadith ${hadithNumber}`}
-                    url={`/hadith/${bookNumber}#${hadithNumber}`}
-                    excerpt={englishText.length > 80 ? englishText.slice(0, 80) + '...' : englishText}
-                  />
-                  <ShareButton
-                    title={`${book.name} - Hadith ${hadithNumber}`}
-                    text={englishText}
-                    url={`/hadith/${bookNumber}#${hadithNumber}`}
-                  />
-                </div>
-              </div>
+              {narrator && <p className='text-sm text-gray-500'>{narrator}</p>}
 
               {/* Arabic text */}
               {arabicText && (
@@ -185,8 +165,31 @@ export default function HadithBook() {
 
               {/* English translation */}
               <p className='text-gray-800 text-base sm:text-lg leading-relaxed'>
-                {englishText}
+                {englishText || 'English translation is unavailable in this source.'}
               </p>
+              <div className='flex items-center justify-between mt-2 gap-2'>
+                <a className='text-xs sm:text-sm text-gray-500' href={`${prefix}/${bookNumber}#${hadithNumber}`}>{recordLabel} {hadithNumber}</a>
+                <div className='flex items-center gap-1'>
+                  <ReadingBookmarkButton
+                    type='hadith'
+                    label={`${title} · ${book.name} - ${recordLabel} ${hadithNumber}`}
+                    url={`${prefix}/${bookNumber}#${hadithNumber}`}
+                    excerpt={excerptText.slice(0, 80)}
+                  />
+                  <BookmarkButton
+                    type='hadith'
+                    itemKey={collection === 'bukhari' ? `${bookNumber}:${hadithNumber}` : `muslim:${bookNumber}:${hadithNumber}`}
+                    label={`${title} · ${book.name} - ${recordLabel} ${hadithNumber}`}
+                    url={`${prefix}/${bookNumber}#${hadithNumber}`}
+                    excerpt={excerptText.slice(0, 80)}
+                  />
+                  <ShareButton
+                    title={`${title} · ${book.name} - ${recordLabel} ${hadithNumber}`}
+                    text={englishText}
+                    url={`${prefix}/${bookNumber}#${hadithNumber}`}
+                  />
+                </div>
+              </div>
             </div>
           );
         })}
@@ -195,8 +198,9 @@ export default function HadithBook() {
   );
 }
 
-export function loader({ params }: { params: Record<string, string | undefined> }) {
-  return readingLoader('hadith', ['get-hadith-book', Number(params.book)], params.book);
+export function loader({ params, request }: { params: Record<string, string | undefined>; request: Request }) {
+  const collection = collectionFromPath(new URL(request.url).pathname);
+  return readingLoader(collection === 'muslim' ? 'muslim' : 'hadith', ['get-hadith-book', collection, Number(params.book)], params.book);
 }
 
 export const meta = (args: any) => readingMeta('hadith', args);

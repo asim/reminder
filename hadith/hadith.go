@@ -1,18 +1,23 @@
 package hadith
 
 import (
+	"bytes"
+	"compress/gzip"
 	"embed"
 	"encoding/json"
 	"fmt"
+	"io"
+	"sync"
 )
 
-//go:embed data/*.json
+//go:embed data/*.json data/*.json.gz
 var files embed.FS
 
 var Description = `A collection of the Prophet Muhammad's sayings and actions, providing essential context and practical guidance for Islamic practice and belief alongside the Quran.`
 
 // Collection represents a hadith collection like Bukhari or Muslim
 type Collection struct {
+	ID     string  `json:"id"`
 	Name   string  `json:"name"`
 	Arabic string  `json:"arabic"`
 	Books  []*Book `json:"books"`
@@ -26,6 +31,7 @@ type Book struct {
 }
 
 type Hadith struct {
+	SourceID int    `json:"source_id,omitempty"`
 	Number   int    `json:"number"`
 	Narrator string `json:"narrator"`
 	English  string `json:"english"`
@@ -55,14 +61,17 @@ func (c *Collection) TOC() string {
 }
 
 func (c *Collection) Get(book int) *Book {
-	if book < 1 || book > len(c.Books) {
-		return nil
+	for _, candidate := range c.Books {
+		if candidate.Number == book {
+			return candidate
+		}
 	}
-	return c.Books[book-1]
+	return nil
 }
 
 func (c *Collection) Index() *Collection {
 	cc := &Collection{
+		ID:     c.ID,
 		Name:   c.Name,
 		Arabic: c.Arabic,
 	}
@@ -84,7 +93,7 @@ func (c *Collection) JSON() []byte {
 }
 
 func Load() *Collection {
-	collection := &Collection{}
+	collection := &Collection{ID: "bukhari"}
 
 	f, err := files.ReadFile("data/bukhari.json")
 	if err != nil {
@@ -159,4 +168,49 @@ func (b *Book) HTML() string {
 	}
 
 	return data
+}
+
+var muslimOnce sync.Once
+var muslimCorpus *Collection
+
+func Muslim() *Collection {
+	muslimOnce.Do(func() {
+		data, err := files.ReadFile("data/muslim.json.gz")
+		if err != nil {
+			panic(err)
+		}
+		reader, err := gzip.NewReader(bytes.NewReader(data))
+		if err != nil {
+			panic(err)
+		}
+		data, err = io.ReadAll(reader)
+		reader.Close()
+		if err != nil {
+			panic(err)
+		}
+		muslimCorpus = &Collection{}
+		if err := json.Unmarshal(data, muslimCorpus); err != nil {
+			panic(err)
+		}
+		for _, book := range muslimCorpus.Books {
+			book.HadithCount = len(book.Hadiths)
+			for _, h := range book.Hadiths {
+				h.Info = fmt.Sprintf("Record %d", h.Number)
+				h.By = h.Narrator
+				h.Text = h.English
+			}
+		}
+	})
+	return muslimCorpus
+}
+
+func Select(id string, bukhari *Collection) *Collection {
+	switch id {
+	case "", "bukhari":
+		return bukhari
+	case "muslim":
+		return Muslim()
+	default:
+		return nil
+	}
 }
