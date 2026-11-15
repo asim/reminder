@@ -26,9 +26,13 @@ type Reference struct {
 	Metadata map[string]string `json:"metadata"`
 }
 
+type completionKey struct{}
+
 type Result struct {
-	Answer     string       `json:"answer"`
-	References []*Reference `json:"references"`
+	Complete   bool           `json:"-"`
+	Coverage   map[string]int `json:"coverage,omitempty"`
+	Answer     string         `json:"answer"`
+	References []*Reference   `json:"references"`
 }
 
 // Validate bounds caller input before retrieval or a model request.
@@ -127,6 +131,7 @@ func Respond(ctx context.Context, request Request, retrieve func(string) ([]*Ref
 		return nil, fmt.Errorf("no model configured")
 	}
 	messages := append(append([]Message(nil), request.History...), Message{Role: "user", Content: request.Prompt})
+	ctx = context.WithValue(ctx, completionKey{}, &result.Complete)
 	result.Answer = complete(context.WithValue(ctx, groundedKey{}, true), groundedPrompt+evidence.String(), messages)
 	for _, match := range citationPattern.FindAllStringSubmatch(result.Answer, -1) {
 		number, err := strconv.Atoi(match[1])

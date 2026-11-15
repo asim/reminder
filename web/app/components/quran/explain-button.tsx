@@ -47,7 +47,7 @@ export function ExplainButton({ chapter, verse, translation }: { chapter: number
     try {
       const response = await fetch('/api/explain', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal,
-        body: JSON.stringify({ context: { source: 'quran', chapter, verse, translation, selection }, question: prompt,
+        body: JSON.stringify({ context: { source: 'quran', chapter, verse, translation, selection }, question: question.trim(),
           history: turns.slice(-4).flatMap(turn => [{ role: 'user', content: turn.question }, { role: 'assistant', content: turn.answer }]) }),
       });
       const result = await response.json();

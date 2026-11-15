@@ -19,16 +19,20 @@ import (
 
 // ModelHandler exposes grounded prompting independently of search summaries.
 func ModelHandler(keys *KeyStore, idx search.Searcher, corpus *names.Names, q *quran.Quran, b *hadith.Collection, indexed <-chan bool) http.Handler {
-	return modelHandler(keys, idx, corpus, q, b, indexed, false)
+	return modelHandler(keys, idx, corpus, q, b, indexed, false, nil)
 }
 
 // ExplainHandler uses API key allowances when keys is non-nil, and the existing
 // anonymous model limits for reader requests otherwise.
-func ExplainHandler(keys *KeyStore, idx search.Searcher, corpus *names.Names, q *quran.Quran, b *hadith.Collection, indexed <-chan bool) http.Handler {
-	return modelHandler(keys, idx, corpus, q, b, indexed, true)
+func ExplainHandler(keys *KeyStore, idx search.Searcher, corpus *names.Names, q *quran.Quran, b *hadith.Collection, indexed <-chan bool, caches ...*ExplainCache) http.Handler {
+	var cache *ExplainCache
+	if len(caches) > 0 {
+		cache = caches[0]
+	}
+	return modelHandler(keys, idx, corpus, q, b, indexed, true, cache)
 }
 
-func modelHandler(keys *KeyStore, idx search.Searcher, corpus *names.Names, q *quran.Quran, b *hadith.Collection, indexed <-chan bool, explain bool) http.Handler {
+func modelHandler(keys *KeyStore, idx search.Searcher, corpus *names.Names, q *quran.Quran, b *hadith.Collection, indexed <-chan bool, explain bool, cache *ExplainCache) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Cache-Control", "no-store")
@@ -95,6 +99,14 @@ func modelHandler(keys *KeyStore, idx search.Searcher, corpus *names.Names, q *q
 				explanation.Context.Chapter = chapter
 				explanation.Context.Verse = verse
 			}
+			if explanation.Context.Chapter > 0 {
+				if explanation.Context.Source == "" {
+					explanation.Context.Source = "quran"
+				}
+				if explanation.Context.Translation == "" {
+					explanation.Context.Translation = "khattab"
+				}
+			}
 			request, err = explanation.Request()
 			if err != nil {
 				fail(400, err.Error())
@@ -116,57 +128,90 @@ func modelHandler(keys *KeyStore, idx search.Searcher, corpus *names.Names, q *q
 			fail(503, "Indexing content, please try again later")
 			return
 		}
-		if !model.Available() {
-			fail(503, "No model configured")
-			return
-		}
-		if keys != nil {
-			if err := keys.Reserve(id, time.Now()); err != nil {
-				if errors.Is(err, errKeyLimit) {
-					fail(429, err.Error())
-				} else {
-					log.Printf("Model key allowance: %v", err)
-					fail(503, "Model access unavailable")
-				}
-				return
+		generate := func() (*model.Result, error) {
+			if !model.Available() {
+				return nil, &explainHTTPError{503, "No model configured"}
 			}
-		}
-		// Key allowances replace the anonymous per-IP allowance, not the global cap.
-		ctx := r.Context()
-		if keys != nil {
-			ctx = model.WithClient(ctx, "")
-			ctx = model.WithTokenAllowance(ctx, func(units int) error { return keys.ReserveTokens(id, units, time.Now()) })
-		}
-		retrieve := func(query string) ([]*model.Reference, error) {
-			refs, err := search.ModelReferences(idx, corpus, q, b, query)
+			if keys != nil {
+				if err := keys.Reserve(id, time.Now()); err != nil {
+					if errors.Is(err, errKeyLimit) {
+						return nil, &explainHTTPError{429, err.Error()}
+					} else {
+						log.Printf("Model key allowance: %v", err)
+						return nil, &explainHTTPError{503, "Model access unavailable"}
+					}
+				}
+			}
+			// Key allowances replace the anonymous per-IP allowance, not the global cap.
+			ctx := r.Context()
+			if keys != nil {
+				ctx = model.WithClient(ctx, "")
+				ctx = model.WithTokenAllowance(ctx, func(units int) error { return keys.ReserveTokens(id, units, time.Now()) })
+			}
+			retrieve := func(query string) ([]*model.Reference, error) {
+				refs, err := search.ModelReferences(idx, corpus, q, b, query)
+				if err != nil {
+					return nil, err
+				}
+				// Dedupe exact records without merging distinct source annotations.
+				out := make([]*model.Reference, 0, len(passage)+len(refs))
+				seen := map[string]bool{}
+				for _, ref := range append(append([]*model.Reference{}, passage...), refs...) {
+					if ref == nil {
+						continue
+					}
+					identity, _ := json.Marshal(struct {
+						Text     string
+						Metadata map[string]string
+					}{ref.Text, ref.Metadata})
+					if !seen[string(identity)] {
+						seen[string(identity)] = true
+						out = append(out, ref)
+					}
+				}
+				return out, nil
+			}
+			var result *model.Result
+			if explain {
+				result, err = model.Explain(ctx, explanation, retrieve)
+			} else {
+				result, err = model.Respond(ctx, request, retrieve)
+			}
 			if err != nil {
 				return nil, err
 			}
-			// Dedupe exact records without merging distinct source annotations.
-			out := make([]*model.Reference, 0, len(passage)+len(refs))
-			seen := map[string]bool{}
-			for _, ref := range append(append([]*model.Reference{}, passage...), refs...) {
-				if ref == nil {
-					continue
+			if explain && explanation.Context.Chapter > 0 && explanation.Context.Verse == 0 {
+				seen := map[string]bool{}
+				for _, ref := range result.References {
+					md := ref.Metadata
+					if md["chapter"] == strconv.Itoa(explanation.Context.Chapter) && (md["source"] == "quran" || md["source"] == "quran_translation") {
+						seen[md["verse"]] = true
+					}
 				}
-				identity, _ := json.Marshal(struct {
-					Text     string
-					Metadata map[string]string
-				}{ref.Text, ref.Metadata})
-				if !seen[string(identity)] {
-					seen[string(identity)] = true
-					out = append(out, ref)
+				total := 0
+				for _, verse := range q.Get(explanation.Context.Chapter).Verses {
+					if verse.Number > 0 {
+						total++
+					}
 				}
+				result.Coverage = map[string]int{"included_verses": len(seen), "total_verses": total}
 			}
-			return out, nil
+
+			return result, nil
 		}
 		var result *model.Result
 		if explain {
-			result, err = model.Explain(ctx, explanation, retrieve)
+			result, err = cache.result(r.Context(), cache.key(explanation), generate)
 		} else {
-			result, err = model.Respond(ctx, request, retrieve)
+			result, err = generate()
 		}
+
 		if err != nil {
+			var status *explainHTTPError
+			if errors.As(err, &status) {
+				fail(status.code, status.message)
+				return
+			}
 			var limit *model.LimitError
 			if errors.As(err, &limit) {
 				fail(429, limit.Error())
@@ -176,26 +221,14 @@ func modelHandler(keys *KeyStore, idx search.Searcher, corpus *names.Names, q *q
 			}
 			return
 		}
-		if explain && explanation.Context.Chapter > 0 && explanation.Context.Verse == 0 {
-			seen := map[string]bool{}
-			for _, ref := range result.References {
-				md := ref.Metadata
-				if md["chapter"] == strconv.Itoa(explanation.Context.Chapter) && (md["source"] == "quran" || md["source"] == "quran_translation") {
-					seen[md["verse"]] = true
-				}
-			}
-			total := 0
-			for _, verse := range q.Get(explanation.Context.Chapter).Verses {
-				if verse.Number > 0 {
-					total++
-				}
-			}
-			json.NewEncoder(w).Encode(struct {
-				*model.Result
-				Coverage map[string]int `json:"coverage"`
-			}{result, map[string]int{"included_verses": len(seen), "total_verses": total}})
-			return
-		}
+
 		json.NewEncoder(w).Encode(result)
 	})
 }
+
+type explainHTTPError struct {
+	code    int
+	message string
+}
+
+func (e *explainHTTPError) Error() string { return e.message }

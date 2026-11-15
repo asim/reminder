@@ -2,7 +2,9 @@ package model
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -88,4 +90,29 @@ func Explain(ctx context.Context, request ExplainRequest, retrieve func(string) 
 		}
 		return retrieve(query)
 	})
+}
+
+// ExplanationVersion excludes credentials; deployment fingerprints additionally
+// cover prompt implementation and embedded data. Epoch allows operator refresh.
+func ExplanationVersion() string {
+	provider, name, endpoint := "anthropic", "claude-haiku-4-5", ""
+	if os.Getenv("OLLAMA_LLM_MODEL") != "" || (os.Getenv("OPENAI_API_KEY") == "" && os.Getenv("ANTHROPIC_API_KEY") == "") {
+		provider = "ollama"
+		name = os.Getenv("OLLAMA_LLM_MODEL")
+		if name == "" {
+			name = "gemma3:1b"
+		}
+		endpoint = os.Getenv("OLLAMA_BASE_URL")
+		if endpoint == "" {
+			endpoint = "http://localhost:11434/v1"
+		}
+	} else if os.Getenv("OPENAI_API_KEY") != "" {
+		provider = "openai"
+		name = os.Getenv("OPENAI_MODEL")
+		if name == "" {
+			name = "gpt-6-luna"
+		}
+	}
+	data, _ := json.Marshal([]any{provider, name, endpoint, contentLimits, groundedPrompt, os.Getenv("EXPLAIN_CACHE_EPOCH")})
+	return string(data)
 }
