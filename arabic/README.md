@@ -35,14 +35,14 @@ existing retrieval. The reader Explain modal is not introduced by this change.
 
 ## Alignment and provenance
 
-All 6,236 verses are available as source annotations. **5,408** have verified
+All 6,236 verses are available as source annotations. **5,832** have verified
 written-token correspondence with the reader's edition. Verification compares
 every word, not just counts. It ignores vocalization/recitation marks, alif wasla,
 kasra-marked final undotted ya, and the documented hamza-plus-long-alif spelling
 variants. It never alters either source or the reader's Arabic. It does not
 conflate alif maqsura and ya in general, nor normalize dictionary letters.
 
-The remaining **828** are flagged `aligned: false`; source positions must not
+The remaining **404** are flagged `aligned: false`; source positions must not
 be attached to reader word positions. Their morphology is excluded from model
 evidence. Matching source tokens are also not indexes into the existing grouped
 English word-gloss array. That reader attachment remains a separate step.
@@ -54,7 +54,31 @@ GNU GPL with additional attribution/verbatim-copy terms and includes Tanzil text
 with its own notice. Those data notices are retained separately from application
 code. [Original corpus and terms](https://corpus.quran.com/download/).
 
-QUL offers word-root/lemma resources but its pages currently say copyright
-information is unavailable. This implementation uses the explicitly attributed
-Quranic Arabic Corpus source instead. The earlier uploaded dataset has not been
-identified or silently substituted.
+## QUL source comparison
+
+The six user-supplied QUL exports are incorporated under `qul/` as compact JSON
+by chapter, retaining every supplied word/ayah root, lemma and stem value.
+`scripts/import_qul.py` reproduces this from the six ZIPs using Python's standard
+library, checking pinned archive hashes, SQLite integrity, unique locations and
+foreign-key joins. `qul/source.json` records archive and database hashes, row
+counts and output checksums. No new licence is asserted for these exports.
+
+`/api/arabic/quran/{chapter}/{verse}` and the matching MCP tool return a separate
+`qul` object. It contains the original ayah summaries and word-location annotations
+with `corroborated`, `missing`, `conflict`, `unverified` or `position_unverified`
+status per field. These are source comparisons, not claims of scholarly consensus.
+Ayah summaries are never split to fabricate missing positional word annotations.
+
+QUL positions are verified against corpus stems in **5,801 verses**; **5,447**
+also pass the reader-token check. Only that intersection can supply QUL word
+annotations to model evidence. QAC remains separately attributed. Disagreements
+are preserved, including the lemma conflict at 5:41:13; disputed fields do not
+silently drive a lexical lookup. Missing annotations are never filled by a model.
+
+QUL and QAC use different segmentation in some passages, including 2:181.
+Neither source's numeric positions are treated as positions in our grouped
+reader gloss array. That future attachment still needs its own explicit mapping.
+
+The comparison also exposed a missing Buckwalter underscore-to-tatweel conversion
+in our parser. Correcting it improves canonical token alignment without changing
+source bytes or the reader's text.

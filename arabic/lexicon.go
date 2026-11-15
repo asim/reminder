@@ -18,7 +18,7 @@ import (
 	"unicode"
 )
 
-//go:embed dict/lane-xml.zip dict/source.json morphology/qac.txt.gz morphology/source.json
+//go:embed dict/lane-xml.zip dict/source.json morphology/qac.txt.gz morphology/source.json qul/*.json
 var files embed.FS
 
 const LaneURL = "https://github.com/alpheios-project/lan"

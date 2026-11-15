@@ -50,7 +50,7 @@ func TestAlignmentCoverage(t *testing.T) {
 		}
 	}
 	t.Logf("Verified token alignment: %d / 6236 verses; %d source words", aligned, words)
-	if aligned != 5408 {
+	if aligned != 5832 {
 		t.Fatal("unexpected alignment regression")
 	}
 	a, e := Analyze(1, 2, "different text")

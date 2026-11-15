@@ -12,13 +12,16 @@ func TestLexicalEvidence(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	morphology, lexicon := false, false
+	morphology, lexicon, qul := false, false, false
 	seen := map[string]bool{}
 	for _, r := range refs {
 		switch r.Metadata["source"] {
 		case "morphology":
 			morphology = true
-			if !strings.Contains(r.Text, "حمد") {
+			if strings.Contains(r.Metadata["title"], "Quranic Universal Library") {
+				qul = true
+			}
+			if !strings.Contains(strings.ReplaceAll(r.Text, " ", ""), "حمد") {
 				t.Fatal("missing root")
 			}
 		case "lexicon":
@@ -33,7 +36,7 @@ func TestLexicalEvidence(t *testing.T) {
 			}
 		}
 	}
-	if !morphology || !lexicon {
+	if !morphology || !lexicon || !qul {
 		t.Fatalf("missing evidence %v %v", morphology, lexicon)
 	}
 	refs, e = LexicalReferences(q, "patience")

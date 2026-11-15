@@ -78,14 +78,37 @@ func LexicalReferences(q *quran.Quran, query string) ([]*Result, error) {
 		if len(data) <= 14000 {
 			out = append(out, &Result{Text: data, Metadata: map[string]string{"source": "morphology", "title": "Quranic Arabic Corpus 0.4", "chapter": match[1], "verse": match[2], "source_url": arabic.CorpusURL, "alignment": "verified written tokens"}})
 		}
+		if analysis.QUL.PositionsVerified {
+			var details strings.Builder
+			details.WriteString("QUL annotations at corpus-verified positions. Corroborated means source agreement, not independent scholarly validation. Conflicts must be acknowledged, not silently resolved.\n")
+			for _, word := range analysis.Words {
+				item := analysis.QUL.Words[strconv.Itoa(word.Position)]
+				fmt.Fprintf(&details, "Word %d (%s): ", word.Position, word.Arabic)
+				for _, field := range []struct {
+					name  string
+					value arabic.QULField
+				}{{"root", item.Root}, {"lemma", item.Lemma}, {"stem", item.Stem}} {
+					value := "not supplied"
+					if field.value.Value != nil {
+						value = *field.value.Value
+					}
+					fmt.Fprintf(&details, "%s %s [%s]; ", field.name, value, field.value.Status)
+				}
+				details.WriteString("\n")
+			}
+			if details.Len() <= 14000 {
+				out = append(out, &Result{Text: details.String(), Metadata: map[string]string{"source": "morphology", "title": "Quranic Universal Library — source comparison", "chapter": match[1], "verse": match[2], "source_url": analysis.QUL.SourceURL, "alignment": "verified against corpus stems and reader tokens"}})
+			}
+		}
+
 		for _, word := range analysis.Words {
 			for _, s := range word.Segments {
-				if s.Lemma != "" {
+				if s.Lemma != "" && !(analysis.QUL.PositionsVerified && analysis.QUL.Words[strconv.Itoa(word.Position)].Lemma.Status == "conflict") {
 					if e := add(s.Lemma); e != nil {
 						return nil, e
 					}
 				}
-				if s.Root != "" {
+				if s.Root != "" && !(analysis.QUL.PositionsVerified && analysis.QUL.Words[strconv.Itoa(word.Position)].Root.Status == "conflict") {
 					if e := add(s.Root); e != nil {
 						return nil, e
 					}

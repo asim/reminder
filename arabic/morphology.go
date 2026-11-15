@@ -27,13 +27,14 @@ type Word struct {
 	Segments []Segment `json:"segments"`
 }
 type Analysis struct {
-	Reference       string `json:"reference"`
-	Source          string `json:"source"`
-	SourceURL       string `json:"source_url"`
-	CanonicalArabic string `json:"canonical_arabic"`
-	Aligned         bool   `json:"aligned"`
-	AlignmentNote   string `json:"alignment_note,omitempty"`
-	Words           []Word `json:"words"`
+	Reference       string       `json:"reference"`
+	Source          string       `json:"source"`
+	SourceURL       string       `json:"source_url"`
+	CanonicalArabic string       `json:"canonical_arabic"`
+	Aligned         bool         `json:"aligned"`
+	AlignmentNote   string       `json:"alignment_note,omitempty"`
+	Words           []Word       `json:"words"`
+	QUL             *QULAnalysis `json:"qul"`
 }
 
 var corpusOnce sync.Once
@@ -41,7 +42,7 @@ var corpus map[string][]Word
 var corpusErr error
 
 func buckwalter(s string) string {
-	mapping := map[rune]rune{
+	mapping := map[rune]rune{'_': 'ـ',
 		'\'': 'ء', '|': 'آ', '>': 'أ', '&': 'ؤ', '<': 'إ', '}': 'ئ', 'A': 'ا', 'b': 'ب', 'p': 'ة', 't': 'ت', 'v': 'ث', 'j': 'ج', 'H': 'ح', 'x': 'خ', 'd': 'د', '*': 'ذ', 'r': 'ر', 'z': 'ز', 's': 'س', '$': 'ش', 'S': 'ص', 'D': 'ض', 'T': 'ط', 'Z': 'ظ', 'E': 'ع', 'g': 'غ', 'f': 'ف', 'q': 'ق', 'k': 'ك', 'l': 'ل', 'm': 'م', 'n': 'ن', 'h': 'ه', 'w': 'و', 'Y': 'ى', 'y': 'ي', 'F': 'ً', 'N': 'ٌ', 'K': 'ٍ', 'a': 'َ', 'u': 'ُ', 'i': 'ِ', '~': 'ّ', 'o': 'ْ', '`': 'ٰ', '{': 'ٱ', '^': 'ٓ', '#': 'ٔ', ':': 'ۜ', '@': '۟', '"': '۠', '[': 'ۢ', ';': 'ۣ', ',': 'ۥ', '.': 'ۦ', '!': 'ۨ', '-': '۪', '+': '۫', '%': '۬', ']': 'ۭ',
 	}
 	return strings.Map(func(r rune) rune {
@@ -183,5 +184,10 @@ func Analyze(chapter, verse int, canonical string) (*Analysis, error) {
 	if !out.Aligned {
 		out.AlignmentNote = "Source word positions are not verified against this edition's written tokens; do not attach them to reader word positions."
 	}
+	qul, err := compareQUL(chapter, verse, source)
+	if err != nil {
+		return nil, err
+	}
+	out.QUL = qul
 	return out, nil
 }

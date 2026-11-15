@@ -121,4 +121,9 @@ root families, dictionary senses and contextual interpretation; it must not infe
 a verse's meaning from a root alone or invent an unannotated root.
 
 See [Arabic data and API](../arabic/README.md) for lookup endpoints, evidence
-budgets, source terms and the 828 verses whose token alignment remains unverified.
+budgets, source terms and the 404 verses whose token alignment remains unverified.
+
+QUL exports now provide separately attributed comparisons of roots, lemmas and
+stems. The model receives them only when their source positions and the reader
+text both align. It must acknowledge relevant conflicts; a conflicting field
+cannot silently select a dictionary entry. See `arabic/README.md` for coverage.
