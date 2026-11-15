@@ -21,7 +21,7 @@ if (!assets.includes('__spa-fallback.html')) throw new Error('Missing offline SP
 const shellHash = createHash('sha256');
 for (const path of assets) shellHash.update(path).update(await readFile(new URL(path, output)));
 const textHash = createHash('sha256');
-for (const dir of ['quran/', 'hadith/', 'names/']) {
+for (const dir of ['quran/', 'hadith/', 'names/', 'tafsir/']) {
   for (const path of await files(new URL(dir, source))) {
     if (path.endsWith('.json') || path.endsWith('.go')) textHash.update(dir + path).update(await readFile(new URL(dir + path, source)));
   }

@@ -52,11 +52,16 @@ For follow-ups, supply earlier turns in chronological order:
 
 The server does not store conversations. History helps interpret the prompt;
 it is not evidence. Each call retrieves sources from the Quran, Bukhari and
-Names material. Tafsir and unrelated index records are excluded. The model is
+Names material. Quran evidence includes three attributed translations and matching
+English Al-Jalalayn tafsir passages from QUL. Unrelated index records and
+unverified editions are excluded. See [tafsir.md](tafsir.md). The model is
 instructed to distinguish sources from interpretation and acknowledge missing
 evidence. This is retrieval-grounded generation, not a trained religious model
 or a guarantee of correct interpretation. The reusable operation is `model.Respond`;
-existing search summaries continue to use `model.AskSafe`.
+it remains an internal integration capability exposed through the existing keyed
+API, without a new Ask UI. Search and MCP retain their existing summarisation
+path. Exact verse references supplement topical retrieval rather than replacing
+it, including when earlier conversation turns contain verse references.
 
 ## Limits and operation
 

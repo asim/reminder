@@ -177,6 +177,7 @@ func NewMCP(q *quran.Quran, n *names.Names, b *hadith.Collection, reminders *dai
 		if err != nil {
 			return "", err
 		}
+		res = search.CurrentTafsirResults(res, q)
 		answer := ""
 		if value, present := args["summarise"]; present {
 			enabled, ok := value.(bool)

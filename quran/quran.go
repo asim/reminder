@@ -4,6 +4,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"github.com/asim/reminder/tafsir"
 	"strings"
 )
 
@@ -25,15 +26,17 @@ type Chapter struct {
 }
 
 type Verse struct {
-	Chapter      int               `json:"chapter"`
-	Number       int               `json:"number"`
-	Text         string            `json:"text"`
-	Translations map[string]string `json:"translations,omitempty"`
-	Arabic       string            `json:"arabic"`
-	Words        []*Word           `json:"words"`
-	Comments     string            `json:"comments"`
-	AudioArabic  string            `json:"audio_arabic,omitempty"`
-	AudioEnglish string            `json:"audio_english,omitempty"`
+	Chapter          int               `json:"chapter"`
+	Number           int               `json:"number"`
+	Text             string            `json:"text"`
+	Translations     map[string]string `json:"translations,omitempty"`
+	Arabic           string            `json:"arabic"`
+	Words            []*Word           `json:"words"`
+	Comments         string            `json:"comments"`
+	CommentarySource string            `json:"commentary_source,omitempty"`
+	CommentaryURL    string            `json:"commentary_url,omitempty"`
+	AudioArabic      string            `json:"audio_arabic,omitempty"`
+	AudioEnglish     string            `json:"audio_english,omitempty"`
 }
 
 type Word struct {
@@ -49,8 +52,9 @@ type Comment struct {
 }
 
 type Quran struct {
-	Chapters   []*Chapter `json:"chapters"`
-	Commentary []*Comment `json:"commentary"`
+	Tafsir     *tafsir.Collection `json:"-"`
+	Chapters   []*Chapter         `json:"chapters"`
+	Commentary []*Comment         `json:"commentary"`
 }
 
 // GetAudioURL returns the audio URL for a verse
@@ -266,13 +270,7 @@ func Load() *Quran {
 		panic(err)
 	}
 
-	// load tafsir
-	fx, err := files.ReadFile("data/tafsir.json")
-	if err != nil {
-		panic(err.Error())
-	}
-	var tafsir map[string]interface{}
-	json.Unmarshal(fx, &tafsir)
+	q.Tafsir = tafsir.Load()
 
 	// Set local
 	for i := 0; i < 114; i++ {
@@ -351,17 +349,11 @@ func Load() *Quran {
 				})
 			}
 
-			var text string
-			key := fmt.Sprintf("%d:%d", chapter, num)
-			comment, ok := tafsir[key].(map[string]interface{})
-
-			if ok {
-				text = comment["text"].(string)
-			} else {
-				v := tafsir[key].(string)
-				comment = tafsir[v].(map[string]interface{})
-				text = comment["text"].(string)
+			passage := q.Tafsir.Get(chapter, num)
+			if passage == nil {
+				panic(fmt.Sprintf("missing tafsir for %d:%d", chapter, num))
 			}
+			text := passage.Text
 
 			q.Commentary = append(q.Commentary, &Comment{
 				Chapter: chapter,
@@ -370,15 +362,17 @@ func Load() *Quran {
 			})
 
 			verses = append(verses, &Verse{
-				Chapter:      chapter,
-				Number:       num,
-				Text:         ayah.([]interface{})[1].(string),
-				Translations: map[string]string{"asad": asadVerses[i], "sahih": sahihVerses[i]},
-				Arabic:       ar,
-				Words:        alignWords(chapter, num, ar, wbw),
-				Comments:     text,
-				AudioArabic:  GetAudioURL(chapter, num, "arabic"),
-				AudioEnglish: GetAudioURL(chapter, num, "english"),
+				Chapter:          chapter,
+				Number:           num,
+				Text:             ayah.([]interface{})[1].(string),
+				Translations:     map[string]string{"asad": asadVerses[i], "sahih": sahihVerses[i]},
+				Arabic:           ar,
+				Words:            alignWords(chapter, num, ar, wbw),
+				Comments:         text,
+				CommentarySource: q.Tafsir.Edition.Title,
+				CommentaryURL:    q.Tafsir.Edition.SourceURL,
+				AudioArabic:      GetAudioURL(chapter, num, "arabic"),
+				AudioEnglish:     GetAudioURL(chapter, num, "english"),
 			})
 		}
 

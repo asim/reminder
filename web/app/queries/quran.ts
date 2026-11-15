@@ -33,6 +33,8 @@ type VerseType = {
   arabic: string;
   words?: WordByWord[];
   comments?: string;
+  commentary_source?: string;
+  commentary_url?: string;
   audio_arabic?: string;
   audio_english?: string;
 };

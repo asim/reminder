@@ -75,8 +75,8 @@ func TestExplanationUsesRequestedVerseWithoutModel(t *testing.T) {
 		t.Fatalf("status %d", code)
 	}
 	var result struct {
-		Text, Reference string
-		Generated       bool
+		Text, Reference, Source string
+		Generated               bool
 	}
 	if err := json.Unmarshal(data, &result); err != nil {
 		t.Fatal(err)
@@ -86,7 +86,7 @@ func TestExplanationUsesRequestedVerseWithoutModel(t *testing.T) {
 	if err := json.Unmarshal(data, &verse); err != nil {
 		t.Fatal(err)
 	}
-	if result.Generated || result.Reference != "2:255" || result.Text != verse.Comments || result.Text == "" {
+	if result.Source != "Tafsir Al-Jalalayn (English)" || result.Generated || result.Reference != "2:255" || result.Text != verse.Comments || result.Text == "" {
 		t.Fatalf("wrong explanation: %+v", result)
 	}
 }

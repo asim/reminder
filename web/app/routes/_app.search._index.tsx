@@ -51,7 +51,7 @@ function getResultTitle(meta: Record<string, string>): string {
     return meta.meaning || meta.english || 'Name of Allah';
   }
   if (source === 'tafsir') {
-    return `Tafsir - ${meta.chapter}:${meta.verse}`;
+    return `${meta.title || "Tafsir"} — ${meta.ayahs || `${meta.chapter}:${meta.verse}`}`;
   }
   return 'Result';
 }

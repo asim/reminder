@@ -133,6 +133,12 @@ func IndexNames(idx Searcher, n *names.Names) {
 }
 
 func IndexTafsir(idx Searcher, q *quran.Quran) {
+	if fts, ok := idx.(*FTS); ok {
+		if _, err := SyncTafsir(fts, q); err != nil {
+			log.Printf("Error indexing tafsir: %v", err)
+		}
+		return
+	}
 	cp := loadCheckpoint()
 	if cp.TafsirDone {
 		log.Println("Tafsir already indexed, skipping")
@@ -141,12 +147,9 @@ func IndexTafsir(idx Searcher, q *quran.Quran) {
 
 	log.Println("Indexing Tafsir")
 
-	for _, comment := range q.Commentary {
-		indexContent(idx, map[string]string{
-			"source":  "tafsir",
-			"chapter": fmt.Sprintf("%v", comment.Chapter),
-			"verse":   fmt.Sprintf("%v", comment.Verse),
-		}, comment.Text)
+	for _, passage := range q.Tafsir.Passages() {
+		doc := tafsirDocument(q.Tafsir, passage, 0)
+		indexContent(idx, doc.Metadata, doc.Text)
 	}
 
 	cp.TafsirDone = true
