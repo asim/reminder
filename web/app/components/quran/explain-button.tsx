@@ -1,10 +1,17 @@
+import { useModelAvailable } from '~/queries/capabilities';
 import { useEffect, useRef, useState } from 'react';
 import { BookOpen, X } from 'lucide-react';
 
 type Reference = { text: string; metadata: Record<string, string> };
 type Turn = { question: string; answer: string; references: Reference[]; coverage?: { included_verses: number; total_verses: number } };
 
-export function ExplainButton({ chapter, verse, translation }: { chapter: number; verse?: number; translation: string }) {
+type Commentary = { number: number; comments?: string; commentary_source?: string };
+
+export function ExplainButton({ chapter, verse, translation, commentary = [] }: { chapter: number; verse?: number; translation: string; commentary?: Commentary[] }) {
+  const modelAvailable = useModelAvailable();
+  const passages = commentary.filter(item => item.number > 0 && !!item.comments);
+  const [view, setView] = useState<'explain' | 'tafsir'>('tafsir');
+  const title = view === 'explain' ? 'Explain' : 'Tafsir';
   const dialog = useRef<HTMLDialogElement>(null);
   const pending = useRef<AbortController | null>(null);
   const [opened, setOpened] = useState(false);
@@ -23,6 +30,13 @@ export function ExplainButton({ chapter, verse, translation }: { chapter: number
 
   useEffect(() => { if (opened) dialog.current?.showModal(); }, [opened]);
 
+  useEffect(() => {
+    if (!modelAvailable) {
+      pending.current?.abort(); pending.current = null;
+      setBusy(false); setView('tafsir');
+    }
+  }, [modelAvailable]);
+
   function close() {
     pending.current?.abort(); pending.current = null;
     setBusy(false); dialog.current?.close(); setOpened(false);
@@ -36,11 +50,11 @@ export function ExplainButton({ chapter, verse, translation }: { chapter: number
     const valid = element && element === end && (verse ? reference === `${chapter}:${verse}` : reference?.startsWith(`${chapter}:`));
     const text = valid ? selected?.toString().trim().slice(0, 2000) || '' : '';
     if (text !== selection) { setTurns([]); setQuestion(''); }
-    setSelection(text); setError(''); setOpened(true);
+    setSelection(text); setError(''); setView(modelAvailable ? 'explain' : 'tafsir'); setOpened(true);
   }
 
   async function ask() {
-    if (busy) return;
+    if (busy || !modelAvailable) return;
     const prompt = question.trim() || 'Explain this passage';
     const controller = new AbortController(); pending.current = controller;
     setBusy(true); setError('');
@@ -61,16 +75,28 @@ export function ExplainButton({ chapter, verse, translation }: { chapter: number
     }
   }
 
+  if (!modelAvailable && !passages.length) return null;
+
   return <>
-    <button type='button' onClick={open} className='inline-flex items-center gap-1 rounded-md p-1 text-xs text-gray-500 hover:bg-gray-100' aria-label={`Explain ${label}`}>
-      <BookOpen className='size-4' /> Explain
+    <button type='button' onClick={open} className='inline-flex items-center gap-1 rounded-md p-1 text-xs text-gray-500 hover:bg-gray-100' aria-label={`${modelAvailable ? 'Explain' : 'Tafsir'} ${label}`}>
+      <BookOpen className='size-4' /> {modelAvailable ? 'Explain' : 'Tafsir'}
     </button>
-    {opened && <dialog ref={dialog} aria-label={`Explain ${label}`} onCancel={close} className='m-auto w-[calc(100%-1rem)] max-w-xl max-h-[85dvh] rounded-xl border border-gray-200 bg-white p-0 text-gray-900 shadow-xl backdrop:bg-black/40'>
+    {opened && <dialog ref={dialog} aria-label={`${title} ${label}`} onCancel={close} className='fixed inset-x-0 bottom-0 top-auto m-0 h-[92dvh] max-h-[92dvh] w-full max-w-none overflow-y-auto overscroll-contain rounded-t-xl border border-gray-200 bg-white p-0 pb-[env(safe-area-inset-bottom)] text-gray-900 shadow-xl backdrop:bg-black/30 md:inset-y-0 md:left-auto md:right-0 md:h-dvh md:max-h-dvh md:w-[32rem] md:rounded-none'>
       <div className='sticky top-0 flex items-center justify-between gap-4 border-b bg-white p-4'>
-        <h2 className='font-medium'>Explain {label}</h2>
-        <button type='button' onClick={close} aria-label='Close explanation' className='rounded p-2 hover:bg-gray-100'><X className='size-4' /></button>
+        <h2 className='font-medium'>{title} {label}</h2>
+        <button type='button' onClick={close} aria-label='Close reading panel' className='rounded p-2 hover:bg-gray-100'><X className='size-4' /></button>
       </div>
-      <div className='space-y-4 p-4 text-sm' aria-live='polite'>
+      {modelAvailable && passages.length > 0 && <nav aria-label='Reading panel' className='flex gap-4 border-b px-4 py-2 text-sm'>
+        <button type='button' aria-pressed={view === 'explain'} onClick={() => setView('explain')} className={view === 'explain' ? 'font-medium underline underline-offset-4' : 'text-gray-500'}>Explain</button>
+        <button type='button' aria-pressed={view === 'tafsir'} onClick={() => setView('tafsir')} className={view === 'tafsir' ? 'font-medium underline underline-offset-4' : 'text-gray-500'}>Tafsir</button>
+      </nav>}
+      {view === 'tafsir' ? <div className='space-y-6 p-4 text-sm'>
+        {passages.map(item => <section key={item.number} className='space-y-2'>
+          <h3 className='font-medium'>{chapter}:{item.number} — {item.commentary_source || 'Stored commentary'}</h3>
+          <p className='whitespace-pre-wrap leading-relaxed'>{item.comments}</p>
+        </section>)}
+        {!passages.length && <p>No stored tafsir is available for this passage.</p>}
+      </div> : <div className='space-y-4 p-4 text-sm' aria-live='polite'>
         {selection && <blockquote className='border-l-2 pl-3' dir='auto'>{selection}</blockquote>}
         {!turns.length && <p className='text-gray-600'>Explore this passage through its Arabic, translations and tafsir. Ask a question or choose Explain.</p>}
         {turns.map((turn, index) => <section key={index} className='space-y-3 border-b pb-4'>
@@ -85,13 +111,13 @@ export function ExplainButton({ chapter, verse, translation }: { chapter: number
           </details>
         </section>)}
         <p className='text-xs text-gray-500'>AI-generated explanation. Check the cited sources.</p>
-        {error && <p role='alert' className='text-red-700'>{error}</p>}
+        {error && <p role='alert' className='text-red-700'>{error}{passages.length > 0 && ' You can read Tafsir above, or retry your question below.'}</p>}
         <form onSubmit={event => { event.preventDefault(); void ask(); }} className='space-y-2'>
           <label className='block' htmlFor={`explain-question-${chapter}-${verse || 0}`}>{turns.length ? 'Ask about this passage' : 'Your question (optional)'}</label>
           <textarea id={`explain-question-${chapter}-${verse || 0}`} value={question} onChange={event => setQuestion(event.target.value)} maxLength={2000} rows={2} className='w-full rounded border border-gray-300 p-2' />
           <button disabled={busy || (turns.length > 0 && !question.trim())} className='rounded bg-gray-900 px-4 py-2 text-white disabled:opacity-50'>{busy ? 'Explaining…' : turns.length ? 'Ask' : 'Explain'}</button>
         </form>
-      </div>
+      </div>}
     </dialog>}
   </>;
 }

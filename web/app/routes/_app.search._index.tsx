@@ -1,3 +1,4 @@
+import { useModelAvailable } from '~/queries/capabilities';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2, Search as SearchIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -128,6 +129,7 @@ function ResultCard({ ref: r, compact }: { ref: SearchReference; compact?: boole
 }
 
 export default function SearchIndex() {
+  const modelAvailable = useModelAvailable();
   const [query, setQuery] = useState('');
   const [submittedQuery, setSubmittedQuery] = useState('');
   const [mode, setMode] = useState<SearchMode>('search');
@@ -149,7 +151,7 @@ export default function SearchIndex() {
   const { data: summaryResults, isLoading: isSummaryLoading, error: summaryError } = useQuery({
     ...searchSummaryOptions(submittedQuery),
     enabled:
-      !!submittedQuery && mode === 'ask' && !!searchResults,
+      modelAvailable && !!submittedQuery && mode === 'ask' && !!searchResults,
   });
 
   const mergedResults = useMemo<SearchResponseType | null>(() => {
@@ -171,7 +173,7 @@ export default function SearchIndex() {
 
   const doSubmit = (chosenMode: SearchMode) => {
     if (!query.trim()) return;
-    setMode(chosenMode);
+    setMode(chosenMode === 'ask' && !modelAvailable ? 'search' : chosenMode);
     setSubmittedQuery(query);
     setQuery('');
   };
@@ -230,7 +232,7 @@ export default function SearchIndex() {
           <div className='relative flex'>
             <input
               className='w-full p-2 sm:p-3 border border-gray-300 rounded-md text-sm sm:text-base disabled:opacity-90'
-              placeholder={isLoading ? 'Seeking...' : 'Search or ask a question...'}
+              placeholder={isLoading ? 'Seeking...' : modelAvailable ? 'Search or ask a question...' : 'Search...'}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               autoComplete='off'
@@ -252,14 +254,14 @@ export default function SearchIndex() {
               <SearchIcon className='size-3.5' />
               Search
             </button>
-            <button
+            {modelAvailable && <button
               type='button'
               onClick={() => doSubmit('ask')}
               disabled={isLoading || !query.trim()}
               className='flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-300 text-xs sm:text-sm hover:bg-gray-100 disabled:opacity-60 transition-colors'
             >
               Ask AI
-            </button>
+            </button>}
           </div>
         </form>
 
