@@ -235,3 +235,12 @@ func TestMuslimRoutesAndSearch(t *testing.T) {
 		t.Fatalf("Muslim missing from search: %d %s", code, data)
 	}
 }
+
+func TestArabicLearningRoutes(t *testing.T) {
+	for _, path := range []string{"/api/arabic/dictionary?q=%D8%B5%D8%A8%D8%B1", "/api/arabic/roots?q=%D8%B1%D8%AD", "/api/arabic/quran/1/2"} {
+		code, _, data := request(t, "GET", path, nil)
+		if code != http.StatusOK || !json.Valid(data) {
+			t.Fatalf("%s: %d %s", path, code, data)
+		}
+	}
+}

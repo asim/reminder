@@ -27,7 +27,19 @@ func ModelReferences(idx Searcher, n *names.Names, q *quran.Quran, b *hadith.Col
 		return nil, err
 	}
 	refs = append(refs, topical...)
-	return EnrichReferences(refs, n, q, b), nil
+	enriched := EnrichReferences(refs, n, q, b)
+	lexical, err := LexicalReferences(q, query)
+	if err != nil {
+		return nil, err
+	}
+	// Keep the primary passage and its translations/tafsir ahead of lexical aids.
+	split := 4 * len(explicitVerse.FindAllStringSubmatch(query, 8))
+	if split > len(enriched) {
+		split = len(enriched)
+	}
+	out := append([]*Result{}, enriched[:split]...)
+	out = append(out, lexical...)
+	return append(out, enriched[split:]...), nil
 }
 
 func tafsirDocument(c *tafsir.Collection, p *tafsir.Passage, score float32) *Result {

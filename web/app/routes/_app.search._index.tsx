@@ -39,6 +39,8 @@ type SearchReference = {
 
 function getResultTitle(meta: Record<string, string>): string {
   const source = meta.source || '';
+  if (source === 'lexicon') return `${meta.title} — ${meta.headword || meta.root}`;
+  if (source === 'morphology') return `${meta.title} — ${meta.chapter}:${meta.verse}`;
   if (source === 'quran_translation') return `${meta.translator || meta.edition} — ${meta.chapter}:${meta.verse}`;
   if (source === 'quran') {
     const name = meta.name || `Chapter ${meta.chapter}`;
@@ -83,6 +85,8 @@ function getSourceLabel(meta: Record<string, string>): string {
   if ((source === 'bukhari' || source === 'muslim')) return 'Hadith';
   if (source === 'names') return 'Names of Allah';
   if (source === 'tafsir') return 'Commentary';
+  if (source === 'lexicon') return 'Dictionary';
+  if (source === 'morphology') return 'Arabic grammar';
   return 'Source';
 }
 

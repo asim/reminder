@@ -584,6 +584,7 @@ func main() {
 	})
 
 	api.RegisterHadithRoutes(http.DefaultServeMux, b)
+	api.RegisterArabicRoutes(http.DefaultServeMux, q)
 
 	http.HandleFunc("/api/explain", func(w http.ResponseWriter, r *http.Request) {
 		var data map[string]interface{}

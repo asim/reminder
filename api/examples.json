@@ -284,5 +284,33 @@
       ]
     },
     "note": "Excerpt from book 1. Record numbers preserve dataset idInBook, not standard Sunnah.com numbering."
+  },
+  "GET /api/arabic/dictionary": {
+    "request": "curl \"https://reminder.dev/api/arabic/dictionary?q=%D8%B5%D8%A8%D8%B1&limit=1\"",
+    "response": {
+      "query": "صبر",
+      "source": "Lane’s Arabic-English Lexicon",
+      "source_url": "https://github.com/alpheios-project/lan",
+      "licence": "CC BY-SA 3.0 US"
+    },
+    "note": "Response also includes entries, total and offset. Each entry retains its ID, headword, root, source filename and complete text."
+  },
+  "GET /api/arabic/roots": {
+    "request": "curl \"https://reminder.dev/api/arabic/roots?q=%D8%B1%D8%AD\"",
+    "response": {
+      "source_url": "https://github.com/alpheios-project/lan",
+      "limit": 100
+    },
+    "note": "Response also includes matching roots."
+  },
+  "GET /api/arabic/quran/{chapter}/{verse}": {
+    "request": "curl https://reminder.dev/api/arabic/quran/1/2",
+    "response": {
+      "reference": "1:2",
+      "source": "Quranic Arabic Corpus 0.4",
+      "source_url": "https://corpus.quran.com",
+      "aligned": true
+    },
+    "note": "Response also includes canonical_arabic and words with source positions and grammatical segments. An unaligned verse is explicitly flagged; its positions must not be attached to reader words."
   }
 }

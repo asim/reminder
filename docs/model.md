@@ -109,3 +109,16 @@ a missing Muslim embedding never excludes Muslim from retrieval. Model evidence
 resolves each result by collection, book and record number against the bundled
 corpus, including Muslim's Introduction (book 0). Muslim references identify the
 source dataset numbering rather than claiming standard Sunnah.com references.
+
+## Arabic lexical evidence
+
+Explicit Arabic words and verse references now retrieve bounded Lane dictionary
+entries and verified Quranic Arabic Corpus morphology through the shared model
+path. For example, ask `Explain الحمد in 1:2, including its root and lemma`.
+References distinguish `lexicon` from `morphology`, Quran, translations and tafsir.
+Lexical entries retain stable IDs and attribution. The model must distinguish
+root families, dictionary senses and contextual interpretation; it must not infer
+a verse's meaning from a root alone or invent an unannotated root.
+
+See [Arabic data and API](../arabic/README.md) for lookup endpoints, evidence
+budgets, source terms and the 828 verses whose token alignment remains unverified.

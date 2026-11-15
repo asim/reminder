@@ -30,6 +30,9 @@ type Value struct {
 }
 
 var Endpoints = []*Endpoint{
+	{Name: "Arabic dictionary", Path: "/api/arabic/dictionary", Method: "GET", Description: "Look up a Lane headword or root using q; limit 1–25 (default 10), offset 0–5000. Returns attributed lexical entries, not verse interpretations."},
+	{Name: "Arabic roots", Path: "/api/arabic/roots", Method: "GET", Description: "List up to 100 Lane roots with optional Arabic prefix q."},
+	{Name: "Quran word morphology", Path: "/api/arabic/quran/{chapter}/{verse}", Method: "GET", Description: "Returns Quranic Arabic Corpus words, segments, roots, lemmas and grammar alongside canonical Arabic. Check aligned before using source positions as reader positions."},
 	{
 		Name:        "Latest reminder (updated hourly)",
 		Path:        "/api/latest",

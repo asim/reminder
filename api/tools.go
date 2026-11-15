@@ -5,12 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/asim/reminder/arabic"
 	"github.com/asim/reminder/daily"
 	"github.com/asim/reminder/hadith"
 	"github.com/asim/reminder/model"
 	"github.com/asim/reminder/names"
 	"github.com/asim/reminder/quran"
 	"github.com/asim/reminder/search"
+	"strings"
 )
 
 // NewMCP exposes Reminder's content and search tools through the MCP protocol.
@@ -223,6 +225,39 @@ func NewMCP(q *quran.Quran, n *names.Names, b *hadith.Collection, reminders *dai
 			"references": res,
 		})
 		return string(output), nil
+	})
+
+	mcpServer.AddTool("arabic_dictionary", "Look up an Arabic headword or root in Lane’s Lexicon. Lexical senses are not verse interpretations.", InputSchema{Type: "object", Properties: map[string]Property{"q": {Type: "string", Description: "Arabic headword or root"}}, Required: []string{"q"}}, func(args map[string]interface{}) (string, error) {
+		query, _ := args["q"].(string)
+		if strings.TrimSpace(query) == "" || len(query) > 200 {
+			return "", fmt.Errorf("q must contain 1–200 bytes")
+		}
+		entries, total, err := arabic.Lookup(query, 0, 5)
+		if err != nil {
+			return "", err
+		}
+		data, err := json.Marshal(map[string]any{"entries": entries, "total": total, "source_url": arabic.LaneURL, "licence": "CC BY-SA 3.0 US"})
+		return string(data), err
+	})
+	mcpServer.AddTool("quran_morphology", "Read attributed Arabic segments, roots, lemmas and grammar for a verse. Check aligned before attaching source word positions to the reader.", InputSchema{Type: "object", Properties: map[string]Property{"chapter": {Type: "number", Description: "Chapter 1–114"}, "verse": {Type: "number", Description: "Verse number"}}, Required: []string{"chapter", "verse"}}, func(args map[string]interface{}) (string, error) {
+		ch, ok := args["chapter"].(float64)
+		if !ok || ch < 1 || ch > 114 || ch != float64(int(ch)) {
+			return "", fmt.Errorf("invalid chapter")
+		}
+		v, ok := args["verse"].(float64)
+		if !ok || v < 1 || v > 286 || v != float64(int(v)) {
+			return "", fmt.Errorf("invalid verse")
+		}
+		verse := q.Get(int(ch)).Verse(int(v))
+		if verse == nil {
+			return "", fmt.Errorf("verse not found")
+		}
+		analysis, err := arabic.Analyze(int(ch), int(v), verse.Arabic)
+		if err != nil {
+			return "", err
+		}
+		data, err := json.Marshal(analysis)
+		return string(data), err
 	})
 
 	return mcpServer

@@ -1,0 +1,36 @@
+name: Import verified Arabic morphology
+on:
+  push:
+    branches: [feat/arabic-lexicon]
+    paths: [.github/workflows/import-arabic-source.yml]
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Fetch and verify original corpus
+        run: |
+          curl --fail --location https://raw.githubusercontent.com/cltk/arabic_morphology_quranic-corpus/b5abd4d8fadd775f3329f34cbe10531fac71e391/quranic-corpus-morphology-0.4.txt -o /tmp/qac.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          import gzip, hashlib, json
+          root = Path('arabic/morphology')
+          manifest = json.loads((root/'source.json').read_text())
+          raw = Path('/tmp/qac.txt').read_bytes()
+          assert hashlib.sha256(raw).hexdigest() == manifest['sha256']
+          assert raw[:raw.index(b'LOCATION')] == (root/'ATTRIBUTION.txt').read_bytes()
+          (root/'qac.txt.gz').write_bytes(gzip.compress(raw, mtime=0))
+          PY
+      - name: Commit source and remove temporary workflow
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/import-arabic-source.yml
+          git add arabic/morphology/qac.txt.gz
+          git commit -m 'Bundle verified original Quranic Arabic Corpus annotations'
+          git push origin HEAD:feat/arabic-lexicon
