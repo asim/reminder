@@ -177,3 +177,29 @@ Reader Explain is available at chapter and verse level, including selected text
 within a single verse. The panel labels its passage, keeps follow-up questions
 there, and exposes the evidence behind numbered citations. This first reader
 integration covers Quran; hadith and Names retain their existing reading UI.
+
+### Shared default-explanation cache
+
+The three Explain routes share a persistent SQLite cache at
+`~/.reminder/explain-cache.db`. Only requests with an explicit passage and empty
+`question`, `q`, selection and history qualify. The reader sends an empty question
+when its default Explain button is used. Custom questions and all follow-ups
+bypass the cache; their text and conversation history are never stored there.
+
+The cache stores the answer, numbered reference records and chapter coverage as
+one JSON snapshot. Its key includes passage, translation, model/provider endpoint,
+model limits, prompt and a SHA-256 fingerprint of the running executable. Because
+the Quran, translations, tafsir, QUL and Lane data are embedded, replacing any of
+those sources or explanation code invalidates cached answers automatically. This
+is deliberately conservative: other binary changes can invalidate the cache too.
+The same binary keeps its cache across restarts. Set `EXPLAIN_CACHE_EPOCH` to a new
+value to refresh answers after a provider changes a model behind an unchanged name.
+Entries expire after 30 days.
+
+Concurrent requests for the same default explanation share one generation within
+the server process. Cache hits avoid retrieval and model generation and do not
+consume model-generation allowances; external API key authentication is still
+required on every request. Only nonempty answers with evidence and a provider
+completion marker (`stop` / `end_turn`) are persisted. Errors, truncated responses,
+missing completion markers and cancelled generations are not cached. A cache
+read/write failure is logged; successful generation can still be returned.

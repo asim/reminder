@@ -190,6 +190,9 @@ func askClaude(ctx context.Context, apiKey, systemPrompt string, history []Messa
 		panic(err)
 	}
 
+	if done, ok := ctx.Value(completionKey{}).(*bool); ok {
+		*done = string(resp.StopReason) == "end_turn"
+	}
 	var parts []string
 	for _, block := range resp.Content {
 		if block.Type == "text" {
@@ -240,6 +243,9 @@ func askOpenAICompat(ctx context.Context, systemPrompt string, history []Message
 	}
 	if len(res.Choices) == 0 {
 		panic("llm: empty response")
+	}
+	if done, ok := ctx.Value(completionKey{}).(*bool); ok {
+		*done = string(res.Choices[0].FinishReason) == "stop"
 	}
 	reply := res.Choices[0].Message.Content
 	return strings.TrimSpace(reply)

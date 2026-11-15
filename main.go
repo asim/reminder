@@ -723,10 +723,15 @@ func main() {
 		log.Fatal(err)
 	}
 	defer keys.Close()
+	explainCache, err := api.OpenExplainCache(api.ReminderDir)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer explainCache.Close()
 	http.Handle("/api/model/ask", api.ModelHandler(keys, idx, n, q, b, indexed))
-	http.Handle("/api/model/explain", api.ExplainHandler(keys, idx, n, q, b, indexed))
-	http.Handle("/api/explain", api.ExplainHandler(nil, idx, n, q, b, indexed))
-	http.Handle("POST /api/quran/{chapter}/{verse}/explain", api.ExplainHandler(nil, idx, n, q, b, indexed))
+	http.Handle("/api/model/explain", api.ExplainHandler(keys, idx, n, q, b, indexed, explainCache))
+	http.Handle("/api/explain", api.ExplainHandler(nil, idx, n, q, b, indexed, explainCache))
+	http.Handle("POST /api/quran/{chapter}/{verse}/explain", api.ExplainHandler(nil, idx, n, q, b, indexed, explainCache))
 
 	http.Handle("/mcp", api.NewMCP(q, n, b, reminders, lookup, indexed))
 

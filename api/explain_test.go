@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/asim/reminder/model"
 	"github.com/asim/reminder/names"
@@ -115,5 +117,82 @@ func TestExplainRoutesShareGroundingAndContext(t *testing.T) {
 	}
 	if calls != 4 {
 		t.Errorf("invalid requests reached provider: %d calls", calls)
+	}
+}
+
+func TestExplainRoutesSharePersistentDefaultCache(t *testing.T) {
+	var calls atomic.Int32
+	provider := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls.Add(1)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"choices":[{"finish_reason":"stop","message":{"role":"assistant","content":"Explanation [1]."}}]}`))
+	}))
+	defer provider.Close()
+	t.Setenv("OLLAMA_LLM_MODEL", "test")
+	t.Setenv("OLLAMA_BASE_URL", provider.URL+"/v1")
+	t.Setenv("AI_IP_DAILY_LIMIT", "0")
+	t.Setenv("AI_DAILY_LIMIT", "20")
+	if err := model.ConfigureLimits(t.TempDir()); err != nil {
+		t.Fatal(err)
+	}
+	keys, err := OpenKeys(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer keys.Close()
+	id, secret, err := keys.Create("test", 1, 1000000)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cache, err := openExplainCache(t.TempDir(), "sources-and-prompt-v1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cache.Close()
+	ready := make(chan bool)
+	close(ready)
+	q := quran.Load()
+	mux := http.NewServeMux()
+	mux.Handle("/api/explain", ExplainHandler(nil, modelIndex{}, &names.Names{}, q, nil, ready, cache))
+	mux.Handle("/api/model/explain", ExplainHandler(keys, modelIndex{}, &names.Names{}, q, nil, ready, cache))
+	mux.Handle("POST /api/quran/{chapter}/{verse}/explain", ExplainHandler(nil, modelIndex{}, &names.Names{}, q, nil, ready, cache))
+	send := func(path, body, auth string) *httptest.ResponseRecorder {
+		r := httptest.NewRequest("POST", path, strings.NewReader(body))
+		r.Header.Set("Authorization", auth)
+		w := httptest.NewRecorder()
+		mux.ServeHTTP(w, r)
+		return w
+	}
+	body := `{"context":{"source":"quran","chapter":1,"verse":2}}`
+	first := send("/api/explain", body, "")
+	if first.Code != 200 {
+		t.Fatal(first.Body.String())
+	}
+	for _, path := range []string{"/api/model/explain", "/api/quran/1/2/explain"} {
+		w := send(path, body, "Bearer "+secret)
+		if w.Code != 200 || w.Body.String() != first.Body.String() {
+			t.Fatalf("%s didn't share response: %d %s", path, w.Code, w.Body.String())
+		}
+	}
+	if calls.Load() != 1 {
+		t.Fatalf("cache missed: %d provider calls", calls.Load())
+	}
+	if err := keys.Reserve(id, time.Now()); err != nil {
+		t.Fatal("cache hit consumed generation allowance")
+	}
+	for i := 0; i < 2; i++ {
+		w := send("/api/explain", `{"context":{"source":"quran","chapter":1,"verse":2},"question":"What does this mean?"}`, "")
+		if w.Code != 200 {
+			t.Fatal(w.Body.String())
+		}
+	}
+	if calls.Load() != 3 {
+		t.Fatal("custom questions used shared cache")
+	}
+	if err := keys.Revoke(id); err != nil {
+		t.Fatal(err)
+	}
+	if w := send("/api/model/explain", body, "Bearer "+secret); w.Code != 401 {
+		t.Fatal("cached response bypassed authentication")
 	}
 }
