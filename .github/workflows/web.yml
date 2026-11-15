@@ -1,0 +1,23 @@
+name: Web build and rendered content
+on: [push, pull_request]
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version: 1.25.5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+        working-directory: web
+      - run: npm run typecheck
+        working-directory: web
+      - run: npm run build
+        working-directory: web
+      - run: python3 scripts/test-rendered.py
+      - run: go test ./app
+        env:
+          REMINDER_RENDERED_DIR: ${{ github.workspace }}/web/build/client

@@ -1,3 +1,4 @@
+import { readingLoader } from '~/utils/prerender.server';
 import type { Route } from '.react-router/types/app/routes/+types/_app.hadith';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
@@ -47,4 +48,8 @@ export default function Hadith() {
       </div>
     </div>
   );
+}
+
+export function loader({ params }: { params: Record<string, string | undefined> }) {
+  return readingLoader('books', ['list-hadith-books']);
 }

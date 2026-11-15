@@ -1,3 +1,4 @@
+import { readingLoader } from '~/utils/prerender.server';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router';
@@ -44,4 +45,8 @@ export default function Names() {
       </div>
     </div>
   );
+}
+
+export function loader({ params }: { params: Record<string, string | undefined> }) {
+  return readingLoader('names', ['list-names']);
 }

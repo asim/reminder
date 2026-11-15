@@ -1,3 +1,6 @@
+import { queryClient } from '~/utils/query-client';
+import { readingMeta } from '~/utils/reading-meta';
+import { readingLoader } from '~/utils/prerender.server';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router';
 import { BookmarkButton } from '~/components/interface/bookmark-button';
@@ -5,20 +8,7 @@ import { ReadingBookmarkButton } from '~/components/interface/reading-bookmark-b
 import { ShareButton } from '~/components/interface/share-button';
 import { getNameOptions } from '~/queries/names';
 
-export function meta() {
-  return [
-    { title: 'Names of Allah - Reminder' },
-    {
-      property: 'og:title',
-      content: 'Names of Allah - Reminder',
-    },
-    {
-      name: 'description',
-      content:
-        'Learn about the Names of Allah, the 99 attributes and qualities through which Muslims identify and connect with Allah',
-    },
-  ];
-}
+
 
 export default function NameDetail() {
   const params = useParams();
@@ -101,4 +91,16 @@ export default function NameDetail() {
       </div>
     </div>
   );
+}
+
+export function loader({ params }: { params: Record<string, string | undefined> }) {
+  return readingLoader('name', ['get-name', Number(params.nameNumber)], params.nameNumber);
+}
+
+export const meta = (args: any) => readingMeta('name', args);
+
+export async function clientLoader({ params }: { params: Record<string, string | undefined> }) {
+  const options = getNameOptions(Number(params.nameNumber));
+  const data = await queryClient.ensureQueryData(options);
+  return { readingQueries: [{ queryKey: options.queryKey, data }] };
 }

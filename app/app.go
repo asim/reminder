@@ -404,8 +404,5 @@ func ServeWeb() http.Handler {
 		log.Fatal(err)
 	}
 
-	return FileServerWith404(http.FS(htmlContent), func(w http.ResponseWriter, r *http.Request) bool {
-		r.URL.Path = "/__spa-fallback.html"
-		return true
-	})
+	return readingFileServer(htmlContent)
 }

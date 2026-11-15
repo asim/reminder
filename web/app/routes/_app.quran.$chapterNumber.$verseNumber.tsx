@@ -1,3 +1,5 @@
+import { readingMeta } from '~/utils/reading-meta';
+import { readingData } from '~/utils/prerender.server';
 import type { Route } from '.react-router/types/app/routes/+types/_app.quran.$chapterNumber.$verseNumber';
 import { CircleChevronLeft, CircleChevronRight } from 'lucide-react';
 import { Link } from 'react-router';
@@ -8,7 +10,8 @@ import { ShareButton } from '~/components/interface/share-button';
 import { AudioPlayer } from '~/components/quran/audio-player';
 import { ChapterHeader } from '~/components/quran/chapter-header';
 import { VerseArabic } from '~/components/quran/verse-arabic';
-import { useTranslatedChapter } from '~/queries/quran';
+import { queryClient } from '~/utils/query-client';
+import { getVersePageOptions, useTranslatedChapter } from '~/queries/quran';
 import { useQuranSettings } from '~/components/quran/reading-settings';
 import { buildQuranShareUrl } from '~/utils/quran-share';
 
@@ -17,7 +20,7 @@ export default function QuranVerse(props: Route.ComponentProps) {
 
   const { settings, textStyle } = useQuranSettings();
   const { mode, wordByWord, transliteration: showTransliteration, commentary: showCommentary, translation } = settings;
-  const data = useTranslatedChapter(Number(chapterNumber), translation);
+  const data = useTranslatedChapter(Number(chapterNumber), translation, Number(verseNumber));
 
   const verse = data.verses.find(
     (verse) => verse.number === Number(verseNumber)
@@ -31,14 +34,8 @@ export default function QuranVerse(props: Route.ComponentProps) {
   const nextVerse = Number(verseNumber) + 1;
   const hasPreviousVerse = previousVerse >= 1;
 
-  // Chapters carry the Bismillah as an entry numbered 0, so the array is one
-  // longer than the verse count. Al-Fatiha is exempt because its first verse
-  // is the Bismillah, and At-Tawbah because it opens without one. Use the
-  // highest verse number, or the last verse links past the end of the chapter.
-  const lastVerse = data.verses.reduce(
-    (max, v) => (v.number > max ? v.number : max),
-    0
-  );
+  // Use the complete chapter count even when only this verse is hydrated.
+  const lastVerse = data.verse_count;
   const hasNextVerse = nextVerse <= lastVerse;
 
   const nextChapter = Number(chapterNumber) + 1;
@@ -111,4 +108,19 @@ export default function QuranVerse(props: Route.ComponentProps) {
       </div>
     </div>
   );
+}
+
+export function loader({ params }: { params: Record<string, string | undefined> }) {
+  const chapter = readingData('quran', params.chapterNumber);
+  const verses = chapter.verses.filter((v: { number: number }) => v.number === Number(params.verseNumber));
+  if (!verses.length) throw new Response('Not found', { status: 404 });
+  return { readingQueries: [{ queryKey: ['get-verse-page', Number(params.chapterNumber), Number(params.verseNumber)], data: { ...chapter, verses } }] };
+}
+
+export const meta = (args: any) => readingMeta('verse', args);
+
+export async function clientLoader({ params }: { params: Record<string, string | undefined> }) {
+  const options = getVersePageOptions(Number(params.chapterNumber), Number(params.verseNumber));
+  const data = await queryClient.ensureQueryData(options);
+  return { readingQueries: [{ queryKey: options.queryKey, data }] };
 }
