@@ -197,7 +197,9 @@ value to refresh answers after a provider changes a model behind an unchanged na
 Entries expire after 30 days.
 
 Concurrent requests for the same default explanation share one generation within
-the server process. Cache hits avoid retrieval and model generation and do not
+the server process. If the initiating reader cancels, active waiters retry through
+one new shared generation using the new owner's request context and allowance.
+A waiting reader can still cancel independently. Cache hits avoid retrieval and model generation and do not
 consume model-generation allowances; external API key authentication is still
 required on every request. Only nonempty answers with evidence and a provider
 completion marker (`stop` / `end_turn`) are persisted. Errors, truncated responses,

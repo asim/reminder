@@ -154,3 +154,69 @@ func TestExplainCacheRejectsFailuresIncompleteAndExpired(t *testing.T) {
 		t.Fatal("expired cache used")
 	}
 }
+
+// Signals that a waiter has reached its select, without sleeps or scheduling assumptions.
+type observedWaitContext struct {
+	context.Context
+	waiting chan struct{}
+	once    sync.Once
+}
+
+func (c *observedWaitContext) Done() <-chan struct{} {
+	c.once.Do(func() { close(c.waiting) })
+	return c.Context.Done()
+}
+
+func TestExplainCacheRetriesAfterOwnerCancellation(t *testing.T) {
+	cache, err := openExplainCache(t.TempDir(), "build")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cache.Close()
+	owner, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	entered := make(chan struct{})
+	ownerDone := make(chan error, 1)
+	go func() {
+		_, err := cache.result(owner, "key", func() (*model.Result, error) { close(entered); <-owner.Done(); return nil, owner.Err() })
+		ownerDone <- err
+	}()
+	<-entered
+	const readers = 6
+	contexts := make([]*observedWaitContext, readers)
+	results := make(chan error, readers)
+	var calls atomic.Int32
+	for i := range contexts {
+		ctx := &observedWaitContext{Context: context.Background(), waiting: make(chan struct{})}
+		contexts[i] = ctx
+		go func() {
+			result, err := cache.result(ctx, "key", func() (*model.Result, error) { calls.Add(1); return cachedFixture(), nil })
+			if err == nil && (result.Answer != "Explanation [1]." || result.Coverage["total_verses"] != 7) {
+				err = errors.New("lost shared response")
+			}
+			results <- err
+		}()
+	}
+	for _, ctx := range contexts {
+		<-ctx.waiting
+	}
+	cancel()
+	if err := <-ownerDone; !errors.Is(err, context.Canceled) {
+		t.Fatalf("owner error: %v", err)
+	}
+	for range contexts {
+		if err := <-results; err != nil {
+			t.Fatalf("active waiter failed: %v", err)
+		}
+	}
+	if calls.Load() != 1 {
+		t.Fatalf("retry generated %d times", calls.Load())
+	}
+	_, err = cache.result(context.Background(), "key", func() (*model.Result, error) {
+		t.Error("successful retry not cached")
+		return nil, errors.New("unexpected generation")
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+}

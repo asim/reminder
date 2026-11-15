@@ -18,9 +18,10 @@ import (
 )
 
 type explainFlight struct {
-	done chan struct{}
-	data []byte
-	err  error
+	done      chan struct{}
+	data      []byte
+	err       error
+	cancelled bool
 }
 
 // ExplainCache stores only default, public passage explanations. Flights are
@@ -95,20 +96,41 @@ func (c *ExplainCache) result(ctx context.Context, key string, generate func() (
 		return generate()
 	}
 	// Coordinate both cache reads and misses, avoiding a lookup/generation race.
-	c.mu.Lock()
-	if flight := c.flights[key]; flight != nil {
-		c.mu.Unlock()
-		select {
-		case <-ctx.Done():
-			return nil, ctx.Err()
-		case <-flight.done:
+	var flight *explainFlight
+	for {
+		if err := ctx.Err(); err != nil {
+			return nil, err
 		}
-		return decodeExplanation(flight.data, flight.err)
+		c.mu.Lock()
+		if current := c.flights[key]; current != nil {
+			c.mu.Unlock()
+			select {
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			case <-current.done:
+			}
+			if err := ctx.Err(); err != nil {
+				return nil, err
+			}
+			if current.cancelled {
+				// The previous owner disconnected. Active waiters compete for one new
+				// flight, using the winner's own request context and generation allowance.
+				continue
+			}
+			return decodeExplanation(current.data, current.err)
+		}
+		flight = &explainFlight{done: make(chan struct{})}
+		c.flights[key] = flight
+		c.mu.Unlock()
+		break
 	}
-	flight := &explainFlight{done: make(chan struct{})}
-	c.flights[key] = flight
-	c.mu.Unlock()
-	defer func() { c.mu.Lock(); delete(c.flights, key); close(flight.done); c.mu.Unlock() }()
+	defer func() {
+		c.mu.Lock()
+		flight.cancelled = ctx.Err() != nil
+		delete(c.flights, key)
+		close(flight.done)
+		c.mu.Unlock()
+	}()
 	var data []byte
 	err := c.db.QueryRowContext(ctx, "SELECT response FROM explanations WHERE key=? AND expires>?", key, time.Now().Unix()).Scan(&data)
 	if err == nil {
