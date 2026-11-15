@@ -1,3 +1,4 @@
+import { queryClient } from '~/utils/query-client';
 import { useMemo } from 'react';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import type { Translation } from '~/components/quran/reading-settings';
@@ -44,6 +45,7 @@ type ChapterResponseType = {
   english: string;
   number: number;
   verses: VerseType[];
+  verse_count: number;
 };
 
 export const getChapterOptions = (chapterNumber: number) => ({
@@ -57,8 +59,16 @@ export const getChapterOptions = (chapterNumber: number) => ({
 });
 
 // All editions share the same chapter cache, so switching also works offline.
-export function useTranslatedChapter(chapterNumber: number, translation: Translation) {
-  const { data: original } = useSuspenseQuery(getChapterOptions(chapterNumber));
+export const getVersePageOptions = (chapter: number, verse: number) => ({
+  queryKey: ['get-verse-page', chapter, verse],
+  queryFn: async () => {
+    const data = await queryClient.ensureQueryData(getChapterOptions(chapter));
+    return { ...data, verses: data.verses.filter(v => v.number === verse) };
+  },
+});
+
+export function useTranslatedChapter(chapterNumber: number, translation: Translation, verse?: number) {
+  const { data: original } = useSuspenseQuery(verse ? getVersePageOptions(chapterNumber, verse) : getChapterOptions(chapterNumber));
   return useMemo(() => ({
     ...original,
     verses: original.verses.map(verse => ({

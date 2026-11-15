@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { startOfflineDownload } from '~/utils/offline';
 import {
+  useMatches,
+  useLocation,
   Links,
   Meta,
   Outlet,
@@ -32,6 +34,14 @@ export const links: Route.LinksFunction = () => [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   useEffect(startOfflineDownload, []);
+  const matches = useMatches();
+  const location = useLocation();
+  for (const match of matches) {
+    const data = match.data as { readingQueries?: { queryKey: unknown[]; data: unknown }[] } | undefined;
+    for (const query of data?.readingQueries || []) {
+      if (queryClient.getQueryData(query.queryKey) === undefined) queryClient.setQueryData(query.queryKey, query.data);
+    }
+  }
   return (
     <html lang='en'>
       <head>
@@ -39,6 +49,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name='viewport' content='width=device-width, initial-scale=1, interactive-widget=resizes-content' />
         <meta name='theme-color' content='#ffffff' />
         <Meta />
+        <link rel="canonical" href={`https://reminder.dev${location.pathname.replace(/\/$/, "") || "/"}`} />
         <Links />
       </head>
       <body>

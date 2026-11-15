@@ -1,3 +1,5 @@
+import { readingMeta } from '~/utils/reading-meta';
+import { readingLoader } from '~/utils/prerender.server';
 import type { Route } from '.react-router/types/app/routes/+types/_app.hadith.$book';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
@@ -15,26 +17,15 @@ function toArabicNumber(num: number) {
     .replace(/\d/g, (d) => String.fromCharCode(0x0660 + Number(d)));
 }
 
-export function meta() {
-  return [
-    { title: 'Hadith - Reminder' },
-    {
-      property: 'og:title',
-      content: 'Hadith - Reminder',
-    },
-    {
-      name: 'description',
-      content:
-        'Read the Hadith, the sayings of Prophet Muhammad (Peace Be Upon Him)',
-    },
-  ];
-}
+
 
 export async function clientLoader(props: Route.LoaderArgs) {
   const bookNumber = parseInt(props.params.book);
   if (isNaN(bookNumber)) return;
 
-  await queryClient.ensureQueryData(getBookOptions(bookNumber));
+  const options = getBookOptions(bookNumber);
+  const data = await queryClient.ensureQueryData(options);
+  return { readingQueries: [{ queryKey: options.queryKey, data }] };
 }
 
 export default function HadithBook() {
@@ -203,3 +194,9 @@ export default function HadithBook() {
     </div>
   );
 }
+
+export function loader({ params }: { params: Record<string, string | undefined> }) {
+  return readingLoader('hadith', ['get-hadith-book', Number(params.book)], params.book);
+}
+
+export const meta = (args: any) => readingMeta('hadith', args);

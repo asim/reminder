@@ -48,12 +48,14 @@ const Context = createContext<{
 } | null>(null);
 
 export function QuranSettingsProvider({ children }: { children: ReactNode }) {
-  const [saved, setSaved] = useState(savedPreferences);
+  const [saved, setSaved] = useState(defaults);
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => { setSaved(savedPreferences()); setHydrated(true); }, []);
   const [pending, setPending] = useState<{ settings: Preferences; search: string } | null>(null);
   const readingPosition = useRef<{ element: Element; offset: number; scroller: HTMLElement } | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
-  const params = new URLSearchParams(location.search);
+  const params = new URLSearchParams(hydrated ? location.search : '');
   const mode = params.get('mode');
   const translation = params.get('translation');
   const booleanParam = (key: string, fallback: boolean) => {

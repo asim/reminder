@@ -1,3 +1,5 @@
+import { readingMeta } from '~/utils/reading-meta';
+import { readingLoader } from '~/utils/prerender.server';
 import type { Route } from '.react-router/types/app/routes/+types/_app.quran.$chapterNumber._index';
 import { CircleChevronLeft, CircleChevronRight, Play, Pause } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -16,24 +18,12 @@ import { useQuranSettings } from '~/components/quran/reading-settings';
 import { queryClient } from '~/utils/query-client';
 import { buildQuranShareUrl } from '~/utils/quran-share';
 
-export function meta() {
-  return [
-    { title: 'Quran - Reminder' },
-    {
-      property: 'og:title',
-      content: 'Quran - Reminder',
-    },
-    {
-      name: 'description',
-      content: 'Read the Quran, the holy book of Islam',
-    },
-  ];
-}
+
 
 export async function clientLoader(props: Route.LoaderArgs) {
-  await queryClient.ensureQueryData(
-    getChapterOptions(Number(props.params.chapterNumber))
-  );
+  const options = getChapterOptions(Number(props.params.chapterNumber));
+  const data = await queryClient.ensureQueryData(options);
+  return { readingQueries: [{ queryKey: options.queryKey, data }] };
 }
 
 export default function QuranChapter(props: Route.ComponentProps) {
@@ -169,3 +159,9 @@ export default function QuranChapter(props: Route.ComponentProps) {
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   return <PageError error={error} />;
 }
+
+export function loader({ params }: { params: Record<string, string | undefined> }) {
+  return readingLoader('quran', ['get-chapter', Number(params.chapterNumber)], params.chapterNumber);
+}
+
+export const meta = (args: any) => readingMeta('chapter', args);

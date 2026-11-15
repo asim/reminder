@@ -1,16 +1,15 @@
 import type { Config } from "@react-router/dev/config";
 
 export default {
-  // Config options...
-  // Server-side render by default, to enable SPA mode set this to `false`
+  // The Go server serves build-time HTML; no Node server is deployed.
   ssr: false,
   // Offline navigation cannot fetch lazy route-manifest patches.
   routeDiscovery: { mode: 'initial' },
-  prerender: [
-    '/',
-    '/quran',
-    '/hadith',
-    '/names',
-    '/api',
-  ]
+  prerender: {
+    unstable_concurrency: 8,
+    async paths() {
+      const { readFile } = await import('node:fs/promises');
+      return JSON.parse(await readFile('.generated/paths.json', 'utf8'));
+    },
+  },
 } satisfies Config;

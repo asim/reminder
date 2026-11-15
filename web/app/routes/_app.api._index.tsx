@@ -264,7 +264,7 @@ export default function Api() {
                     Format: {endpoint.requestFormat}
                   </p>
                   <div className='overflow-x-auto'>
-                    <table className='w-full border-collapse min-w-full'>
+                    <table className='w-full border-collapse min-w-full [&_th:nth-child(-n+2)]:whitespace-nowrap [&_td:nth-child(-n+2)]:whitespace-nowrap [&_td:nth-child(-n+2)]:break-normal'>
                       <thead>
                         <tr className='border-b'>
                           <th className='text-left py-1 sm:py-2 pr-3 last:pr-0 align-top text-xs sm:text-sm'>
@@ -308,7 +308,7 @@ export default function Api() {
 
                 {endpoint.responseFields && (
                   <div className='overflow-x-auto'>
-                    <table className='w-full border-collapse min-w-full'>
+                    <table className='w-full border-collapse min-w-full [&_th:nth-child(-n+2)]:whitespace-nowrap [&_td:nth-child(-n+2)]:whitespace-nowrap [&_td:nth-child(-n+2)]:break-normal'>
                       <thead>
                         <tr className='border-b'>
                           <th className='text-left py-1 sm:py-2 pr-3 last:pr-0 align-top text-xs sm:text-sm'>

@@ -1,3 +1,4 @@
+import { readingLoader } from '~/utils/prerender.server';
 import { ReadingSettings, useQuranSettings } from '~/components/quran/reading-settings';
 import type { Route } from '.react-router/types/app/routes/+types/_app.quran';
 import { useSuspenseQuery } from '@tanstack/react-query';
@@ -59,4 +60,8 @@ export default function Quran() {
       </div>
     </div>
   );
+}
+
+export function loader({ params }: { params: Record<string, string | undefined> }) {
+  return readingLoader('chapters', ['list-surahs']);
 }

@@ -57,7 +57,9 @@ function saveBookmarks(bookmarks: BookmarksData): boolean {
 }
 
 export function useBookmarks() {
-  const [bookmarks, setBookmarks] = useState<BookmarksData>(getStoredBookmarks);
+  const [bookmarks, setBookmarks] = useState<BookmarksData>(initBookmarks);
+
+  useEffect(() => { setBookmarks(getStoredBookmarks()); }, []);
 
   const addBookmark = (
     type: BookmarkType,
