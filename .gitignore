@@ -1,5 +1,5 @@
 _site
-reminder
+/reminder
 index.md
 .env
 node_modules

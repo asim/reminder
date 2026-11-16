@@ -1,0 +1,84 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "reminder",
+  "version": "0.1.0",
+  "description": "Daily reminders, Quran, hadith, Names of Allah and source-backed Arabic understanding.",
+  "author": {
+    "name": "Asim Aslam",
+    "url": "https://github.com/asim"
+  },
+  "homepage": "https://reminder.dev",
+  "repository": "https://github.com/asim/reminder",
+  "keywords": [
+    "quran",
+    "hadith",
+    "arabic",
+    "daily reminders"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Reminder",
+        "shortDescription": "Quran, hadith and daily reminders",
+        "longDescription": "Read the Quran, hadith and Names of Allah, find today’s reminder, and explore Arabic meanings through attributed translations, tafsir, morphology and Lane’s Lexicon. Request Reminder-generated explanations with source citations. Public reading requires no account.",
+        "developerName": "Asim Aslam",
+        "category": "Education",
+        "capabilities": [
+          "Read",
+          "Search"
+        ],
+        "websiteURL": "https://reminder.dev",
+        "supportURL": "https://github.com/asim/reminder/issues",
+        "defaultPrompt": [
+          "Show me today’s daily reminder.",
+          "Show Quran 2:153 with its Arabic and tafsir.",
+          "Explain Quran 112:1 using Reminder’s sources."
+        ],
+        "composerIcon": "./assets/icon.png",
+        "logo": "./assets/icon.png"
+      },
+      "review": {
+        "test_cases": {
+          "positive": [
+            {
+              "description": "Read today’s reminder",
+              "prompt": "Show today’s daily reminder.",
+              "tools_triggered": "get_daily",
+              "expected_behavior": "Return the stored daily verse, hadith and Name. Do not claim to schedule notifications."
+            },
+            {
+              "description": "Read a verse without generation",
+              "prompt": "Show Quran 2:153 with tafsir.",
+              "tools_triggered": "get_quran_verse",
+              "expected_behavior": "Return Arabic, attributed translation and commentary with a link to the verse, without explain_quran."
+            },
+            {
+              "description": "Explore Arabic evidence",
+              "prompt": "What is the root and lemma of the Arabic words in Quran 1:2?",
+              "tools_triggered": "quran_morphology, arabic_dictionary",
+              "expected_behavior": "Cite annotations and dictionary separately. Preserve missing values, alignment limitations and conflicts."
+            },
+            {
+              "description": "Request Reminder explanation",
+              "prompt": "Use Reminder to explain Quran 2:153.",
+              "tools_triggered": "explain_quran",
+              "expected_behavior": "Return Reminder’s generated explanation and numbered sources. Report unavailable model or limits honestly and offer stored tafsir."
+            }
+          ],
+          "negative": [
+            {
+              "description": "No subscription writes",
+              "prompt": "Subscribe me to daily notifications.",
+              "expected_behavior": "Do not call a write tool or claim success. Explain that subscriptions are managed on Reminder."
+            },
+            {
+              "description": "No unrelated research",
+              "prompt": "What is the current stock price of Apple?",
+              "expected_behavior": "Do not use Reminder tools for unrelated market data."
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -65,9 +65,9 @@ func TestExplainRoutesShareGroundingAndContext(t *testing.T) {
 	ready := make(chan bool)
 	close(ready)
 	mux := http.NewServeMux()
-	mux.Handle("/api/explain", ExplainHandler(nil, modelIndex{}, &names.Names{}, q, nil, ready))
-	mux.Handle("/api/model/explain", ExplainHandler(keys, modelIndex{}, &names.Names{}, q, nil, ready))
-	mux.Handle("POST /api/quran/{chapter}/{verse}/explain", ExplainHandler(nil, modelIndex{}, &names.Names{}, q, nil, ready))
+	mux.Handle("/api/explain", (&ModelService{Index: modelIndex{}, Names: &names.Names{}, Quran: q, Hadith: nil, Ready: ready}).ExplainHandler(nil))
+	mux.Handle("/api/model/explain", (&ModelService{Index: modelIndex{}, Names: &names.Names{}, Quran: q, Hadith: nil, Ready: ready}).ExplainHandler(keys))
+	mux.Handle("POST /api/quran/{chapter}/{verse}/explain", (&ModelService{Index: modelIndex{}, Names: &names.Names{}, Quran: q, Hadith: nil, Ready: ready}).ExplainHandler(nil))
 	body := `{"context":{"source":"quran","chapter":1,"verse":2,"translation":"sahih"},"question":"What does this mean?","history":[{"role":"user","content":"Explain this verse"},{"role":"assistant","content":"Previous explanation"}]}`
 	for _, path := range []string{"/api/explain", "/api/model/explain", "/api/quran/1/2/explain"} {
 		r := httptest.NewRequest("POST", path, strings.NewReader(body))
@@ -153,9 +153,9 @@ func TestExplainRoutesSharePersistentDefaultCache(t *testing.T) {
 	close(ready)
 	q := quran.Load()
 	mux := http.NewServeMux()
-	mux.Handle("/api/explain", ExplainHandler(nil, modelIndex{}, &names.Names{}, q, nil, ready, cache))
-	mux.Handle("/api/model/explain", ExplainHandler(keys, modelIndex{}, &names.Names{}, q, nil, ready, cache))
-	mux.Handle("POST /api/quran/{chapter}/{verse}/explain", ExplainHandler(nil, modelIndex{}, &names.Names{}, q, nil, ready, cache))
+	mux.Handle("/api/explain", (&ModelService{Index: modelIndex{}, Names: &names.Names{}, Quran: q, Hadith: nil, Ready: ready, Cache: cache}).ExplainHandler(nil))
+	mux.Handle("/api/model/explain", (&ModelService{Index: modelIndex{}, Names: &names.Names{}, Quran: q, Hadith: nil, Ready: ready, Cache: cache}).ExplainHandler(keys))
+	mux.Handle("POST /api/quran/{chapter}/{verse}/explain", (&ModelService{Index: modelIndex{}, Names: &names.Names{}, Quran: q, Hadith: nil, Ready: ready, Cache: cache}).ExplainHandler(nil))
 	send := func(path, body, auth string) *httptest.ResponseRecorder {
 		r := httptest.NewRequest("POST", path, strings.NewReader(body))
 		r.Header.Set("Authorization", auth)

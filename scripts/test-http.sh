@@ -28,6 +28,9 @@ for _ in range(300):
 else: raise SystemExit('server did not become ready')
 PY
 then cat "$test_dir/server.log"; exit 1; fi
+if [ "${REMINDER_MCP_SMOKE:-}" = "1" ]; then
+ python3 scripts/test-plugin.py http://127.0.0.1:8080/mcp --sdk
+fi
 if ! REMINDER_TEST_URL=http://127.0.0.1:8080 go test -count=1 ./test; then
  cat "$test_dir/server.log"
  exit 1

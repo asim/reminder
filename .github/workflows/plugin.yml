@@ -1,0 +1,30 @@
+name: Package Reminder plugin
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'plugins/reminder/**'
+      - 'scripts/package-plugin.py'
+      - '.github/workflows/plugin.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'plugins/reminder/**'
+      - 'scripts/package-plugin.py'
+      - '.github/workflows/plugin.yml'
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 scripts/package-plugin.py "$RUNNER_TEMP/reminder-plugin.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reminder-plugin
+          path: ${{ runner.temp }}/reminder-plugin.zip
+          if-no-files-found: error
