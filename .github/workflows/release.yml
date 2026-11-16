@@ -19,10 +19,12 @@ jobs:
         name: Fetch tags
         run: git fetch --prune --unshallow --tags -f
       - 
-        name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        name: Set up Node
+        uses: actions/setup-node@v4
         with:
-          version: 10
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
       -
         name: Set up Go
         uses: actions/setup-go@v6

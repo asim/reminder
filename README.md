@@ -127,7 +127,7 @@ The reminder bakes in a "lite" app by default. This can be replaced by a feature
 To build the react app
 
 ```
-# requires pnpm
+# requires Node.js 22 and npm
 make setup
 ```
 
