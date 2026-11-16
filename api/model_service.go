@@ -63,7 +63,7 @@ func (s *ModelService) Ask(ctx context.Context, request model.Request, access Ge
 	if err != nil {
 		return nil, err
 	}
-	return model.Respond(ctx, request, s.references(nil))
+	return model.Research(ctx, request, s.references(nil), search.Lookups(s.Index, s.Names, s.Quran, s.Hadith, ""))
 }
 
 func (s *ModelService) Explain(ctx context.Context, request model.ExplainRequest, access GenerationAccess) (*model.Result, error) {
@@ -90,7 +90,7 @@ func (s *ModelService) Explain(ctx context.Context, request model.ExplainRequest
 		if err != nil {
 			return nil, err
 		}
-		result, err := model.Explain(generation, request, s.references(passage))
+		result, err := model.Explain(generation, request, s.references(passage), search.Lookups(s.Index, s.Names, s.Quran, s.Hadith, ""))
 		if err != nil {
 			return nil, err
 		}

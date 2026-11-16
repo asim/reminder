@@ -350,10 +350,10 @@ func (i *FTS) queryFTS(q string, limit int) ([]*Result, error) {
 		SELECT d.text, d.metadata, bm25(docs_fts) AS rank
 		FROM docs_fts f
 		JOIN docs d ON d.id = f.rowid
-		WHERE docs_fts MATCH ? AND (? = '' OR json_extract(d.metadata, '$.source') = ?)
+		WHERE docs_fts MATCH ? AND (? = '' OR json_extract(d.metadata, '$.source') = ? OR (? = 'hadith' AND json_extract(d.metadata, '$.source') IN ('bukhari', 'muslim')))
 		ORDER BY rank
 		LIMIT ?
-	`, ftsQuery, source, source, limit)
+	`, ftsQuery, source, source, source, limit)
 	if err != nil {
 		return nil, fmt.Errorf("search: query: %w", err)
 	}
@@ -405,7 +405,7 @@ func (i *FTS) Close() error {
 // A collection prefix is an explicit search scope; ordinary queries cover all sources.
 func collectionQuery(query string) (string, string) {
 	trimmed := strings.TrimSpace(query)
-	for _, source := range []string{"bukhari", "muslim"} {
+	for _, source := range []string{"quran", "hadith", "tafsir", "names", "bukhari", "muslim"} {
 		if strings.HasPrefix(strings.ToLower(trimmed), source+":") {
 			return source, strings.TrimSpace(trimmed[len(source)+1:])
 		}

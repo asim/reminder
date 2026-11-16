@@ -63,6 +63,9 @@ func (modelIndex) Query(string) ([]*search.Result, error) {
 }
 func TestModelKeyAllowanceAndGlobalLimit(t *testing.T) {
 	provider := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if replyToLookupPlan(w, r) {
+			return
+		}
 		var body struct {
 			Messages []model.Message `json:"messages"`
 		}
@@ -79,7 +82,7 @@ func TestModelKeyAllowanceAndGlobalLimit(t *testing.T) {
 	t.Setenv("OLLAMA_LLM_MODEL", "test")
 	t.Setenv("OLLAMA_BASE_URL", provider.URL+"/v1")
 	t.Setenv("AI_IP_DAILY_LIMIT", "0")
-	t.Setenv("AI_DAILY_LIMIT", "2")
+	t.Setenv("AI_DAILY_LIMIT", "4") // two provider calls per researched answer
 	if err := model.ConfigureLimits(t.TempDir()); err != nil {
 		t.Fatal(err)
 	}

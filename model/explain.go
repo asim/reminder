@@ -52,7 +52,7 @@ func (r ExplainRequest) Request() (Request, error) {
 		return Request{}, fmt.Errorf("a passage context or question is required")
 	}
 	if question == "" {
-		question = "Explain this passage, including relevant Arabic meanings and tafsir."
+		question = "Explain the overall meaning and message of this passage, using its surrounding verses and tafsir."
 	}
 	anchor := "Explain the supplied question using retrieved evidence."
 	if c.Chapter > 0 {
@@ -63,18 +63,22 @@ func (r ExplainRequest) Request() (Request, error) {
 			anchor += ". Give an overview limited to the verses actually supplied as evidence; explicitly state any incomplete coverage. Do not imply a complete chapter analysis."
 		}
 	}
-	prompt := fmt.Sprintf("%s\nKeep this passage central throughout follow-up questions. Explain in accessible English, distinguishing source interpretation from your synthesis.\nSelected translation: %s\nSelected text (user selection, not independent evidence): %s\nQuestion: %s", anchor, c.Translation, c.Selection, question)
+	prompt := fmt.Sprintf("%s\nKeep this passage central throughout follow-up questions. For a general question such as “What does it mean?”, start with the meaning of the whole passage and its message in plain English, then explain relevant context and tafsir. Do not turn a general question into an analysis of the first word, a conjunction, or translation differences. Discuss grammar only when the question explicitly asks about wording or it is essential to understanding. A text selection alone must not override a general question about the verse. Distinguish source interpretation from your synthesis.\nSelected translation: %s\nSelected text (user selection, not independent evidence): %s\nQuestion: %s", anchor, c.Translation, c.Selection, question)
 	request := Request{Prompt: prompt, History: r.History}
 	return request, request.Validate()
 }
 
 // Explain shares grounding, limits and citation validation with search summaries.
-func Explain(ctx context.Context, request ExplainRequest, retrieve func(string) ([]*Reference, error)) (*Result, error) {
+func Explain(ctx context.Context, request ExplainRequest, retrieve func(string) ([]*Reference, error), lookups ...LookupFunc) (*Result, error) {
 	r, err := request.Request()
 	if err != nil {
 		return nil, err
 	}
-	return Respond(ctx, r, func(_ string) ([]*Reference, error) {
+	var lookup LookupFunc
+	if len(lookups) > 0 {
+		lookup = lookups[0]
+	}
+	return Research(ctx, r, func(_ string) ([]*Reference, error) {
 		query := strings.TrimSpace(request.Question + " " + request.Q + " " + request.Context.Selection)
 		if request.Context.Chapter > 0 {
 			if request.Context.Verse > 0 {
@@ -89,7 +93,7 @@ func Explain(ctx context.Context, request ExplainRequest, retrieve func(string) 
 			}
 		}
 		return retrieve(query)
-	})
+	}, lookup)
 }
 
 // ExplanationVersion excludes credentials; deployment fingerprints additionally

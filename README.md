@@ -74,6 +74,20 @@ OpenAI API credentials are required; a ChatGPT/Codex subscription is not an API 
 
 The reader links back to the full chapter at the selected verse.
 
+Search offers All, Quran, Hadith, Tafsir and Names filters, applied before result
+limits. `/api/search` accepts `source: "all" | "quran" | "hadith" | "tafsir" | "names"`.
+The browser retains both searches and AI answers in Recent, separately by source
+and mode; refresh restores the query and filter without regenerating a saved answer.
+
+Ask AI can request up to four read-only corpus lookups before answering: focused
+searches, a verse and its neighbours, or a complete Quran mention inventory. The
+inventory reports explicit whole-word matches for the supplied names/aliases in
+the bundled texts, not thematic or unnamed references. One planning call and one
+answer call use the existing model usage limits. Claims remain grounded in the
+retrieved texts with numbered citations. General verse explanations start with
+the passage's meaning and include neighbouring verses; Arabic grammar evidence
+is retrieved for explicit wording questions.
+
 Summaries are optional. With no model configured the summarise controls are
 hidden and search still returns references.
 

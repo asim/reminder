@@ -17,9 +17,10 @@ var explicitVerse = regexp.MustCompile(`\b([0-9]{1,3}):([0-9]{1,3})\b`)
 // ModelReferences resolves identifiers against bundled texts and adds attributed
 // translations and verified tafsir. Stale index excerpts are never evidence.
 func ModelReferences(idx Searcher, n *names.Names, q *quran.Quran, b *hadith.Collection, query string) ([]*Result, error) {
+	source, text := collectionQuery(query)
 	var refs []*Result
 	// Questions such as "Explain Quran 112:1" must retrieve that exact verse.
-	for _, match := range explicitVerse.FindAllStringSubmatch(query, 8) {
+	for _, match := range explicitVerse.FindAllStringSubmatch(text, 8) {
 		refs = append(refs, &Result{Score: 1, Metadata: map[string]string{"source": "quran", "chapter": match[1], "verse": match[2]}})
 	}
 	topical, err := References(WithQuran(idx, q), n, query)
@@ -27,13 +28,16 @@ func ModelReferences(idx Searcher, n *names.Names, q *quran.Quran, b *hadith.Col
 		return nil, err
 	}
 	refs = append(refs, topical...)
-	enriched := EnrichReferences(refs, n, q, b)
+	enriched := FilterSource(EnrichReferences(refs, n, q, b), source)
+	if !WantsLexical(text) || source != "" {
+		return enriched, nil
+	}
 	lexical, err := LexicalReferences(q, query)
 	if err != nil {
 		return nil, err
 	}
 	// Keep the primary passage and its translations/tafsir ahead of lexical aids.
-	split := 4 * len(explicitVerse.FindAllStringSubmatch(query, 8))
+	split := 4 * len(explicitVerse.FindAllStringSubmatch(text, 8))
 	if split > len(enriched) {
 		split = len(enriched)
 	}

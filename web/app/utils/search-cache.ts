@@ -3,6 +3,10 @@ import type { SearchResponseType } from '~/queries/search';
 const SEARCH_CACHE_KEY = 'reminder_search_cache';
 const NAMES_REVISION = '2026-11-15-muslim-sqlite';
 
+function identity(query: string, source = 'all', mode = 'search') {
+    return JSON.stringify([query.trim().toLowerCase(), source || 'all', mode]);
+}
+
 export type CachedSearch = {
     query: string;
     result: SearchResponseType;
@@ -48,7 +52,7 @@ export function cacheSearchResult(query: string, result: SearchResponseType) {
 
         // Remove any existing cache for this query
         const filteredSearches = cache.searches.filter(
-            (s) => s.query.toLowerCase() !== query.toLowerCase()
+            (s) => identity(s.query, s.result.source, s.result.mode || (s.result.answer ? 'ask' : 'search')) !== identity(query, result.source, result.mode || (result.answer ? 'ask' : 'search'))
         );
 
         // Add new search to the beginning
@@ -71,13 +75,13 @@ export function cacheSearchResult(query: string, result: SearchResponseType) {
 }
 
 // Get a cached search result by query
-export function getCachedSearchResult(query: string): SearchResponseType | null {
+export function getCachedSearchResult(query: string, source = 'all', mode = 'search'): SearchResponseType | null {
     if (typeof window === 'undefined') return null;
 
     try {
         const cache = getSearchCache();
         const cached = cache.searches.find(
-            (s) => s.query.toLowerCase() === query.toLowerCase()
+            (s) => identity(s.query, s.result.source, s.result.mode || (s.result.answer ? 'ask' : 'search')) === identity(query, source, mode)
         );
         return cached ? cached.result : null;
     } catch (error) {

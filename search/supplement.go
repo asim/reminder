@@ -19,11 +19,8 @@ func (s *supplemented) Query(query string) ([]*Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	source, semanticQuery := collectionQuery(query)
-	if source == "" {
-		semanticQuery = query
-	}
-	extra, err := s.extra.Query(semanticQuery)
+	source, _ := collectionQuery(query)
+	extra, err := s.extra.Query(query)
 	if err != nil {
 		return primary, nil
 	}
@@ -45,7 +42,7 @@ func (s *supplemented) Query(query string) ([]*Result, error) {
 				m[strings.ToLower(key)] = value
 				changed = changed || strings.ToLower(key) != key
 			}
-			if source != "" && m["source"] != source {
+			if !MatchesSource(source, m["source"]) {
 				continue
 			}
 			if changed {

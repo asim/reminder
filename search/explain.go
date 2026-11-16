@@ -19,7 +19,14 @@ func ExplanationPassage(q *quran.Quran, c model.ExplainContext) ([]*Result, erro
 		if chapter.Verse(c.Verse) == nil {
 			return nil, fmt.Errorf("verse not found")
 		}
-		return VerseReferences(q, c.Chapter, c.Verse, 1), nil
+		refs := VerseReferences(q, c.Chapter, c.Verse, 1)
+		// Keep the focus first; supply the immediate passage context automatically.
+		for _, number := range []int{c.Verse - 1, c.Verse + 1} {
+			if number > 0 {
+				refs = append(refs, VerseReferences(q, c.Chapter, number, 1)...)
+			}
+		}
+		return refs, nil
 	}
 	// Put the chapter text before supplementary commentary so the budget covers as
 	// much of the chapter as possible. The model must disclose partial coverage.

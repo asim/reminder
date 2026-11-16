@@ -60,7 +60,12 @@ func (l *quranLookup) chapter(s string) *quran.Chapter {
 	return nil
 }
 func (l *quranLookup) Query(query string) ([]*Result, error) {
-	query = strings.TrimSpace(query)
+	source, text := collectionQuery(query)
+	if source != "" && source != "quran" {
+		return l.Searcher.Query(query)
+	}
+	original := query
+	query = strings.TrimSpace(text)
 	if ch := l.chapter(query); ch != nil {
 		return []*Result{{Text: fmt.Sprintf("%s — %s. Chapter %d, %d verses.", ch.Name, ch.English, ch.Number, ch.VerseCount), Score: 1, Metadata: map[string]string{"source": "quran", "kind": "chapter", "chapter": strconv.Itoa(ch.Number), "name": ch.Name}}}, nil
 	}
@@ -90,5 +95,5 @@ func (l *quranLookup) Query(query string) ([]*Result, error) {
 			return []*Result{}, nil
 		}
 	}
-	return l.Searcher.Query(query)
+	return l.Searcher.Query(original)
 }

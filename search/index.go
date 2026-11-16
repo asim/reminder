@@ -157,7 +157,24 @@ func (i *Index) Store(md map[string]string, content ...string) error {
 func (i *Index) Query(v string) ([]*Result, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	res, err := i.Col.Query(ctx, v, 25, nil, nil)
+	source, query := collectionQuery(v)
+	// Apply source restrictions inside vector retrieval, before its top-25 limit.
+	filter := map[string]string(nil)
+	if source != "" {
+		filter = map[string]string{"source": source}
+	}
+	if source == "hadith" {
+		var out []*Result
+		for _, collection := range []string{"bukhari", "muslim"} {
+			refs, err := i.Query(collection + ":" + query)
+			if err != nil {
+				return nil, err
+			}
+			out = append(out, refs...)
+		}
+		return out, nil
+	}
+	res, err := i.Col.Query(ctx, query, 25, filter, nil)
 	if err != nil {
 		return nil, err
 	}
