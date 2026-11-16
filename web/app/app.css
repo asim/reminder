@@ -132,3 +132,8 @@
     border-radius: 0.75rem;
   }
 }
+
+/* Reading explanations use the same sheet/dialog treatment as settings. */
+.explanation-dialog {
+  max-width: 40rem;
+}
