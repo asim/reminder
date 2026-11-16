@@ -30,8 +30,8 @@ export async function clientLoader(props: Route.LoaderArgs) {
 export default function QuranChapter(props: Route.ComponentProps) {
   const { chapterNumber } = props.params;
   const { settings, textStyle } = useQuranSettings();
-  const { mode, wordByWord, transliteration: showTransliteration, commentary: showCommentary, translation } = settings;
-  const data = useTranslatedChapter(Number(chapterNumber), translation);
+  const { mode, wordByWord, transliteration: showTransliteration, commentary: showCommentary, translation, tafsir } = settings;
+  const data = useTranslatedChapter(Number(chapterNumber), translation, undefined, tafsir);
   const location = useLocation();
   const audioPlayerRef = useRef<AudioPlayerHandle>(null);
   const [playingVerse, setPlayingVerse] = useState<string | null>(null);
@@ -94,7 +94,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
         />
         <ShareButton
           title={`${data.english} (${data.name}) - Quran Chapter ${data.number}`}
-          url={buildQuranShareUrl(`/quran/${data.number}`, { mode, translation, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}
+          url={buildQuranShareUrl(`/quran/${data.number}`, { mode, translation, tafsir, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}
         />
         </>}
       />
@@ -106,10 +106,10 @@ export default function QuranChapter(props: Route.ComponentProps) {
           <section id={String(verse.number)} data-chapter-verse={`${data.number}:${verse.number}`} key={verse.number} className='border-b border-gray-100 pb-3 sm:pb-8 scroll-mt-4'>
             {mode !== 'english' && <VerseArabic verse={verse} wordByWord={wordByWord} transliteration={showTransliteration} />}
             {mode !== 'arabic' && <p className='quran-translation text-base sm:text-lg leading-relaxed'>{verse.text}</p>}
-            {showCommentary && verse.comments && <div className='mt-3 p-3 bg-yellow-50 text-sm leading-relaxed'><strong>{verse.commentary_source || "Stored commentary"}:</strong> {verse.comments}</div>}
+            {showCommentary && <div className='mt-3 p-3 bg-yellow-50 text-sm leading-relaxed'><strong>{verse.commentary_source || "Stored commentary"}:</strong> {verse.comments || 'No commentary saved for this source and verse.'}</div>}
             {verse.number > 0 && <>
               <div className='flex items-center justify-between mt-2 gap-2'>
-                <Link className='text-xs sm:text-sm text-gray-500' to={buildQuranShareUrl(`/quran/${data.number}/${verse.number}`, { mode, translation, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}>{data.number}:{verse.number}</Link>
+                <Link className='text-xs sm:text-sm text-gray-500' to={buildQuranShareUrl(`/quran/${data.number}/${verse.number}`, { mode, translation, tafsir, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}>{data.number}:{verse.number}</Link>
                 <div className='flex flex-wrap items-center justify-end gap-1'>
                   <ExplainButton chapter={data.number} verse={verse.number} translation={translation} commentary={[verse]} />
                   {(verse.audio_arabic || verse.audio_english) && (
@@ -123,9 +123,9 @@ export default function QuranChapter(props: Route.ComponentProps) {
                       {playingVerse === `Quran ${data.number}:${verse.number}` ? <Pause className='size-4' /> : <Play className='size-4' />}
                     </button>
                   )}
-                  <ReadingBookmarkButton type='quran' label={`${data.english} ${data.number}:${verse.number}`} url={buildQuranShareUrl(`/quran/${data.number}`, { mode, translation, wordByWord, commentary: showCommentary, transliteration: showTransliteration }) + `#${verse.number}`} excerpt={verse.text.slice(0, 80)} />
-                  <BookmarkButton type='quran' itemKey={`${data.number}:${verse.number}`} label={`${data.english} ${data.number}:${verse.number}`} url={buildQuranShareUrl(`/quran/${data.number}`, { mode, translation, wordByWord, commentary: showCommentary, transliteration: showTransliteration }) + `#${verse.number}`} excerpt={verse.text.slice(0, 80)} />
-                  <ShareButton title={`Quran ${data.number}:${verse.number}`} text={verse.text} url={buildQuranShareUrl(`/quran/${data.number}/${verse.number}`, { mode, translation, wordByWord, commentary: showCommentary, transliteration: showTransliteration })} />
+                  <ReadingBookmarkButton type='quran' label={`${data.english} ${data.number}:${verse.number}`} url={buildQuranShareUrl(`/quran/${data.number}`, { mode, translation, tafsir, wordByWord, commentary: showCommentary, transliteration: showTransliteration }) + `#${verse.number}`} excerpt={verse.text.slice(0, 80)} />
+                  <BookmarkButton type='quran' itemKey={`${data.number}:${verse.number}`} label={`${data.english} ${data.number}:${verse.number}`} url={buildQuranShareUrl(`/quran/${data.number}`, { mode, translation, tafsir, wordByWord, commentary: showCommentary, transliteration: showTransliteration }) + `#${verse.number}`} excerpt={verse.text.slice(0, 80)} />
+                  <ShareButton title={`Quran ${data.number}:${verse.number}`} text={verse.text} url={buildQuranShareUrl(`/quran/${data.number}/${verse.number}`, { mode, translation, tafsir, wordByWord, commentary: showCommentary, transliteration: showTransliteration })} />
                 </div>
               </div>
             </>}
@@ -138,7 +138,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
           disabled={previousChapter < 1}
           className='text-sm sm:text-base py-2 sm:py-2 px-3 sm:px-4'
         >
-          <Link to={buildQuranShareUrl(`/quran/${previousChapter}`, { mode, translation, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}>
+          <Link to={buildQuranShareUrl(`/quran/${previousChapter}`, { mode, translation, tafsir, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}>
             <CircleChevronLeft className='size-4' />
             <span className='ml-1'>Previous</span>
           </Link>
@@ -149,7 +149,7 @@ export default function QuranChapter(props: Route.ComponentProps) {
           disabled={nextChapter > 114}
           className='text-sm sm:text-base py-2 sm:py-2 px-3 sm:px-4'
         >
-          <Link to={buildQuranShareUrl(`/quran/${nextChapter}`, { mode, translation, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}>
+          <Link to={buildQuranShareUrl(`/quran/${nextChapter}`, { mode, translation, tafsir, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}>
             <span className='mr-1'>Next</span>
             <CircleChevronRight className='size-4' />
           </Link>

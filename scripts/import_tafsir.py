@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate a QUL English Al-Jalalayn JSON/ZIP download before replacing the corpus."""
+"""Validate and import a QUL tafsir JSON/ZIP download."""
 import argparse
 import hashlib
 import json
@@ -83,6 +83,10 @@ def convert(source):
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('input', type=Path)
+    ap.add_argument('--id', default='jalalayn-en')
+    ap.add_argument('--title', default='Tafsir Al-Jalalayn (English)')
+    ap.add_argument('--source-url', default='https://qul.tarteel.ai/resources/tafsir/english-tafsir-al-jalalayn')
+    ap.add_argument('--stem', default='commentary', choices=['commentary', 'original', 'ibn-kathir'])
     args = ap.parse_args()
     if args.input.stat().st_size > MAX_BYTES:
         raise ValueError('input exceeds 64 MiB')
@@ -96,18 +100,18 @@ def main():
             source = archive.read(files[0])
     result = convert(source)
     edition = {
-        'id': 'jalalayn-en', 'title': 'Tafsir Al-Jalalayn (English)',
+        'id': args.id, 'title': args.title,
         'language': 'en', 'verified': True,
-        'source_url': 'https://qul.tarteel.ai/resources/tafsir/english-tafsir-al-jalalayn',
+        'source_url': args.source_url,
         'download_sha256': hashlib.sha256(downloaded).hexdigest(),
-        'rights': 'QUL reports no copyright information for this resource; not covered by the code licence.',
+        'rights': 'Source text is not covered by the repository software licence; consult the upstream resource for rights.',
     }
     # All validation completes before either tracked file is changed. Review and
     # commit both files together; this is a build-time importer, never a server job.
     destination = ROOT / 'tafsir/data'
-    for name, content in [('commentary.json', result), ('edition.json', edition)]:
+    for name, content in [(args.stem + '.json', result), ('edition.json' if args.stem == 'commentary' else args.stem + '-edition.json', edition)]:
         (destination / name).write_text(json.dumps(content, ensure_ascii=False, indent=2) + '\n')
-    print('Imported Al-Jalalayn for all 6,236 verses. Run go test ./tafsir ./quran ./search.')
+    print(f'Imported {args.title} for all 6,236 verses. Run go test ./tafsir ./quran ./search.')
 
 if __name__ == '__main__':
     main()

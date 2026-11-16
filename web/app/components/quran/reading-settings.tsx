@@ -1,3 +1,5 @@
+import { TafsirSelect } from './tafsir-select';
+import { validTafsir, type TafsirEdition } from '~/utils/tafsir-editions';
 import { Settings, X } from 'lucide-react';
 import { createContext, useContext, useRef, useState, useId, useEffect, useLayoutEffect } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
@@ -10,6 +12,7 @@ type Preferences = {
   mode: ViewMode;
   chapterOrder: ChapterOrder;
   translation: Translation;
+  tafsir: TafsirEdition;
   wordByWord: boolean;
   transliteration: boolean;
   commentary: boolean;
@@ -17,7 +20,7 @@ type Preferences = {
   englishSize: number;
 };
 const defaults: Preferences = {
-  chapterOrder: 'standard', mode: 'translation', translation: 'khattab', wordByWord: false,
+  tafsir: 'jalalayn-en', chapterOrder: 'standard', mode: 'translation', translation: 'khattab', wordByWord: false,
   transliteration: false, commentary: false, arabicSize: 100, englishSize: 100,
 };
 const storageKey = 'quran-reading-settings';
@@ -32,6 +35,7 @@ function savedPreferences(): Preferences {
     return {
       chapterOrder: saved.chapterOrder === 'revelation' ? 'revelation' : 'standard',
       mode: validMode(saved.mode) ? saved.mode : validMode(oldMode) ? oldMode : defaults.mode,
+      tafsir: validTafsir(saved.tafsir) ? saved.tafsir : defaults.tafsir,
       translation: validTranslation(saved.translation) ? saved.translation : defaults.translation,
       wordByWord: typeof saved.wordByWord === 'boolean' ? saved.wordByWord : localStorage.getItem('quran-word-by-word-toggle') === 'true',
       transliteration: typeof saved.transliteration === 'boolean' ? saved.transliteration : localStorage.getItem('quran-transliteration-toggle') === 'true',
@@ -64,6 +68,7 @@ export function QuranSettingsProvider({ children }: { children: ReactNode }) {
   };
   const settings: Preferences = pending?.settings ?? {
     ...saved,
+    tafsir: validTafsir(params.get('tafsir')) ? params.get('tafsir') as TafsirEdition : saved.tafsir,
     mode: validMode(mode) ? mode : saved.mode,
     translation: validTranslation(translation) ? translation : saved.translation,
     wordByWord: booleanParam('wbw', saved.wordByWord),
@@ -103,6 +108,7 @@ export function QuranSettingsProvider({ children }: { children: ReactNode }) {
     try { localStorage.setItem(storageKey, JSON.stringify(next)); } catch { /* Still works without storage. */ }
     params.set('mode', next.mode);
     params.set('translation', next.translation);
+    params.set('tafsir', next.tafsir);
     params.set('wbw', next.wordByWord ? '1' : '0');
     params.set('transliteration', next.transliteration ? '1' : '0');
     params.set('commentary', next.commentary ? '1' : '0');
@@ -174,6 +180,7 @@ export function ReadingSettings() {
             <option value='asad'>Muhammad Asad · The Message of the Qur’an</option>
           </select>
         </label>
+        <TafsirSelect />
         <div className='grid grid-cols-2 gap-4'>
           {(['arabicSize', 'englishSize'] as const).map(key => <label key={key} className='text-sm'>
             <span className='block mb-2 font-medium'>{key === 'arabicSize' ? 'Arabic text size' : 'English text size'}</span>

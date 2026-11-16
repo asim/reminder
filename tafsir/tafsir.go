@@ -140,3 +140,34 @@ func (c *Collection) Get(chapter, verse int) *Passage {
 	return c.byVerse[fmt.Sprintf("%d:%d", chapter, verse)]
 }
 func (c *Collection) Passages() []*Passage { return append([]*Passage(nil), c.passages...) }
+
+// Editions returns the bundled reading editions in display order.
+// Load remains the default model evidence source.
+func Editions() []*Collection {
+	readingOnce.Do(func() {
+		readingCollections = []*Collection{Load()}
+		for _, stem := range []string{"original", "ibn-kathir"} {
+			data, err := files.ReadFile("data/" + stem + ".json")
+			if err != nil {
+				panic(err)
+			}
+			meta, err := files.ReadFile("data/" + stem + "-edition.json")
+			if err != nil {
+				panic(err)
+			}
+			var edition Edition
+			if err := json.Unmarshal(meta, &edition); err != nil {
+				panic(err)
+			}
+			collection, err := Parse(data, edition)
+			if err != nil {
+				panic(err)
+			}
+			readingCollections = append(readingCollections, collection)
+		}
+	})
+	return append([]*Collection(nil), readingCollections...)
+}
+
+var readingOnce sync.Once
+var readingCollections []*Collection

@@ -2,8 +2,8 @@
 
 ## Status
 
-English Tafsir Al-Jalalayn from QUL is bundled for all 6,236 verses. It replaces
-the previous unattributed commentary in the reader and is available as attributed
+English Tafsir Al-Jalalayn from QUL is bundled for all 6,236 verses. It remains the default
+reader commentary and is available as attributed
 evidence to the model through the shared tafsir package.
 
 QUL resource: https://qul.tarteel.ai/resources/tafsir/english-tafsir-al-jalalayn
@@ -70,3 +70,37 @@ returns stored tafsir with `generated: false`, without calling a model.
 
 Differences between translations are not proof of alternative lexical meanings.
 Dictionary/lemma integration remains separate future work.
+
+## Reading editions
+
+Reading settings and the Tafsir panel offer Al-Jalalayn, Al-Mukhtasar and Ibn Kathir
+in English. The choice is independent of the Commentary visibility toggle,
+saved locally, and carried by shared reading URLs. All three editions travel
+in chapter/verse payloads and work offline after refreshing the chapter.
+
+The original commentary is English Al-Mukhtasar, QUL resource
+https://qul.tarteel.ai/resources/tafsir/266. The supplied
+`abridged-explanation-of-the-quran.json` matches all 6,236 original entries exactly.
+Its existing `original-en` ID is retained for saved settings and shared links.
+The supplied `en-tafisr-ibn-kathir.json` is imported as `ibn-kathir-en`, preserving
+shared-passage pointers and converting HTML to plain text. Its exact upstream
+resource URL was not supplied, so no URL is guessed. Both import manifests
+record the archive SHA-256; source texts are not relicensed by the code licence.
+
+Al-Jalalayn remains the default and model grounding source. Selecting another
+reading edition does not change model evidence or explanation caches.
+
+The importer accepts `--stem`, `--id`, `--title` and `--source-url` for additional
+editions. Use stem `original` and ID `original-en` for Al-Mukhtasar, or stem
+`ibn-kathir` and ID `ibn-kathir-en` for Ibn Kathir. Pass an empty source URL
+when the exact resource address is not known.
+
+Quran API verse records now expose a `commentaries` map keyed by edition ID.
+Each value contains `text`, `source`, `url` (when known), and `verified`.
+Existing `comments`, `commentary_source`, and `commentary_url` retain their
+Al-Jalalayn values for compatibility. Missing editions are shown as unavailable,
+without substituting another source.
+
+To add a reading edition, register its parsed collection in `tafsir.Editions()`
+and its display option in `web/app/utils/tafsir-editions.ts`. Record attribution
+and rights before presenting a source as verified.

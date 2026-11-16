@@ -1,3 +1,4 @@
+import type { TafsirEdition } from '~/utils/tafsir-editions';
 import { queryClient } from '~/utils/query-client';
 import { useMemo } from 'react';
 import { useSuspenseQuery } from '@tanstack/react-query';
@@ -34,6 +35,7 @@ type VerseType = {
   arabic: string;
   words?: WordByWord[];
   comments?: string;
+  commentaries?: Record<string, { text: string; source: string; url?: string; verified: boolean }>;
   commentary_source?: string;
   commentary_url?: string;
   audio_arabic?: string;
@@ -67,14 +69,20 @@ export const getVersePageOptions = (chapter: number, verse: number) => ({
   },
 });
 
-export function useTranslatedChapter(chapterNumber: number, translation: Translation, verse?: number) {
+export function useTranslatedChapter(chapterNumber: number, translation: Translation, verse?: number, tafsir: TafsirEdition = 'jalalayn-en') {
   const { data: original } = useSuspenseQuery(verse ? getVersePageOptions(chapterNumber, verse) : getChapterOptions(chapterNumber));
   return useMemo(() => ({
     ...original,
     verses: original.verses.map(verse => ({
       ...verse,
+      comments: verse.commentaries?.[tafsir]?.text ??
+        (tafsir === 'jalalayn-en' ? verse.comments : ''),
+      commentary_source: verse.commentaries?.[tafsir]?.source ??
+        (tafsir === 'jalalayn-en' ? verse.commentary_source : (tafsir === 'original-en' ? 'Al-Mukhtasar (English)' : 'Tafsir Ibn Kathir (English)')),
+      commentary_url: verse.commentaries?.[tafsir]?.url ??
+        (tafsir === 'jalalayn-en' ? verse.commentary_url : undefined),
       text: translation === 'khattab' ? verse.text :
         verse.translations?.[translation] ?? 'This translation has not been saved yet. Reconnect to update this chapter.',
     })),
-  }), [original, translation]);
+  }), [original, translation, tafsir]);
 }

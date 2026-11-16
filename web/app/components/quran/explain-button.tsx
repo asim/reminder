@@ -1,3 +1,4 @@
+import { TafsirSelect } from './tafsir-select';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { PrimaryButton } from '~/components/interface/primary-button';
@@ -78,7 +79,7 @@ export function ExplainButton({ chapter, verse, translation, commentary = [] }: 
     }
   }
 
-  if (!modelAvailable && !passages.length) return null;
+
 
   return <>
     <button type='button' onClick={open} className='inline-flex items-center justify-center p-1 rounded-md transition-colors text-gray-400 hover:bg-gray-100 hover:text-gray-600' title={`${modelAvailable ? 'Explain' : 'Tafsir'} ${label}`} aria-label={`${modelAvailable ? 'Explain' : 'Tafsir'} ${label}`}>
@@ -89,16 +90,17 @@ export function ExplainButton({ chapter, verse, translation, commentary = [] }: 
         <h2 className='text-lg font-semibold'>{title} {label}</h2>
         <button type='button' onClick={close} aria-label='Close reading panel' className='rounded p-2 hover:bg-gray-100'><X className='size-4' /></button>
       </div>
-      {modelAvailable && passages.length > 0 && <nav aria-label='Reading panel' className='flex gap-4 border-b border-gray-100 px-4 py-3 text-sm sm:px-5'>
+      {modelAvailable && <nav aria-label='Reading panel' className='flex gap-4 border-b border-gray-100 px-4 py-3 text-sm sm:px-5'>
         <button type='button' aria-pressed={view === 'explain'} onClick={() => setView('explain')} className={view === 'explain' ? 'font-medium underline underline-offset-4' : 'text-gray-500'}>Explain</button>
         <button type='button' aria-pressed={view === 'tafsir'} onClick={() => setView('tafsir')} className={view === 'tafsir' ? 'font-medium underline underline-offset-4' : 'text-gray-500'}>Tafsir</button>
       </nav>}
       {view === 'tafsir' ? <div className='space-y-6 p-4 text-left text-sm leading-relaxed sm:p-5'>
+        <TafsirSelect />
         {passages.map(item => <section key={item.number} className='space-y-2'>
           <h3 className='font-medium'>{chapter}:{item.number} — {item.commentary_source || 'Stored commentary'}</h3>
           <p className='whitespace-pre-wrap leading-relaxed'>{item.comments}</p>
         </section>)}
-        {!passages.length && <p>No stored tafsir is available for this passage.</p>}
+        {!passages.length && <p>This tafsir has no saved commentary for this passage. Choose another source, or reconnect to update the chapter.</p>}
       </div> : <div className='space-y-4 p-4 text-left text-sm sm:p-5' aria-live='polite'>
         {selection && <blockquote className='border-l-2 pl-3' dir='auto'>{selection}</blockquote>}
         {!turns.length && <p className='text-gray-600'>Explore this passage through its Arabic, translations and tafsir. Ask a question or choose Explain.</p>}

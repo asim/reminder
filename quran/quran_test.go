@@ -100,3 +100,34 @@ func TestSaheehTranslationCoverage(t *testing.T) {
 		t.Fatalf("Saheeh source snapshot changed: %s", got)
 	}
 }
+
+func TestCommentaryEditions(t *testing.T) {
+	q := Load()
+	count := 0
+	for _, ch := range q.Chapters {
+		for _, verse := range ch.Verses {
+			if verse.Number == 0 {
+				continue
+			}
+			kathir := verse.Commentaries["ibn-kathir-en"]
+			if kathir.Text == "" || !kathir.Verified || kathir.Source != "Tafsir Ibn Kathir (English)" {
+				t.Fatalf("missing Ibn Kathir at %d:%d", ch.Number, verse.Number)
+			}
+			count++
+			current := verse.Commentaries["jalalayn-en"]
+			original := verse.Commentaries["original-en"]
+			if current.Text != verse.Comments || current.Source != verse.CommentarySource || !current.Verified {
+				t.Fatalf("default commentary changed at %d:%d", ch.Number, verse.Number)
+			}
+			if original.Text == "" || !original.Verified || original.Source != "Al-Mukhtasar (English)" {
+				t.Fatalf("missing or misattributed original commentary at %d:%d", ch.Number, verse.Number)
+			}
+		}
+	}
+	if count != 6236 {
+		t.Fatalf("coverage %d", count)
+	}
+	if q.Get(1).Verse(1).Commentaries["original-en"].Text == q.Get(1).Verse(1).Comments {
+		t.Fatal("editions were conflated")
+	}
+}

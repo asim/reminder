@@ -30,3 +30,28 @@ func TestBundledCorpus(t *testing.T) {
 		t.Fatalf("coverage %d", total)
 	}
 }
+
+func TestReadingEditions(t *testing.T) {
+	editions := Editions()
+	if len(editions) != 3 || editions[0] != Load() {
+		t.Fatal("reading editions changed default")
+	}
+	for _, c := range editions {
+		total := 0
+		for _, p := range c.Passages() {
+			total += len(p.Ayahs)
+			for _, ref := range p.Ayahs {
+				ch, v := Numbers(ref)
+				if c.Get(ch, v) != p {
+					t.Fatalf("lost shared passage %s", ref)
+				}
+			}
+		}
+		if total != 6236 {
+			t.Fatalf("%s coverage %d", c.Edition.ID, total)
+		}
+	}
+	if editions[1].Edition.SourceURL != "https://qul.tarteel.ai/resources/tafsir/266" {
+		t.Fatal("missing Al-Mukhtasar attribution")
+	}
+}
