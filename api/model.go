@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
@@ -148,56 +149,12 @@ func modelHandler(keys *KeyStore, idx search.Searcher, corpus *names.Names, q *q
 				ctx = model.WithClient(ctx, "")
 				ctx = model.WithTokenAllowance(ctx, func(units int) error { return keys.ReserveTokens(id, units, time.Now()) })
 			}
-			retrieve := func(query string) ([]*model.Reference, error) {
-				refs, err := search.ModelReferences(idx, corpus, q, b, query)
-				if err != nil {
-					return nil, err
-				}
-				// Dedupe exact records without merging distinct source annotations.
-				out := make([]*model.Reference, 0, len(passage)+len(refs))
-				seen := map[string]bool{}
-				for _, ref := range append(append([]*model.Reference{}, passage...), refs...) {
-					if ref == nil {
-						continue
-					}
-					identity, _ := json.Marshal(struct {
-						Text     string
-						Metadata map[string]string
-					}{ref.Text, ref.Metadata})
-					if !seen[string(identity)] {
-						seen[string(identity)] = true
-						out = append(out, ref)
-					}
-				}
-				return out, nil
-			}
-			var result *model.Result
+			var focus *model.ExplainRequest
 			if explain {
-				result, err = model.Explain(ctx, explanation, retrieve)
-			} else {
-				result, err = model.Respond(ctx, request, retrieve)
+				focus = &explanation
 			}
-			if err != nil {
-				return nil, err
-			}
-			if explain && explanation.Context.Chapter > 0 && explanation.Context.Verse == 0 {
-				seen := map[string]bool{}
-				for _, ref := range result.References {
-					md := ref.Metadata
-					if md["chapter"] == strconv.Itoa(explanation.Context.Chapter) && (md["source"] == "quran" || md["source"] == "quran_translation") {
-						seen[md["verse"]] = true
-					}
-				}
-				total := 0
-				for _, verse := range q.Get(explanation.Context.Chapter).Verses {
-					if verse.Number > 0 {
-						total++
-					}
-				}
-				result.Coverage = map[string]int{"included_verses": len(seen), "total_verses": total}
-			}
+			return respondWithSources(ctx, request, focus, passage, idx, corpus, q, b)
 
-			return result, nil
 		}
 		var result *model.Result
 		if explain {
@@ -232,3 +189,58 @@ type explainHTTPError struct {
 }
 
 func (e *explainHTTPError) Error() string { return e.message }
+
+// respondWithSources is shared by HTTP and MCP explanations and search prompting.
+func respondWithSources(ctx context.Context, request model.Request, explanation *model.ExplainRequest, passage []*model.Reference, idx search.Searcher, corpus *names.Names, q *quran.Quran, b *hadith.Collection) (*model.Result, error) {
+	retrieve := func(query string) ([]*model.Reference, error) {
+		refs, err := search.ModelReferences(idx, corpus, q, b, query)
+		if err != nil {
+			return nil, err
+		}
+		// Dedupe exact records without merging distinct source annotations.
+		out := make([]*model.Reference, 0, len(passage)+len(refs))
+		seen := map[string]bool{}
+		for _, ref := range append(append([]*model.Reference{}, passage...), refs...) {
+			if ref == nil {
+				continue
+			}
+			identity, _ := json.Marshal(struct {
+				Text     string
+				Metadata map[string]string
+			}{ref.Text, ref.Metadata})
+			if !seen[string(identity)] {
+				seen[string(identity)] = true
+				out = append(out, ref)
+			}
+		}
+		return out, nil
+	}
+	var result *model.Result
+	var err error
+	if explanation != nil {
+		result, err = model.Explain(ctx, *explanation, retrieve)
+	} else {
+		result, err = model.Respond(ctx, request, retrieve)
+	}
+	if err != nil {
+		return nil, err
+	}
+	if explanation != nil && explanation.Context.Chapter > 0 && explanation.Context.Verse == 0 {
+		seen := map[string]bool{}
+		for _, ref := range result.References {
+			md := ref.Metadata
+			if md["chapter"] == strconv.Itoa(explanation.Context.Chapter) && (md["source"] == "quran" || md["source"] == "quran_translation") {
+				seen[md["verse"]] = true
+			}
+		}
+		total := 0
+		for _, verse := range q.Get(explanation.Context.Chapter).Verses {
+			if verse.Number > 0 {
+				total++
+			}
+		}
+		result.Coverage = map[string]int{"included_verses": len(seen), "total_verses": total}
+	}
+
+	return result, nil
+}

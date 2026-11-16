@@ -16,8 +16,14 @@ import (
 )
 
 // NewMCP exposes Reminder's content and search tools through the MCP protocol.
-func NewMCP(q *quran.Quran, n *names.Names, b *hadith.Collection, reminders *daily.Store, idx search.Searcher, indexed <-chan bool) *Server {
-	mcpServer := NewServer("reminder", "1.0.0")
+func NewMCP(q *quran.Quran, n *names.Names, b *hadith.Collection, reminders *daily.Store, idx search.Searcher, indexed <-chan bool, caches ...*ExplainCache) *Server {
+	mcpServer := NewServer("reminder", "1.1.0")
+	mcpServer.instructions = reminderInstructions
+	var cache *ExplainCache
+	if len(caches) > 0 {
+		cache = caches[0]
+	}
+	registerExplainTool(mcpServer, q, n, b, idx, indexed, cache)
 
 	mcpServer.AddTool("get_latest", "Get the latest reminder (updated hourly) with a verse, hadith and name of Allah", InputSchema{
 		Type: "object",
@@ -63,35 +69,35 @@ func NewMCP(q *quran.Quran, n *names.Names, b *hadith.Collection, reminders *dai
 	mcpServer.AddTool("get_quran_chapter", "Get a chapter of the Quran with all its verses", InputSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"chapter": {Type: "number", Description: "Chapter number (1-114)"},
+			"chapter": {Type: "integer", Description: "Chapter number (1-114)"},
 		},
 		Required: []string{"chapter"},
 	}, func(args map[string]interface{}) (string, error) {
 		chNum, ok := args["chapter"].(float64)
-		if !ok {
+		if !ok || chNum != float64(int(chNum)) {
 			return "", fmt.Errorf("chapter is required")
 		}
 		chapter := int(chNum)
 		if chapter < 1 || chapter > 114 {
 			return "", fmt.Errorf("chapter must be between 1 and 114")
 		}
-		return string(q.Get(chapter).JSON()), nil
+		return linkedQuranResult(q.Get(chapter).JSON(), fmt.Sprintf("https://reminder.dev/quran/%d", chapter))
 	})
 
 	mcpServer.AddTool("get_quran_verse", "Get a specific verse of the Quran with word-by-word translation", InputSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"chapter": {Type: "number", Description: "Chapter number (1-114)"},
-			"verse":   {Type: "number", Description: "Verse number"},
+			"chapter": {Type: "integer", Description: "Chapter number (1-114)"},
+			"verse":   {Type: "integer", Description: "Verse number"},
 		},
 		Required: []string{"chapter", "verse"},
 	}, func(args map[string]interface{}) (string, error) {
 		chNum, ok := args["chapter"].(float64)
-		if !ok {
+		if !ok || chNum != float64(int(chNum)) {
 			return "", fmt.Errorf("chapter is required")
 		}
 		veNum, ok := args["verse"].(float64)
-		if !ok {
+		if !ok || veNum != float64(int(veNum)) {
 			return "", fmt.Errorf("verse is required")
 		}
 		chapter := int(chNum)
@@ -103,7 +109,7 @@ func NewMCP(q *quran.Quran, n *names.Names, b *hadith.Collection, reminders *dai
 		if cc.Verse(verse) == nil {
 			return "", fmt.Errorf("verse out of range")
 		}
-		return string(cc.Verse(verse).JSON()), nil
+		return linkedQuranResult(cc.Verse(verse).JSON(), fmt.Sprintf("https://reminder.dev/quran/%d/%d", chapter, verse))
 	})
 
 	collectionFor := func(args map[string]interface{}) (*hadith.Collection, error) {
@@ -130,7 +136,7 @@ func NewMCP(q *quran.Quran, n *names.Names, b *hadith.Collection, reminders *dai
 		return string(data), nil
 	})
 	mcpServer.AddTool("get_hadith_book", "Read a book from Bukhari or Muslim", InputSchema{
-		Type: "object", Properties: map[string]Property{"collection": {Type: "string", Description: "bukhari (default) or muslim"}, "book": {Type: "number", Description: "Book number; Muslim introduction is 0"}}, Required: []string{"book"},
+		Type: "object", Properties: map[string]Property{"collection": {Type: "string", Description: "bukhari (default) or muslim"}, "book": {Type: "integer", Description: "Book number; Muslim introduction is 0"}}, Required: []string{"book"},
 	}, func(args map[string]interface{}) (string, error) {
 		c, err := collectionFor(args)
 		if err != nil {
@@ -156,7 +162,7 @@ func NewMCP(q *quran.Quran, n *names.Names, b *hadith.Collection, reminders *dai
 	mcpServer.AddTool("get_name", "Get a specific Name of Allah with description and Quran references", InputSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"id": {Type: "number", Description: "Name number (1-99)"},
+			"id": {Type: "integer", Description: "Name number (1-99)"},
 		},
 		Required: []string{"id"},
 	}, func(args map[string]interface{}) (string, error) {
@@ -172,7 +178,7 @@ func NewMCP(q *quran.Quran, n *names.Names, b *hadith.Collection, reminders *dai
 		return string(byt), nil
 	})
 
-	mcpServer.AddContextTool("search", "Search Islamic content and get AI-summarised answers from the Quran, Hadith and Names of Allah", InputSchema{
+	mcpServer.AddContextTool("search", "Search Quran, hadith and Names of Allah. Retrieve original sources by default; request summarise only for an explicitly requested Reminder-generated answer.", InputSchema{
 		Type: "object",
 		Properties: map[string]Property{
 			"summarise": {Type: "boolean", Description: "Generate an AI summary; defaults to false"},
@@ -239,7 +245,7 @@ func NewMCP(q *quran.Quran, n *names.Names, b *hadith.Collection, reminders *dai
 		data, err := json.Marshal(map[string]any{"entries": entries, "total": total, "source_url": arabic.LaneURL, "licence": "CC BY-SA 3.0 US"})
 		return string(data), err
 	})
-	mcpServer.AddTool("quran_morphology", "Read attributed Arabic segments, roots, lemmas and grammar for a verse. Check aligned before attaching source word positions to the reader.", InputSchema{Type: "object", Properties: map[string]Property{"chapter": {Type: "number", Description: "Chapter 1–114"}, "verse": {Type: "number", Description: "Verse number"}}, Required: []string{"chapter", "verse"}}, func(args map[string]interface{}) (string, error) {
+	mcpServer.AddTool("quran_morphology", "Read attributed Arabic segments, roots, lemmas and grammar for a verse. Check aligned before attaching source word positions to the reader.", InputSchema{Type: "object", Properties: map[string]Property{"chapter": {Type: "integer", Description: "Chapter 1–114"}, "verse": {Type: "integer", Description: "Verse number"}}, Required: []string{"chapter", "verse"}}, func(args map[string]interface{}) (string, error) {
 		ch, ok := args["chapter"].(float64)
 		if !ok || ch < 1 || ch > 114 || ch != float64(int(ch)) {
 			return "", fmt.Errorf("invalid chapter")
@@ -260,5 +266,20 @@ func NewMCP(q *quran.Quran, n *names.Names, b *hadith.Collection, reminders *dai
 		return string(data), err
 	})
 
+	for i := range mcpServer.tools {
+		tool := &mcpServer.tools[i]
+		tool.Title = strings.ReplaceAll(tool.Name, "_", " ")
+		tool.Annotations = &ToolAnnotations{ReadOnly: true, OpenWorld: tool.Name == "search" || tool.Name == "explain_quran"}
+	}
 	return mcpServer
+}
+
+func linkedQuranResult(data []byte, link string) (string, error) {
+	var record map[string]interface{}
+	if err := json.Unmarshal(data, &record); err != nil {
+		return "", err
+	}
+	record["url"] = link
+	encoded, err := json.Marshal(record)
+	return string(encoded), err
 }
