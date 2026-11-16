@@ -52,7 +52,7 @@ export default function QuranVerse(props: Route.ComponentProps) {
         translation={data.english}
         subtitle={`Verse ${data.number}:${verseNumber}`}
         actions={<>
-        <ExplainButton key={`${data.number}:${translation}`} chapter={data.number} verse={Number(verseNumber)} translation={translation} />
+        <ExplainButton key={`${data.number}:${translation}`} chapter={data.number} verse={Number(verseNumber)} translation={translation} commentary={[verse]} />
         <EmbedButton path={`/quran/${data.number}/${verseNumber}?translation=${translation}`} />
         <ShareButton
           title={`Quran ${data.number}:${verseNumber} - ${data.english}`}

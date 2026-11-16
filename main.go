@@ -728,6 +728,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer explainCache.Close()
+	http.HandleFunc("/api/capabilities", api.CapabilitiesHandler)
 	http.Handle("/api/model/ask", api.ModelHandler(keys, idx, n, q, b, indexed))
 	http.Handle("/api/model/explain", api.ExplainHandler(keys, idx, n, q, b, indexed, explainCache))
 	http.Handle("/api/explain", api.ExplainHandler(nil, idx, n, q, b, indexed, explainCache))

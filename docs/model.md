@@ -205,3 +205,24 @@ required on every request. Only nonempty answers with evidence and a provider
 completion marker (`stop` / `end_turn`) are persisted. Errors, truncated responses,
 missing completion markers and cancelled generations are not cached. A cache
 read/write failure is logged; successful generation can still be returned.
+
+### Reader controls and model availability
+
+`GET /api/capabilities` returns `{ "model": true|false }` using the server's
+stable model availability check. Explicit provider configuration is treated as
+available even during a transient outage; the endpoint does not poll provider
+health. The browser shares one capability query across search and reader controls.
+Until availability is known, AI actions are hidden. A failed refresh preserves
+previously known capabilities.
+
+Search shows Ask AI only when a model is available. Each reader action occupies
+one existing control position: Explain with a model, otherwise Tafsir when stored
+commentary exists. The panel offers an internal Tafsir view alongside Explain;
+there is no second tafsir button beside every verse. Tafsir is attributed stored
+commentary and never presented as an AI answer. It requires no model request and
+remains usable with the reader's downloaded verse data.
+
+The panel is a right-hand drawer on desktop and a near-full-height sheet on mobile,
+with scrollable content, a persistent close header and native dialog focus handling.
+Provider failures preserve the question and allow retry or switching to Tafsir.
+The optional inline-commentary setting remains unchanged for readers who prefer it.

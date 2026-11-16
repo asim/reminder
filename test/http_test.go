@@ -237,3 +237,21 @@ func TestArabicLearningRoutes(t *testing.T) {
 		}
 	}
 }
+
+func TestCapabilitiesWithoutModel(t *testing.T) {
+	code, headers, data := request(t, "GET", "/api/capabilities", nil)
+	if code != 200 || headers.Get("Cache-Control") != "no-store" {
+		t.Fatalf("capabilities: %d %v", code, headers)
+	}
+	var flags map[string]bool
+	if err := json.Unmarshal(data, &flags); err != nil {
+		t.Fatal(err)
+	}
+	if enabled, exists := flags["model"]; !exists || enabled || len(flags) != 1 {
+		t.Fatalf("unexpected model capabilities: %s", data)
+	}
+	code, _, _ = request(t, "POST", "/api/capabilities", nil)
+	if code != 405 {
+		t.Fatalf("expected GET-only capabilities, got %d", code)
+	}
+}
