@@ -105,3 +105,18 @@ export function clearSearchCache() {
         console.error('Error clearing search cache:', error);
     }
 }
+
+// Restore each mode independently: AI evidence is not an ordinary search result.
+export function restoreCachedSearches(
+    query: string,
+    source: string,
+    mode: 'search' | 'ask',
+    restore: (mode: 'search' | 'ask', result: SearchResponseType) => void,
+) {
+    const search = getCachedSearchResult(query, source, 'search');
+    if (search) restore('search', search);
+    if (mode === 'ask') {
+        const summary = getCachedSearchResult(query, source, 'ask');
+        if (summary) restore('ask', summary);
+    }
+}

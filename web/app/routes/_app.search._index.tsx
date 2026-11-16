@@ -13,7 +13,7 @@ import {
 } from '~/queries/search';
 import {
   cacheSearchResult,
-  getCachedSearchResult,
+  restoreCachedSearches,
   getAllCachedSearches,
   type CachedSearch,
 } from '~/utils/search-cache';
@@ -152,11 +152,10 @@ export default function SearchIndex() {
     const filter = sourceOptions.find(item => item.value === params.get('source'))?.value || 'all';
     const savedMode = params.get('mode') === 'ask' ? 'ask' : 'search';
     if (q) {
-      const cached = getCachedSearchResult(q, filter, savedMode);
-      if (cached) {
-        queryClient.setQueryData(searchOptions(q, filter).queryKey, cached);
-        if (savedMode === 'ask') queryClient.setQueryData(searchSummaryOptions(q, filter).queryKey, cached);
-      }
+      restoreCachedSearches(q, filter, savedMode, (cachedMode, result) => {
+        const options = cachedMode === 'ask' ? searchSummaryOptions(q, filter) : searchOptions(q, filter);
+        queryClient.setQueryData(options.queryKey, result);
+      });
       setQuery(q); setSource(filter); setSubmittedSource(filter); setMode(savedMode); setSubmittedQuery(q);
     }
   }, []);
@@ -177,13 +176,15 @@ export default function SearchIndex() {
   });
 
   const mergedResults = useMemo<SearchResponseType | null>(() => {
-    if (!searchResults) return null;
+    // A saved AI answer remains readable even while ordinary results load or fail.
+    const results = mode === 'ask' ? summaryResults ?? searchResults : searchResults;
+    if (!results) return null;
     return {
-      ...searchResults,
+      ...results,
       source: submittedSource,
       mode,
       answer: mode === 'ask' ? summaryResults?.answer ?? '' : '',
-      references: mode === 'ask' ? summaryResults?.references ?? searchResults.references : searchResults.references,
+      references: mode === 'ask' ? summaryResults?.references ?? results.references : results.references,
     };
   }, [searchResults, summaryResults, mode, submittedSource]);
 

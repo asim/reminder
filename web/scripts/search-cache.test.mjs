@@ -5,7 +5,7 @@ import ts from 'typescript';
 
 const source = await readFile(new URL('../app/utils/search-cache.ts', import.meta.url), 'utf8');
 const js = ts.transpileModule(source, {compilerOptions: {module: ts.ModuleKind.ESNext}}).outputText;
-const {cacheSearchResult, getCachedSearchResult, getAllCachedSearches} = await import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`);
+const {cacheSearchResult, getCachedSearchResult, getAllCachedSearches, restoreCachedSearches} = await import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`);
 
 test('plain results survive reload and source/mode variants coexist', () => {
   const storage = new Map();
@@ -32,4 +32,29 @@ test('unavailable storage does not break searching', () => {
     assert.doesNotThrow(()=>cacheSearchResult('query',{q:'query',answer:'',references:[]}));
     assert.deepEqual(getAllCachedSearches(),[]);
   } finally {console.error=previous;}
+});
+
+test('restoring Ask AI never seeds or overwrites ordinary-search evidence', () => {
+  const storage = new Map();
+  globalThis.window = {};
+  globalThis.localStorage = {getItem: key => storage.get(key) ?? null, setItem: (key,value) => storage.set(key,value)};
+  const ai = {q:'Musa', source:'quran', mode:'ask', answer:'Answer', references:[{text:'Complete mention inventory', metadata:{source:'quran',kind:'mention_inventory'}}]};
+  cacheSearchResult('Musa', ai);
+  const restored = new Map();
+  restoreCachedSearches('Musa', 'quran', 'ask', (mode,result) => restored.set(mode,result));
+  assert.equal(restored.has('search'),false, 'Search must fetch its own results when none were saved');
+  assert.deepEqual(restored.get('ask'),ai);
+
+  const plain = {q:'Musa', source:'quran', mode:'search', answer:'', references:[{text:'Ranked verse result',metadata:{source:'quran'}}]};
+  cacheSearchResult('Musa',plain);
+  restored.clear();
+  restoreCachedSearches('Musa','quran','ask',(mode,result) => restored.set(mode,result));
+  assert.deepEqual(restored.get('search'),plain);
+  assert.deepEqual(restored.get('ask'),ai);
+  // Switching back to Search and persisting the restored results retains its own evidence.
+  cacheSearchResult('Musa',restored.get('search'));
+  assert.deepEqual(getCachedSearchResult('Musa','quran','search'),plain);
+  restored.clear();
+  restoreCachedSearches('Musa','quran','search',(mode,result) => restored.set(mode,result));
+  assert.deepEqual([...restored.keys()],['search']);
 });
