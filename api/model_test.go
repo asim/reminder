@@ -24,7 +24,7 @@ func TestModelRequiresBearerAndValidBody(t *testing.T) {
 		t.Fatal(err)
 	}
 	ready := make(chan bool)
-	handler := ModelHandler(keys, nil, &names.Names{}, quran.Load(), nil, ready)
+	handler := (&ModelService{Index: nil, Names: &names.Names{}, Quran: quran.Load(), Hadith: nil, Ready: ready}).AskHandler(keys)
 	cases := []struct {
 		auth, body string
 		status     int
@@ -98,7 +98,7 @@ func TestModelKeyAllowanceAndGlobalLimit(t *testing.T) {
 	}
 	ready := make(chan bool)
 	close(ready)
-	handler := ModelHandler(keys, modelIndex{}, &names.Names{}, quran.Load(), nil, ready)
+	handler := (&ModelService{Index: modelIndex{}, Names: &names.Names{}, Quran: quran.Load(), Hadith: nil, Ready: ready}).AskHandler(keys)
 	for _, tc := range []struct {
 		secret string
 		status int

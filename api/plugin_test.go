@@ -39,13 +39,13 @@ func TestPluginExplainSharesReaderCache(t *testing.T) {
 	close(ready)
 	q := quran.Load()
 	n := &names.Names{}
-	handler := ExplainHandler(nil, modelIndex{}, n, q, nil, ready, cache)
+	handler := (&ModelService{Index: modelIndex{}, Names: n, Quran: q, Hadith: nil, Ready: ready, Cache: cache}).ExplainHandler(nil)
 	w := httptest.NewRecorder()
 	handler.ServeHTTP(w, httptest.NewRequest("POST", "/api/explain", strings.NewReader(`{"context":{"chapter":1,"verse":2}}`)))
 	if w.Code != 200 {
 		t.Fatal(w.Body.String())
 	}
-	server := NewMCP(q, n, nil, nil, modelIndex{}, ready, cache)
+	server := NewMCP(&ModelService{Index: modelIndex{}, Names: n, Quran: q, Hadith: nil, Ready: ready, Cache: cache}, nil)
 	call := func(arguments map[string]interface{}) ToolCallResult {
 		payload, _ := json.Marshal(map[string]interface{}{"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": map[string]interface{}{"name": "explain_quran", "arguments": arguments}})
 		recorder := httptest.NewRecorder()

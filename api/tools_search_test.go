@@ -39,7 +39,7 @@ func TestMCPSearchUsesGroundedModel(t *testing.T) {
 	}
 	ready := make(chan bool)
 	close(ready)
-	server := NewMCP(quran.Load(), names.Load(), nil, nil, modelIndex{}, ready)
+	server := NewMCP(&ModelService{Index: modelIndex{}, Names: names.Load(), Quran: quran.Load(), Hadith: nil, Ready: ready}, nil)
 	for _, summary := range []bool{false, true} {
 		text, err := server.handlers["search"](context.Background(), map[string]interface{}{"q": "Explain 1:2", "summarise": summary})
 		if err != nil {

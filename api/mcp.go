@@ -4,11 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/asim/reminder/model"
 	"io"
 	"net/http"
-	"net/url"
-	"os"
 	"strings"
 	"sync"
 )
@@ -110,8 +107,17 @@ type ToolCallResult struct {
 // ToolHandler is a function that takes arguments and returns a JSON string result.
 type ToolHandler func(args map[string]interface{}) (string, error)
 
+// ServerOptions configures transport limits and application policy.
+type ServerOptions struct {
+	Instructions string
+	MaxBodyBytes int64
+	AllowOrigin  func(origin, host string) bool
+}
+
 // Server implements an MCP server with Streamable HTTP transport.
 type Server struct {
+	maxBodyBytes int64
+	allowOrigin  func(string, string) bool
 	instructions string
 	info         ServerInfo
 	tools        []Tool
@@ -120,10 +126,20 @@ type Server struct {
 }
 
 // NewServer creates a new MCP server.
-func NewServer(name, version string) *Server {
+func NewServer(name, version string, options ...ServerOptions) *Server {
+	config := ServerOptions{MaxBodyBytes: 1 << 20}
+	if len(options) > 0 {
+		config = options[0]
+	}
+	if config.MaxBodyBytes <= 0 {
+		config.MaxBodyBytes = 1 << 20
+	}
 	return &Server{
-		info:     ServerInfo{Name: name, Version: version},
-		handlers: make(map[string]func(context.Context, map[string]interface{}) (string, error)),
+		instructions: config.Instructions,
+		maxBodyBytes: config.MaxBodyBytes,
+		allowOrigin:  config.AllowOrigin,
+		info:         ServerInfo{Name: name, Version: version},
+		handlers:     make(map[string]func(context.Context, map[string]interface{}) (string, error)),
 	}
 }
 
@@ -133,21 +149,21 @@ func (s *Server) AddTool(name, description string, schema InputSchema, handler T
 }
 
 func (s *Server) AddContextTool(name, description string, schema InputSchema, handler func(context.Context, map[string]interface{}) (string, error)) {
+	s.RegisterTool(Tool{Name: name, Description: description, InputSchema: schema}, handler)
+}
+
+// RegisterTool publishes a complete definition together with its handler.
+func (s *Server) RegisterTool(tool Tool, handler func(context.Context, map[string]interface{}) (string, error)) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
-	s.tools = append(s.tools, Tool{
-		Name:        name,
-		Description: description,
-		InputSchema: schema,
-	})
-	s.handlers[name] = handler
+	s.tools = append(s.tools, tool)
+	s.handlers[tool.Name] = handler
 }
 
 // ServeHTTP handles MCP requests over Streamable HTTP.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")
-	if origin := r.Header.Get("Origin"); origin != "" && !allowedMCPOrigin(origin, r.Host) {
+	if origin := r.Header.Get("Origin"); origin != "" && (s.allowOrigin == nil || !s.allowOrigin(origin, r.Host)) {
 		http.Error(w, "Origin not allowed", http.StatusForbidden)
 		return
 	}
@@ -172,7 +188,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, model.ModelBodyLimit()))
+	body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, s.maxBodyBytes))
 	if err != nil {
 		writeError(w, nil, -32700, "Parse error")
 		return
@@ -307,25 +323,6 @@ func supportedMCPVersion(version string) bool {
 	switch version {
 	case "2025-03-26", "2025-06-18", "2025-11-25":
 		return true
-	}
-	return false
-}
-
-func allowedMCPOrigin(origin, host string) bool {
-	u, err := url.Parse(origin)
-	if err != nil || u.User != nil || u.RawQuery != "" || u.Fragment != "" || u.Path != "" {
-		return false
-	}
-	if (u.Scheme == "https" || u.Scheme == "http") && u.Host == host {
-		return true
-	}
-	if origin == "https://chatgpt.com" || origin == "https://reminder.dev" {
-		return true
-	}
-	for _, allowed := range strings.Split(os.Getenv("MCP_ALLOWED_ORIGINS"), ",") {
-		if origin == strings.TrimSpace(allowed) {
-			return true
-		}
 	}
 	return false
 }
