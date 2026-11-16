@@ -1,7 +1,7 @@
 .PHONY: dev dev-backend dev-frontend build setup web
 
 setup:
-	cd web && pnpm install
+	cd web && npm ci
 
 # Development
 dev:
@@ -14,17 +14,17 @@ dev-backend:
 	go run . --serve --web
 
 dev-frontend:
-	cd web && pnpm run dev
+	cd web && npm run dev
 
 # Building
 build:
-	cd web && pnpm run build
+	cd web && npm run build
 	find app/dist -mindepth 1 -not -name '.gitignore' -delete
 	cp -r web/build/client/* app/dist/
 	go build -o reminder .
 
 # Build web app
 web:
-	cd web && pnpm run build
+	cd web && npm run build
 	find app/dist -mindepth 1 -not -name '.gitignore' -delete
 	cp -r web/build/client/* app/dist/
