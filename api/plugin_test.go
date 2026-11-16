@@ -18,9 +18,6 @@ import (
 func TestPluginExplainSharesReaderCache(t *testing.T) {
 	var calls atomic.Int32
 	provider := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if replyToLookupPlan(w, r) {
-			return
-		}
 		calls.Add(1)
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"choices":[{"finish_reason":"stop","message":{"role":"assistant","content":"Grounded explanation [1]."}}]}`))

@@ -68,8 +68,8 @@ func TestMusaLookupAndScope(t *testing.T) {
 	}
 	lookup := Lookups(evidenceIndex{}, &names.Names{}, q, nil, "hadith")
 	refs, err = lookup(model.Lookup{Tool: "quran_mentions", Terms: []string{"Moses"}})
-	if err != nil || len(refs) != 0 {
-		t.Fatal("model widened source restriction")
+	if err == nil || len(refs) != 0 {
+		t.Fatal("model widened source restriction or hid the restriction")
 	}
 }
 
@@ -103,5 +103,32 @@ func TestGeneralExplanationContextWithoutGrammar(t *testing.T) {
 		if found != tc.lexical {
 			t.Fatalf("grammar evidence for %q: %v", tc.query, found)
 		}
+	}
+}
+
+func TestArabicToolLookup(t *testing.T) {
+	q := quran.Load()
+	lookup := Lookups(evidenceIndex{}, &names.Names{}, q, nil, "quran")
+	refs, err := lookup(model.Lookup{Tool: "arabic", Chapter: 10, Verse: 106})
+	if err != nil || len(refs) == 0 {
+		t.Fatal("missing Arabic tool evidence", err)
+	}
+	found := false
+	for _, ref := range refs {
+		if ref.Metadata["source"] == "morphology" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("missing attributed verse analysis")
+	}
+	for _, call := range []model.Lookup{{Tool: "arabic"}, {Tool: "arabic", Chapter: 115, Verse: 1}, {Tool: "arabic", Chapter: 1, Verse: 99}} {
+		if _, err := lookup(call); err == nil {
+			t.Fatal("invalid Arabic lookup accepted")
+		}
+	}
+	restricted := Lookups(evidenceIndex{}, &names.Names{}, q, nil, "hadith")
+	if _, err := restricted(model.Lookup{Tool: "arabic", Chapter: 1, Verse: 2}); err == nil {
+		t.Fatal("Arabic tool widened source restriction")
 	}
 }

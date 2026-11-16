@@ -18,9 +18,6 @@ func TestExplainRoutesShareGroundingAndContext(t *testing.T) {
 	q := quran.Load()
 	calls := 0
 	provider := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if replyToLookupPlan(w, r) {
-			return
-		}
 		calls++
 		var body struct {
 			Messages []model.Message `json:"messages"`
@@ -126,9 +123,6 @@ func TestExplainRoutesShareGroundingAndContext(t *testing.T) {
 func TestExplainRoutesSharePersistentDefaultCache(t *testing.T) {
 	var calls atomic.Int32
 	provider := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if replyToLookupPlan(w, r) {
-			return
-		}
 		calls.Add(1)
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"choices":[{"finish_reason":"stop","message":{"role":"assistant","content":"Explanation [1]."}}]}`))

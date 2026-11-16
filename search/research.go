@@ -33,7 +33,7 @@ func Lookups(idx Searcher, n *names.Names, q *quran.Quran, b *hadith.Collection,
 			return ModelReferences(idx, n, q, b, query)
 		case "passage":
 			if scope != "" && scope != "all" && scope != "quran" && scope != "tafsir" {
-				return nil, nil
+				return nil, fmt.Errorf("Quran passage lookup is outside the selected source")
 			}
 			if call.Verse < 1 {
 				return nil, fmt.Errorf("passage lookup requires a verse")
@@ -43,9 +43,27 @@ func Lookups(idx Searcher, n *names.Names, q *quran.Quran, b *hadith.Collection,
 				return nil, err
 			}
 			return FilterSource(refs, scope), nil
+		case "arabic":
+			if scope != "" && scope != "all" && scope != "quran" {
+				return nil, fmt.Errorf("Arabic lookup is outside the selected source")
+			}
+			if len(call.Query) > 1000 {
+				return nil, fmt.Errorf("Arabic query is too long")
+			}
+			query := call.Query
+			if call.Chapter != 0 || call.Verse != 0 {
+				if q == nil || call.Chapter < 1 || call.Chapter > len(q.Chapters) || call.Verse < 1 || q.Get(call.Chapter).Verse(call.Verse) == nil {
+					return nil, fmt.Errorf("invalid Quran reference")
+				}
+				query = fmt.Sprintf("%d:%d %s", call.Chapter, call.Verse, query)
+			}
+			if strings.TrimSpace(query) == "" {
+				return nil, fmt.Errorf("provide Arabic text or a chapter and verse")
+			}
+			return LexicalReferences(q, query)
 		case "quran_mentions":
 			if scope != "" && scope != "all" && scope != "quran" {
-				return nil, nil
+				return nil, fmt.Errorf("Quran mention lookup is outside the selected source")
 			}
 			return QuranMentions(q, call.Terms)
 		default:

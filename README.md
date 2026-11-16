@@ -79,14 +79,25 @@ limits. `/api/search` accepts `source: "all" | "quran" | "hadith" | "tafsir" | "
 The browser retains both searches and AI answers in Recent, separately by source
 and mode; refresh restores the query and filter without regenerating a saved answer.
 
-Ask AI can request up to four read-only corpus lookups before answering: focused
-searches, a verse and its neighbours, or a complete Quran mention inventory. The
-inventory reports explicit whole-word matches for the supplied names/aliases in
-the bundled texts, not thematic or unnamed references. One planning call and one
-answer call use the existing model usage limits. Claims remain grounded in the
-retrieved texts with numbered citations. General verse explanations start with
-the passage's meaning and include neighbouring verses; Arabic grammar evidence
-is retrieved for explicit wording questions.
+Ask AI and verse explanations use native tool calling with OpenAI-compatible
+(including tool-capable Ollama) and Anthropic models. The model can answer directly
+or repeatedly inspect lookup results and refine its investigation. Available tools
+search the texts, retrieve a verse and its neighbours, scan Quran mentions, and
+look up Arabic dictionary/morphology evidence. There is no mandatory planning call.
+
+The prompt allows language knowledge, context and reasoning to support explanation.
+Quotations, references, counts, exhaustive lists and attributed scholarly claims
+must be verified against retrieved sources. Source numbers remain stable across
+all tool rounds. Mention inventories count explicit whole-word matches for supplied
+names/aliases, not thematic or unnamed references. General verse explanations
+start with the passage's meaning, supported by context and tafsir where useful.
+
+Research is bounded by a 120-second deadline, 1 MiB of conservative cumulative
+request/output allowance, and an eight-turn loop backstop (the last turn is
+answer-only). Existing per-client, key and global usage limits apply to every
+provider call, including tool schemas and results. Local models must support
+native tools; provider errors are surfaced rather than silently switching to an
+unverified answer. No external web browsing is enabled.
 
 Summaries are optional. With no model configured the summarise controls are
 hidden and search still returns references.

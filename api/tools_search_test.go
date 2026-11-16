@@ -16,9 +16,6 @@ import (
 func TestMCPSearchUsesGroundedModel(t *testing.T) {
 	calls := 0
 	provider := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if replyToLookupPlan(w, r) {
-			return
-		}
 		calls++
 		var body struct {
 			Messages []model.Message `json:"messages"`

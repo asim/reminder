@@ -202,7 +202,7 @@ func askClaude(ctx context.Context, apiKey, systemPrompt string, history []Messa
 	return strings.TrimSpace(strings.Join(parts, ""))
 }
 
-func askOpenAICompat(ctx context.Context, systemPrompt string, history []Message) string {
+func openAIConfiguration() (openai.ClientConfig, string) {
 	var model string
 	var config openai.ClientConfig
 
@@ -228,6 +228,11 @@ func askOpenAICompat(ctx context.Context, systemPrompt string, history []Message
 		}
 	}
 
+	return config, model
+}
+
+func askOpenAICompat(ctx context.Context, systemPrompt string, history []Message) string {
+	config, model := openAIConfiguration()
 	openAIClient := openai.NewClientWithConfig(config)
 	messages := []openai.ChatCompletionMessage{{Role: openai.ChatMessageRoleSystem, Content: systemPrompt}}
 	for _, message := range history {

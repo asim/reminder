@@ -63,7 +63,7 @@ func (r ExplainRequest) Request() (Request, error) {
 			anchor += ". Give an overview limited to the verses actually supplied as evidence; explicitly state any incomplete coverage. Do not imply a complete chapter analysis."
 		}
 	}
-	prompt := fmt.Sprintf("%s\nKeep this passage central throughout follow-up questions. For a general question such as “What does it mean?”, start with the meaning of the whole passage and its message in plain English, then explain relevant context and tafsir. Do not turn a general question into an analysis of the first word, a conjunction, or translation differences. Discuss grammar only when the question explicitly asks about wording or it is essential to understanding. A text selection alone must not override a general question about the verse. Distinguish source interpretation from your synthesis.\nSelected translation: %s\nSelected text (user selection, not independent evidence): %s\nQuestion: %s", anchor, c.Translation, c.Selection, question)
+	prompt := fmt.Sprintf("%s\nKeep this passage central. Explain its meaning and message in accessible English, using surrounding context and tafsir where helpful. Use Arabic analysis when it helps answer the question. For a general question, explain the whole passage even if a fragment is selected.\nSelected translation: %s\nSelected text (user selection): %s\nQuestion: %s", anchor, c.Translation, c.Selection, question)
 	request := Request{Prompt: prompt, History: r.History}
 	return request, request.Validate()
 }
