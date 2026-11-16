@@ -10,8 +10,6 @@ export function TafsirSelect() {
       value={settings.tafsir} onChange={event => update({ tafsir: event.target.value as TafsirEdition })}>
       {tafsirEditions.map(edition => <option key={edition.id} value={edition.id}>{edition.label}</option>)}
     </select>
-    {settings.tafsir === 'original-en' && <span className='mt-2 block text-xs leading-relaxed text-gray-500'>
-      Preserved from Reminder’s original dataset. Author and source have not been verified.
-    </span>}
+
   </label>;
 }

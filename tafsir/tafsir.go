@@ -142,26 +142,32 @@ func (c *Collection) Get(chapter, verse int) *Passage {
 func (c *Collection) Passages() []*Passage { return append([]*Passage(nil), c.passages...) }
 
 // Editions returns the bundled reading editions in display order.
-// The original commentary has no verified author and is not model evidence.
+// Load remains the default model evidence source.
 func Editions() []*Collection {
-	return []*Collection{Load(), original()}
-}
-
-var originalOnce sync.Once
-var originalCollection *Collection
-
-func original() *Collection {
-	originalOnce.Do(func() {
-		data, err := files.ReadFile("data/original.json")
-		if err != nil {
-			panic(err)
-		}
-		originalCollection, err = Parse(data, Edition{
-			ID: "original-en", Title: "Original commentary — unattributed", Language: "en",
-		})
-		if err != nil {
-			panic(err)
+	readingOnce.Do(func() {
+		readingCollections = []*Collection{Load()}
+		for _, stem := range []string{"original", "ibn-kathir"} {
+			data, err := files.ReadFile("data/" + stem + ".json")
+			if err != nil {
+				panic(err)
+			}
+			meta, err := files.ReadFile("data/" + stem + "-edition.json")
+			if err != nil {
+				panic(err)
+			}
+			var edition Edition
+			if err := json.Unmarshal(meta, &edition); err != nil {
+				panic(err)
+			}
+			collection, err := Parse(data, edition)
+			if err != nil {
+				panic(err)
+			}
+			readingCollections = append(readingCollections, collection)
 		}
 	})
-	return originalCollection
+	return append([]*Collection(nil), readingCollections...)
 }
+
+var readingOnce sync.Once
+var readingCollections []*Collection

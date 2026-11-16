@@ -73,19 +73,27 @@ Dictionary/lemma integration remains separate future work.
 
 ## Reading editions
 
-Reading settings and the Tafsir panel offer Al-Jalalayn (English) and the
-original English commentary. The choice is independent of the Commentary
-visibility toggle, saved locally, and carried by shared reading URLs as
-`tafsir=jalalayn-en` or `tafsir=original-en`. Both editions travel in the
-chapter/verse payload and work offline after that chapter has been refreshed.
+Reading settings and the Tafsir panel offer Al-Jalalayn, Al-Mukhtasar and Ibn Kathir
+in English. The choice is independent of the Commentary visibility toggle,
+saved locally, and carried by shared reading URLs. All three editions travel
+in chapter/verse payloads and work offline after refreshing the chapter.
 
-The original text is restored byte-for-byte from
-`90aa5a9^:quran/data/tafsir.json` into `tafsir/data/original.json`.
-Its author, upstream source and rights are not established in the repository.
-It is labelled “Original commentary — unattributed”, not assigned a guessed
-author, and is excluded from attributed model evidence. Al-Jalalayn remains the
-grounding source for Explain; switching reading editions does not change the
-explanation cache or imply that the model used the selected commentary.
+The original commentary is English Al-Mukhtasar, QUL resource
+https://qul.tarteel.ai/resources/tafsir/266. The supplied
+`abridged-explanation-of-the-quran.json` matches all 6,236 original entries exactly.
+Its existing `original-en` ID is retained for saved settings and shared links.
+The supplied `en-tafisr-ibn-kathir.json` is imported as `ibn-kathir-en`, preserving
+shared-passage pointers and converting HTML to plain text. Its exact upstream
+resource URL was not supplied, so no URL is guessed. Both import manifests
+record the archive SHA-256; source texts are not relicensed by the code licence.
+
+Al-Jalalayn remains the default and model grounding source. Selecting another
+reading edition does not change model evidence or explanation caches.
+
+The importer accepts `--stem`, `--id`, `--title` and `--source-url` for additional
+editions. Use stem `original` and ID `original-en` for Al-Mukhtasar, or stem
+`ibn-kathir` and ID `ibn-kathir-en` for Ibn Kathir. Pass an empty source URL
+when the exact resource address is not known.
 
 Quran API verse records now expose a `commentaries` map keyed by edition ID.
 Each value contains `text`, `source`, `url` (when known), and `verified`.

@@ -109,13 +109,17 @@ func TestCommentaryEditions(t *testing.T) {
 			if verse.Number == 0 {
 				continue
 			}
+			kathir := verse.Commentaries["ibn-kathir-en"]
+			if kathir.Text == "" || !kathir.Verified || kathir.Source != "Tafsir Ibn Kathir (English)" {
+				t.Fatalf("missing Ibn Kathir at %d:%d", ch.Number, verse.Number)
+			}
 			count++
 			current := verse.Commentaries["jalalayn-en"]
 			original := verse.Commentaries["original-en"]
 			if current.Text != verse.Comments || current.Source != verse.CommentarySource || !current.Verified {
 				t.Fatalf("default commentary changed at %d:%d", ch.Number, verse.Number)
 			}
-			if original.Text == "" || original.Verified || original.Source != "Original commentary — unattributed" {
+			if original.Text == "" || !original.Verified || original.Source != "Al-Mukhtasar (English)" {
 				t.Fatalf("missing or misattributed original commentary at %d:%d", ch.Number, verse.Number)
 			}
 		}

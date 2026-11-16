@@ -78,7 +78,7 @@ export function useTranslatedChapter(chapterNumber: number, translation: Transla
       comments: verse.commentaries?.[tafsir]?.text ??
         (tafsir === 'jalalayn-en' ? verse.comments : ''),
       commentary_source: verse.commentaries?.[tafsir]?.source ??
-        (tafsir === 'jalalayn-en' ? verse.commentary_source : 'Original commentary — unattributed'),
+        (tafsir === 'jalalayn-en' ? verse.commentary_source : (tafsir === 'original-en' ? 'Al-Mukhtasar (English)' : 'Tafsir Ibn Kathir (English)')),
       commentary_url: verse.commentaries?.[tafsir]?.url ??
         (tafsir === 'jalalayn-en' ? verse.commentary_url : undefined),
       text: translation === 'khattab' ? verse.text :
