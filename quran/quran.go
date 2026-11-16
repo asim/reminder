@@ -25,7 +25,16 @@ type Chapter struct {
 	VerseCount int      `json:"verse_count"`
 }
 
+type Commentary struct {
+	Text     string `json:"text"`
+	Source   string `json:"source"`
+	URL      string `json:"url,omitempty"`
+	Verified bool   `json:"verified"`
+}
+
 type Verse struct {
+	Commentaries map[string]Commentary `json:"commentaries,omitempty"`
+
 	Chapter          int               `json:"chapter"`
 	Number           int               `json:"number"`
 	Text             string            `json:"text"`
@@ -354,6 +363,12 @@ func Load() *Quran {
 				panic(fmt.Sprintf("missing tafsir for %d:%d", chapter, num))
 			}
 			text := passage.Text
+			commentaries := map[string]Commentary{}
+			for _, edition := range tafsir.Editions() {
+				if entry := edition.Get(chapter, num); entry != nil {
+					commentaries[edition.Edition.ID] = Commentary{Text: entry.Text, Source: edition.Edition.Title, URL: edition.Edition.SourceURL, Verified: edition.Edition.Verified}
+				}
+			}
 
 			q.Commentary = append(q.Commentary, &Comment{
 				Chapter: chapter,
@@ -369,6 +384,7 @@ func Load() *Quran {
 				Arabic:           ar,
 				Words:            alignWords(chapter, num, ar, wbw),
 				Comments:         text,
+				Commentaries:     commentaries,
 				CommentarySource: q.Tafsir.Edition.Title,
 				CommentaryURL:    q.Tafsir.Edition.SourceURL,
 				AudioArabic:      GetAudioURL(chapter, num, "arabic"),

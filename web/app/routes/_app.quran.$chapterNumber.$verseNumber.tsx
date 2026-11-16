@@ -20,8 +20,8 @@ export default function QuranVerse(props: Route.ComponentProps) {
   const { chapterNumber, verseNumber } = props.params;
 
   const { settings, textStyle } = useQuranSettings();
-  const { mode, wordByWord, transliteration: showTransliteration, commentary: showCommentary, translation } = settings;
-  const data = useTranslatedChapter(Number(chapterNumber), translation, Number(verseNumber));
+  const { mode, wordByWord, transliteration: showTransliteration, commentary: showCommentary, translation, tafsir } = settings;
+  const data = useTranslatedChapter(Number(chapterNumber), translation, Number(verseNumber), tafsir);
 
   const verse = data.verses.find(
     (verse) => verse.number === Number(verseNumber)
@@ -57,7 +57,7 @@ export default function QuranVerse(props: Route.ComponentProps) {
         <ShareButton
           title={`Quran ${data.number}:${verseNumber} - ${data.english}`}
           text={verse.text}
-          url={buildQuranShareUrl(`/quran/${data.number}/${verseNumber}`, { mode, translation, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}
+          url={buildQuranShareUrl(`/quran/${data.number}/${verseNumber}`, { mode, translation, tafsir, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}
         />
         </>}
       />
@@ -72,20 +72,20 @@ export default function QuranVerse(props: Route.ComponentProps) {
       <section data-chapter-verse={`${data.number}:${verse.number}`}>
         {mode !== 'english' && <VerseArabic verse={verse} wordByWord={wordByWord} transliteration={showTransliteration} />}
         {mode !== 'arabic' && <p className='quran-translation text-base sm:text-lg leading-relaxed'>{verse.text}</p>}
-        {showCommentary && verse.comments && <div className='mt-3 p-3 bg-yellow-50 text-sm leading-relaxed'><strong>{verse.commentary_source || "Stored commentary"}:</strong> {verse.comments}</div>}
+        {showCommentary && <div className='mt-3 p-3 bg-yellow-50 text-sm leading-relaxed'><strong>{verse.commentary_source || "Stored commentary"}:</strong> {verse.comments || 'No commentary saved for this source and verse.'}</div>}
       </section>
-      <Link className='my-4 text-sm underline underline-offset-4' to={buildQuranShareUrl(`/quran/${data.number}`, { mode, translation, wordByWord, commentary: showCommentary, transliteration: showTransliteration }) + `#${verse.number}`}>Read full chapter at {data.number}:{verse.number}</Link>
+      <Link className='my-4 text-sm underline underline-offset-4' to={buildQuranShareUrl(`/quran/${data.number}`, { mode, translation, tafsir, wordByWord, commentary: showCommentary, transliteration: showTransliteration }) + `#${verse.number}`}>Read full chapter at {data.number}:{verse.number}</Link>
       <div className='flex justify-between mt-6 sm:mt-8 mb-8 sm:mb-12'>
         {hasPreviousVerse ? (
           <PrimaryButton asChild disabled={!hasPreviousVerse} className='text-sm sm:text-base py-1 sm:py-2 px-2 sm:px-4'>
-            <Link to={buildQuranShareUrl(`/quran/${chapterNumber}/${previousVerse}`, { mode, translation, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}>
+            <Link to={buildQuranShareUrl(`/quran/${chapterNumber}/${previousVerse}`, { mode, translation, tafsir, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}>
               <CircleChevronLeft className='size-3 sm:size-4' />
               <span className='ml-1'>Previous</span>
             </Link>
           </PrimaryButton>
         ) : (
           <PrimaryButton asChild disabled={!hasPreviousChapter} className='text-sm sm:text-base py-1 sm:py-2 px-2 sm:px-4'>
-            <Link to={buildQuranShareUrl(`/quran/${previousChapter}`, { mode, translation, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}>
+            <Link to={buildQuranShareUrl(`/quran/${previousChapter}`, { mode, translation, tafsir, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}>
               <CircleChevronLeft className='size-3 sm:size-4' />
               <span className='ml-1'>Previous</span>
             </Link>
@@ -94,14 +94,14 @@ export default function QuranVerse(props: Route.ComponentProps) {
 
         {hasNextVerse ? (
           <PrimaryButton asChild disabled={!hasNextVerse} className='text-sm sm:text-base py-1 sm:py-2 px-2 sm:px-4'>
-            <Link to={buildQuranShareUrl(`/quran/${chapterNumber}/${nextVerse}`, { mode, translation, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}>
+            <Link to={buildQuranShareUrl(`/quran/${chapterNumber}/${nextVerse}`, { mode, translation, tafsir, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}>
               <span className='mr-1'>Next</span>
               <CircleChevronRight className='size-3 sm:size-4' />
             </Link>
           </PrimaryButton>
         ) : (
           <PrimaryButton asChild disabled={!hasNextChapter} className='text-sm sm:text-base py-1 sm:py-2 px-2 sm:px-4'>
-            <Link to={buildQuranShareUrl(`/quran/${nextChapter}`, { mode, translation, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}>
+            <Link to={buildQuranShareUrl(`/quran/${nextChapter}`, { mode, translation, tafsir, wordByWord, commentary: showCommentary, transliteration: showTransliteration })}>
               <span className='mr-1'>Next</span>
               <CircleChevronRight className='size-3 sm:size-4' />
             </Link>

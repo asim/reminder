@@ -2,8 +2,8 @@
 
 ## Status
 
-English Tafsir Al-Jalalayn from QUL is bundled for all 6,236 verses. It replaces
-the previous unattributed commentary in the reader and is available as attributed
+English Tafsir Al-Jalalayn from QUL is bundled for all 6,236 verses. It remains the default
+reader commentary and is available as attributed
 evidence to the model through the shared tafsir package.
 
 QUL resource: https://qul.tarteel.ai/resources/tafsir/english-tafsir-al-jalalayn
@@ -70,3 +70,29 @@ returns stored tafsir with `generated: false`, without calling a model.
 
 Differences between translations are not proof of alternative lexical meanings.
 Dictionary/lemma integration remains separate future work.
+
+## Reading editions
+
+Reading settings and the Tafsir panel offer Al-Jalalayn (English) and the
+original English commentary. The choice is independent of the Commentary
+visibility toggle, saved locally, and carried by shared reading URLs as
+`tafsir=jalalayn-en` or `tafsir=original-en`. Both editions travel in the
+chapter/verse payload and work offline after that chapter has been refreshed.
+
+The original text is restored byte-for-byte from
+`90aa5a9^:quran/data/tafsir.json` into `tafsir/data/original.json`.
+Its author, upstream source and rights are not established in the repository.
+It is labelled “Original commentary — unattributed”, not assigned a guessed
+author, and is excluded from attributed model evidence. Al-Jalalayn remains the
+grounding source for Explain; switching reading editions does not change the
+explanation cache or imply that the model used the selected commentary.
+
+Quran API verse records now expose a `commentaries` map keyed by edition ID.
+Each value contains `text`, `source`, `url` (when known), and `verified`.
+Existing `comments`, `commentary_source`, and `commentary_url` retain their
+Al-Jalalayn values for compatibility. Missing editions are shown as unavailable,
+without substituting another source.
+
+To add a reading edition, register its parsed collection in `tafsir.Editions()`
+and its display option in `web/app/utils/tafsir-editions.ts`. Record attribution
+and rights before presenting a source as verified.

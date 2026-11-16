@@ -140,3 +140,28 @@ func (c *Collection) Get(chapter, verse int) *Passage {
 	return c.byVerse[fmt.Sprintf("%d:%d", chapter, verse)]
 }
 func (c *Collection) Passages() []*Passage { return append([]*Passage(nil), c.passages...) }
+
+// Editions returns the bundled reading editions in display order.
+// The original commentary has no verified author and is not model evidence.
+func Editions() []*Collection {
+	return []*Collection{Load(), original()}
+}
+
+var originalOnce sync.Once
+var originalCollection *Collection
+
+func original() *Collection {
+	originalOnce.Do(func() {
+		data, err := files.ReadFile("data/original.json")
+		if err != nil {
+			panic(err)
+		}
+		originalCollection, err = Parse(data, Edition{
+			ID: "original-en", Title: "Original commentary — unattributed", Language: "en",
+		})
+		if err != nil {
+			panic(err)
+		}
+	})
+	return originalCollection
+}

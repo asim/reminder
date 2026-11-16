@@ -100,3 +100,30 @@ func TestSaheehTranslationCoverage(t *testing.T) {
 		t.Fatalf("Saheeh source snapshot changed: %s", got)
 	}
 }
+
+func TestCommentaryEditions(t *testing.T) {
+	q := Load()
+	count := 0
+	for _, ch := range q.Chapters {
+		for _, verse := range ch.Verses {
+			if verse.Number == 0 {
+				continue
+			}
+			count++
+			current := verse.Commentaries["jalalayn-en"]
+			original := verse.Commentaries["original-en"]
+			if current.Text != verse.Comments || current.Source != verse.CommentarySource || !current.Verified {
+				t.Fatalf("default commentary changed at %d:%d", ch.Number, verse.Number)
+			}
+			if original.Text == "" || original.Verified || original.Source != "Original commentary — unattributed" {
+				t.Fatalf("missing or misattributed original commentary at %d:%d", ch.Number, verse.Number)
+			}
+		}
+	}
+	if count != 6236 {
+		t.Fatalf("coverage %d", count)
+	}
+	if q.Get(1).Verse(1).Commentaries["original-en"].Text == q.Get(1).Verse(1).Comments {
+		t.Fatal("editions were conflated")
+	}
+}
