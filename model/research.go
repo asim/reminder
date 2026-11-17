@@ -188,6 +188,7 @@ func Research(ctx context.Context, request Request, retrieve func(string) ([]*Re
 			query += "\n" + request.History[i].Content
 		}
 	}
+	Emit(ctx, Event{Type: "status", Text: "Reading sources…"})
 	initial, err := retrieve(query)
 	if err != nil {
 		return nil, err
@@ -213,6 +214,8 @@ func runResearch(ctx context.Context, system string, evidence *evidenceSet, sess
 		if !allowTools {
 			prompt += "\nThe research budget is ending. Answer from what you have established so far and clearly state any material unresolved gaps. Do not request more tools."
 		}
+		Emit(ctx, Event{Type: "reset"})
+		Emit(ctx, Event{Type: "status", Text: "Preparing explanation…"})
 		turn, err := session.next(ctx, prompt, replies, allowTools, &usedUnits)
 		if err != nil {
 			return nil, err
@@ -232,6 +235,8 @@ func runResearch(ctx context.Context, system string, evidence *evidenceSet, sess
 		if !allowTools {
 			return nil, fmt.Errorf("model requested tools after the research budget ended")
 		}
+		Emit(ctx, Event{Type: "reset"})
+		Emit(ctx, Event{Type: "status", Text: "Looking up additional sources…"})
 		replies = nil
 		ids := map[string]bool{}
 		for _, call := range turn.Calls {

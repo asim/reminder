@@ -72,7 +72,12 @@ func modelHTTP(keys *KeyStore, operation func(*http.Request, GenerationAccess) (
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Cache-Control", "no-store")
+		var emit func(model.Event)
 		fail := func(status int, message string) {
+			if emit != nil {
+				emit(model.Event{Type: "error", Text: message})
+				return
+			}
 			w.WriteHeader(status)
 			json.NewEncoder(w).Encode(map[string]string{"message": message})
 		}
@@ -91,6 +96,27 @@ func modelHTTP(keys *KeyStore, operation func(*http.Request, GenerationAccess) (
 				fail(503, "Model access unavailable")
 			}
 			return
+		}
+		if r.Header.Get("Accept") == "application/x-ndjson" {
+			ctx, cancel := context.WithCancel(r.Context())
+			defer cancel()
+			w.Header().Set("Content-Type", "application/x-ndjson")
+			w.Header().Set("X-Accel-Buffering", "no")
+			encoder := json.NewEncoder(w)
+			controller := http.NewResponseController(w)
+			emit = func(event model.Event) {
+				if ctx.Err() != nil {
+					return
+				}
+				if err := encoder.Encode(event); err != nil {
+					cancel()
+					return
+				}
+				if err := controller.Flush(); err != nil {
+					cancel()
+				}
+			}
+			r = r.WithContext(model.WithEvents(ctx, emit))
 		}
 		r.Body = http.MaxBytesReader(w, r.Body, model.ModelBodyLimit())
 		result, err := operation(r, access)
@@ -115,7 +141,11 @@ func modelHTTP(keys *KeyStore, operation func(*http.Request, GenerationAccess) (
 			}
 			return
 		}
-		json.NewEncoder(w).Encode(result)
+		if emit != nil {
+			emit(model.Event{Type: "result", Result: result})
+		} else {
+			json.NewEncoder(w).Encode(result)
+		}
 	})
 }
 
