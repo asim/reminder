@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -198,8 +199,17 @@ func Research(ctx context.Context, request Request, retrieve func(string) ([]*Re
 	}
 	evidence := &evidenceSet{refs: make([]*Reference, 0)}
 	system := groundedPrompt + evidence.add(initial, contentLimits.Evidence/2)
-	session := newResearchSession(request)
-	return runResearch(ctx, system, evidence, session, lookup)
+	session := &countedSession{researchSession: newResearchSession(request)}
+	result, err = runResearch(ctx, system, evidence, session, lookup)
+	if err != nil && ctx.Err() == nil && session.turns == 1 && len(evidence.refs) > 0 && recoverableResearchError(err) {
+		log.Printf("Research first-call recovery: %v", err)
+		Emit(ctx, Event{Type: "reset"})
+		Emit(ctx, Event{Type: "status", Text: "Retrying explanation from the available sources…"})
+		// One fresh, tool-free completion, with the same provider, sources, history,
+		// limits and citation validation. Never re-run retrieval or retry recursively.
+		return Respond(ctx, request, func(string) ([]*Reference, error) { return evidence.refs, nil })
+	}
+	return result, err
 }
 
 func runResearch(ctx context.Context, system string, evidence *evidenceSet, session researchSession, lookup LookupFunc) (*Result, error) {

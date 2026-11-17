@@ -137,7 +137,7 @@ func modelHTTP(keys *KeyStore, operation func(*http.Request, GenerationAccess) (
 				fail(429, err.Error())
 			default:
 				log.Printf("Model request failed: %v", err)
-				fail(503, "Model unavailable. Please try again later.")
+				fail(503, model.FailureMessage(err))
 			}
 			return
 		}
