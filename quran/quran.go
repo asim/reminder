@@ -12,6 +12,9 @@ import (
 //go:embed data/words/*.json
 var files embed.FS
 
+// ContentFiles exposes the read-only embedded sources for cache fingerprinting.
+func ContentFiles() embed.FS { return files }
+
 var Bismillah = `بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ`
 var English = `In the Name of Allah—the Most Compassionate, Most Merciful.`
 

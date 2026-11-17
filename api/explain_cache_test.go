@@ -6,6 +6,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
+	"testing/fstest"
 
 	"github.com/asim/reminder/model"
 )
@@ -242,5 +243,21 @@ func TestPublicCacheVersionSurvivesReopen(t *testing.T) {
 	_, err = b.result(context.Background(), b.key(req), func() (*model.Result, error) { t.Fatal("persisted entry missed"); return nil, nil })
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestVersionTracksOnlySourceContent(t *testing.T) {
+	a := fstest.MapFS{"a.json": &fstest.MapFile{Data: []byte("source")}}
+	first := sourceFingerprint(a)
+	if sourceFingerprint(a) != first {
+		t.Fatal("unstable fingerprint")
+	}
+	a["a.json"].Data = []byte("updated")
+	if sourceFingerprint(a) == first {
+		t.Fatal("source update did not invalidate")
+	}
+	b := fstest.MapFS{"b.json": &fstest.MapFile{Data: []byte("source")}}
+	if sourceFingerprint(b) == first {
+		t.Fatal("source identity ignored")
 	}
 }

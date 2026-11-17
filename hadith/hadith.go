@@ -13,6 +13,9 @@ import (
 //go:embed data/*.json data/*.json.gz
 var files embed.FS
 
+// ContentFiles exposes the read-only embedded sources for cache fingerprinting.
+func ContentFiles() embed.FS { return files }
+
 var Description = `A collection of the Prophet Muhammad's sayings and actions, providing essential context and practical guidance for Islamic practice and belief alongside the Quran.`
 
 // Collection represents a hadith collection like Bukhari or Muslim

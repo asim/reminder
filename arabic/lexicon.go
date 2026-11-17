@@ -21,6 +21,9 @@ import (
 //go:embed dict/lane-xml.zip dict/source.json morphology/qac.txt.gz morphology/source.json qul/*.json
 var files embed.FS
 
+// ContentFiles exposes the read-only embedded sources for cache fingerprinting.
+func ContentFiles() embed.FS { return files }
+
 const LaneURL = "https://github.com/alpheios-project/lan"
 const CorpusURL = "https://corpus.quran.com"
 

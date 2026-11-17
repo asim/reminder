@@ -10,6 +10,9 @@ import (
 //go:embed data/*.json
 var files embed.FS
 
+// ContentFiles exposes the read-only embedded sources for cache fingerprinting.
+func ContentFiles() embed.FS { return files }
+
 var Description = `The "Names of Allah" (Asma al-Husna) refer to the 99 beautiful names of God. Descriptions of God's divine attributes, revealing His nature and qualities.`
 
 type Name struct {

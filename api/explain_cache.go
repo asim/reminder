@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -39,7 +40,7 @@ type ExplainCache struct {
 
 func OpenExplainCache(dir string) (*ExplainCache, error) {
 	// Only source data and explanation policy invalidate answers, not unrelated builds.
-	return openExplainCache(dir, quran.ContentVersion()+tafsir.ContentVersion()+hadith.ContentVersion()+names.ContentVersion()+arabic.ContentVersion())
+	return openExplainCache(dir, explanationSourcesVersion())
 }
 
 func openExplainCache(dir, version string) (*ExplainCache, error) {
@@ -166,4 +167,33 @@ func decodeExplanation(data []byte, err error) (*model.Result, error) {
 		return nil, fmt.Errorf("invalid cached explanation: %w", err)
 	}
 	return &result, nil
+}
+
+// Fingerprinting belongs to the cache that uses it. Keep the per-corpus encoding
+// unchanged so this refactor does not invalidate existing cached explanations.
+var explanationSourcesVersion = sync.OnceValue(func() string {
+	return sourceFingerprint(quran.ContentFiles()) + sourceFingerprint(tafsir.ContentFiles()) + sourceFingerprint(hadith.ContentFiles()) + sourceFingerprint(names.ContentFiles()) + sourceFingerprint(arabic.ContentFiles())
+})
+
+func sourceFingerprint(files fs.FS) string {
+	h := sha256.New()
+	err := fs.WalkDir(files, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		data, err := fs.ReadFile(files, path)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(h, "%d:%s:%d:", len(path), path, len(data))
+		h.Write(data)
+		return nil
+	})
+	if err != nil {
+		panic(err)
+	}
+	return fmt.Sprintf("%x", h.Sum(nil))
 }
