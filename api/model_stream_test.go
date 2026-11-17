@@ -72,7 +72,7 @@ func (idx *countedExplainIndex) Query(q string) ([]*search.Result, error) {
 	idx.calls++
 	return idx.modelIndex.Query(q)
 }
-func TestDefaultExplainSkipsBroadSearch(t *testing.T) {
+func TestPassageExplainAndQuestionsSkipBroadSearch(t *testing.T) {
 	provider := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"choices":[{"finish_reason":"stop","message":{"role":"assistant","content":"Explanation [1]."}}]}`))
@@ -100,7 +100,7 @@ func TestDefaultExplainSkipsBroadSearch(t *testing.T) {
 	if _, err := service.Explain(context.Background(), req, nil); err != nil {
 		t.Fatal(err)
 	}
-	if index.calls == 0 {
-		t.Fatal("custom question lost retrieval")
+	if index.calls != 0 {
+		t.Fatal("passage question ran broad search")
 	}
 }
