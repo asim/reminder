@@ -79,6 +79,9 @@ func (s *ModelService) Explain(ctx context.Context, request model.ExplainRequest
 		return nil, invalidModelRequest(err.Error())
 	}
 	passage, err := search.ExplanationPassage(s.Quran, request.Context)
+	if request.Context.Source == "hadith" {
+		passage, err = search.HadithExplanationPassage(s.Hadith, request.Context)
+	}
 	if err != nil {
 		return nil, &modelServiceError{"not_found", err.Error()}
 	}

@@ -56,7 +56,11 @@ func (e *evidenceSet) add(refs []*Reference, allowance int) string {
 	}
 	var out strings.Builder
 	omitted := 0
+	var records []*Reference
 	for _, ref := range refs {
+		records = append(records, hadithEvidenceChunks(ref, allowance)...)
+	}
+	for _, ref := range records {
 		if ref == nil {
 			continue
 		}
@@ -94,6 +98,66 @@ func (e *evidenceSet) add(refs []*Reference, allowance int) string {
 		out.WriteString("No matching source records were returned. This does not establish absence from the full corpus.\n")
 	}
 	return out.String()
+}
+
+// Split oversized narrations before budgeting, including Arabic metadata that
+// can be larger than the translation. Keep translation excerpts first and mark
+// every chunk so a partial narration cannot be mistaken for the complete text.
+func hadithEvidenceChunks(ref *Reference, allowance int) []*Reference {
+	if ref == nil || (ref.Metadata["source"] != "bukhari" && ref.Metadata["source"] != "muslim") {
+		return []*Reference{ref}
+	}
+	data, _ := json.Marshal(ref)
+	if len(data)+32 <= allowance {
+		return []*Reference{ref}
+	}
+	var chunks []*Reference
+	fields := []struct{ name, text string }{{"text", ref.Text}, {"arabic", ref.Metadata["arabic"]}}
+	if ref.Text == ref.Metadata["arabic"] {
+		fields = fields[1:]
+	}
+	for _, field := range fields {
+		remaining := field.text
+		for remaining != "" {
+			md := make(map[string]string, len(ref.Metadata)+4)
+			for key, value := range ref.Metadata {
+				if key != "arabic" {
+					md[key] = value
+				}
+			}
+			md["excerpt_field"] = field.name
+			md["evidence_scope"] = "excerpt of a longer narration; only supplied parts are available"
+			chunk := &Reference{Metadata: md}
+			// Leave space for citation labels and part numbering. Bound serialized
+			// bytes (including JSON escaping), not just raw text length.
+			limit := allowance/4 - 128
+			runes := []rune(remaining)
+			low, high := 0, len(runes)
+			for low < high {
+				mid := (low + high + 1) / 2
+				chunk.Text = string(runes[:mid])
+				encoded, _ := json.Marshal(chunk)
+				if len(encoded) <= limit {
+					low = mid
+				} else {
+					high = mid - 1
+				}
+			}
+			if low == 0 {
+				// Unusually large non-text metadata cannot fit: let the normal
+				// budget path report the original record as omitted.
+				return []*Reference{ref}
+			}
+			chunk.Text = string(runes[:low])
+			remaining = string(runes[low:])
+			chunks = append(chunks, chunk)
+		}
+	}
+	for i, chunk := range chunks {
+		chunk.Metadata["excerpt_part"] = strconv.Itoa(i + 1)
+		chunk.Metadata["excerpt_parts"] = strconv.Itoa(len(chunks))
+	}
+	return chunks
 }
 
 // Research lets the model answer directly or repeatedly call native read-only

@@ -1,5 +1,5 @@
 const assert = require('node:assert/strict'), fs = require('node:fs'), vm = require('node:vm'), ts = require('typescript');
-let slots = [], cursor = 0, effects = [], available = false, requests = 0;
+let slots = [], cursor = 0, effects = [], available = false, requests = 0, lastBody, success = false;
 const jsx = (type, props) => ({ type, props: props || {} });
 const react = {
  useState(initial) { const i = cursor++; if (!(i in slots)) slots[i] = initial; return [slots[i], v => { slots[i] = typeof v === 'function' ? v(slots[i]) : v; }]; },
@@ -13,7 +13,7 @@ vm.runInNewContext(ts.transpileModule(fs.readFileSync('app/components/quran/expl
  exports: output, AbortController, Error,
  require: name => name === 'react' ? react : name === 'react/jsx-runtime' ? { jsx, jsxs: jsx } : name === '~/queries/capabilities' ? { useModelAvailable: () => available } : {},
  window: { getSelection: () => null },
- fetch: async () => { requests++; return { ok: false, json: async () => ({ message: 'Temporarily unavailable' }) }; },
+ fetch: async (url, options) => { requests++; lastBody = JSON.parse(options.body); return { ok: success, json: async () => success ? { answer: 'Explanation', references: [] } : { message: 'Temporarily unavailable' } }; },
 });
 const props = { chapter: 2, verse: 153, translation: 'sahih', commentary: [{ number: 153, comments: 'Stored tafsir text', commentary_source: 'Tafsir Al-Jalalayn' }] };
 function flatten(n) {
@@ -34,7 +34,7 @@ function reset(model) { slots = []; available = model; requests = 0; }
  button(nodes,'Tafsir Quran 2:153').props.onClick(); nodes = render();
  assert(nodes.includes('Stored tafsir text')); assert(nodes.includes('Tafsir Al-Jalalayn'));
  assert(!nodes.some(n => n.type === 'form')); assert.equal(requests,0);
- reset(false); assert.equal(render({...props,commentary:[]}).length,0);
+ reset(false); assert(button(render({...props,commentary:[]}), 'Tafsir Quran 2:153'));
  reset(true); nodes = render(); assert.equal(nodes.filter(n => n.type === 'button').length,1);
  button(nodes,'Explain Quran 2:153').props.onClick(); nodes = render();
  nodes.find(n => n.type === 'textarea').props.onChange({target:{value:'What does this mean?'}}); nodes = render();
@@ -45,5 +45,23 @@ function reset(model) { slots = []; available = model; requests = 0; }
  button(nodes,'Tafsir').props.onClick(); nodes = render(); assert(nodes.includes('Stored tafsir text')); assert.equal(requests,1);
  button(nodes,'Explain').props.onClick(); nodes = render();
  assert.equal(nodes.find(n => n.type === 'textarea').props.value,'What does this mean?');
+ const hadith = { hadith: { collection: 'muslim', book: 0, number: 7369, label: 'Sahih Muslim record 7369' } };
+ reset(false); assert.equal(render(hadith).length,0);
+ reset(true); success = true; nodes = render(hadith);
+ button(nodes,'Explain Sahih Muslim record 7369').props.onClick(); nodes = render(hadith);
+ assert(!nodes.some(n => n.type === 'nav'), 'hadith has no tafsir tab');
+ nodes.find(n => n.type === 'form').props.onSubmit({preventDefault(){}});
+ await new Promise(setImmediate); nodes = render(hadith);
+ assert.equal(lastBody.context.source,'hadith'); assert.equal(lastBody.context.collection,'muslim');
+ assert.equal(lastBody.context.book,0); assert.equal(lastBody.context.hadith,7369);
+ assert.equal(lastBody.context.chapter,undefined); assert.equal(lastBody.question,'');
+ nodes.find(n => n.type === 'textarea').props.onChange({target:{value:'What does that mean?'}}); nodes = render(hadith);
+ nodes.find(n => n.type === 'form').props.onSubmit({preventDefault(){}});
+ await new Promise(setImmediate); nodes = render(hadith);
+ assert.equal(lastBody.context.hadith,7369); assert.equal(lastBody.history.length,2);
+ assert.equal(lastBody.question,'What does that mean?');
+ render({hadith:{...hadith.hadith,collection:'bukhari',book:1,number:1}});
+ nodes = render({hadith:{...hadith.hadith,collection:'bukhari',book:1,number:1}});
+ assert(!nodes.some(n => n.type === 'dialog'), 'changing records clears the panel');
  console.log('Explain panel: single action, availability, attributed tafsir and recoverable failure passed');
 })().catch(err => { console.error(err); process.exitCode = 1; });

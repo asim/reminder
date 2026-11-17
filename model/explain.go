@@ -11,6 +11,9 @@ import (
 // ExplainContext identifies the passage independently of the user's question.
 type ExplainContext struct {
 	Source      string `json:"source"`
+	Collection  string `json:"collection,omitempty"`
+	Book        int    `json:"book,omitempty"`
+	Hadith      int    `json:"hadith,omitempty"`
 	Chapter     int    `json:"chapter"`
 	Verse       int    `json:"verse,omitempty"`
 	Translation string `json:"translation,omitempty"`
@@ -29,8 +32,18 @@ func (r ExplainRequest) Request() (Request, error) {
 		return Request{}, fmt.Errorf("provide question or q, not both")
 	}
 	c := r.Context
-	if c.Source != "" && c.Source != "quran" {
+	if c.Source != "" && c.Source != "quran" && c.Source != "hadith" {
 		return Request{}, fmt.Errorf("unsupported explanation source")
+	}
+	if c.Source == "hadith" {
+		if (c.Collection != "bukhari" && c.Collection != "muslim") || c.Book < 0 || c.Hadith < 1 {
+			return Request{}, fmt.Errorf("collection, book and hadith are required")
+		}
+		if c.Chapter != 0 || c.Verse != 0 || c.Translation != "" {
+			return Request{}, fmt.Errorf("Quran fields are not valid for hadith context")
+		}
+	} else if c.Collection != "" || c.Book != 0 || c.Hadith != 0 {
+		return Request{}, fmt.Errorf("hadith fields require hadith source")
 	}
 	if c.Chapter < 0 || c.Chapter > 114 || c.Verse < 0 || (c.Verse > 0 && c.Chapter == 0) {
 		return Request{}, fmt.Errorf("invalid Quran context")
@@ -48,7 +61,7 @@ func (r ExplainRequest) Request() (Request, error) {
 	if question == "" {
 		question = strings.TrimSpace(r.Q)
 	}
-	if question == "" && c.Chapter == 0 {
+	if question == "" && c.Chapter == 0 && c.Source != "hadith" {
 		return Request{}, fmt.Errorf("a passage context or question is required")
 	}
 	if question == "" {
@@ -64,6 +77,12 @@ func (r ExplainRequest) Request() (Request, error) {
 		}
 	}
 	prompt := fmt.Sprintf("%s\nKeep this passage central. Explain its meaning and message in accessible English, using surrounding context and tafsir where helpful. Use Arabic analysis when it helps answer the question. For a general question, explain the whole passage even if a fragment is selected.\nSelected translation: %s\nSelected text (user selection): %s\nQuestion: %s", anchor, c.Translation, c.Selection, question)
+	if c.Source == "hadith" {
+		if strings.TrimSpace(r.Question+r.Q) == "" {
+			question = "Explain the meaning and message of this hadith."
+		}
+		prompt = fmt.Sprintf("Explain %s book %d, record %d. Keep this exact narration central, including for follow-up questions. Explain its meaning in accessible English. Use the supplied Arabic and translation and look up related evidence when useful. No stored hadith commentary is supplied: distinguish your explanation from attributed scholarly commentary, and verify any attribution with retrieved sources. Record numbers identify this dataset; do not invent canonical numbering, authenticity grades or rulings.\nSelected text (user selection): %s\nQuestion: %s", c.Collection, c.Book, c.Hadith, c.Selection, question)
+	}
 	request := Request{Prompt: prompt, History: r.History}
 	return request, request.Validate()
 }
@@ -86,6 +105,9 @@ func Explain(ctx context.Context, request ExplainRequest, retrieve func(string) 
 			} else {
 				query = fmt.Sprintf("Quran chapter %d %s", request.Context.Chapter, query)
 			}
+		}
+		if request.Context.Source == "hadith" {
+			query = fmt.Sprintf("%s book %d hadith %d %s", request.Context.Collection, request.Context.Book, request.Context.Hadith, query)
 		}
 		for i := len(request.History) - 2; i >= 0 && i >= len(request.History)-4; i -= 2 {
 			if len(query)+len(request.History[i].Content)+1 <= contentLimits.Prompt {

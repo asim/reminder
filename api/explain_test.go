@@ -2,6 +2,8 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/asim/reminder/hadith"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -194,5 +196,74 @@ func TestExplainRoutesSharePersistentDefaultCache(t *testing.T) {
 	}
 	if w := send("/api/model/explain", body, "Bearer "+secret); w.Code != 401 {
 		t.Fatal("cached response bypassed authentication")
+	}
+}
+
+func TestHadithExplainRoute(t *testing.T) {
+	var expectedText string
+	provider := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var request struct {
+			Messages []model.Message `json:"messages"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+			t.Error(err)
+		}
+		encoded, _ := json.Marshal(expectedText)
+		if len(request.Messages) == 0 || !strings.Contains(request.Messages[0].Content, string(encoded[1:len(encoded)-1])) {
+			t.Error("selected narration never reached provider")
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"choices":[{"message":{"role":"assistant","content":"Explanation [1]."}}]}`))
+	}))
+	defer provider.Close()
+	t.Setenv("OLLAMA_LLM_MODEL", "test")
+	t.Setenv("OLLAMA_BASE_URL", provider.URL+"/v1")
+	t.Setenv("AI_IP_DAILY_LIMIT", "0")
+	t.Setenv("AI_DAILY_LIMIT", "20")
+	if err := model.ConfigureLimits(t.TempDir()); err != nil {
+		t.Fatal(err)
+	}
+	ready := make(chan bool)
+	close(ready)
+	b := hadith.Load()
+	handler := (&ModelService{Index: modelIndex{}, Names: &names.Names{}, Quran: quran.Load(), Hadith: b, Ready: ready}).ExplainHandler(nil)
+	for _, tc := range []struct {
+		corpus       *hadith.Collection
+		book, number int
+	}{{b, b.Books[0].Number, b.Books[0].Hadiths[0].Number}, {hadith.Muslim(), 0, 7369}, {b, 54, 2732}, {hadith.Muslim(), 50, 6843}} {
+		corpus := tc.corpus
+		book := corpus.Get(tc.book)
+		var h *hadith.Hadith
+		for _, candidate := range book.Hadiths {
+			if candidate.Number == tc.number {
+				h = candidate
+				break
+			}
+		}
+		if h == nil {
+			t.Fatal("missing test fixture")
+		}
+		expectedText = h.English
+		if len(expectedText) > 100 {
+			expectedText = expectedText[:100]
+		}
+		body := fmt.Sprintf(`{"context":{"source":"hadith","collection":%q,"book":%d,"hadith":%d}}`, corpus.ID, book.Number, h.Number)
+		w := httptest.NewRecorder()
+		handler.ServeHTTP(w, httptest.NewRequest("POST", "/api/explain", strings.NewReader(body)))
+		if w.Code != 200 {
+			t.Fatalf("%s: %d %s", corpus.ID, w.Code, w.Body.String())
+		}
+		var result model.Result
+		if err := json.Unmarshal(w.Body.Bytes(), &result); err != nil {
+			t.Fatal(err)
+		}
+		if len(result.References) == 0 || !strings.HasPrefix(h.English, result.References[0].Text) || result.References[0].Text == "" || result.References[0].Metadata["collection"] != corpus.ID {
+			t.Fatalf("lost exact anchor: %+v", result)
+		}
+	}
+	w := httptest.NewRecorder()
+	handler.ServeHTTP(w, httptest.NewRequest("POST", "/api/explain", strings.NewReader(`{"context":{"source":"hadith","collection":"muslim","book":0,"hadith":999999}}`)))
+	if w.Code != 404 {
+		t.Fatalf("missing record returned %d", w.Code)
 	}
 }
