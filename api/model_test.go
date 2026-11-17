@@ -79,7 +79,7 @@ func TestModelKeyAllowanceAndGlobalLimit(t *testing.T) {
 	t.Setenv("OLLAMA_LLM_MODEL", "test")
 	t.Setenv("OLLAMA_BASE_URL", provider.URL+"/v1")
 	t.Setenv("AI_IP_DAILY_LIMIT", "0")
-	t.Setenv("AI_DAILY_LIMIT", "2")
+	t.Setenv("AI_DAILY_LIMIT", "2") // direct answers need only one provider turn
 	if err := model.ConfigureLimits(t.TempDir()); err != nil {
 		t.Fatal(err)
 	}

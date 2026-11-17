@@ -664,20 +664,32 @@ func main() {
 				}
 			}
 
+			source, _ := data["source"].(string)
+			if value, present := data["source"]; present {
+				if _, ok := value.(string); !ok {
+					http.Error(w, "source must be a string", 400)
+					return
+				}
+			}
+			scoped, err := search.ScopedQuery(question, source)
+			if err != nil {
+				http.Error(w, err.Error(), 400)
+				return
+			}
 			if !summarise {
-				res, err := search.References(lookup, n, question)
+				res, err := search.References(lookup, n, scoped)
 				if err != nil {
 					http.Error(w, err.Error(), 500)
 					return
 				}
 				res = search.CurrentTafsirResults(res, q)
 				res = search.CurrentHadithResults(res, b)
-				json.NewEncoder(w).Encode(map[string]interface{}{"q": question, "answer": "", "references": res})
+				json.NewEncoder(w).Encode(map[string]interface{}{"q": question, "source": source, "answer": "", "references": res})
 				return
 			}
-			result, err := model.Respond(r.Context(), model.Request{Prompt: question}, func(query string) ([]*model.Reference, error) {
-				return search.ModelReferences(idx, n, q, b, query)
-			})
+			result, err := model.Research(r.Context(), model.Request{Prompt: question + "\nSearch source: " + source}, func(_ string) ([]*model.Reference, error) {
+				return search.ModelReferences(idx, n, q, b, scoped)
+			}, search.Lookups(idx, n, q, b, source))
 			if err != nil {
 				status, message := http.StatusServiceUnavailable, "AI summary unavailable. Please try again later."
 				var limit *model.LimitError
@@ -696,6 +708,7 @@ func main() {
 
 			output, _ := json.Marshal(map[string]interface{}{
 				"q":          question,
+				"source":     source,
 				"answer":     answerMD,
 				"references": res,
 			})

@@ -102,7 +102,7 @@ export function ExplainButton({ chapter, verse, translation, commentary = [] }: 
         </section>)}
         {!passages.length && <p>This tafsir has no saved commentary for this passage. Choose another source, or reconnect to update the chapter.</p>}
       </div> : <div className='space-y-4 p-4 text-left text-sm sm:p-5' aria-live='polite'>
-        {selection && <blockquote className='border-l-2 pl-3' dir='auto'>{selection}</blockquote>}
+        {selection && <div><blockquote className='border-l-2 pl-3' dir='auto'>{selection}</blockquote><button type='button' className='mt-1 text-xs underline' onClick={() => setSelection('')}>Clear selection</button></div>}
         {!turns.length && <p className='text-gray-600'>Explore this passage through its Arabic, translations and tafsir. Ask a question or choose Explain.</p>}
         {turns.map((turn, index) => <section key={index} className='space-y-3 border-b pb-4'>
           <h3 className='font-medium'>{turn.question}</h3>

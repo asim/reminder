@@ -255,3 +255,37 @@ func TestCapabilitiesWithoutModel(t *testing.T) {
 		t.Fatalf("expected GET-only capabilities, got %d", code)
 	}
 }
+
+func TestSearchSourceFilters(t *testing.T) {
+	for _, source := range []string{"quran", "hadith", "tafsir", "names"} {
+		body, _ := json.Marshal(map[string]any{"q": "mercy", "source": source})
+		status, _, data := request(t, "POST", "/api/search", body)
+		if status != 200 {
+			t.Fatalf("%s: %d %s", source, status, data)
+		}
+		var result struct {
+			Source     string `json:"source"`
+			References []struct {
+				Metadata map[string]string `json:"metadata"`
+			} `json:"references"`
+		}
+		if err := json.Unmarshal(data, &result); err != nil {
+			t.Fatal(err)
+		}
+		if result.Source != source || len(result.References) == 0 {
+			t.Fatalf("%s: missing results %s", source, data)
+		}
+		for _, ref := range result.References {
+			got := ref.Metadata["source"]
+			if got != source && !(source == "hadith" && (got == "bukhari" || got == "muslim")) {
+				t.Fatalf("%s leaked %s", source, got)
+			}
+		}
+	}
+	for _, body := range []string{`{"q":"mercy","source":"unknown"}`, `{"q":"mercy","source":42}`} {
+		status, _, _ := request(t, "POST", "/api/search", []byte(body))
+		if status != 400 {
+			t.Fatalf("invalid source accepted: %d", status)
+		}
+	}
+}

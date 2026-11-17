@@ -7,7 +7,10 @@ type SearchReference = {
   metadata: Record<string, string>;
 };
 
+export type SearchSource = 'all' | 'quran' | 'hadith' | 'tafsir' | 'names';
 export type SearchResponseType = {
+  source?: string;
+  mode?: 'search' | 'ask';
   q: string;
   answer: string;
   references: SearchReference[];
@@ -19,8 +22,8 @@ export type SearchHistoryType = {
 };
 
 // Fast search: fetches references only, no LLM summarisation.
-export const searchOptions = (query: string) => ({
-  queryKey: ['search', query],
+export const searchOptions = (query: string, source: SearchSource = 'all') => ({
+  queryKey: ['search', query, source],
   queryFn: async () => {
     if (!query.trim()) {
       return null;
@@ -28,6 +31,7 @@ export const searchOptions = (query: string) => ({
 
     const data = await httpPost<SearchResponseType>('/api/search', {
       q: query,
+      source,
       summarise: false,
     });
 
@@ -37,8 +41,9 @@ export const searchOptions = (query: string) => ({
 });
 
 // Slow search: triggers LLM summarisation for the given query.
-export const searchSummaryOptions = (query: string) => ({
-  queryKey: ['search-summary', query],
+export const searchSummaryOptions = (query: string, source: SearchSource = 'all') => ({
+  queryKey: ['search-summary', query, source],
+  staleTime: Infinity,
   retry: false,
   refetchOnWindowFocus: false,
   refetchOnReconnect: false,
@@ -50,11 +55,12 @@ export const searchSummaryOptions = (query: string) => ({
 
     const data = await httpPost<SearchResponseType>('/api/search', {
       q: query,
+      source,
       summarise: true,
     });
 
     queryClient.invalidateQueries({
-      queryKey: [getSearchHistoryOptions().queryKey],
+      queryKey: getSearchHistoryOptions().queryKey,
     });
 
     return data;

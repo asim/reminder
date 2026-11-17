@@ -33,9 +33,9 @@ func TestExplainRoutesShareGroundingAndContext(t *testing.T) {
 		}
 		last := body.Messages[len(body.Messages)-1].Content
 		if strings.Contains(last, "Explain Quran 1:2") {
-			for _, want := range []string{"Lane", "Quranic Arabic Corpus"} {
-				if !strings.Contains(system, want) {
-					t.Errorf("missing Arabic evidence: %s", want)
+			for _, want := range []string{`"source":"lexicon"`, `"source":"morphology"`} {
+				if strings.Contains(system, want) {
+					t.Errorf("general explanation was flooded with lexical evidence: %s", want)
 				}
 			}
 		}

@@ -23,7 +23,7 @@ func TestMCPSearchUsesGroundedModel(t *testing.T) {
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Error(err)
 		}
-		if len(body.Messages) == 0 || !strings.Contains(body.Messages[0].Content, "Sources (JSON records)") || !strings.Contains(body.Messages[0].Content, quran.Load().Get(1).Verse(2).Arabic) || !strings.Contains(body.Messages[0].Content, "jalalayn-en") || !strings.Contains(body.Messages[0].Content, "Lane’s Arabic-English Lexicon") || !strings.Contains(body.Messages[0].Content, "Quranic Arabic Corpus") {
+		if len(body.Messages) == 0 || !strings.Contains(body.Messages[0].Content, "Sources (JSON records)") || !strings.Contains(body.Messages[0].Content, quran.Load().Get(1).Verse(2).Arabic) || !strings.Contains(body.Messages[0].Content, "jalalayn-en") {
 			t.Error("MCP summary must use canonical Arabic, translations and attributed tafsir")
 		}
 		w.Header().Set("Content-Type", "application/json")

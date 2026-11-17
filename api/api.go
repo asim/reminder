@@ -223,6 +223,7 @@ var Endpoints = []*Endpoint{
 		Method:      "POST",
 		Description: "Search the Quran, Hadith and Names of Allah, with an optional AI summary",
 		Params: []*Param{
+			{Name: "source", Value: "string", Description: "Filter before ranking: all (default), quran, hadith, tafsir or names"},
 			{Name: "summarise", Value: "boolean", Description: "Generate an AI summary only when true (default: false)"},
 			{
 				Name:        "q",

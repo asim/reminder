@@ -3,14 +3,17 @@ import { useQuery } from '@tanstack/react-query';
 import { Loader2, Search as SearchIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
+import { queryClient } from '~/utils/query-client';
 import {
   getSearchHistoryOptions,
   searchOptions,
   searchSummaryOptions,
   type SearchResponseType,
+  type SearchSource,
 } from '~/queries/search';
 import {
   cacheSearchResult,
+  restoreCachedSearches,
   getAllCachedSearches,
   type CachedSearch,
 } from '~/utils/search-cache';
@@ -31,6 +34,10 @@ export function meta() {
 }
 
 type SearchMode = 'search' | 'ask';
+const sourceOptions: { value: SearchSource; label: string }[] = [
+  {value: 'all', label: 'All'}, {value: 'quran', label: 'Quran'},
+  {value: 'hadith', label: 'Hadith'}, {value: 'tafsir', label: 'Tafsir'}, {value: 'names', label: 'Names'},
+];
 
 type SearchReference = {
   text: string;
@@ -40,6 +47,7 @@ type SearchReference = {
 
 function getResultTitle(meta: Record<string, string>): string {
   const source = meta.source || '';
+  if (meta.kind === 'mention_inventory') return 'Quran mention lookup';
   if (source === 'lexicon') return `${meta.title} — ${meta.headword || meta.root}`;
   if (source === 'morphology') return `${meta.title} — ${meta.chapter}:${meta.verse}`;
   if (source === 'quran_translation') return `${meta.translator || meta.edition} — ${meta.chapter}:${meta.verse}`;
@@ -133,10 +141,23 @@ export default function SearchIndex() {
   const [query, setQuery] = useState('');
   const [submittedQuery, setSubmittedQuery] = useState('');
   const [mode, setMode] = useState<SearchMode>('search');
+  const [source, setSource] = useState<SearchSource>('all');
+  const [submittedSource, setSubmittedSource] = useState<SearchSource>('all');
   const [cachedSearches, setCachedSearches] = useState<CachedSearch[]>([]);
 
   useEffect(() => {
     setCachedSearches(getAllCachedSearches());
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q') || '';
+    const filter = sourceOptions.find(item => item.value === params.get('source'))?.value || 'all';
+    const savedMode = params.get('mode') === 'ask' ? 'ask' : 'search';
+    if (q) {
+      restoreCachedSearches(q, filter, savedMode, (cachedMode, result) => {
+        const options = cachedMode === 'ask' ? searchSummaryOptions(q, filter) : searchOptions(q, filter);
+        queryClient.setQueryData(options.queryKey, result);
+      });
+      setQuery(q); setSource(filter); setSubmittedSource(filter); setMode(savedMode); setSubmittedQuery(q);
+    }
   }, []);
 
   const { data: historyData, refetch: refetchHistory } = useQuery(
@@ -144,38 +165,43 @@ export default function SearchIndex() {
   );
 
   const { data: searchResults, isLoading, error: searchError } = useQuery({
-    ...searchOptions(submittedQuery),
+    ...searchOptions(submittedQuery, submittedSource),
     enabled: !!submittedQuery,
   });
 
   const { data: summaryResults, isLoading: isSummaryLoading, error: summaryError } = useQuery({
-    ...searchSummaryOptions(submittedQuery),
+    ...searchSummaryOptions(submittedQuery, submittedSource),
     enabled:
       modelAvailable && !!submittedQuery && mode === 'ask' && !!searchResults,
   });
 
   const mergedResults = useMemo<SearchResponseType | null>(() => {
-    if (!searchResults) return null;
+    // A saved AI answer remains readable even while ordinary results load or fail.
+    const results = mode === 'ask' ? summaryResults ?? searchResults : searchResults;
+    if (!results) return null;
     return {
-      ...searchResults,
+      ...results,
+      source: submittedSource,
+      mode,
       answer: mode === 'ask' ? summaryResults?.answer ?? '' : '',
-      references: mode === 'ask' ? summaryResults?.references ?? searchResults.references : searchResults.references,
+      references: mode === 'ask' ? summaryResults?.references ?? results.references : results.references,
     };
-  }, [searchResults, summaryResults, mode]);
+  }, [searchResults, summaryResults, mode, submittedSource]);
 
   useEffect(() => {
-    if (mergedResults && submittedQuery && mergedResults.answer) {
+    if (mergedResults && submittedQuery && (mode === 'search' || !!summaryResults?.answer)) {
       cacheSearchResult(submittedQuery, mergedResults);
       setCachedSearches(getAllCachedSearches());
-      refetchHistory();
+      if (mode === 'ask') refetchHistory();
     }
-  }, [mergedResults, submittedQuery, refetchHistory]);
+  }, [mergedResults, submittedQuery, mode, summaryResults, refetchHistory]);
 
   const doSubmit = (chosenMode: SearchMode) => {
     if (!query.trim()) return;
-    setMode(chosenMode === 'ask' && !modelAvailable ? 'search' : chosenMode);
-    setSubmittedQuery(query);
-    setQuery('');
+    const nextMode = chosenMode === 'ask' && !modelAvailable ? 'search' : chosenMode;
+    setMode(nextMode); setSubmittedSource(source); setSubmittedQuery(query.trim());
+    const params = new URLSearchParams({q: query.trim(), source, mode: nextMode});
+    window.history.replaceState(null, '', `${window.location.pathname}?${params}`);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -184,38 +210,17 @@ export default function SearchIndex() {
   };
 
   const mergedHistory = useMemo(() => {
-    if (!historyData?.history || historyData.history.length === 0) {
-      return cachedSearches.map((cached) => ({
-        type: 'cached' as const,
-        result: cached.result,
-      }));
-    }
-
-    const cachedMap = new Map<string, CachedSearch>();
-    cachedSearches.forEach((cached) => {
-      cachedMap.set(cached.query.toLowerCase(), cached);
-    });
-
     const merged: Array<{
-      type: 'cached' | 'server';
-      query?: string;
-      answer?: string;
-      result?: SearchResponseType;
-    }> = [];
-
-    for (let i = 0; i < historyData.history.length; i += 2) {
-      const question = historyData.history[i];
-      const answer = historyData.history[i + 1];
-      if (!question || !answer) continue;
-
-      const cached = cachedMap.get(question.toLowerCase());
-      if (cached) {
-        merged.push({ type: 'cached', result: cached.result });
-      } else {
-        merged.push({ type: 'server', query: question, answer });
+      type: 'cached' | 'server'; query?: string; answer?: string; result?: SearchResponseType;
+    }> = cachedSearches.map(cached => ({type: 'cached', result: cached.result}));
+    const cachedQueries = new Set(cachedSearches.filter(cached => !!cached.result.answer).map(cached => cached.query.toLowerCase()));
+    const history = historyData?.history || [];
+    for (let i = 0; i < history.length; i += 2) {
+      const question = history[i], answer = history[i + 1];
+      if (question && answer && !cachedQueries.has(question.toLowerCase())) {
+        merged.push({type: 'server', query: question, answer});
       }
     }
-
     return merged;
   }, [historyData, cachedSearches]);
 
@@ -226,7 +231,7 @@ export default function SearchIndex() {
           Search
         </h1>
         <div className='text-sm sm:text-base text-gray-700 mb-2'>
-          Seek knowledge from the Quran, Hadith and Names of Allah
+          Seek knowledge from the Quran, Hadith, Tafsir and Names of Allah
         </div>
         <form onSubmit={handleSubmit} className='mb-4 sm:mb-6'>
           <div className='relative flex'>
@@ -245,7 +250,14 @@ export default function SearchIndex() {
               </div>
             )}
           </div>
-          <div className='flex gap-2 mt-2'>
+          <div className='flex flex-wrap gap-2 mt-3' role='group' aria-label='Search sources'>
+            {sourceOptions.map(item => <button key={item.value} type='button'
+              aria-pressed={source === item.value} onClick={() => setSource(item.value)}
+              className={`rounded-full border px-3 py-1 text-sm ${source === item.value ? 'border-gray-900 bg-gray-900 text-white' : 'border-gray-300 text-gray-700 hover:bg-gray-100'}`}>
+              {item.label}
+            </button>)}
+          </div>
+          <div className='flex gap-2 mt-3'>
             <button
               type='submit'
               disabled={isLoading || !query.trim()}
@@ -277,7 +289,7 @@ export default function SearchIndex() {
         {mergedResults && mode === 'search' && (
           <div className='mb-6 sm:mb-8'>
             <div className='mb-3 text-sm text-gray-500'>
-              {mergedResults.references.length} results for "{mergedResults.q}"
+              {mergedResults.references.length} results for "{mergedResults.q}" · {sourceOptions.find(item => item.value === submittedSource)?.label}
             </div>
             <div className='space-y-3'>
               {mergedResults.references.map((ref, index) => (
@@ -339,6 +351,7 @@ export default function SearchIndex() {
                       <div className='mb-2 font-semibold text-sm sm:text-base'>
                         {result.q}
                       </div>
+                      <p className='mb-2 text-xs text-gray-500'>{result.answer ? 'Ask AI' : 'Search'} · {sourceOptions.find(item => item.value === (result.source || 'all'))?.label}</p>
                       {result.answer && (
                         <div
                           className='mb-3 text-sm prose prose-sm max-w-none'
@@ -351,9 +364,7 @@ export default function SearchIndex() {
                             <ResultCard key={refIdx} ref={ref} compact />
                           ))}
                           {result.references.length > 3 && (
-                            <div className='text-xs text-gray-500'>
-                              +{result.references.length - 3} more results
-                            </div>
+                            <details className='text-sm'><summary className='cursor-pointer text-gray-600'>Show {result.references.length - 3} more results</summary><div className='mt-2 space-y-2'>{result.references.slice(3).map((ref, index) => <ResultCard key={index} ref={ref} />)}</div></details>
                           )}
                         </div>
                       )}
