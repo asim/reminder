@@ -140,6 +140,6 @@ func ExplanationVersion() string {
 		}
 	}
 	// Bump the policy revision when explanation/retrieval behavior changes.
-	data, _ := json.Marshal([]any{provider, name, endpoint, contentLimits, groundedPrompt, "explanation-policy-v2", os.Getenv("EXPLAIN_CACHE_EPOCH")})
+	data, _ := json.Marshal([]any{provider, name, endpoint, contentLimits, groundedPrompt, "explanation-policy-v3", os.Getenv("EXPLAIN_CACHE_EPOCH")})
 	return string(data)
 }

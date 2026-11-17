@@ -130,6 +130,9 @@ func Respond(ctx context.Context, request Request, retrieve func(string) ([]*Ref
 	messages := append(append([]Message(nil), request.History...), Message{Role: "user", Content: request.Prompt})
 	ctx = context.WithValue(ctx, completionKey{}, &result.Complete)
 	result.Answer = complete(context.WithValue(ctx, groundedKey{}, true), groundedPrompt+evidence.String(), messages)
+	if strings.TrimSpace(result.Answer) == "" {
+		return nil, fmt.Errorf("model returned an empty answer")
+	}
 	for _, match := range citationPattern.FindAllStringSubmatch(result.Answer, -1) {
 		number, err := strconv.Atoi(match[1])
 		if err != nil || number < 1 || number > len(result.References) {

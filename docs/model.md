@@ -247,3 +247,14 @@ prompt asks the model to answer directly when the supplied evidence suffices.
 The first deployment of the new cache-key format has a cold cache. Subsequent
 unrelated deployments preserve it. Cached results use the same final result event
 without regenerating or replaying artificial text deltas.
+
+If the first research call is rejected with HTTP 400/422, returns an empty or
+incomplete response, or fails citation validation, the server attempts one plain
+grounded completion using the already-budgeted sources and conversation history.
+This recovery omits native tools and streaming, retains citation validation and
+charges normal usage limits. It never repeats retrieval or retries recursively.
+Authentication errors, missing models, rate limits, outages, cancellation and
+timeouts do not trigger recovery, nor do failures after later research rounds.
+The reader receives a recovery status; successful normal requests retain tools.
+Public failure messages report safe error categories without provider response
+bodies, credentials or source text. Full errors remain in server logs.
