@@ -22,10 +22,15 @@ func TestExplainRoutesShareGroundingAndContext(t *testing.T) {
 	provider := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		calls++
 		var body struct {
-			Messages []model.Message `json:"messages"`
+			Messages   []model.Message `json:"messages"`
+			Tools      json.RawMessage `json:"tools"`
+			ToolChoice json.RawMessage `json:"tool_choice"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			t.Error(err)
+		}
+		if len(body.Tools) > 0 || len(body.ToolChoice) > 0 {
+			t.Error("Explain sent native tool configuration")
 		}
 		system := body.Messages[0].Content
 		for _, want := range []string{q.Get(1).Verse(2).Arabic, "Jalalayn"} {

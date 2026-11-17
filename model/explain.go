@@ -76,28 +76,24 @@ func (r ExplainRequest) Request() (Request, error) {
 			anchor += ". Give an overview limited to the verses actually supplied as evidence; explicitly state any incomplete coverage. Do not imply a complete chapter analysis."
 		}
 	}
-	prompt := fmt.Sprintf("%s\nUse the supplied passage evidence first. Answer directly when this evidence is sufficient; use tools for specific missing evidence, not to re-fetch records already supplied. Keep this passage central. Explain its meaning and message in accessible English, using surrounding context and tafsir where helpful. Use Arabic analysis when it helps answer the question. For a general question, explain the whole passage even if a fragment is selected.\nSelected translation: %s\nSelected text (user selection): %s\nQuestion: %s", anchor, c.Translation, c.Selection, question)
+	prompt := fmt.Sprintf("%s\nUse the supplied passage evidence first. Answer directly when this evidence is sufficient; state any material gaps in the supplied evidence. Keep this passage central. Explain its meaning and message in accessible English, using surrounding context and tafsir where helpful. Use Arabic analysis when it helps answer the question. For a general question, explain the whole passage even if a fragment is selected.\nSelected translation: %s\nSelected text (user selection): %s\nQuestion: %s", anchor, c.Translation, c.Selection, question)
 	if c.Source == "hadith" {
 		if strings.TrimSpace(r.Question+r.Q) == "" {
 			question = "Explain the meaning and message of this hadith."
 		}
-		prompt = fmt.Sprintf("Explain %s book %d, record %d. Keep this exact narration central, including for follow-up questions. Explain its meaning in accessible English. Use the supplied Arabic and translation and look up related evidence when useful. No stored hadith commentary is supplied: distinguish your explanation from attributed scholarly commentary, and verify any attribution with retrieved sources. Record numbers identify this dataset; do not invent canonical numbering, authenticity grades or rulings.\nSelected text (user selection): %s\nQuestion: %s", c.Collection, c.Book, c.Hadith, c.Selection, question)
+		prompt = fmt.Sprintf("Explain %s book %d, record %d. Keep this exact narration central, including for follow-up questions. Explain its meaning in accessible English. Use the supplied Arabic and translation to explain the narration in context. No stored hadith commentary is supplied: distinguish your explanation from attributed scholarly commentary, and verify any attribution with retrieved sources. Record numbers identify this dataset; do not invent canonical numbering, authenticity grades or rulings.\nSelected text (user selection): %s\nQuestion: %s", c.Collection, c.Book, c.Hadith, c.Selection, question)
 	}
 	request := Request{Prompt: prompt, History: r.History}
 	return request, request.Validate()
 }
 
 // Explain shares grounding, limits and citation validation with search summaries.
-func Explain(ctx context.Context, request ExplainRequest, retrieve func(string) ([]*Reference, error), lookups ...LookupFunc) (*Result, error) {
+func Explain(ctx context.Context, request ExplainRequest, retrieve func(string) ([]*Reference, error)) (*Result, error) {
 	r, err := request.Request()
 	if err != nil {
 		return nil, err
 	}
-	var lookup LookupFunc
-	if len(lookups) > 0 {
-		lookup = lookups[0]
-	}
-	return Research(ctx, r, func(_ string) ([]*Reference, error) {
+	return explainOnce(ctx, r, func(_ string) ([]*Reference, error) {
 		query := strings.TrimSpace(request.Question + " " + request.Q + " " + request.Context.Selection)
 		if request.Context.Chapter > 0 {
 			if request.Context.Verse > 0 {
@@ -115,7 +111,7 @@ func Explain(ctx context.Context, request ExplainRequest, retrieve func(string) 
 			}
 		}
 		return retrieve(query)
-	}, lookup)
+	})
 }
 
 // ExplanationVersion excludes credentials; deployment fingerprints additionally
@@ -140,6 +136,6 @@ func ExplanationVersion() string {
 		}
 	}
 	// Bump the policy revision when explanation/retrieval behavior changes.
-	data, _ := json.Marshal([]any{provider, name, endpoint, contentLimits, groundedPrompt, "explanation-policy-v3", os.Getenv("EXPLAIN_CACHE_EPOCH")})
+	data, _ := json.Marshal([]any{provider, name, endpoint, contentLimits, groundedPrompt, "explanation-policy-v4-single-call", os.Getenv("EXPLAIN_CACHE_EPOCH")})
 	return string(data)
 }

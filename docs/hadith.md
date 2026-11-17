@@ -75,9 +75,9 @@ AI-generated and show their retrieved sources.
 {"context":{"source":"hadith","collection":"muslim","book":0,"hadith":7369},"question":"What does this mean?"}
 ```
 
-The server resolves the exact corpus record before ranked retrieval, retaining
-collection, book and record identity on follow-ups. The existing research loop
-can look up additional evidence. Attributed commentary must be verified against
-retrieved sources; generated explanation is not presented as stored commentary.
+The server resolves the exact corpus record, retaining collection, book and record
+identity on follow-ups. It makes one streamed model call using that narration and
+conversation history, without tools, ranked search or fallback retries. Generated
+explanation is not presented as stored scholarly commentary.
 Muslim book 0 is supported. Invalid records return 404 instead of substituting
 search results.

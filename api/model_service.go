@@ -85,8 +85,10 @@ func (s *ModelService) Explain(ctx context.Context, request model.ExplainRequest
 	if err != nil {
 		return nil, &modelServiceError{"not_found", err.Error()}
 	}
-	if err := s.ready(); err != nil {
-		return nil, err
+	if len(passage) == 0 {
+		if err := s.ready(); err != nil {
+			return nil, err
+		}
 	}
 	model.Emit(ctx, model.Event{Type: "status", Text: "Loading explanation…"})
 	return s.Cache.result(ctx, s.Cache.key(request), func() (*model.Result, error) {
@@ -95,12 +97,11 @@ func (s *ModelService) Explain(ctx context.Context, request model.ExplainRequest
 			return nil, err
 		}
 		retrieve := s.references(passage)
-		if len(passage) > 0 && request.Question == "" && request.Q == "" && request.Context.Selection == "" && len(request.History) == 0 {
-			// Default Explain already has an exact anchor and context. Tools remain
-			// available for gaps; avoid an unconditional embedding/ranked search first.
+		if len(passage) > 0 {
+			// Passage explanations and follow-ups use the same trusted reading context.
 			retrieve = func(string) ([]*model.Reference, error) { return passage, nil }
 		}
-		result, err := model.Explain(generation, request, retrieve, search.Lookups(s.Index, s.Names, s.Quran, s.Hadith, ""))
+		result, err := model.Explain(generation, request, retrieve)
 		if err != nil {
 			return nil, err
 		}

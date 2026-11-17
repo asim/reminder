@@ -151,7 +151,9 @@ with numbered citations. No conversation is stored on the server.
 ```
 
 The context is resolved from the bundled Quran, independently of search ranking.
-Translations, verified tafsir, Arabic morphology and Lane evidence supplement it.
+The verse, neighbouring verses, translations and verified tafsir supply its context.
+Explain makes one streamed model call with no tools, research loop or fallback retry.
+Passage questions and follow-ups use this same evidence without ranked search.
 Follow-ups resend the same context and complete user/assistant pairs. History and
 selected text are user input, not source evidence. The reader keeps the most recent
 four pairs; changing passage or translation resets the discussion.
@@ -238,17 +240,16 @@ streaming starts; later failures are terminal `error` events. Clients must not
 save provisional text as a completed answer. A disconnected stream without a
 `result` is a failure, and closing the reader cancels its request.
 
-OpenAI-compatible and Anthropic providers stream text and retain native tool-call
-IDs and arguments across research turns. Lookup tools remain available. Default
-passage explanations begin with their exact corpus evidence without an additional
-ranked search; questions and selections retain broader initial retrieval. The
-prompt asks the model to answer directly when the supplied evidence suffices.
+OpenAI-compatible and Anthropic providers stream the explanation in one request.
+No tool schemas or tool-choice parameters are sent. Citation checks, source budgets,
+long-narration excerpts and cancellation still apply. Search Ask AI and the general
+Ask endpoint retain their separate research behavior.
 
 The first deployment of the new cache-key format has a cold cache. Subsequent
 unrelated deployments preserve it. Cached results use the same final result event
 without regenerating or replaying artificial text deltas.
 
-If the first research call is rejected with HTTP 400/422, returns an empty or
+For Search Ask AI and the general Ask endpoint (not Explain), if the first research call is rejected with HTTP 400/422, returns an empty or
 incomplete response, or fails citation validation, the server attempts one plain
 grounded completion using the already-budgeted sources and conversation history.
 This recovery omits native tools and streaming, retains citation validation and

@@ -106,9 +106,10 @@ func (s *openAIResearchSession) next(ctx context.Context, system string, replies
 		}
 		definitions = append(definitions, openai.Tool{Type: openai.ToolTypeFunction, Function: &openai.FunctionDefinition{Name: d.Name, Description: d.Description, Parameters: schema}})
 	}
-	choice := "auto"
+	var choice any = "auto"
 	if !allow {
-		choice = "none"
+		choice = nil
+		definitions = nil
 	}
 	params := openai.ChatCompletionRequest{Model: s.model, Messages: append([]openai.ChatCompletionMessage{{Role: "system", Content: system}}, s.messages...), Tools: definitions, ToolChoice: choice, MaxCompletionTokens: outputLimit(ctx)}
 	release, err := reserveResearchCall(ctx, params, used)
@@ -151,8 +152,7 @@ func (s *claudeResearchSession) next(ctx context.Context, system string, replies
 	}
 	params := anthropic.MessageNewParams{Model: anthropic.ModelClaudeHaiku4_5, MaxTokens: int64(outputLimit(ctx)), System: []anthropic.TextBlockParam{{Text: system}}, Messages: s.messages, Tools: definitions}
 	if !allow {
-		none := anthropic.NewToolChoiceNoneParam()
-		params.ToolChoice = anthropic.ToolChoiceUnionParam{OfNone: &none}
+		params.Tools = nil
 	}
 	release, err := reserveResearchCall(ctx, params, used)
 	if err != nil {
