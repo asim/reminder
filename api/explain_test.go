@@ -2,6 +2,8 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/asim/reminder/hadith"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -194,5 +196,46 @@ func TestExplainRoutesSharePersistentDefaultCache(t *testing.T) {
 	}
 	if w := send("/api/model/explain", body, "Bearer "+secret); w.Code != 401 {
 		t.Fatal("cached response bypassed authentication")
+	}
+}
+
+func TestHadithExplainRoute(t *testing.T) {
+	provider := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"choices":[{"message":{"role":"assistant","content":"Explanation [1]."}}]}`))
+	}))
+	defer provider.Close()
+	t.Setenv("OLLAMA_LLM_MODEL", "test")
+	t.Setenv("OLLAMA_BASE_URL", provider.URL+"/v1")
+	t.Setenv("AI_IP_DAILY_LIMIT", "0")
+	t.Setenv("AI_DAILY_LIMIT", "20")
+	if err := model.ConfigureLimits(t.TempDir()); err != nil {
+		t.Fatal(err)
+	}
+	ready := make(chan bool)
+	close(ready)
+	b := hadith.Load()
+	handler := (&ModelService{Index: modelIndex{}, Names: &names.Names{}, Quran: quran.Load(), Hadith: b, Ready: ready}).ExplainHandler(nil)
+	for _, corpus := range []*hadith.Collection{b, hadith.Muslim()} {
+		book := corpus.Books[0]
+		h := book.Hadiths[0]
+		body := fmt.Sprintf(`{"context":{"source":"hadith","collection":%q,"book":%d,"hadith":%d}}`, corpus.ID, book.Number, h.Number)
+		w := httptest.NewRecorder()
+		handler.ServeHTTP(w, httptest.NewRequest("POST", "/api/explain", strings.NewReader(body)))
+		if w.Code != 200 {
+			t.Fatalf("%s: %d %s", corpus.ID, w.Code, w.Body.String())
+		}
+		var result model.Result
+		if err := json.Unmarshal(w.Body.Bytes(), &result); err != nil {
+			t.Fatal(err)
+		}
+		if len(result.References) == 0 || result.References[0].Text != h.English || result.References[0].Metadata["collection"] != corpus.ID {
+			t.Fatalf("lost exact anchor: %+v", result)
+		}
+	}
+	w := httptest.NewRecorder()
+	handler.ServeHTTP(w, httptest.NewRequest("POST", "/api/explain", strings.NewReader(`{"context":{"source":"hadith","collection":"muslim","book":0,"hadith":999999}}`)))
+	if w.Code != 404 {
+		t.Fatalf("missing record returned %d", w.Code)
 	}
 }

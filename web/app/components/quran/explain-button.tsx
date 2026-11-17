@@ -11,7 +11,9 @@ type Turn = { question: string; answer: string; references: Reference[]; coverag
 
 type Commentary = { number: number; comments?: string; commentary_source?: string };
 
-export function ExplainButton({ chapter, verse, translation, commentary = [] }: { chapter: number; verse?: number; translation: string; commentary?: Commentary[] }) {
+type HadithContext = { collection: 'bukhari' | 'muslim'; book: number; number: number; label: string };
+
+export function ExplainButton({ chapter = 0, verse, translation = '', commentary = [], hadith }: { chapter?: number; verse?: number; translation?: string; commentary?: Commentary[]; hadith?: HadithContext }) {
   const modelAvailable = useModelAvailable();
   const passages = commentary.filter(item => item.number > 0 && !!item.comments);
   const [view, setView] = useState<'explain' | 'tafsir'>('tafsir');
@@ -24,13 +26,15 @@ export function ExplainButton({ chapter, verse, translation, commentary = [] }: 
   const [selection, setSelection] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const label = verse ? `Quran ${chapter}:${verse}` : `Quran chapter ${chapter}`;
+  const hadithKey = hadith ? `${hadith.collection}:${hadith.book}:${hadith.number}` : '';
+  const questionId = `explain-question-${hadithKey || `${chapter}-${verse || 0}`}`;
+  const label = hadith?.label || (verse ? `Quran ${chapter}:${verse}` : `Quran chapter ${chapter}`);
 
   useEffect(() => {
     pending.current?.abort(); dialog.current?.close();
     setOpened(false); setTurns([]); setQuestion(''); setSelection(''); setError(''); setBusy(false);
     return () => { pending.current?.abort(); };
-  }, [chapter, verse, translation]);
+  }, [chapter, verse, translation, hadithKey]);
 
   useEffect(() => { if (opened) dialog.current?.showModal(); }, [opened]);
 
@@ -48,10 +52,11 @@ export function ExplainButton({ chapter, verse, translation, commentary = [] }: 
 
   function open() {
     const selected = window.getSelection();
-    const element = selected?.anchorNode?.parentElement?.closest('[data-chapter-verse]');
-    const end = selected?.focusNode?.parentElement?.closest('[data-chapter-verse]');
-    const reference = element?.getAttribute('data-chapter-verse');
-    const valid = element && element === end && (verse ? reference === `${chapter}:${verse}` : reference?.startsWith(`${chapter}:`));
+    const attribute = hadith ? 'data-hadith' : 'data-chapter-verse';
+    const element = selected?.anchorNode?.parentElement?.closest(`[${attribute}]`);
+    const end = selected?.focusNode?.parentElement?.closest(`[${attribute}]`);
+    const reference = element?.getAttribute(attribute);
+    const valid = element && element === end && (hadith ? reference === hadithKey : verse ? reference === `${chapter}:${verse}` : reference?.startsWith(`${chapter}:`));
     const text = valid ? selected?.toString().trim().slice(0, 2000) || '' : '';
     if (text !== selection) { setTurns([]); setQuestion(''); }
     setSelection(text); setError(''); setView(modelAvailable ? 'explain' : 'tafsir'); setOpened(true);
@@ -65,7 +70,7 @@ export function ExplainButton({ chapter, verse, translation, commentary = [] }: 
     try {
       const response = await fetch('/api/explain', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal,
-        body: JSON.stringify({ context: { source: 'quran', chapter, verse, translation, selection }, question: question.trim(),
+        body: JSON.stringify({ context: hadith ? { source: 'hadith', collection: hadith.collection, book: hadith.book, hadith: hadith.number, selection } : { source: 'quran', chapter, verse, translation, selection }, question: question.trim(),
           history: turns.slice(-4).flatMap(turn => [{ role: 'user', content: turn.question }, { role: 'assistant', content: turn.answer }]) }),
       });
       const result = await response.json();
@@ -81,6 +86,8 @@ export function ExplainButton({ chapter, verse, translation, commentary = [] }: 
 
 
 
+  if (hadith && !modelAvailable) return null;
+
   return <>
     <button type='button' onClick={open} className='inline-flex items-center justify-center p-1 rounded-md transition-colors text-gray-400 hover:bg-gray-100 hover:text-gray-600' title={`${modelAvailable ? 'Explain' : 'Tafsir'} ${label}`} aria-label={`${modelAvailable ? 'Explain' : 'Tafsir'} ${label}`}>
       <BookOpen className='size-4' aria-hidden='true' />
@@ -90,7 +97,7 @@ export function ExplainButton({ chapter, verse, translation, commentary = [] }: 
         <h2 className='text-lg font-semibold'>{title} {label}</h2>
         <button type='button' onClick={close} aria-label='Close reading panel' className='rounded p-2 hover:bg-gray-100'><X className='size-4' /></button>
       </div>
-      {modelAvailable && <nav aria-label='Reading panel' className='flex gap-4 border-b border-gray-100 px-4 py-3 text-sm sm:px-5'>
+      {modelAvailable && !hadith && <nav aria-label='Reading panel' className='flex gap-4 border-b border-gray-100 px-4 py-3 text-sm sm:px-5'>
         <button type='button' aria-pressed={view === 'explain'} onClick={() => setView('explain')} className={view === 'explain' ? 'font-medium underline underline-offset-4' : 'text-gray-500'}>Explain</button>
         <button type='button' aria-pressed={view === 'tafsir'} onClick={() => setView('tafsir')} className={view === 'tafsir' ? 'font-medium underline underline-offset-4' : 'text-gray-500'}>Tafsir</button>
       </nav>}
@@ -103,7 +110,7 @@ export function ExplainButton({ chapter, verse, translation, commentary = [] }: 
         {!passages.length && <p>This tafsir has no saved commentary for this passage. Choose another source, or reconnect to update the chapter.</p>}
       </div> : <div className='space-y-4 p-4 text-left text-sm sm:p-5' aria-live='polite'>
         {selection && <div><blockquote className='border-l-2 pl-3' dir='auto'>{selection}</blockquote><button type='button' className='mt-1 text-xs underline' onClick={() => setSelection('')}>Clear selection</button></div>}
-        {!turns.length && <p className='text-gray-600'>Explore this passage through its Arabic, translations and tafsir. Ask a question or choose Explain.</p>}
+        {!turns.length && <p className='text-gray-600'>{hadith ? 'Ask about this narration or choose Explain for an overview of its meaning. No stored scholarly commentary is available for this hadith.' : 'Explore this passage through its Arabic, translations and tafsir. Ask a question or choose Explain.'}</p>}
         {turns.map((turn, index) => <section key={index} className='space-y-3 border-b pb-4'>
           <h3 className='font-medium'>{turn.question}</h3>
           {turn.coverage && <p className='text-xs text-gray-500'>Source text covers {turn.coverage.included_verses} of {turn.coverage.total_verses} verses{turn.coverage.included_verses < turn.coverage.total_verses ? ' — a partial chapter overview.' : '.'}</p>}
@@ -112,7 +119,7 @@ export function ExplainButton({ chapter, verse, translation, commentary = [] }: 
           </div>
           <details><summary className='cursor-pointer text-gray-600'>Sources ({turn.references.length})</summary>
             <ol className='mt-2 space-y-3'>{turn.references.map((ref, i) => <li key={i} className='break-words text-xs leading-relaxed'>
-              <strong>[{i + 1}] {ref.metadata.title || ref.metadata.translator || ref.metadata.source}{ref.metadata.chapter && ` — ${ref.metadata.chapter}:${ref.metadata.verse}`}</strong>
+              <strong>[{i + 1}] {ref.metadata.title || ref.metadata.translator || ref.metadata.collection_name || ref.metadata.source}{ref.metadata.chapter && ` — ${ref.metadata.chapter}:${ref.metadata.verse}`}{ref.metadata.book_num && ` — book ${ref.metadata.book_num}, record ${ref.metadata.number}`}</strong>
               <p className='whitespace-pre-wrap'>{ref.text}</p>
             </li>)}</ol>
           </details>
@@ -120,8 +127,8 @@ export function ExplainButton({ chapter, verse, translation, commentary = [] }: 
         <p className='text-xs text-gray-500'>AI-generated explanation. Check the cited sources.</p>
         {error && <p role='alert' className='text-red-700'>{error}{passages.length > 0 && ' You can read Tafsir above, or retry your question below.'}</p>}
         <form onSubmit={event => { event.preventDefault(); void ask(); }} className='space-y-2'>
-          <label className='block' htmlFor={`explain-question-${chapter}-${verse || 0}`}>{turns.length ? 'Ask about this passage' : 'Your question (optional)'}</label>
-          <textarea id={`explain-question-${chapter}-${verse || 0}`} value={question} onChange={event => setQuestion(event.target.value)} maxLength={2000} rows={2} className='w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm' />
+          <label className='block' htmlFor={questionId}>{turns.length ? 'Ask about this passage' : 'Your question (optional)'}</label>
+          <textarea id={questionId} value={question} onChange={event => setQuestion(event.target.value)} maxLength={2000} rows={2} className='w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm' />
           <PrimaryButton disabled={busy || (turns.length > 0 && !question.trim())}>{busy ? 'Explaining…' : turns.length ? 'Ask' : 'Explain'}</PrimaryButton>
         </form>
       </div>}

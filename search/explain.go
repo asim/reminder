@@ -2,6 +2,7 @@ package search
 
 import (
 	"fmt"
+	"github.com/asim/reminder/hadith"
 	"github.com/asim/reminder/model"
 	"github.com/asim/reminder/quran"
 )
@@ -50,4 +51,22 @@ func ExplanationPassage(q *quran.Quran, c model.ExplainContext) ([]*Result, erro
 		}
 	}
 	return append(primary, extra...), nil
+}
+
+// HadithExplanationPassage resolves the exact collection record before ranked search.
+func HadithExplanationPassage(b *hadith.Collection, c model.ExplainContext) ([]*Result, error) {
+	collection := hadith.Select(c.Collection, b)
+	if collection == nil {
+		return nil, fmt.Errorf("hadith collection not found")
+	}
+	book := collection.Get(c.Book)
+	if book == nil {
+		return nil, fmt.Errorf("hadith book not found")
+	}
+	for _, h := range book.Hadiths {
+		if h.Number == c.Hadith {
+			return []*Result{hadithDocument(collection, book, h)}, nil
+		}
+	}
+	return nil, fmt.Errorf("hadith not found")
 }

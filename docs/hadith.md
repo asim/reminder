@@ -60,3 +60,24 @@ are combined with reciprocal rank fusion, with duplicate references merged and
 SQLite retained if vector retrieval fails. `SEARCH_SEMANTIC=false` disables vectors. Existing vector maintenance commands remain available, but this import
 does not regenerate the legacy embedding artifact. Keyword relevance still needs
 answer-quality evaluation; corpus coverage alone does not establish answer quality.
+
+## Explanations and questions
+
+When a model is configured, each narration has the same Explain icon and panel
+as Quran. Readers can request an overview or ask follow-up questions. The panel
+has no Tafsir tab: the bundled Hadith records contain Arabic, translation and
+narrator details, but no scholarly commentary collection. Answers are labelled
+AI-generated and show their retrieved sources.
+
+`POST /api/explain` and `/api/model/explain` accept a Hadith context:
+
+```json
+{"context":{"source":"hadith","collection":"muslim","book":0,"hadith":7369},"question":"What does this mean?"}
+```
+
+The server resolves the exact corpus record before ranked retrieval, retaining
+collection, book and record identity on follow-ups. The existing research loop
+can look up additional evidence. Attributed commentary must be verified against
+retrieved sources; generated explanation is not presented as stored commentary.
+Muslim book 0 is supported. Invalid records return 404 instead of substituting
+search results.

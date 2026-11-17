@@ -1,3 +1,4 @@
+import { ExplainButton } from '~/components/quran/explain-button';
 import { collectionFromPath, collectionTitle, hadithPath } from '~/utils/hadith-collection';
 import { readingMeta } from '~/utils/reading-meta';
 import { readingLoader } from '~/utils/prerender.server';
@@ -146,6 +147,7 @@ export default function HadithBook() {
             <div
               key={`${collection}-${bookNumber}-${hadithNumber}`}
               id={String(hadithNumber)}
+              data-hadith={`${collection}:${bookNumber}:${hadithNumber}`}
               className='border-b border-gray-100 pb-3 sm:pb-8 space-y-2 sm:space-y-4 scroll-mt-4'
             >
               {narrator && <p className='text-sm text-gray-500'>{narrator}</p>}
@@ -170,6 +172,7 @@ export default function HadithBook() {
               <div className='flex items-center justify-between mt-2 gap-2'>
                 <a className='text-xs sm:text-sm text-gray-500' href={`${prefix}/${bookNumber}#${hadithNumber}`}>{recordLabel} {hadithNumber}</a>
                 <div className='flex items-center gap-1'>
+                  <ExplainButton hadith={{ collection, book: bookNumber, number: hadithNumber, label: `${title} · ${book.name} — ${recordLabel} ${hadithNumber}` }} />
                   <ReadingBookmarkButton
                     type='hadith'
                     label={`${title} · ${book.name} - ${recordLabel} ${hadithNumber}`}
