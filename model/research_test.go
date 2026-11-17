@@ -314,3 +314,40 @@ func TestNativeToolErrorResultPreservesEmptyInput(t *testing.T) {
 		})
 	}
 }
+
+func TestOversizedHadithEvidencePreservesTextAndIdentity(t *testing.T) {
+	ref := &Reference{Text: strings.Repeat("Translation <quoted> ", 2000), Metadata: map[string]string{"source": "bukhari", "book_num": "54", "number": "2732", "arabic": strings.Repeat("حديث ", 4000)}}
+	allowance := contentLimits.Evidence / 2
+	chunks := hadithEvidenceChunks(ref, allowance)
+	if len(chunks) < 2 {
+		t.Fatal("long narration was not split")
+	}
+	var english, arabic strings.Builder
+	for i, chunk := range chunks {
+		encoded, _ := json.Marshal(chunk)
+		if len(encoded)+32 > allowance || chunk.Metadata["book_num"] != "54" || chunk.Metadata["number"] != "2732" || chunk.Metadata["excerpt_part"] != fmt.Sprint(i+1) || chunk.Metadata["excerpt_parts"] != fmt.Sprint(len(chunks)) {
+			t.Fatalf("invalid chunk: %+v", chunk.Metadata)
+		}
+		if chunk.Metadata["excerpt_field"] == "text" {
+			english.WriteString(chunk.Text)
+		} else {
+			arabic.WriteString(chunk.Text)
+		}
+	}
+	if english.String() != ref.Text || arabic.String() != ref.Metadata["arabic"] {
+		t.Fatal("chunking lost source text")
+	}
+	e := &evidenceSet{}
+	output := e.add([]*Reference{ref}, allowance)
+	if len(e.refs) == 0 || e.refs[0].Metadata["number"] != "2732" || !strings.Contains(output, "this response is incomplete") {
+		t.Fatal("anchor missing or partial coverage hidden")
+	}
+	if e.bytes > allowance {
+		t.Fatal("evidence budget exceeded")
+	}
+	count := len(e.refs)
+	e.add([]*Reference{ref}, allowance)
+	if len(e.refs) != count {
+		t.Fatal("duplicate lookup changed citation identities")
+	}
+}

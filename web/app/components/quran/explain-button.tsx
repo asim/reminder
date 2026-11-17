@@ -120,6 +120,7 @@ export function ExplainButton({ chapter = 0, verse, translation = '', commentary
           <details><summary className='cursor-pointer text-gray-600'>Sources ({turn.references.length})</summary>
             <ol className='mt-2 space-y-3'>{turn.references.map((ref, i) => <li key={i} className='break-words text-xs leading-relaxed'>
               <strong>[{i + 1}] {ref.metadata.title || ref.metadata.translator || ref.metadata.collection_name || ref.metadata.source}{ref.metadata.chapter && ` — ${ref.metadata.chapter}:${ref.metadata.verse}`}{ref.metadata.book_num && ` — book ${ref.metadata.book_num}, record ${ref.metadata.number}`}</strong>
+              {ref.metadata.excerpt_part && <p className='text-gray-500'>Excerpt {ref.metadata.excerpt_part} of {ref.metadata.excerpt_parts}{ref.metadata.excerpt_field === 'arabic' ? ' · Arabic' : ''}. Only supplied excerpts are included in the explanation.</p>}
               <p className='whitespace-pre-wrap'>{ref.text}</p>
             </li>)}</ol>
           </details>

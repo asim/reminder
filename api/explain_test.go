@@ -200,7 +200,18 @@ func TestExplainRoutesSharePersistentDefaultCache(t *testing.T) {
 }
 
 func TestHadithExplainRoute(t *testing.T) {
+	var expectedText string
 	provider := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var request struct {
+			Messages []model.Message `json:"messages"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+			t.Error(err)
+		}
+		encoded, _ := json.Marshal(expectedText)
+		if len(request.Messages) == 0 || !strings.Contains(request.Messages[0].Content, string(encoded[1:len(encoded)-1])) {
+			t.Error("selected narration never reached provider")
+		}
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"choices":[{"message":{"role":"assistant","content":"Explanation [1]."}}]}`))
 	}))
@@ -216,9 +227,26 @@ func TestHadithExplainRoute(t *testing.T) {
 	close(ready)
 	b := hadith.Load()
 	handler := (&ModelService{Index: modelIndex{}, Names: &names.Names{}, Quran: quran.Load(), Hadith: b, Ready: ready}).ExplainHandler(nil)
-	for _, corpus := range []*hadith.Collection{b, hadith.Muslim()} {
-		book := corpus.Books[0]
-		h := book.Hadiths[0]
+	for _, tc := range []struct {
+		corpus       *hadith.Collection
+		book, number int
+	}{{b, b.Books[0].Number, b.Books[0].Hadiths[0].Number}, {hadith.Muslim(), 0, 7369}, {b, 54, 2732}, {hadith.Muslim(), 50, 6843}} {
+		corpus := tc.corpus
+		book := corpus.Get(tc.book)
+		var h *hadith.Hadith
+		for _, candidate := range book.Hadiths {
+			if candidate.Number == tc.number {
+				h = candidate
+				break
+			}
+		}
+		if h == nil {
+			t.Fatal("missing test fixture")
+		}
+		expectedText = h.English
+		if len(expectedText) > 100 {
+			expectedText = expectedText[:100]
+		}
 		body := fmt.Sprintf(`{"context":{"source":"hadith","collection":%q,"book":%d,"hadith":%d}}`, corpus.ID, book.Number, h.Number)
 		w := httptest.NewRecorder()
 		handler.ServeHTTP(w, httptest.NewRequest("POST", "/api/explain", strings.NewReader(body)))
@@ -229,7 +257,7 @@ func TestHadithExplainRoute(t *testing.T) {
 		if err := json.Unmarshal(w.Body.Bytes(), &result); err != nil {
 			t.Fatal(err)
 		}
-		if len(result.References) == 0 || result.References[0].Text != h.English || result.References[0].Metadata["collection"] != corpus.ID {
+		if len(result.References) == 0 || !strings.HasPrefix(h.English, result.References[0].Text) || result.References[0].Text == "" || result.References[0].Metadata["collection"] != corpus.ID {
 			t.Fatalf("lost exact anchor: %+v", result)
 		}
 	}
