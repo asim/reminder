@@ -7,14 +7,18 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
 
+	"github.com/asim/reminder/arabic"
+	"github.com/asim/reminder/hadith"
 	"github.com/asim/reminder/model"
+	"github.com/asim/reminder/names"
+	"github.com/asim/reminder/quran"
+	"github.com/asim/reminder/tafsir"
 )
 
 type explainFlight struct {
@@ -34,22 +38,8 @@ type ExplainCache struct {
 }
 
 func OpenExplainCache(dir string) (*ExplainCache, error) {
-	executable, err := os.Executable()
-	if err != nil {
-		return nil, err
-	}
-	f, err := os.Open(executable)
-	if err != nil {
-		return nil, err
-	}
-	h := sha256.New()
-	_, err = io.Copy(h, f)
-	f.Close()
-	if err != nil {
-		return nil, err
-	}
-	// The executable includes prompts and all embedded Quran/tafsir/Arabic data.
-	return openExplainCache(dir, hex.EncodeToString(h.Sum(nil)))
+	// Only source data and explanation policy invalidate answers, not unrelated builds.
+	return openExplainCache(dir, quran.ContentVersion()+tafsir.ContentVersion()+hadith.ContentVersion()+names.ContentVersion()+arabic.ContentVersion())
 }
 
 func openExplainCache(dir, version string) (*ExplainCache, error) {

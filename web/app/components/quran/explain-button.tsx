@@ -1,3 +1,4 @@
+import { readExplanation } from '~/utils/explanation-stream';
 import { TafsirSelect } from './tafsir-select';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -26,13 +27,15 @@ export function ExplainButton({ chapter = 0, verse, translation = '', commentary
   const [selection, setSelection] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [progress, setProgress] = useState('');
+  const [draft, setDraft] = useState('');
   const hadithKey = hadith ? `${hadith.collection}:${hadith.book}:${hadith.number}` : '';
   const questionId = `explain-question-${hadithKey || `${chapter}-${verse || 0}`}`;
   const label = hadith?.label || (verse ? `Quran ${chapter}:${verse}` : `Quran chapter ${chapter}`);
 
   useEffect(() => {
     pending.current?.abort(); dialog.current?.close();
-    setOpened(false); setTurns([]); setQuestion(''); setSelection(''); setError(''); setBusy(false);
+    setDraft(''); setProgress(''); setOpened(false); setTurns([]); setQuestion(''); setSelection(''); setError(''); setBusy(false);
     return () => { pending.current?.abort(); };
   }, [chapter, verse, translation, hadithKey]);
 
@@ -47,7 +50,7 @@ export function ExplainButton({ chapter = 0, verse, translation = '', commentary
 
   function close() {
     pending.current?.abort(); pending.current = null;
-    setBusy(false); dialog.current?.close(); setOpened(false);
+    setBusy(false); setDraft(''); setProgress(''); dialog.current?.close(); setOpened(false);
   }
 
   function open() {
@@ -66,21 +69,26 @@ export function ExplainButton({ chapter = 0, verse, translation = '', commentary
     if (busy || !modelAvailable) return;
     const prompt = question.trim() || 'Explain this passage';
     const controller = new AbortController(); pending.current = controller;
-    setBusy(true); setError('');
+    setBusy(true); setError(''); setDraft(''); setProgress('Loading explanation…');
     try {
       const response = await fetch('/api/explain', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: controller.signal,
+        method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/x-ndjson' }, signal: controller.signal,
         body: JSON.stringify({ context: hadith ? { source: 'hadith', collection: hadith.collection, book: hadith.book, hadith: hadith.number, selection } : { source: 'quran', chapter, verse, translation, selection }, question: question.trim(),
           history: turns.slice(-4).flatMap(turn => [{ role: 'user', content: turn.question }, { role: 'assistant', content: turn.answer }]) }),
       });
-      const result = await response.json();
+      const result = await readExplanation(response, event => {
+        if (pending.current !== controller || controller.signal.aborted) return;
+        if (event.type === 'status') setProgress(event.text || 'Working…');
+        if (event.type === 'reset') setDraft('');
+        if (event.type === 'delta') { setProgress('Writing explanation…'); setDraft(previous => previous + (event.text || '')); }
+      });
       if (!response.ok) throw new Error(result.message || 'Explanation unavailable. Please try again.');
-      if (pending.current !== controller) return;
+      if (pending.current !== controller || controller.signal.aborted) return;
       setTurns(previous => [...previous, { question: prompt, answer: result.answer, references: result.references || [], coverage: result.coverage }]); setQuestion('');
     } catch (err) {
       if (!controller.signal.aborted) setError(err instanceof Error ? err.message : 'Unable to load explanation.');
     } finally {
-      if (pending.current === controller) { pending.current = null; setBusy(false); }
+      if (pending.current === controller) { pending.current = null; setBusy(false); setDraft(''); setProgress(''); }
     }
   }
 
@@ -125,6 +133,13 @@ export function ExplainButton({ chapter = 0, verse, translation = '', commentary
             </li>)}</ol>
           </details>
         </section>)}
+        {busy && <div role='status' className='space-y-2'>
+          <p className='text-xs text-gray-500'>{progress}</p>
+          {draft && <div aria-live='off' className='prose prose-sm max-w-none break-words'>
+            <Markdown remarkPlugins={[remarkGfm]} skipHtml components={{ img: () => null }}>{draft}</Markdown>
+            <p className='text-xs text-gray-500'>Draft — checking sources before completion.</p>
+          </div>}
+        </div>}
         <p className='text-xs text-gray-500'>AI-generated explanation. Check the cited sources.</p>
         {error && <p role='alert' className='text-red-700'>{error}{passages.length > 0 && ' You can read Tafsir above, or retry your question below.'}</p>}
         <form onSubmit={event => { event.preventDefault(); void ask(); }} className='space-y-2'>

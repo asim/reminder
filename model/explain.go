@@ -76,7 +76,7 @@ func (r ExplainRequest) Request() (Request, error) {
 			anchor += ". Give an overview limited to the verses actually supplied as evidence; explicitly state any incomplete coverage. Do not imply a complete chapter analysis."
 		}
 	}
-	prompt := fmt.Sprintf("%s\nKeep this passage central. Explain its meaning and message in accessible English, using surrounding context and tafsir where helpful. Use Arabic analysis when it helps answer the question. For a general question, explain the whole passage even if a fragment is selected.\nSelected translation: %s\nSelected text (user selection): %s\nQuestion: %s", anchor, c.Translation, c.Selection, question)
+	prompt := fmt.Sprintf("%s\nUse the supplied passage evidence first. Answer directly when this evidence is sufficient; use tools for specific missing evidence, not to re-fetch records already supplied. Keep this passage central. Explain its meaning and message in accessible English, using surrounding context and tafsir where helpful. Use Arabic analysis when it helps answer the question. For a general question, explain the whole passage even if a fragment is selected.\nSelected translation: %s\nSelected text (user selection): %s\nQuestion: %s", anchor, c.Translation, c.Selection, question)
 	if c.Source == "hadith" {
 		if strings.TrimSpace(r.Question+r.Q) == "" {
 			question = "Explain the meaning and message of this hadith."
@@ -139,6 +139,7 @@ func ExplanationVersion() string {
 			name = "gpt-6-luna"
 		}
 	}
-	data, _ := json.Marshal([]any{provider, name, endpoint, contentLimits, groundedPrompt, os.Getenv("EXPLAIN_CACHE_EPOCH")})
+	// Bump the policy revision when explanation/retrieval behavior changes.
+	data, _ := json.Marshal([]any{provider, name, endpoint, contentLimits, groundedPrompt, "explanation-policy-v2", os.Getenv("EXPLAIN_CACHE_EPOCH")})
 	return string(data)
 }

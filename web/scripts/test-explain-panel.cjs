@@ -11,7 +11,7 @@ vm.runInNewContext(ts.transpileModule(fs.readFileSync('app/components/quran/expl
  compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX },
 }).outputText, {
  exports: output, AbortController, Error,
- require: name => name === 'react' ? react : name === 'react/jsx-runtime' ? { jsx, jsxs: jsx } : name === '~/queries/capabilities' ? { useModelAvailable: () => available } : {},
+ require: name => name === 'react' ? react : name === 'react/jsx-runtime' ? { jsx, jsxs: jsx } : name === '~/utils/explanation-stream' ? { readExplanation: response => response.json() } : name === '~/queries/capabilities' ? { useModelAvailable: () => available } : {},
  window: { getSelection: () => null },
  fetch: async (url, options) => { requests++; lastBody = JSON.parse(options.body); return { ok: success, json: async () => success ? { answer: 'Explanation', references: [] } : { message: 'Temporarily unavailable' } }; },
 });

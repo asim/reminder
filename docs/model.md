@@ -188,12 +188,12 @@ bypass the cache; their text and conversation history are never stored there.
 
 The cache stores the answer, numbered reference records and chapter coverage as
 one JSON snapshot. Its key includes passage, translation, model/provider endpoint,
-model limits, prompt and a SHA-256 fingerprint of the running executable. Because
-the Quran, translations, tafsir, QUL and Lane data are embedded, replacing any of
-those sources or explanation code invalidates cached answers automatically. This
-is deliberately conservative: other binary changes can invalidate the cache too.
-The same binary keeps its cache across restarts. Set `EXPLAIN_CACHE_EPOCH` to a new
-value to refresh answers after a provider changes a model behind an unchanged name.
+model limits, prompt, explanation-policy revision and SHA-256 fingerprints of the
+embedded Quran, tafsir, Hadith, Names and Arabic source files. Unrelated binary/UI
+changes no longer invalidate answers. Source changes invalidate automatically;
+changes to explanation/retrieval policy must bump the policy revision in
+`model.ExplanationVersion`. Set `EXPLAIN_CACHE_EPOCH` to a new value to refresh
+answers after a provider changes a model behind an unchanged name.
 Entries expire after 30 days.
 
 Concurrent requests for the same default explanation share one generation within
@@ -226,3 +226,24 @@ The panel is a right-hand drawer on desktop and a near-full-height sheet on mobi
 with scrollable content, a persistent close header and native dialog focus handling.
 Provider failures preserve the question and allow retry or switching to Tafsir.
 The optional inline-commentary setting remains unchanged for readers who prefer it.
+
+### Streaming explanations
+
+The reader sends `Accept: application/x-ndjson` to `/api/explain`. The model HTTP
+routes retain JSON responses by default. Streams carry one JSON event per line:
+`status` (progress), `delta` (provisional text), `reset` (discard the current draft
+when another research turn begins), `result` (final citation-checked answer and
+references), or `error`. Authentication failures still use HTTP errors before
+streaming starts; later failures are terminal `error` events. Clients must not
+save provisional text as a completed answer. A disconnected stream without a
+`result` is a failure, and closing the reader cancels its request.
+
+OpenAI-compatible and Anthropic providers stream text and retain native tool-call
+IDs and arguments across research turns. Lookup tools remain available. Default
+passage explanations begin with their exact corpus evidence without an additional
+ranked search; questions and selections retain broader initial retrieval. The
+prompt asks the model to answer directly when the supplied evidence suffices.
+
+The first deployment of the new cache-key format has a cold cache. Subsequent
+unrelated deployments preserve it. Cached results use the same final result event
+without regenerating or replaying artificial text deltas.

@@ -116,7 +116,7 @@ func (s *openAIResearchSession) next(ctx context.Context, system string, replies
 		return researchTurn{}, err
 	}
 	defer release()
-	response, err := s.client.CreateChatCompletion(ctx, params)
+	response, err := s.complete(ctx, params)
 	if err != nil {
 		return researchTurn{}, err
 	}
@@ -159,7 +159,7 @@ func (s *claudeResearchSession) next(ctx context.Context, system string, replies
 		return researchTurn{}, err
 	}
 	defer release()
-	response, err := s.client.Messages.New(ctx, params)
+	response, err := s.complete(ctx, params)
 	if err != nil {
 		return researchTurn{}, err
 	}

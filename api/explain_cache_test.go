@@ -220,3 +220,27 @@ func TestExplainCacheRetriesAfterOwnerCancellation(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestPublicCacheVersionSurvivesReopen(t *testing.T) {
+	dir := t.TempDir()
+	a, err := OpenExplainCache(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := model.ExplainRequest{Context: model.ExplainContext{Chapter: 1, Verse: 2}}
+	key := a.key(req)
+	a.result(context.Background(), key, func() (*model.Result, error) { return cachedFixture(), nil })
+	a.Close()
+	b, err := OpenExplainCache(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer b.Close()
+	if b.key(req) != key {
+		t.Fatal("unchanged corpus changed key")
+	}
+	_, err = b.result(context.Background(), b.key(req), func() (*model.Result, error) { t.Fatal("persisted entry missed"); return nil, nil })
+	if err != nil {
+		t.Fatal(err)
+	}
+}
