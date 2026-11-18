@@ -14,6 +14,9 @@ import (
 //go:embed data/*.json
 var files embed.FS
 
+// ContentFiles exposes the read-only embedded sources for cache fingerprinting.
+func ContentFiles() embed.FS { return files }
+
 type Edition struct {
 	ID        string `json:"id"`
 	Title     string `json:"title"`
