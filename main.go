@@ -730,6 +730,7 @@ func main() {
 	log.Println("Registering routes")
 	httpMux := http.DefaultServeMux
 	api.RegisterRoutes(httpMux)
+	api.RegisterTafsirRoutes(httpMux)
 
 	keys, err := api.OpenKeys(api.ReminderDir)
 	if err != nil {
@@ -744,9 +745,8 @@ func main() {
 	http.HandleFunc("/api/capabilities", api.CapabilitiesHandler)
 	models := &api.ModelService{Index: idx, Names: n, Quran: q, Hadith: b, Ready: indexed, Cache: explainCache}
 	http.Handle("/api/model/ask", models.AskHandler(keys))
-	http.Handle("/api/model/explain", models.ExplainHandler(keys))
-	http.Handle("/api/explain", models.ExplainHandler(nil))
-	http.Handle("POST /api/quran/{chapter}/{verse}/explain", models.ExplainHandler(nil))
+	http.Handle("/api/explain", models.ExplainHandler(keys))
+	http.Handle("POST /api/quran/{chapter}/{verse}/explain", models.ExplainHandler(keys))
 	http.Handle("/mcp", api.NewMCP(models, reminders))
 
 	if *ServerFlag {
@@ -769,7 +769,7 @@ func main() {
 		log.Println("Starting server :8080")
 		if err := http.ListenAndServe(":8080", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			bodyLimit := int64(16384)
-			if r.URL.Path == "/mcp" || r.URL.Path == "/api/model/ask" || r.URL.Path == "/api/model/explain" || r.URL.Path == "/api/explain" || strings.HasSuffix(r.URL.Path, "/explain") {
+			if r.URL.Path == "/mcp" || r.URL.Path == "/api/model/ask" || r.URL.Path == "/api/explain" || strings.HasSuffix(r.URL.Path, "/explain") {
 				bodyLimit = model.ModelBodyLimit()
 			}
 			r.Body = http.MaxBytesReader(w, r.Body, bodyLimit)
@@ -778,7 +778,7 @@ func main() {
 				w.Header().Set("Access-Control-Allow-Origin", "*")
 				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 				w.Header().Set("Access-Control-Allow-Headers", "Content-Type, MCP-Protocol-Version")
-				if r.URL.Path == "/api/model/ask" || r.URL.Path == "/api/model/explain" {
+				if r.URL.Path == "/api/model/ask" || r.URL.Path == "/api/explain" || strings.HasSuffix(r.URL.Path, "/explain") {
 					w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 				}
 
@@ -790,7 +790,7 @@ func main() {
 				w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
 				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 				w.Header().Set("Access-Control-Allow-Headers", "Content-Type, MCP-Protocol-Version")
-				if r.URL.Path == "/api/model/ask" || r.URL.Path == "/api/model/explain" {
+				if r.URL.Path == "/api/model/ask" || r.URL.Path == "/api/explain" || strings.HasSuffix(r.URL.Path, "/explain") {
 					w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 				}
 				w.Header().Set("Access-Control-Allow-Credentials", "true")

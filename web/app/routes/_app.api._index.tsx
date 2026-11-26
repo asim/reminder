@@ -198,6 +198,36 @@ const endpoints: Endpoint[] = [
     ],
   },
   {
+    title: 'Explain',
+    description: 'Explain a Quran passage or Hadith, with contextual follow-up questions. Optional Authorization: Bearer <key> uses API-key allowances; requests without a key use anonymous reader limits.',
+    url: '/api/explain', method: 'POST', requestFormat: 'JSON', responseFormat: 'JSON',
+    params: [
+      { name: 'context', type: 'object', description: 'Quran: source, chapter, optional verse and translation. Hadith: source=hadith, collection, book and hadith number.' },
+      { name: 'question', type: 'string', description: 'Optional question; defaults to explaining the passage.' },
+      { name: 'history', type: 'array', description: 'Optional complete user/assistant message pairs for this passage.' },
+    ],
+    responseFields: [
+      { name: 'answer', type: 'string', description: 'Explanation with numbered source citations.' },
+      { name: 'references', type: 'array', description: 'Source records supporting the explanation.' },
+    ],
+  },
+  {
+    title: 'Tafsir editions',
+    description: 'List bundled tafsir editions with IDs, titles, languages, source URLs and verification status. No API key or model call required.',
+    url: '/api/tafsir', method: 'GET', responseFormat: 'JSON',
+  },
+  {
+    title: 'Tafsir passage',
+    description: 'Return stored commentary and edition attribution. Shared passages retain all covered ayahs. Unknown editions or passages return 404; malformed chapter or verse numbers return 400.',
+    url: '/api/tafsir/{edition}/{chapter}/{verse}', method: 'GET', responseFormat: 'JSON',
+    responseFields: [
+      { name: 'edition', type: 'object', description: 'Edition ID, title, language, source URL and verification status.' },
+      { name: 'ref', type: 'string', description: 'Canonical reference for the commentary passage.' },
+      { name: 'text', type: 'string', description: 'Stored commentary with original line breaks.' },
+      { name: 'ayahs', type: 'array', description: 'All verse references covered by this passage.' },
+    ],
+  },
+  {
     title: 'MCP',
     description: "Connect MCP clients to https://reminder.dev/mcp using HTTP POST (JSON-RPC 2.0) for Quran, hadith, names, reminders and search tools. Search summaries require summarise: true (default: false).",
     url: 'https://reminder.dev/mcp',

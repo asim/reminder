@@ -130,11 +130,12 @@ cannot silently select a dictionary entry. See `arabic/README.md` for coverage.
 
 ## Contextual Explain
 
-`POST /api/model/explain` uses the same API-key authentication and allowances as
-`/api/model/ask`. It shares `model.Explain` with the reader's `POST /api/explain`
-and `POST /api/quran/{chapter}/{verse}/explain` routes. Reader requests use the
-anonymous per-IP and global model allowances. All return `{answer, references}`
-with numbered citations. No conversation is stored on the server.
+`POST /api/explain` accepts an optional API key using `Authorization: Bearer <key>`.
+Keyed requests use the same authentication and allowances as `/api/model/ask`.
+Requests without a key use the reader's anonymous per-IP and global model allowances.
+An invalid or revoked key is rejected, including for cached responses.
+The reader also supports `POST /api/quran/{chapter}/{verse}/explain` with the same access rules.
+All return `{answer, references}` with numbered citations. No conversation is stored on the server.
 
 ```json
 {

@@ -72,11 +72,10 @@ func TestExplainRoutesShareGroundingAndContext(t *testing.T) {
 	ready := make(chan bool)
 	close(ready)
 	mux := http.NewServeMux()
-	mux.Handle("/api/explain", (&ModelService{Index: modelIndex{}, Names: &names.Names{}, Quran: q, Hadith: nil, Ready: ready}).ExplainHandler(nil))
-	mux.Handle("/api/model/explain", (&ModelService{Index: modelIndex{}, Names: &names.Names{}, Quran: q, Hadith: nil, Ready: ready}).ExplainHandler(keys))
-	mux.Handle("POST /api/quran/{chapter}/{verse}/explain", (&ModelService{Index: modelIndex{}, Names: &names.Names{}, Quran: q, Hadith: nil, Ready: ready}).ExplainHandler(nil))
+	mux.Handle("/api/explain", (&ModelService{Index: modelIndex{}, Names: &names.Names{}, Quran: q, Hadith: nil, Ready: ready}).ExplainHandler(keys))
+	mux.Handle("POST /api/quran/{chapter}/{verse}/explain", (&ModelService{Index: modelIndex{}, Names: &names.Names{}, Quran: q, Hadith: nil, Ready: ready}).ExplainHandler(keys))
 	body := `{"context":{"source":"quran","chapter":1,"verse":2,"translation":"sahih"},"question":"What does this mean?","history":[{"role":"user","content":"Explain this verse"},{"role":"assistant","content":"Previous explanation"}]}`
-	for _, path := range []string{"/api/explain", "/api/model/explain", "/api/quran/1/2/explain"} {
+	for _, path := range []string{"/api/explain", "/api/quran/1/2/explain"} {
 		r := httptest.NewRequest("POST", path, strings.NewReader(body))
 		r.Header.Set("Authorization", "Bearer "+secret)
 		w := httptest.NewRecorder()
@@ -96,7 +95,7 @@ func TestExplainRoutesShareGroundingAndContext(t *testing.T) {
 		path, body string
 		code       int
 	}{
-		{"/api/model/explain", body, 401},
+		{"/api/model/explain", body, 404},
 		{"/api/explain", `{"context":{"source":"quran","chapter":2,"verse":287}}`, 404},
 		{"/api/quran/2/1/explain", body, 400},
 		{"/api/explain", body + ` {}`, 400},
@@ -122,7 +121,7 @@ func TestExplainRoutesShareGroundingAndContext(t *testing.T) {
 	if chapter.Coverage["included_verses"] != 7 || chapter.Coverage["total_verses"] != 7 {
 		t.Fatalf("incorrect chapter coverage: %+v", chapter)
 	}
-	if calls != 4 {
+	if calls != 3 {
 		t.Errorf("invalid requests reached provider: %d calls", calls)
 	}
 }
@@ -160,22 +159,32 @@ func TestExplainRoutesSharePersistentDefaultCache(t *testing.T) {
 	close(ready)
 	q := quran.Load()
 	mux := http.NewServeMux()
-	mux.Handle("/api/explain", (&ModelService{Index: modelIndex{}, Names: &names.Names{}, Quran: q, Hadith: nil, Ready: ready, Cache: cache}).ExplainHandler(nil))
-	mux.Handle("/api/model/explain", (&ModelService{Index: modelIndex{}, Names: &names.Names{}, Quran: q, Hadith: nil, Ready: ready, Cache: cache}).ExplainHandler(keys))
-	mux.Handle("POST /api/quran/{chapter}/{verse}/explain", (&ModelService{Index: modelIndex{}, Names: &names.Names{}, Quran: q, Hadith: nil, Ready: ready, Cache: cache}).ExplainHandler(nil))
+	mux.Handle("/api/explain", (&ModelService{Index: modelIndex{}, Names: &names.Names{}, Quran: q, Hadith: nil, Ready: ready, Cache: cache}).ExplainHandler(keys))
+	mux.Handle("POST /api/quran/{chapter}/{verse}/explain", (&ModelService{Index: modelIndex{}, Names: &names.Names{}, Quran: q, Hadith: nil, Ready: ready, Cache: cache}).ExplainHandler(keys))
 	send := func(path, body, auth string) *httptest.ResponseRecorder {
 		r := httptest.NewRequest("POST", path, strings.NewReader(body))
-		r.Header.Set("Authorization", auth)
+		if auth != "" {
+			r.Header.Set("Authorization", auth)
+		}
 		w := httptest.NewRecorder()
 		mux.ServeHTTP(w, r)
 		return w
+	}
+	for _, auth := range []string{"Bearer invalid", "Basic invalid", ""} {
+		r := httptest.NewRequest("POST", "/api/explain", strings.NewReader(`{}`))
+		r.Header.Set("Authorization", auth)
+		w := httptest.NewRecorder()
+		mux.ServeHTTP(w, r)
+		if w.Code != 401 {
+			t.Fatalf("invalid authorization %q: %d", auth, w.Code)
+		}
 	}
 	body := `{"context":{"source":"quran","chapter":1,"verse":2}}`
 	first := send("/api/explain", body, "")
 	if first.Code != 200 {
 		t.Fatal(first.Body.String())
 	}
-	for _, path := range []string{"/api/model/explain", "/api/quran/1/2/explain"} {
+	for _, path := range []string{"/api/explain", "/api/quran/1/2/explain"} {
 		w := send(path, body, "Bearer "+secret)
 		if w.Code != 200 || w.Body.String() != first.Body.String() {
 			t.Fatalf("%s didn't share response: %d %s", path, w.Code, w.Body.String())
@@ -186,6 +195,9 @@ func TestExplainRoutesSharePersistentDefaultCache(t *testing.T) {
 	}
 	if err := keys.Reserve(id, time.Now()); err != nil {
 		t.Fatal("cache hit consumed generation allowance")
+	}
+	if w := send("/api/explain", `{"context":{"source":"quran","chapter":1,"verse":2},"question":"Explain this"}`, "Bearer "+secret); w.Code != 429 {
+		t.Fatalf("exhausted key bypassed allowance: %d %s", w.Code, w.Body.String())
 	}
 	for i := 0; i < 2; i++ {
 		w := send("/api/explain", `{"context":{"source":"quran","chapter":1,"verse":2},"question":"What does this mean?"}`, "")
@@ -199,7 +211,7 @@ func TestExplainRoutesSharePersistentDefaultCache(t *testing.T) {
 	if err := keys.Revoke(id); err != nil {
 		t.Fatal(err)
 	}
-	if w := send("/api/model/explain", body, "Bearer "+secret); w.Code != 401 {
+	if w := send("/api/explain", body, "Bearer "+secret); w.Code != 401 {
 		t.Fatal("cached response bypassed authentication")
 	}
 }

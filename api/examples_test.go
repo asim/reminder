@@ -11,6 +11,7 @@ import (
 	"github.com/asim/reminder/names"
 	"github.com/asim/reminder/quran"
 	"github.com/asim/reminder/search"
+	"github.com/asim/reminder/tafsir"
 )
 
 func TestEveryDocumentedEndpointHasExamples(t *testing.T) {
@@ -94,7 +95,16 @@ func TestContentExamplesMatchCorpus(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	editions := []tafsir.Edition{}
+	for _, c := range tafsir.Editions() {
+		editions = append(editions, c.Edition)
+	}
 	responses := map[string]any{
+		"GET /api/tafsir": editions,
+		"GET /api/tafsir/{edition}/{chapter}/{verse}": struct {
+			Edition tafsir.Edition `json:"edition"`
+			*tafsir.Passage
+		}{tafsir.Load().Edition, tafsir.Load().Get(1, 1)},
 		"GET /api/quran": q, "GET /api/quran/chapters": q.Index().Chapters,
 		"GET /api/quran/{chapter}": q.Get(112), "GET /api/quran/{chapter}/{verse}": q.Get(112).Verse(1),
 		"GET /api/hadith": h, "GET /api/hadith/{book}": h.Get(1), "GET /api/names": n,

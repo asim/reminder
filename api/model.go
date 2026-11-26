@@ -25,7 +25,7 @@ func (s *ModelService) AskHandler(keys *KeyStore) http.Handler {
 }
 
 func (s *ModelService) ExplainHandler(keys *KeyStore) http.Handler {
-	return modelHTTP(keys, func(r *http.Request, access GenerationAccess) (*model.Result, error) {
+	operation := func(r *http.Request, access GenerationAccess) (*model.Result, error) {
 		var request model.ExplainRequest
 		if err := decodeModelRequest(r, &request, r.PathValue("chapter") != ""); err != nil {
 			return nil, err
@@ -36,6 +36,15 @@ func (s *ModelService) ExplainHandler(keys *KeyStore) http.Handler {
 			}
 		}
 		return s.Explain(r.Context(), request, access)
+	}
+	anonymous := modelHTTP(nil, operation)
+	authenticated := modelHTTP(keys, operation)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if _, supplied := r.Header["Authorization"]; supplied && keys != nil {
+			authenticated.ServeHTTP(w, r)
+			return
+		}
+		anonymous.ServeHTTP(w, r)
 	})
 }
 
