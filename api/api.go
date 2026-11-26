@@ -30,6 +30,8 @@ type Value struct {
 }
 
 var Endpoints = []*Endpoint{
+	{Name: "Tafsir editions", Path: "/api/tafsir", Method: "GET", Description: "List bundled tafsir editions with IDs, titles, languages, source URLs and verification status. No model call or API key required."},
+	{Name: "Tafsir passage", Path: "/api/tafsir/{edition}/{chapter}/{verse}", Method: "GET", Description: "Return stored commentary with edition attribution and the full shared passage's ayahs. Unknown editions or passages return 404. No model call or API key required."},
 	{Name: "Arabic dictionary", Path: "/api/arabic/dictionary", Method: "GET", Description: "Look up a Lane headword or root using q; limit 1–25 (default 10), offset 0–5000. Returns attributed lexical entries, not verse interpretations."},
 	{Name: "Arabic roots", Path: "/api/arabic/roots", Method: "GET", Description: "List up to 100 Lane roots with optional Arabic prefix q."},
 	{Name: "Quran word morphology", Path: "/api/arabic/quran/{chapter}/{verse}", Method: "GET", Description: "Returns Quranic Arabic Corpus words, segments, roots, lemmas and grammar alongside canonical Arabic. Check aligned before using source positions as reader positions."},
@@ -197,9 +199,9 @@ var Endpoints = []*Endpoint{
 	},
 	{
 		Name:        "Explain",
-		Path:        "/api/model/explain",
+		Path:        "/api/explain",
 		Method:      "POST",
-		Description: "Grounded passage explanations with contextual follow-up questions. Requires Authorization: Bearer <key>. Uses the same model implementation as the Quran reader. See docs/model.md.",
+		Description: "Grounded passage explanations with contextual follow-up questions. Accepts optional Authorization: Bearer <key> for API-key allowances; requests without a key use anonymous reader limits. Uses the same model implementation as the Quran reader. See docs/model.md.",
 		Params: []*Param{
 			{Name: "context", Value: "object", Description: "Quran context: source=quran, chapter, optional verse, translation (khattab/sahih/asad), selection"},
 			{Name: "question", Value: "string", Description: "Optional question; defaults to explaining the passage"},

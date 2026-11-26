@@ -104,3 +104,17 @@ without substituting another source.
 To add a reading edition, register its parsed collection in `tafsir.Editions()`
 and its display option in `web/app/utils/tafsir-editions.ts`. Record attribution
 and rights before presenting a source as verified.
+
+## HTTP API
+
+`GET /api/tafsir` lists the bundled editions with `id`, `title`, `language`,
+`source_url` and `verified`. No API key or model generation is needed.
+
+`GET /api/tafsir/{edition}/{chapter}/{verse}` returns `edition` metadata and
+`ref`, `text`, and `ayahs`. Shared commentary retains the full passage and all
+covered ayahs, even when requesting a later verse in that passage. Newlines in
+`text` are preserved. Unknown editions or missing passages return 404; malformed
+chapter or verse numbers return 400.
+
+Example: `/api/tafsir/jalalayn-en/2/153`. Use edition IDs from the listing;
+`original-en` identifies Al-Mukhtasar (English).

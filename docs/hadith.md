@@ -69,7 +69,7 @@ has no Tafsir tab: the bundled Hadith records contain Arabic, translation and
 narrator details, but no scholarly commentary collection. Answers are labelled
 AI-generated and show their retrieved sources.
 
-`POST /api/explain` and `/api/model/explain` accept a Hadith context:
+`POST /api/explain` accepts a Hadith context:
 
 ```json
 {"context":{"source":"hadith","collection":"muslim","book":0,"hadith":7369},"question":"What does this mean?"}

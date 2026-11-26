@@ -313,8 +313,8 @@
     },
     "note": "Response also includes canonical_arabic and words with source positions and grammatical segments. An unaligned verse is explicitly flagged; its positions must not be attached to reader words."
   },
-  "POST /api/model/explain": {
-    "request": "curl -X POST 'https://reminder.dev/api/model/explain' -H 'Authorization: Bearer YOUR_API_KEY' -H 'Content-Type: application/json' -d '{\"context\":{\"source\":\"quran\",\"chapter\":2,\"verse\":153,\"translation\":\"sahih\"},\"question\":\"What does patience mean here?\"}'",
+  "POST /api/explain": {
+    "request": "curl -X POST 'https://reminder.dev/api/explain' -H 'Authorization: Bearer YOUR_API_KEY' -H 'Content-Type: application/json' -d '{\"context\":{\"source\":\"quran\",\"chapter\":2,\"verse\":153,\"translation\":\"sahih\"},\"question\":\"What does patience mean here?\"}'",
     "response": {
       "answer": "An explanation grounded in the passage and cited sources [1].",
       "references": [
@@ -332,5 +332,50 @@
       ]
     },
     "note": "Illustrative response structure; generated wording and retrieved sources vary. History uses complete user/assistant pairs."
+  },
+  "GET /api/tafsir": {
+    "request": "curl 'https://reminder.dev/api/tafsir'",
+    "response": [
+      {
+        "id": "jalalayn-en",
+        "title": "Tafsir Al-Jalalayn (English)",
+        "language": "en",
+        "source_url": "https://qul.tarteel.ai/resources/tafsir/english-tafsir-al-jalalayn",
+        "verified": true
+      },
+      {
+        "id": "original-en",
+        "title": "Al-Mukhtasar (English)",
+        "language": "en",
+        "source_url": "https://qul.tarteel.ai/resources/tafsir/266",
+        "verified": true
+      },
+      {
+        "id": "ibn-kathir-en",
+        "title": "Tafsir Ibn Kathir (English)",
+        "language": "en",
+        "source_url": "",
+        "verified": true
+      }
+    ],
+    "note": "Bundled reading editions."
+  },
+  "GET /api/tafsir/{edition}/{chapter}/{verse}": {
+    "request": "curl 'https://reminder.dev/api/tafsir/jalalayn-en/1/1'",
+    "response": {
+      "edition": {
+        "id": "jalalayn-en",
+        "title": "Tafsir Al-Jalalayn (English)",
+        "language": "en",
+        "source_url": "https://qul.tarteel.ai/resources/tafsir/english-tafsir-al-jalalayn",
+        "verified": true
+      },
+      "ref": "1:1",
+      "text": "In the Name of God, the Compassionate, the Merciful:",
+      "ayahs": [
+        "1:1"
+      ]
+    },
+    "note": "Stored commentary; no model generation."
   }
 }
